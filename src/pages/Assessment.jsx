@@ -3,6 +3,8 @@ import Papa from "papaparse";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { ASSESSMENT_QUESTIONS, evaluateAssessment } from "../utils/matchingEngine";
 import { db, isFirebaseConfigured } from "../firebaseConfig";
+import { ArrowLeft, RefreshCw, ChevronLeft, ChevronRight, TrendingUp, DollarSign, Activity, ShieldCheck, Loader2, Target } from "lucide-react";
+import Navbar from "../components/Navbar";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
 const API_TIMEOUT_MS = 3000;
@@ -194,188 +196,227 @@ export default function Assessment({ onBack, onOpenCluster, user = null }) {
   };
 
   return (
-    <section className="min-h-screen w-full bg-[radial-gradient(circle_at_top,_#eef4ff_0%,_#d6e5ff_42%,_#c9ddff_100%)] px-4 py-6 sm:px-8 sm:py-9">
-      <div className="mx-auto w-full max-w-6xl rounded-[32px] border border-[#c2d5fb] bg-white/80 p-6 shadow-[0_22px_60px_rgba(43,90,186,0.18)] backdrop-blur sm:p-10">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="cc-body text-sm font-semibold uppercase tracking-[0.18em] text-[#3f6fce]">Assessment</p>
-            <h1 className="cc-display mt-1 text-3xl font-black text-[#0c1e4f] sm:text-4xl">Career Discovery Engine</h1>
-            <p className="cc-body mt-2 text-sm text-[#41608e] sm:text-base">Answer all 13 questions. Your results are generated inside this same section.</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={onBack}
-            className="cc-body rounded-xl border border-[#b8cbf7] bg-[#edf3ff] px-4 py-2 text-sm font-bold text-[#234b9f] transition hover:bg-[#e0ebff]"
-          >
-            Back
-          </button>
-        </div>
-
-        {isLoadingCareers ? (
-          <div className="mt-8 rounded-2xl border border-[#ccdcff] bg-[#f4f8ff] p-6 text-center">
-            <p className="cc-body text-lg font-semibold text-[#2e5ec6]">Loading careers dataset...</p>
-          </div>
-        ) : null}
-
-        {loadError ? (
-          <div className="mt-8 rounded-2xl border border-[#f4b1b1] bg-[#ffe9e9] p-5 text-sm font-semibold text-[#9f2f2f]">{loadError}</div>
-        ) : null}
-
-        {!isLoadingCareers && !loadError && !result ? (
-          <div className="mt-8">
-            <div className="mb-6">
-              <div className="mb-2 flex items-center justify-between text-sm font-semibold text-[#365c9c]">
-                <span className="cc-body">{currentQuestion.stage}</span>
-                <span className="cc-body">Question {questionIndex + 1} / {ASSESSMENT_QUESTIONS.length}</span>
-              </div>
-              <div className="h-3 w-full overflow-hidden rounded-full bg-[#dce8ff]">
-                <div className="h-full rounded-full bg-gradient-to-r from-[#376dde] to-[#00a5b7] transition-all duration-300" style={{ width: `${progress}%` }} />
-              </div>
+    <>
+      <Navbar />
+      <section className="min-h-screen w-full bg-[radial-gradient(circle_at_top,_#eef4ff_0%,_#d6e5ff_42%,_#c9ddff_100%)] px-4 py-6 sm:px-8 sm:py-9">
+        <div className="mx-auto w-full max-w-6xl rounded-[32px] border border-[#c2d5fb] bg-white/80 p-6 shadow-[0_22px_60px_rgba(43,90,186,0.18)] backdrop-blur sm:p-10">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="cc-body text-sm font-semibold uppercase tracking-[0.18em] text-[#3f6fce]">Assessment</p>
+              <h1 className="cc-display mt-1 text-3xl font-black text-[#0c1e4f] sm:text-4xl">Career Discovery Engine</h1>
+              <p className="cc-body mt-2 text-sm text-[#41608e] sm:text-base">Answer all 13 questions. Your results are generated inside this same section.</p>
             </div>
 
-            <h2 className="cc-display text-2xl font-extrabold leading-tight text-[#10254f] sm:text-[2rem]">{currentQuestion.prompt}</h2>
+            <button
+              type="button"
+              onClick={onBack}
+              className="cc-body inline-flex items-center gap-2 rounded-xl border border-[#b8cbf7] bg-[#edf3ff] px-4 py-2 text-sm font-bold text-[#234b9f] transition hover:bg-[#e0ebff] hover:-translate-y-0.5"
+            >
+              <ArrowLeft size={15} />
+              Back
+            </button>
+          </div>
 
-            <div className="mt-6 grid gap-3">
-              {currentQuestion.options.map((option) => {
-                const isSelected = selectedOption === option.key;
-                return (
-                  <button
-                    key={option.key}
-                    type="button"
-                    onClick={() => handleSelectOption(option.key)}
-                    className={`group rounded-2xl border px-4 py-4 text-left transition sm:px-5 ${
-                      isSelected
+          {isLoadingCareers ? (
+            <div className="mt-8 rounded-2xl border border-[#ccdcff] bg-[#f4f8ff] p-6 text-center">
+              <Loader2 size={24} className="mx-auto mb-3 animate-spin text-[#2e5ec6]" />
+              <p className="cc-body text-lg font-semibold text-[#2e5ec6]">Loading careers dataset...</p>
+            </div>
+          ) : null}
+
+          {loadError ? (
+            <div className="mt-8 rounded-2xl border border-[#f4b1b1] bg-[#ffe9e9] p-5 text-sm font-semibold text-[#9f2f2f]">{loadError}</div>
+          ) : null}
+
+          {!isLoadingCareers && !loadError && !result ? (
+            <div className="mt-8">
+              <div className="mb-6">
+                <div className="mb-2 flex items-center justify-between text-sm font-semibold text-[#365c9c]">
+                  <span className="cc-body">{currentQuestion.stage}</span>
+                  <span className="cc-body">Question {questionIndex + 1} / {ASSESSMENT_QUESTIONS.length}</span>
+                </div>
+                <div className="h-3 w-full overflow-hidden rounded-full bg-[#dce8ff]">
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#376dde] to-[#00a5b7] transition-all duration-300" style={{ width: `${progress}%` }} />
+                </div>
+              </div>
+
+              <h2 className="cc-display text-2xl font-extrabold leading-tight text-[#10254f] sm:text-[2rem]">{currentQuestion.prompt}</h2>
+
+              <div className="mt-6 grid gap-3">
+                {currentQuestion.options.map((option) => {
+                  const isSelected = selectedOption === option.key;
+                  return (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => handleSelectOption(option.key)}
+                      className={`group rounded-2xl border px-4 py-4 text-left transition sm:px-5 ${isSelected
                         ? "border-[#2f63d7] bg-[#edf3ff] shadow-[0_10px_22px_rgba(47,99,215,0.2)]"
                         : "border-[#d5e0f8] bg-white hover:border-[#7fa4ee] hover:bg-[#f5f9ff]"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span
-                        className={`mt-0.5 grid h-7 w-7 place-items-center rounded-full text-xs font-black ${
-                          isSelected ? "bg-[#2f63d7] text-white" : "bg-[#e8effe] text-[#4069b7]"
                         }`}
-                      >
-                        {option.key}
-                      </span>
-                      <span className="cc-body text-sm font-semibold leading-6 text-[#143167] sm:text-base">{option.text}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={handlePrevious}
-                disabled={questionIndex === 0}
-                className="cc-body rounded-xl border border-[#c7d7fb] bg-white px-4 py-2 text-sm font-bold text-[#345ca7] transition disabled:cursor-not-allowed disabled:opacity-45 hover:bg-[#f3f7ff]"
-              >
-                Previous
-              </button>
-
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={!selectedOption}
-                className="cc-body rounded-xl bg-[#2f63d7] px-5 py-2 text-sm font-bold text-white transition hover:bg-[#2658c7] disabled:cursor-not-allowed disabled:bg-[#8ea7dd]"
-              >
-                {questionIndex === ASSESSMENT_QUESTIONS.length - 1 ? "See My Matches" : "Next"}
-              </button>
-            </div>
-          </div>
-        ) : null}
-
-        {!isLoadingCareers && !loadError && result ? (
-          <div className="mt-8">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="cc-display text-2xl font-black text-[#0f2552] sm:text-3xl">Career Match Results</h2>
-              <button
-                type="button"
-                onClick={restartAssessment}
-                className="cc-body rounded-xl border border-[#b9cdf8] bg-[#eef4ff] px-4 py-2 text-sm font-bold text-[#2b55aa] transition hover:bg-[#e2ecff]"
-              >
-                Retake Assessment
-              </button>
-            </div>
-
-            {isFirebaseConfigured ? (
-              <div className="mb-4 rounded-xl border border-[#d6e4ff] bg-[#f4f8ff] px-4 py-3">
-                {saveState === "saving" ? (
-                  <p className="cc-body text-sm font-semibold text-[#2d5dbf]">Saving assessment to Firebase...</p>
-                ) : null}
-                {saveState === "saved" ? (
-                  <p className="cc-body text-sm font-semibold text-[#226a3f]">Assessment saved to Firebase successfully.</p>
-                ) : null}
-                {saveState === "error" ? (
-                  <p className="cc-body text-sm font-semibold text-[#9b2d2d]">Could not save assessment to Firebase: {saveError}</p>
-                ) : null}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span
+                          className={`mt-0.5 grid h-7 w-7 place-items-center rounded-full text-xs font-black ${isSelected ? "bg-[#2f63d7] text-white" : "bg-[#e8effe] text-[#4069b7]"
+                            }`}
+                        >
+                          {option.key}
+                        </span>
+                        <span className="cc-body text-sm font-semibold leading-6 text-[#143167] sm:text-base">{option.text}</span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            ) : null}
 
-            <div className="mb-6 grid gap-3 rounded-2xl border border-[#ccdcff] bg-[#f5f9ff] p-4 sm:grid-cols-3">
-              <div>
-                <p className="cc-body text-xs font-bold uppercase tracking-[0.14em] text-[#4a72ba]">Work World</p>
-                <p className="cc-display mt-1 text-lg font-extrabold text-[#102a5d]">{result.studentProfile.dominant.ww}</p>
-              </div>
-              <div>
-                <p className="cc-body text-xs font-bold uppercase tracking-[0.14em] text-[#4a72ba]">Thinking Style</p>
-                <p className="cc-display mt-1 text-lg font-extrabold text-[#102a5d]">{result.studentProfile.dominant.hw}</p>
-              </div>
-              <div>
-                <p className="cc-body text-xs font-bold uppercase tracking-[0.14em] text-[#4a72ba]">Motivation</p>
-                <p className="cc-display mt-1 text-lg font-extrabold text-[#102a5d]">{result.studentProfile.dominant.mw}</p>
-              </div>
-            </div>
-
-            <div className="grid gap-4">
-              {result.topMatches.map((match, index) => (
-                <article
-                  key={match.id}
-                  onClick={() => {
-                    onOpenCluster?.(match.cluster);
-                  }}
-                  className="cursor-pointer rounded-2xl border border-[#cddcff] bg-white p-5 shadow-[0_8px_24px_rgba(25,54,116,0.1)] transition hover:shadow-[0_12px_32px_rgba(25,54,116,0.2)]"
+              <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={handlePrevious}
+                  disabled={questionIndex === 0}
+                  className="cc-body inline-flex items-center gap-2 rounded-xl border border-[#c7d7fb] bg-white px-4 py-2.5 text-sm font-bold text-[#345ca7] transition disabled:cursor-not-allowed disabled:opacity-45 hover:bg-[#f3f7ff] hover:-translate-y-0.5"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="cc-body text-xs font-bold uppercase tracking-[0.15em] text-[#4b74be]">Match #{index + 1} • {match.cluster}</p>
-                      <h3 className="cc-display mt-1 text-xl font-black text-[#102a5e]">{match.careerName}</h3>
-                      <p className="cc-body mt-1 text-sm text-[#3f5e90]">{match.summary}</p>
-                    </div>
-                    <div className="rounded-xl bg-[#edf4ff] px-4 py-2 text-center">
-                      <p className="cc-body text-xs font-bold uppercase tracking-[0.12em] text-[#4870ba]">Match</p>
-                      <p className="cc-display text-2xl font-black text-[#1a4eb0]">{Math.round(match.score)}%</p>
-                    </div>
-                  </div>
+                  <ChevronLeft size={15} />
+                  Previous
+                </button>
 
-                  <p className="cc-body mt-3 text-sm text-[#29477f]">{match.explanation}</p>
-
-                  <div className="mt-4 grid gap-2 rounded-xl border border-[#d8e4ff] bg-[#f8fbff] p-3 sm:grid-cols-4">
-                    <div>
-                      <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Money</p>
-                      <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.money}/10</p>
-                    </div>
-                    <div>
-                      <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Growth</p>
-                      <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.growth}/10</p>
-                    </div>
-                    <div>
-                      <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Stability</p>
-                      <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.stability}/10</p>
-                    </div>
-                    <div>
-                      <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Feasibility</p>
-                      <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.feasibility}/10</p>
-                    </div>
-                  </div>
-                </article>
-              ))}
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={!selectedOption}
+                  className="cc-body inline-flex items-center gap-2 rounded-xl bg-[#2f63d7] px-6 py-2.5 text-sm font-bold text-white transition hover:bg-[#2658c7] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:bg-[#8ea7dd]"
+                >
+                  {questionIndex === ASSESSMENT_QUESTIONS.length - 1 ? (
+                    <><Target size={15} />See My Matches</>
+                  ) : (
+                    <>Next<ChevronRight size={15} /></>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
-        ) : null}
-      </div>
-    </section>
+          ) : null}
+
+          {!isLoadingCareers && !loadError && result ? (
+            <div className="mt-8">
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="cc-body text-xs font-bold uppercase tracking-[0.2em] text-[#4a72ba]">Your Results</p>
+                  <h2 className="cc-display mt-1 text-2xl font-black text-[#0f2552] sm:text-3xl">Career Match Results</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={restartAssessment}
+                  className="cc-body inline-flex items-center gap-2 rounded-xl border border-[#b9cdf8] bg-[#eef4ff] px-4 py-2.5 text-sm font-bold text-[#2b55aa] transition hover:bg-[#e2ecff] hover:-translate-y-0.5"
+                >
+                  <RefreshCw size={14} />
+                  Retake Assessment
+                </button>
+              </div>
+
+              {isFirebaseConfigured ? (
+                <div className="mb-4 rounded-xl border border-[#d6e4ff] bg-[#f4f8ff] px-4 py-3">
+                  {saveState === "saving" ? (
+                    <p className="cc-body text-sm font-semibold text-[#2d5dbf]">Saving assessment to Firebase...</p>
+                  ) : null}
+                  {saveState === "saved" ? (
+                    <p className="cc-body text-sm font-semibold text-[#226a3f]">Assessment saved to Firebase successfully.</p>
+                  ) : null}
+                  {saveState === "error" ? (
+                    <p className="cc-body text-sm font-semibold text-[#9b2d2d]">Could not save assessment to Firebase: {saveError}</p>
+                  ) : null}
+                </div>
+              ) : null}
+
+              <div className="mb-6 grid gap-3 rounded-2xl border border-[#ccdcff] bg-[#f5f9ff] p-4 sm:grid-cols-3">
+                <div className="flex items-start gap-3">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#dde9ff] text-[#3060cc]">
+                    <Activity size={16} />
+                  </div>
+                  <div>
+                    <p className="cc-body text-xs font-bold uppercase tracking-[0.14em] text-[#4a72ba]">Work World</p>
+                    <p className="cc-display mt-1 text-lg font-extrabold text-[#102a5d]">{result.studentProfile.dominant.ww}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#dde9ff] text-[#3060cc]">
+                    <ShieldCheck size={16} />
+                  </div>
+                  <div>
+                    <p className="cc-body text-xs font-bold uppercase tracking-[0.14em] text-[#4a72ba]">Thinking Style</p>
+                    <p className="cc-display mt-1 text-lg font-extrabold text-[#102a5d]">{result.studentProfile.dominant.hw}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#dde9ff] text-[#3060cc]">
+                    <TrendingUp size={16} />
+                  </div>
+                  <div>
+                    <p className="cc-body text-xs font-bold uppercase tracking-[0.14em] text-[#4a72ba]">Motivation</p>
+                    <p className="cc-display mt-1 text-lg font-extrabold text-[#102a5d]">{result.studentProfile.dominant.mw}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {result.topMatches.map((match, index) => (
+                  <article
+                    key={match.id}
+                    onClick={() => {
+                      onOpenCluster?.(match.cluster);
+                    }}
+                    className="cursor-pointer rounded-2xl border border-[#cddcff] bg-white p-5 shadow-[0_8px_24px_rgba(25,54,116,0.1)] transition hover:shadow-[0_12px_32px_rgba(25,54,116,0.2)]"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="cc-body text-xs font-bold uppercase tracking-[0.15em] text-[#4b74be]">Match #{index + 1} • {match.cluster}</p>
+                        <h3 className="cc-display mt-1 text-xl font-black text-[#102a5e]">{match.careerName}</h3>
+                        <p className="cc-body mt-1 text-sm text-[#3f5e90]">{match.summary}</p>
+                      </div>
+                      <div className="rounded-xl bg-[#edf4ff] px-4 py-2 text-center">
+                        <p className="cc-body text-xs font-bold uppercase tracking-[0.12em] text-[#4870ba]">Match</p>
+                        <p className="cc-display text-2xl font-black text-[#1a4eb0]">{Math.round(match.score)}%</p>
+                      </div>
+                    </div>
+
+                    <p className="cc-body mt-3 text-sm text-[#29477f]">{match.explanation}</p>
+
+                    <div className="mt-4 grid gap-2 rounded-xl border border-[#d8e4ff] bg-[#f8fbff] p-3 sm:grid-cols-4">
+                      <div className="flex items-start gap-2">
+                        <DollarSign size={14} className="mt-0.5 shrink-0 text-emerald-500" />
+                        <div>
+                          <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Money</p>
+                          <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.money}/10</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <TrendingUp size={14} className="mt-0.5 shrink-0 text-blue-500" />
+                        <div>
+                          <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Growth</p>
+                          <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.growth}/10</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <ShieldCheck size={14} className="mt-0.5 shrink-0 text-violet-500" />
+                        <div>
+                          <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Stability</p>
+                          <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.stability}/10</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Activity size={14} className="mt-0.5 shrink-0 text-amber-500" />
+                        <div>
+                          <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Feasibility</p>
+                          <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.feasibility}/10</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </section>
+    </>
   );
 }

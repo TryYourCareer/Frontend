@@ -1,20 +1,17 @@
 import { useMemo, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Home, UserPlus, ClipboardList, Compass, Newspaper, Users, LayoutDashboard, LogIn, LogOut } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import careersData from "../data/clearcareers_data.json";
 
 const SIDE_MENU = [
-  "1. Landing Page",
-  "2. Onboarding",
-  "3. Assessment",
-  "4. Career Reality",
-  "5. Insights Feed",
-  "6. Trial Mission",
-  "7. Career Hubs",
-  "8. Student Dashboard",
-  "9. Decision Report",
-  "10. Parent Report",
+  { label: "Landing Page", icon: Home, action: "home" },
+  { label: "Onboarding", icon: UserPlus, action: "onboarding" },
+  { label: "Assessment", icon: ClipboardList, action: "assessment" },
+  { label: "Career Reality", icon: Compass, action: "career-reality" },
+  { label: "Insights Feed", icon: Newspaper, action: "insights-feed" },
+  { label: "Career Hubs", icon: Users, action: "career-hubs" },
+  { label: "Student Dashboard", icon: LayoutDashboard, action: "student-dashboard" },
 ];
 
 export default function Landing({ onStartDiscovery, onOpenAssessment, onOpenCareerReality, onOpenInsightsFeed, onOpenCareerHubs, onOpenStudentDashboard, onExploreCareers, onOpenAuth, profile, user, onLogout, theme = "light", onToggleTheme, searchQuery = "", onSearchChange }) {
@@ -30,132 +27,100 @@ export default function Landing({ onStartDiscovery, onOpenAssessment, onOpenCare
 
   const clusterResults = useMemo(() => {
     const query = String(searchQuery || "").trim().toLowerCase();
-    if (!query) {
-      return [];
-    }
-
+    if (!query) return [];
     const clusters = [...new Set(careers.map((career) => String(career.cluster || "").trim()).filter(Boolean))];
-    return clusters
-      .filter((cluster) => cluster.toLowerCase().includes(query))
-      .slice(0, 8);
+    return clusters.filter((cluster) => cluster.toLowerCase().includes(query)).slice(0, 8);
   }, [careers, searchQuery]);
 
-  const handleSearchSubmit = () => {
-    onExploreCareers?.(searchQuery);
-  };
-
+  const handleSearchSubmit = () => onExploreCareers?.(searchQuery);
   const handleSelectCluster = (clusterName) => {
     onSearchChange?.(clusterName);
     onExploreCareers?.(clusterName);
   };
 
+  const handleNavAction = (action) => {
+    if (action === "onboarding") onStartDiscovery?.();
+    else if (action === "assessment") onOpenAssessment?.();
+    else if (action === "career-reality") onOpenCareerReality?.();
+    else if (action === "insights-feed") onOpenInsightsFeed?.();
+    else if (action === "career-hubs") onOpenCareerHubs?.();
+    else if (action === "student-dashboard") onOpenStudentDashboard?.();
+  };
+
   return (
-    <div
-      className={`min-h-screen ${
-        isDark
-          ? "bg-[linear-gradient(to_bottom,_#0f172a_0,_#0f172a_72vh,_#111827_72vh,_#111827_100%)]"
-          : "bg-[linear-gradient(to_bottom,_#dfe7f4_0,_#dfe7f4_72vh,_#ffffff_72vh,_#ffffff_100%)]"
-      }`}
-    >
+    <div className={`min-h-screen transition-colors duration-300 ${isDark ? "bg-[#0f172a]" : "bg-[#dfe7f4]"}`}>
       <div className="mx-auto max-w-[1480px] lg:flex">
-        <aside
-          className={`hidden lg:flex lg:w-[230px] lg:min-h-screen lg:flex-col lg:border-r ${
-            isDark ? "lg:border-slate-700 lg:bg-slate-900" : "lg:border-[#cfd6e5] lg:bg-[#edf2fa]"
-          }`}
-        >
-          <div className="flex items-center justify-between px-4 pt-4 pb-3">
+
+        {/* Sidebar — desktop only */}
+        <aside className={`hidden lg:flex lg:w-[240px] lg:min-h-screen lg:flex-col lg:border-r ${isDark ? "lg:border-slate-700/60 lg:bg-slate-900" : "lg:border-[#cfd6e5] lg:bg-[#edf2fa]"}`}>
+
+          {/* Logo + theme toggle */}
+          <div className={`flex items-center justify-between px-5 pt-5 pb-4 border-b ${isDark ? "border-slate-800" : "border-[#d9e2f0]"}`}>
             <div className="flex items-center gap-3">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-[#3164de] text-xs text-white">
-                C
-              </div>
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-sm font-black text-white shadow-md">C</div>
               <div>
-                <p className={`cc-display text-base leading-none font-black tracking-[-0.015em] ${isDark ? "text-slate-100" : "text-[#0f1c3d]"}`}>Clear Careers</p>
+                <p className={`cc-display text-sm font-black tracking-tight leading-none ${isDark ? "text-slate-100" : "text-[#0f1c3d]"}`}>Clear Careers</p>
+                <p className={`text-[10px] mt-0.5 ${isDark ? "text-slate-400" : "text-[#7089b5]"}`}>Career Discovery</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onToggleTheme}
-              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
-                isDark
-                  ? "border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"
-                  : "border-[#c5d3eb] bg-[#f4f7fc] text-[#4a5f86] hover:bg-[#e9eff9]"
-              }`}
+              className={`rounded-full border p-1.5 transition ${isDark ? "border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700" : "border-[#c5d3eb] bg-[#f4f7fc] text-[#4a5f86] hover:bg-[#e2ecf9]"}`}
               title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
             >
-              {theme === "light" ? <Moon size={13} /> : <Sun size={13} />}
-              <span>{theme === "light" ? "Dark" : "Light"}</span>
+              {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
             </button>
           </div>
 
-          <div className="px-4 pb-5">
-            <div className="max-h-[66vh] overflow-y-auto pr-2">
-              {SIDE_MENU.map((item) => (
-                <button
-                  key={item}
-                  onClick={() => {
-                    if (item.includes("Onboarding")) {
-                      onStartDiscovery?.();
-                      return;
-                    }
-                    if (item.includes("Assessment")) {
-                      onOpenAssessment?.();
-                      return;
-                    }
-                    if (item.includes("Career Reality")) {
-                      onOpenCareerReality?.();
-                      return;
-                    }
-                    if (item.includes("Insights Feed")) {
-                      onOpenInsightsFeed?.();
-                      return;
-                    }
-                    if (item.includes("Career Hubs")) {
-                      onOpenCareerHubs?.();
-                      return;
-                    }
-                    if (item.includes("Student Dashboard")) {
-                      onOpenStudentDashboard?.();
-                      return;
-                    }
-                  }}
-                  className="cc-body mb-1.5 flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold leading-none text-[#4e607f] hover:bg-[#e4ebf8]"
-                >
-                  <span className="text-base">⌂</span>
-                  {item}
-                </button>
-              ))}
-            </div>
+          {/* Nav links */}
+          <div className="flex-1 px-3 py-4 overflow-y-auto">
+            <p className={`mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.2em] ${isDark ? "text-slate-500" : "text-[#9aadca]"}`}>Navigation</p>
+            {SIDE_MENU.map(({ label, icon: Icon, action }) => (
+              <button
+                key={action}
+                onClick={() => handleNavAction(action)}
+                className={`cc-body mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold leading-none transition ${isDark ? "text-slate-400 hover:bg-slate-800 hover:text-white" : "text-[#4e607f] hover:bg-[#e4ebf8] hover:text-[#1a3669]"}`}
+              >
+                <Icon size={16} className={isDark ? "text-cyan-500" : "text-[#3a6bcf]"} />
+                {label}
+              </button>
+            ))}
           </div>
 
-          <div className="mt-auto p-4">
+          {/* User section */}
+          <div className={`mt-auto p-4 border-t ${isDark ? "border-slate-800" : "border-[#d9e2f0]"}`}>
             {user ? (
-              <div className="rounded-xl bg-blue-50 border border-blue-100 p-3.5">
+              <div className={`rounded-2xl border p-3.5 ${isDark ? "border-slate-700 bg-slate-800" : "bg-blue-50 border-blue-100"}`}>
                 <div className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-bold text-white">
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-bold text-white shrink-0">
                     {user.email.charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <p className="cc-display text-sm font-extrabold text-[#1f2d4f]">
-                      {user.email.split("@")[0]}
-                    </p>
-                    <p className="cc-body text-xs text-[#7082a5]">Logged In</p>
+                  <div className="min-w-0">
+                    <p className={`cc-display text-sm font-extrabold truncate ${isDark ? "text-slate-100" : "text-[#1f2d4f]"}`}>{user.email.split("@")[0]}</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 cc-pulse-dot" />
+                      <p className={`cc-body text-xs ${isDark ? "text-slate-400" : "text-[#7082a5]"}`}>Logged In</p>
+                    </div>
                   </div>
                 </div>
                 <button
                   onClick={onLogout}
-                  className="mt-3 w-full text-xs font-semibold text-red-600 hover:text-red-700 transition"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100"
                 >
-                  Log Out
+                  <LogOut size={12} />
+                  Sign Out
                 </button>
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-[#c9d6ec] bg-[#eaf0f9] p-3.5">
-                <p className="cc-display text-xs font-bold text-[#4a5f86]">Not logged in yet?</p>
-                <p className="cc-body mt-1 text-[11px] text-[#6f82a7]">Log in to track your progress and save your preferences.</p>
+              <div className={`rounded-2xl border border-dashed p-3.5 ${isDark ? "border-slate-700 bg-slate-800/50" : "border-[#c9d6ec] bg-[#eaf0f9]"}`}>
+                <p className={`cc-display text-xs font-bold ${isDark ? "text-slate-300" : "text-[#4a5f86]"}`}>Not logged in yet?</p>
+                <p className={`cc-body mt-1 text-[11px] ${isDark ? "text-slate-500" : "text-[#6f82a7]"}`}>Log in to track your progress and save your preferences.</p>
                 <button
                   onClick={onOpenAuth}
-                  className="mt-3 w-full rounded-lg bg-blue-100 text-xs font-semibold text-blue-700 hover:bg-blue-200 transition py-2"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2 text-xs font-semibold text-white transition hover:bg-blue-700"
                 >
+                  <LogIn size={12} />
                   Sign In
                 </button>
               </div>
@@ -163,9 +128,15 @@ export default function Landing({ onStartDiscovery, onOpenAssessment, onOpenCare
           </div>
         </aside>
 
-        <main className="flex-1">
+        {/* Main content */}
+        <main className="flex-1 min-w-0">
           <Navbar
             onStartDiscovery={onStartDiscovery}
+            onOpenAssessment={onOpenAssessment}
+            onOpenCareerReality={onOpenCareerReality}
+            onOpenInsightsFeed={onOpenInsightsFeed}
+            onOpenCareerHubs={onOpenCareerHubs}
+            onOpenStudentDashboard={onOpenStudentDashboard}
             user={user}
             onOpenAuth={onOpenAuth}
             onLogout={onLogout}
@@ -174,8 +145,10 @@ export default function Landing({ onStartDiscovery, onOpenAssessment, onOpenCare
             onSearchSubmit={handleSearchSubmit}
             clusterResults={clusterResults}
             onSelectCluster={handleSelectCluster}
+            theme={theme}
+            onToggleTheme={onToggleTheme}
           />
-          <Hero onStartDiscovery={onStartDiscovery} onExploreCareers={onExploreCareers} careersCount={careers.length} />
+          <Hero onStartDiscovery={onStartDiscovery} onExploreCareers={onExploreCareers} careersCount={careers.length} isDark={isDark} />
         </main>
       </div>
     </div>

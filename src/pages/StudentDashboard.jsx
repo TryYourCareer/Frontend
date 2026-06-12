@@ -1,10 +1,12 @@
+import { ArrowLeft, ClipboardList, CheckCircle2, Zap, Flame, TrendingUp, Sparkles, ArrowRight, BarChart3, Target, Play } from "lucide-react";
+
 const dashboardData = {
   userName: "Jane",
   stats: [
-    { label: "Assessments", value: "3/3", tone: "text-[#1f4bb2]" },
-    { label: "Missions Completed", value: "12", tone: "text-[#1f6f51]" },
-    { label: "Skills Unlocked", value: "8", tone: "text-[#8c5bc7]" },
-    { label: "Current Streak", value: "5 Days", tone: "text-[#1f4bb2]" },
+    { label: "Assessments", value: "3/3", tone: "text-[#1f4bb2]", icon: ClipboardList, bg: "bg-[#e4eeff] text-[#2350b2]" },
+    { label: "Missions Completed", value: "12", tone: "text-[#1f6f51]", icon: CheckCircle2, bg: "bg-[#dcf6eb] text-[#15794a]" },
+    { label: "Skills Unlocked", value: "8", tone: "text-[#8c5bc7]", icon: Zap, bg: "bg-[#ede8ff] text-[#6e3dc0]" },
+    { label: "Current Streak", value: "5 Days", tone: "text-[#1f4bb2]", icon: Flame, bg: "bg-[#fff1e0] text-[#b85b00]" },
   ],
   compatibility: [
     { label: "Software Engineering", value: 92, color: "bg-[#1f4bb2]" },
@@ -70,8 +72,9 @@ export default function StudentDashboard({ onBack }) {
           </div>
           <button
             onClick={onBack}
-            className="inline-flex items-center rounded-full border border-[#c6d5ea] bg-white px-5 py-2 text-sm font-semibold text-[#2f4bb2] transition hover:bg-[#eef3ff]"
+            className="inline-flex items-center gap-2 rounded-full border border-[#c6d5ea] bg-white px-5 py-2 text-sm font-semibold text-[#2f4bb2] transition hover:bg-[#eef3ff] hover:-translate-y-0.5"
           >
+            <ArrowLeft size={15} />
             Back to Home
           </button>
         </div>
@@ -79,12 +82,18 @@ export default function StudentDashboard({ onBack }) {
         <div className="grid gap-4 lg:grid-cols-[1.4fr_0.85fr]">
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {stats.map((stat) => (
-                <div key={stat.label} className="rounded-[28px] border border-[#dce4f5] bg-white p-6 shadow-[0_16px_40px_rgba(60,91,166,0.08)]">
-                  <p className="text-sm font-semibold uppercase tracking-[0.26em] text-[#52668f]">{stat.label}</p>
-                  <p className={`mt-4 text-3xl font-black ${stat.tone}`}>{stat.value}</p>
-                </div>
-              ))}
+              {stats.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={stat.label} className="rounded-[28px] border border-[#dce4f5] bg-white p-5 shadow-[0_16px_40px_rgba(60,91,166,0.08)] hover:-translate-y-1 transition">
+                    <div className={`mb-3 grid h-10 w-10 place-items-center rounded-xl ${stat.bg}`}>
+                      <Icon size={18} />
+                    </div>
+                    <p className="text-xs font-bold uppercase tracking-[0.26em] text-[#52668f]">{stat.label}</p>
+                    <p className={`mt-2 text-3xl font-black ${stat.tone}`}>{stat.value}</p>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">
@@ -135,22 +144,31 @@ export default function StudentDashboard({ onBack }) {
             <div className="rounded-[32px] border border-[#dce4f5] bg-white p-6 shadow-[0_18px_45px_rgba(60,91,166,0.08)]">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#3f5a92]">Recent Trial Missions</p>
+                  <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.28em] text-[#3f5a92]">
+                    <Target size={13} className="text-blue-500" />
+                    Recent Trial Missions
+                  </p>
                   <p className="mt-2 text-sm text-[#5b6f95]">See your latest progress and mission scores.</p>
                 </div>
-                <button className="rounded-full bg-[#eef4ff] px-4 py-2 text-sm font-semibold text-[#2f5fde] hover:bg-[#e0e9ff]">
+                <button className="flex items-center gap-1.5 rounded-full bg-[#eef4ff] px-4 py-2 text-sm font-semibold text-[#2f5fde] hover:bg-[#e0e9ff]">
                   View All
+                  <ArrowRight size={13} />
                 </button>
               </div>
               <div className="mt-5 space-y-3">
                 {missions.map((mission) => (
-                  <div key={mission.title} className="rounded-3xl border border-[#e6edf7] bg-[#f8fbff] p-4">
+                  <div key={mission.title} className="rounded-3xl border border-[#e6edf7] bg-[#f8fbff] p-4 transition hover:-translate-y-0.5">
                     <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-base font-bold text-[#11244c]">{mission.title}</p>
-                        <p className="mt-1 text-sm text-[#5b6f95]">{mission.subtitle}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#eef4ff] text-[#2f5fde]">
+                          <Play size={14} className="ml-0.5" />
+                        </div>
+                        <div>
+                          <p className="text-base font-bold text-[#11244c]">{mission.title}</p>
+                          <p className="mt-0.5 text-sm text-[#5b6f95]">{mission.subtitle}</p>
+                        </div>
                       </div>
-                      <div className="rounded-2xl bg-[#ffffff] px-4 py-2 text-sm font-semibold text-[#2f5fde] shadow-sm">
+                      <div className={`rounded-2xl px-4 py-2 text-sm font-semibold shadow-sm ${mission.score === "—" ? "bg-[#f7f9fc] text-[#8fa3c1]" : "bg-[#ffffff] text-[#2f5fde]"}`}>
                         {mission.score}
                       </div>
                     </div>
@@ -162,23 +180,37 @@ export default function StudentDashboard({ onBack }) {
 
           <aside className="space-y-4 rounded-[32px] border border-[#dce4f5] bg-white p-6 shadow-[0_18px_45px_rgba(60,91,166,0.08)] lg:sticky lg:top-8">
             <div className="rounded-[28px] border border-[#e8eef9] bg-[#f7faff] p-6">
-              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#3f5a92]">Recommended Next Steps</p>
+              <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.28em] text-[#3f5a92]">
+                <BarChart3 size={13} className="text-blue-500" />
+                Recommended Next Steps
+              </p>
               <ul className="mt-4 space-y-3 text-sm text-[#455b84]">
                 {recommendations.map((item) => (
-                  <li key={item} className="rounded-2xl bg-white px-4 py-3 shadow-sm">{item}</li>
+                  <li key={item} className="flex items-start gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
+                    <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-emerald-500" />
+                    {item}
+                  </li>
                 ))}
               </ul>
-              <button className="mt-5 w-full rounded-full bg-[#2f5fde] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#274fc4]">
+              <button className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-[#2f5fde] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#274fc4] hover:-translate-y-0.5">
+                <Play size={13} className="ml-0.5" />
                 Start Next Mission
               </button>
             </div>
 
             <div className="rounded-[28px] border border-[#e8eef9] bg-[#fdfcff] p-6">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#3f5a92]">AI-Powered Recommendations</p>
-                <button className="text-xs font-semibold text-[#2f5fde] hover:text-[#1c42ab]">Generate Insights</button>
+                <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.28em] text-[#3f5a92]">
+                  <Sparkles size={13} className="text-violet-500" />
+                  AI-Powered Insights
+                </p>
+                <button className="flex items-center gap-1.5 text-xs font-semibold text-[#2f5fde] hover:text-[#1c42ab]">
+                  Generate
+                  <TrendingUp size={12} />
+                </button>
               </div>
               <div className="mt-5 rounded-[24px] border border-dashed border-[#d7e0f1] bg-white p-6 text-center text-sm text-[#556a8f]">
+                <Sparkles size={24} className="mx-auto mb-3 text-[#c6cfe8]" />
                 <p className="font-semibold text-[#2f4bb2]">No Recommendations Yet</p>
                 <p className="mt-2">Click the button above to generate your personalized career insights.</p>
               </div>

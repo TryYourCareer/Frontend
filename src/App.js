@@ -49,7 +49,7 @@ function App() {
 
   useEffect(() => {
     if (!isFirebaseConfigured || !auth) {
-      return () => {};
+      return () => { };
     }
 
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
@@ -89,7 +89,7 @@ function App() {
             setUser(null);
           }}
         />
-      )}}
+      )}
 
       {step === "onboarding" && (
         <Onboarding
