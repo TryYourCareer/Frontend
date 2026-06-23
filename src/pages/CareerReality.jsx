@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { ArrowLeft, Clock, TrendingUp, Activity, CheckCircle2, DollarSign, Wrench, BookOpen, AlertCircle } from "lucide-react";
-import Navbar from "../components/Navbar";
-
 const careerData = {
   title: "Software Engineer",
   tagline: "Build products, solve problems, and ship real software.",
@@ -40,7 +38,6 @@ export default function CareerReality({ onBack }) {
 
   return (
     <>
-      <Navbar />
       <section className="min-h-screen bg-[#f4f7fb] px-4 py-8 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-7xl space-y-6">
 

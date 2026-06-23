@@ -1,5 +1,4 @@
 import { ArrowLeft, ClipboardList, CheckCircle2, Zap, Flame, TrendingUp, Sparkles, ArrowRight, BarChart3, Target, Play } from "lucide-react";
-
 const dashboardData = {
   userName: "Jane",
   stats: [
@@ -60,6 +59,7 @@ export default function StudentDashboard({ onBack }) {
   const { userName, stats, compatibility, missions, recommendations } = dashboardData;
 
   return (
+    <>
     <section className="min-h-screen bg-[#f4f7fb] px-4 py-8 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -219,5 +219,6 @@ export default function StudentDashboard({ onBack }) {
         </div>
       </div>
     </section>
+    </>
   );
 }

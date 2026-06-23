@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Users, TrendingUp, Sparkles, Activity, Send, ArrowLeft, MessageSquare } from "lucide-react";
 import { isFirebaseReady, saveDocument, addDocument, getDocuments } from "../utils/firebaseStorage";
-import Navbar from "../components/Navbar";
-
 const hubData = [
   { id: "software-engineering", name: "Software Engineering", description: "Live discussion for learners building software careers.", explorers: 1240, status: "Active", icon: "💻" },
   { id: "ux-design", name: "UX Design", description: "Share design thinking, prototyping tips, and portfolio advice.", explorers: 892, status: "Growing", icon: "🎨" },
@@ -54,7 +52,6 @@ export default function CareerHub({ onBack }) {
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen bg-[#f3f6fb] px-4 py-8 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-7xl space-y-6">
 

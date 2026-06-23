@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import Papa from "papaparse";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Search, X } from "lucide-react";
-import Navbar from "../components/Navbar";
-
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
 const API_TIMEOUT_MS = 3000;
 const CSV_TIMEOUT_MS = 8000;
@@ -352,7 +350,6 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen bg-[linear-gradient(180deg,#f4f9ff_0%,#f9fbff_55%,#fefaf6_100%)]">
         <header className="border-b border-[#d7e6fb] bg-[#eff6ff]/95 backdrop-blur">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">

@@ -89,3 +89,32 @@ button, a, input, textarea {
 .cc-pulse-dot {
   animation: cc-pulse-dot 1.6s infinite;
 }
+
+/* ── Sidebar ─────────────────────────────────────────── */
+.cc-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148,163,184,0.15) transparent;
+}
+.cc-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.cc-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cc-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(148,163,184,0.15);
+  border-radius: 99px;
+}
+.cc-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148,163,184,0.3);
+}
+
+/* Sidebar nav item — relative for the active indicator bar */
+.sidebar-nav-item {
+  position: relative;
+}
+
+/* Smooth page transition when sidebar opens/closes */
+.cc-app-layout {
+  transition: background-color 0.3s ease;
+}
