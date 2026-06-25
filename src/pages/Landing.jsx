@@ -5,16 +5,14 @@ import Hero from "../components/Hero";
 import careersData from "../data/clearcareers_data.json";
 
 const SIDE_MENU = [
-  "1. Landing Page",
-  "2. Onboarding",
-  "3. Assessment",
-  "4. Career Reality",
-  "5. Insights Feed",
-  "6. Trial Mission",
-  "7. Career Hubs",
-  "8. Student Dashboard",
-  "9. Decision Report",
-  "10. Parent Report",
+  "1. Assessment",
+  "2. Career Reality",
+  "3. Insights Feed",
+  "4. Trial Mission",
+  "5. Career Hubs",
+  "6. Student Dashboard",
+  "7. Decision Report",
+  "8. Parent Report",
 ];
 
 export default function Landing({ onStartDiscovery, onOpenAssessment, onOpenCareerReality, onOpenInsightsFeed, onOpenCareerHubs, onOpenStudentDashboard, onExploreCareers, onOpenAuth, profile, user, onLogout, theme = "light", onToggleTheme, searchQuery = "", onSearchChange }) {
@@ -53,14 +51,14 @@ export default function Landing({ onStartDiscovery, onOpenAssessment, onOpenCare
     <div
       className={`min-h-screen ${
         isDark
-          ? "bg-[linear-gradient(to_bottom,_#0f172a_0,_#0f172a_72vh,_#111827_72vh,_#111827_100%)]"
-          : "bg-[linear-gradient(to_bottom,_#dfe7f4_0,_#dfe7f4_72vh,_#ffffff_72vh,_#ffffff_100%)]"
+          ? "bg-[linear-gradient(to_bottom,_#111827_0,_#111827_55vh,_#0f172a_100%)]"
+          : "bg-[linear-gradient(to_bottom,_#f7fbff_0,_#eef6ff_62vh,_#ffffff_100%)]"
       }`}
     >
       <div className="mx-auto max-w-[1480px] lg:flex">
         <aside
           className={`hidden lg:flex lg:w-[230px] lg:min-h-screen lg:flex-col lg:border-r ${
-            isDark ? "lg:border-slate-700 lg:bg-slate-900" : "lg:border-[#cfd6e5] lg:bg-[#edf2fa]"
+            isDark ? "lg:border-slate-700 lg:bg-slate-900" : "lg:border-slate-200 lg:bg-white/90"
           }`}
         >
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
@@ -93,10 +91,6 @@ export default function Landing({ onStartDiscovery, onOpenAssessment, onOpenCare
                 <button
                   key={item}
                   onClick={() => {
-                    if (item.includes("Onboarding")) {
-                      onStartDiscovery?.();
-                      return;
-                    }
                     if (item.includes("Assessment")) {
                       onOpenAssessment?.();
                       return;
@@ -165,6 +159,7 @@ export default function Landing({ onStartDiscovery, onOpenAssessment, onOpenCare
 
         <main className="flex-1">
           <Navbar
+            theme={theme}
             onStartDiscovery={onStartDiscovery}
             user={user}
             onOpenAuth={onOpenAuth}
@@ -175,7 +170,7 @@ export default function Landing({ onStartDiscovery, onOpenAssessment, onOpenCare
             clusterResults={clusterResults}
             onSelectCluster={handleSelectCluster}
           />
-          <Hero onStartDiscovery={onStartDiscovery} onExploreCareers={onExploreCareers} careersCount={careers.length} />
+          <Hero onStartDiscovery={onStartDiscovery} onExploreCareers={onExploreCareers} careersCount={careers.length} theme={theme} />
         </main>
       </div>
     </div>

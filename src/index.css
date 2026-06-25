@@ -10,9 +10,9 @@
 }
 
 body {
-  background-color: #dbe3f0;
+  background: radial-gradient(circle at top, #f7f9ff 0%, #f0effb 45%, #eef3fd 100%);
   font-family: var(--cc-font-body);
-  color: #142447;
+  color: #1e3c5f;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -23,4 +23,8 @@ body {
 
 .cc-body {
   font-family: var(--cc-font-body);
+}
+
+.btn-pastel {
+  @apply inline-flex items-center justify-center rounded-full px-5 py-2.5 font-semibold transition;
 }

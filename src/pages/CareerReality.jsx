@@ -55,7 +55,8 @@ function TimelineItem({ time, title, description }) {
   );
 }
 
-export default function CareerReality({ onBack }) {
+export default function CareerReality({ theme = "light", onBack }) {
+  const isDark = theme === "dark";
   const [activeTab, setActiveTab] = useState("day");
 
   useEffect(() => {
@@ -82,18 +83,18 @@ export default function CareerReality({ onBack }) {
     });
   }, []);
   return (
-    <section className="min-h-screen bg-[#f4f7fb] px-4 py-8 sm:px-6 lg:px-10">
+    <section className={`min-h-screen px-4 py-8 sm:px-6 lg:px-10 ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f4f7fb] text-slate-900"}`}>
       <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:grid lg:grid-cols-[1.7fr_0.9fr] lg:items-start">
         {onBack && (
           <button
             onClick={onBack}
-            className="mb-2 inline-flex items-center rounded-full border border-[#d2d9ea] bg-white px-4 py-2 text-sm font-semibold text-[#3d4f71] transition hover:bg-[#eef2f9]"
+            className={`mb-2 inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition ${isDark ? "border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800" : "border border-[#d2d9ea] bg-white text-[#3d4f71] hover:bg-[#eef2f9]"}`}
           >
             ← Back to Home
           </button>
         )}
         <div className="space-y-6">
-          <div className="rounded-[28px] border border-[#dbe2ef] bg-white p-6 shadow-[0_20px_50px_rgba(15,35,80,0.08)] sm:p-8">
+          <div className={`rounded-[28px] p-6 shadow-[0_20px_50px_rgba(15,35,80,0.08)] sm:p-8 ${isDark ? "border border-slate-700 bg-slate-900" : "border border-[#dbe2ef] bg-white"}`}>
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-4">
                 <div className="grid h-16 w-16 place-items-center rounded-3xl bg-[#eef5ff] text-3xl">{careerData.icon}</div>
@@ -114,7 +115,7 @@ export default function CareerReality({ onBack }) {
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-[#dbe2ef] bg-white p-6 shadow-[0_20px_50px_rgba(15,35,80,0.06)] sm:p-8">
+          <div className={`rounded-[28px] p-6 shadow-[0_20px_50px_rgba(15,35,80,0.06)] sm:p-8 ${isDark ? "border border-slate-700 bg-slate-900" : "border border-[#dbe2ef] bg-white"}`}>
             <div className="flex flex-wrap items-center gap-3 border-b border-[#e6ebf4] pb-4">
               <button
                 type="button"
@@ -199,7 +200,7 @@ export default function CareerReality({ onBack }) {
 
         <aside className="lg:sticky lg:top-8">
           <div className="space-y-6">
-            <div className="rounded-[28px] border border-[#dbe2ef] bg-white p-6 shadow-[0_20px_50px_rgba(15,35,80,0.06)]">
+            <div className={`rounded-[28px] p-6 shadow-[0_20px_50px_rgba(15,35,80,0.06)] ${isDark ? "border border-slate-700 bg-slate-900" : "border border-[#dbe2ef] bg-white"}`}>
               <h2 className="text-xl font-bold text-[#10213f]">Core Tools & Skills</h2>
               <div className="mt-5 grid gap-2 sm:grid-cols-2">
                 {careerData.hardSkills.map((skill) => (

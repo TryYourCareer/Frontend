@@ -78,7 +78,8 @@ function formatTimeAgo(timestamp) {
   return `${Math.floor(diffSeconds / 86400)} days ago`;
 }
 
-export default function InsightsFeed({ onBack }) {
+export default function InsightsFeed({ theme = "light", onBack }) {
+  const isDark = theme === "dark";
   const [insights, setInsights] = useState(INITIAL_INSIGHTS);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -174,9 +175,9 @@ export default function InsightsFeed({ onBack }) {
   }, [activeCategory, insights, searchQuery]);
 
   return (
-    <section className="min-h-screen bg-[#f3f6fb] px-4 py-8 sm:px-6 lg:px-10">
+    <section className={`min-h-screen px-4 py-8 sm:px-6 lg:px-10 ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f3f6fb] text-slate-900"}`}>
       <div className="mx-auto max-w-6xl space-y-8">
-        <div className="flex flex-col gap-4 rounded-[32px] border border-[#d7e0f2] bg-white px-6 py-6 shadow-[0_20px_60px_rgba(35,60,115,0.08)] sm:px-10 sm:py-8 lg:flex-row lg:items-center lg:justify-between">
+        <div className={`flex flex-col gap-4 rounded-[32px] px-6 py-6 shadow-[0_20px_60px_rgba(35,60,115,0.08)] sm:px-10 sm:py-8 lg:flex-row lg:items-center lg:justify-between ${isDark ? "border border-slate-700 bg-slate-900" : "border border-[#d7e0f2] bg-white"}`}>
           <div className="space-y-3">
             <p className="text-sm font-semibold uppercase tracking-[0.32em] text-[#3b5d98]">Your Daily Insights</p>
             <h1 className="text-4xl font-black tracking-[-0.04em] text-[#0e2140] sm:text-5xl">Your Daily Insights</h1>
@@ -186,7 +187,7 @@ export default function InsightsFeed({ onBack }) {
             <p className="text-sm text-[#7b8aa4]">Updated daily from Google Trends, expert sources, and student career briefs.</p>
           </div>
 
-          <div className="flex w-full max-w-xl items-center gap-2 rounded-3xl border border-[#d8e1ef] bg-[#f8fafc] px-4 py-3 shadow-sm sm:px-5 sm:py-4">
+          <div className={`flex w-full max-w-xl items-center gap-2 rounded-3xl px-4 py-3 shadow-sm sm:px-5 sm:py-4 ${isDark ? "border border-slate-700 bg-slate-900 text-slate-100" : "border border-[#d8e1ef] bg-[#f8fafc]"}`}>
             <span className="text-[#5c6f8f]">🔍</span>
             <input
               value={searchQuery}
@@ -223,7 +224,7 @@ export default function InsightsFeed({ onBack }) {
         </div>
 
         <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2 rounded-3xl border border-[#e2e9f5] bg-[#eef4fc] px-5 py-4 text-sm text-[#4e627f] shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className={`flex flex-col gap-2 rounded-3xl border px-5 py-4 text-sm shadow-sm sm:flex-row sm:items-center sm:justify-between ${isDark ? "border-slate-700 bg-slate-900 text-slate-200" : "border border-[#e2e9f5] bg-[#eef4fc] text-[#4e627f]"}`}>
             <p>{filteredInsights.length} insights available for {activeCategory}.</p>
             <p>{lastUpdated ? `Last refreshed: ${new Date(lastUpdated).toLocaleDateString()}` : "Refreshing insights..."}</p>
           </div>

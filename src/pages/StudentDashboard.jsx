@@ -54,11 +54,12 @@ function RadarDot({ angle, radius, label, value }) {
   );
 }
 
-export default function StudentDashboard({ onBack }) {
+export default function StudentDashboard({ theme = "light", onBack }) {
+  const isDark = theme === "dark";
   const { userName, stats, compatibility, missions, recommendations } = dashboardData;
 
   return (
-    <section className="min-h-screen bg-[#f4f7fb] px-4 py-8 sm:px-6 lg:px-10">
+    <section className={`min-h-screen px-4 py-8 sm:px-6 lg:px-10 ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f4f7fb] text-slate-900"}`}>
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -70,7 +71,7 @@ export default function StudentDashboard({ onBack }) {
           </div>
           <button
             onClick={onBack}
-            className="inline-flex items-center rounded-full border border-[#c6d5ea] bg-white px-5 py-2 text-sm font-semibold text-[#2f4bb2] transition hover:bg-[#eef3ff]"
+            className={`inline-flex items-center rounded-full border px-5 py-2 text-sm font-semibold transition ${isDark ? "border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800" : "border border-[#c6d5ea] bg-white text-[#2f4bb2] hover:bg-[#eef3ff]"}`}
           >
             Back to Home
           </button>
@@ -160,7 +161,7 @@ export default function StudentDashboard({ onBack }) {
             </div>
           </div>
 
-          <aside className="space-y-4 rounded-[32px] border border-[#dce4f5] bg-white p-6 shadow-[0_18px_45px_rgba(60,91,166,0.08)] lg:sticky lg:top-8">
+          <aside className={`space-y-4 rounded-[32px] p-6 shadow-[0_18px_45px_rgba(60,91,166,0.08)] lg:sticky lg:top-8 ${isDark ? "border border-slate-700 bg-slate-900" : "border border-[#dce4f5] bg-white"}`}>
             <div className="rounded-[28px] border border-[#e8eef9] bg-[#f7faff] p-6">
               <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#3f5a92]">Recommended Next Steps</p>
               <ul className="mt-4 space-y-3 text-sm text-[#455b84]">

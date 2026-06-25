@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import Landing from "./pages/Landing";
-import Onboarding from "./pages/Onboarding";
 import Assessment from "./pages/Assessment";
 import Profile from "./pages/Profile";
 import ExploreCareers from "./pages/ExploreCareers";
@@ -10,6 +9,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import CareerReality from "./pages/CareerReality";
 import InsightsFeed from "./pages/InsightsFeed";
 import AuthModal from "./components/AuthModal";
+import CreateProfile from "./pages/CreateProfile";
 import { auth, isFirebaseConfigured } from "./firebaseConfig";
 
 const PROFILE_STORAGE_KEY = "clear-careers-generated-profile";
@@ -47,23 +47,34 @@ function App() {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
+  const handleStartDiscovery = () => {
+    setStep("assessment");
+  };
+
   useEffect(() => {
     if (!isFirebaseConfigured || !auth) {
       return () => {};
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
-      setUser(nextUser || null);
-    });
-
-    return () => unsubscribe();
+    // Check if it's mock auth (has addAuthStateListener) or real Firebase auth
+    if (auth.addAuthStateListener) {
+      const unsubscribe = auth.addAuthStateListener((nextUser) => {
+        setUser(nextUser || null);
+      });
+      return () => unsubscribe();
+    } else {
+      const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+        setUser(nextUser || null);
+      });
+      return () => unsubscribe();
+    }
   }, []);
 
   return (
     <div>
       {step === "landing" && (
         <Landing
-          onStartDiscovery={() => setStep("onboarding")}
+          onStartDiscovery={handleStartDiscovery}
           onOpenAssessment={() => setStep("assessment")}
           onOpenCareerReality={() => setStep("career-reality")}
           onOpenInsightsFeed={() => setStep("insights-feed")}
@@ -89,21 +100,11 @@ function App() {
             setUser(null);
           }}
         />
-      )}}
-
-      {step === "onboarding" && (
-        <Onboarding
-          onBack={() => setStep("landing")}
-          onContinue={(profile) => {
-            setGeneratedProfile(profile);
-            localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
-            setStep("assessment");
-          }}
-        />
       )}
 
       {step === "assessment" && (
         <Assessment
+          theme={theme}
           onBack={() => setStep("landing")}
           onOpenCluster={(clusterId) => {
             setSelectedClusterId(clusterId);
@@ -115,6 +116,7 @@ function App() {
 
       {step === "profile" && (
         <Profile
+          theme={theme}
           profile={generatedProfile}
           onRestart={() => {
             setGeneratedProfile(null);
@@ -125,23 +127,24 @@ function App() {
       )}
 
       {step === "career-reality" && (
-        <CareerReality onBack={() => setStep("landing")} />
+        <CareerReality theme={theme} onBack={() => setStep("landing")} />
       )}
 
       {step === "insights-feed" && (
-        <InsightsFeed onBack={() => setStep("landing")} />
+        <InsightsFeed theme={theme} onBack={() => setStep("landing")} />
       )}
 
       {step === "career-hubs" && (
-        <CareerHub onBack={() => setStep("landing")} />
+        <CareerHub theme={theme} onBack={() => setStep("landing")} />
       )}
 
       {step === "student-dashboard" && (
-        <StudentDashboard onBack={() => setStep("landing")} />
+        <StudentDashboard theme={theme} onBack={() => setStep("landing")} />
       )}
 
       {step === "explore-careers" && (
         <ExploreCareers
+          theme={theme}
           onBack={() => setStep("landing")}
           user={user}
           onOpenAuth={() => setShowAuth(true)}
@@ -153,11 +156,30 @@ function App() {
 
       {showAuth && (
         <AuthModal
+          theme={theme}
           onClose={() => setShowAuth(false)}
-          onAuthSuccess={() => setShowAuth(false)}
+          onAuthSuccess={(signedUp) => {
+            setShowAuth(false);
+            if (signedUp) {
+              setStep("create-profile");
+            }
+          }}
         />
       )}
-    </div>
+
+      {step === "create-profile" && (
+        <CreateProfile
+          theme={theme}
+          onBack={() => setStep("landing")}
+          onCreate={(profile) => {
+            setGeneratedProfile(profile);
+            localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+            // After creating a profile, go to the home (landing) page.
+            setStep("landing");
+          }}
+        />
+      )}
+      </div>
   );
 }
 

@@ -19,7 +19,8 @@ async function fetchWithTimeout(url, timeoutMs) {
   }
 }
 
-export default function Assessment({ onBack, onOpenCluster, user = null }) {
+export default function Assessment({ theme = "light", onBack, onOpenCluster, user = null }) {
+  const isDark = theme === "dark";
   const [careers, setCareers] = useState([]);
   const [isLoadingCareers, setIsLoadingCareers] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -35,6 +36,7 @@ export default function Assessment({ onBack, onOpenCluster, user = null }) {
 
   const [questionIndex, setQuestionIndex] = useState(0);
   const [result, setResult] = useState(null);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -191,190 +193,138 @@ export default function Assessment({ onBack, onOpenCluster, user = null }) {
     setResult(null);
     setSaveState("idle");
     setSaveError("");
+    setStarted(false);
+  };
+
+  const handleStartAssessment = () => {
+    setStarted(true);
   };
 
   return (
-    <section className="min-h-screen w-full bg-[radial-gradient(circle_at_top,_#eef4ff_0%,_#d6e5ff_42%,_#c9ddff_100%)] px-4 py-6 sm:px-8 sm:py-9">
-      <div className="mx-auto w-full max-w-6xl rounded-[32px] border border-[#c2d5fb] bg-white/80 p-6 shadow-[0_22px_60px_rgba(43,90,186,0.18)] backdrop-blur sm:p-10">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="cc-body text-sm font-semibold uppercase tracking-[0.18em] text-[#3f6fce]">Assessment</p>
-            <h1 className="cc-display mt-1 text-3xl font-black text-[#0c1e4f] sm:text-4xl">Career Discovery Engine</h1>
-            <p className="cc-body mt-2 text-sm text-[#41608e] sm:text-base">Answer all 13 questions. Your results are generated inside this same section.</p>
+    <section className={`min-h-screen w-full px-4 py-8 sm:px-8 sm:py-10 ${isDark ? "bg-slate-950 text-slate-100" : "bg-white text-slate-900"}`}>
+      <div className="mx-auto max-w-6xl">
+        <div className={`relative overflow-hidden rounded-[32px] border px-6 py-8 sm:px-10 sm:py-10 ${isDark ? "border-slate-700 bg-slate-900 shadow-[0_20px_60px_rgba(0,0,0,0.35)]" : "border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]"}`}>
+          <div className={`absolute right-10 top-10 h-28 w-28 rounded-full opacity-60 blur-3xl ${isDark ? "bg-slate-800" : "bg-[#dbe4ff]"}`}></div>
+          <div className={`absolute left-8 top-36 h-24 w-24 rounded-[28px] opacity-70 blur-2xl ${isDark ? "bg-slate-800" : "bg-[#ede7ff]"}`}></div>
+
+          <div className="relative flex flex-col gap-8">
+            <div className="flex items-center justify-between gap-4">
+              <p className={`text-xs font-semibold uppercase tracking-[0.32em] ${isDark ? "text-slate-400" : "text-[#2563eb]"}`}>Assessment</p>
+              <button
+                type="button"
+                onClick={onBack}
+                className={`inline-flex items-center justify-center rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] transition ${isDark ? "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700" : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"}`}
+              >
+                Back
+              </button>
+            </div>
+
+            <div className="max-w-3xl">
+              <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">Start your career discovery journey</h1>
+              <p className={`mt-4 max-w-2xl text-base leading-7 ${isDark ? "text-slate-300" : "text-slate-600"}`}>Answer all 13 questions. Your results are generated inside this same section.</p>
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onBack}
-            className="cc-body rounded-xl border border-[#b8cbf7] bg-[#edf3ff] px-4 py-2 text-sm font-bold text-[#234b9f] transition hover:bg-[#e0ebff]"
-          >
-            Back
-          </button>
+          <div className="mt-10 grid gap-6">
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className={`rounded-[20px] border p-5 shadow-[0_15px_40px_rgba(15,23,42,0.06)] ${isDark ? "border-slate-700 bg-slate-950" : "border-slate-200 bg-white"}`}>
+                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eff6ff] text-[#1d4ed8] font-semibold">13</div>
+                  <p className={`mt-4 text-sm font-semibold ${isDark ? "text-slate-100" : "text-slate-950"}`}>13 Questions</p>
+                  <p className={`mt-2 text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>Comprehensive</p>
+                </div>
+                <div className={`rounded-[20px] border p-5 shadow-[0_15px_40px_rgba(15,23,42,0.06)] ${isDark ? "border-slate-700 bg-slate-950" : "border-slate-200 bg-white"}`}>
+                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f0fdf4] text-[#15803d] font-semibold">5</div>
+                  <p className={`mt-4 text-sm font-semibold ${isDark ? "text-slate-100" : "text-slate-950"}`}>5 Minutes</p>
+                  <p className={`mt-2 text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>Estimated Time</p>
+                </div>
+                <div className={`rounded-[20px] border p-5 shadow-[0_15px_40px_rgba(15,23,42,0.06)] ${isDark ? "border-slate-700 bg-slate-950" : "border-slate-200 bg-white"}`}>
+                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f5f3ff] text-[#7c3aed] font-semibold">270</div>
+                  <p className={`mt-4 text-sm font-semibold ${isDark ? "text-slate-100" : "text-slate-950"}`}>270 Careers</p>
+                  <p className={`mt-2 text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>Real Database</p>
+                </div>
+              </div>
+
+              <div className={`mt-6 rounded-[28px] border p-6 shadow-[0_20px_40px_rgba(15,23,42,0.06)] ${isDark ? "border-slate-700 bg-slate-900" : "border-slate-200 bg-[#f8fbff]"}`}>
+                <div className={`rounded-[24px] border p-6 shadow-sm ${isDark ? "border-slate-700 bg-slate-950" : "border border-[#d8e9ff] bg-white"}`}>
+                  <h2 className={`text-xl font-semibold ${isDark ? "text-slate-100" : "text-slate-950"}`}>Before You Begin</h2>
+                  <p className={`mt-4 text-sm leading-7 ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                    This is not a test. There are no right answers, no scores to hack, and no result that is better than another. What this assessment does is ask you 17 carefully chosen questions about how you actually think, what genuinely interests you, and what kind of work feels meaningful—not what sounds impressive.
+                  </p>
+                  <p className={`mt-4 text-sm leading-7 ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                    The assessment consists of 14 multiple-choice questions and 3 short reflection questions, where you'll have the opportunity to express your thoughts in your own words.
+                  </p>
+                  <p className={`mt-4 text-sm leading-7 ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                    Based on your answers, Try Your Career will recommend careers from our career database that match your natural thinking style, interests, and preferences—not just your subject scores or your family's expectations.
+                  </p>
+                </div>
+
+                <div className={`mt-8 rounded-[28px] p-6 shadow-[0_18px_35px_rgba(15,23,42,0.05)] ${isDark ? "bg-slate-950" : "bg-white"}`}>
+                  <p className={`text-lg font-semibold ${isDark ? "text-slate-100" : "text-slate-950"}`}>Three things to keep in mind</p>
+                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                    <div className={`rounded-3xl border p-4 text-sm ${isDark ? "border-slate-700 bg-slate-900 text-slate-300" : "border border-[#e2e8f0] bg-[#f8fafc] text-slate-600"}`}>
+                      <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-[#e0efff] text-[#2563eb]">✓</div>
+                      <p className="font-semibold text-slate-900">Pick the option that feels most true right now</p>
+                      <p className="mt-2 text-[13px] leading-5 text-slate-600">Not the one that sounds smartest or that you think we want to hear. The more honest you are, the more useful the result.</p>
+                    </div>
+                    <div className={`rounded-3xl border p-4 text-sm ${isDark ? "border-slate-700 bg-slate-900 text-slate-300" : "border border-[#e2e8f0] bg-[#fdf2fe] text-slate-600"}`}>
+                      <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-[#f5e0ff] text-[#7c3aed]">❤️</div>
+                      <p className="font-semibold text-slate-900">Go with your gut on the first read</p>
+                      <p className="mt-2 text-[13px] leading-5 text-slate-600">Most people who overthink their answers end up with less accurate results. Your first instinct is usually the truest one.</p>
+                    </div>
+                    <div className={`rounded-3xl border p-4 text-sm ${isDark ? "border-slate-700 bg-slate-900 text-slate-300" : "border border-[#e2e8f0] bg-[#f8fafc] text-slate-600"}`}>
+                      <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-[#eff6ff] text-[#0f172a]">⭐</div>
+                      <p className="font-semibold text-slate-900">There is no ideal result</p>
+                      <p className="mt-2 text-[13px] leading-5 text-slate-600">Every combination of answers leads somewhere interesting. Wherever you land, there is a real career path waiting.</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div className={`relative rounded-[28px] border p-8 shadow-[0_20px_40px_rgba(15,23,42,0.08)] ${isDark ? "border-slate-700 bg-slate-900" : "border-slate-200 bg-white"}`}>
+              <div className={`absolute right-6 top-6 h-16 w-16 rounded-full opacity-80 ${isDark ? "bg-slate-800" : "bg-[#eef4ff]"}`}></div>
+              <div className={`absolute -right-10 bottom-8 h-14 w-14 rounded-full opacity-80 ${isDark ? "bg-slate-800" : "bg-[#f5e8ff]"}`}></div>
+              <h2 className={`text-2xl font-bold ${isDark ? "text-slate-100" : "text-slate-950"}`}>What You'll Get</h2>
+              <div className={`mt-6 space-y-4 ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-[#eff6ff] text-[#2563eb]">✓</span>
+                  <div>
+                    <p className="font-semibold text-slate-900">Personalized career pathways</p>
+                    <p className="text-sm text-slate-500">Career matches tailored to your interests and strengths.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-[#f0fdf4] text-[#15803d]">✓</span>
+                  <div>
+                    <p className="font-semibold text-slate-900">Meaningful career recommendations</p>
+                    <p className="text-sm text-slate-500">Options that feel realistic, inspiring, and relevant.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-[#faf5ff] text-[#7c3aed]">✓</span>
+                  <div>
+                    <p className="font-semibold text-slate-900">Clear next steps and confidence</p>
+                    <p className="text-sm text-slate-500">See practical guidance and which careers fit your profile best.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`mt-8 rounded-[24px] p-5 text-sm leading-6 ${isDark ? "border border-slate-700 bg-slate-950 text-slate-400" : "border border-[#e2e8f0] bg-[#f8fafc] text-slate-600"}`}>
+                Answer honestly and avoid overthinking. Your first response is usually the best one.
+              </div>
+
+              <button
+                type="button"
+                onClick={handleStartAssessment}
+                className="mt-8 inline-flex w-full items-center justify-center rounded-3xl bg-[#2563eb] px-6 py-4 text-base font-semibold text-white shadow-[0_18px_45px_rgba(37,99,235,0.24)] transition hover:bg-[#1d4ed8]"
+              >
+                Start Assessment →
+              </button>
+            </div>
+          </div>
         </div>
-
-        {isLoadingCareers ? (
-          <div className="mt-8 rounded-2xl border border-[#ccdcff] bg-[#f4f8ff] p-6 text-center">
-            <p className="cc-body text-lg font-semibold text-[#2e5ec6]">Loading careers dataset...</p>
-          </div>
-        ) : null}
-
-        {loadError ? (
-          <div className="mt-8 rounded-2xl border border-[#f4b1b1] bg-[#ffe9e9] p-5 text-sm font-semibold text-[#9f2f2f]">{loadError}</div>
-        ) : null}
-
-        {!isLoadingCareers && !loadError && !result ? (
-          <div className="mt-8">
-            <div className="mb-6">
-              <div className="mb-2 flex items-center justify-between text-sm font-semibold text-[#365c9c]">
-                <span className="cc-body">{currentQuestion.stage}</span>
-                <span className="cc-body">Question {questionIndex + 1} / {ASSESSMENT_QUESTIONS.length}</span>
-              </div>
-              <div className="h-3 w-full overflow-hidden rounded-full bg-[#dce8ff]">
-                <div className="h-full rounded-full bg-gradient-to-r from-[#376dde] to-[#00a5b7] transition-all duration-300" style={{ width: `${progress}%` }} />
-              </div>
-            </div>
-
-            <h2 className="cc-display text-2xl font-extrabold leading-tight text-[#10254f] sm:text-[2rem]">{currentQuestion.prompt}</h2>
-
-            <div className="mt-6 grid gap-3">
-              {currentQuestion.options.map((option) => {
-                const isSelected = selectedOption === option.key;
-                return (
-                  <button
-                    key={option.key}
-                    type="button"
-                    onClick={() => handleSelectOption(option.key)}
-                    className={`group rounded-2xl border px-4 py-4 text-left transition sm:px-5 ${
-                      isSelected
-                        ? "border-[#2f63d7] bg-[#edf3ff] shadow-[0_10px_22px_rgba(47,99,215,0.2)]"
-                        : "border-[#d5e0f8] bg-white hover:border-[#7fa4ee] hover:bg-[#f5f9ff]"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span
-                        className={`mt-0.5 grid h-7 w-7 place-items-center rounded-full text-xs font-black ${
-                          isSelected ? "bg-[#2f63d7] text-white" : "bg-[#e8effe] text-[#4069b7]"
-                        }`}
-                      >
-                        {option.key}
-                      </span>
-                      <span className="cc-body text-sm font-semibold leading-6 text-[#143167] sm:text-base">{option.text}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={handlePrevious}
-                disabled={questionIndex === 0}
-                className="cc-body rounded-xl border border-[#c7d7fb] bg-white px-4 py-2 text-sm font-bold text-[#345ca7] transition disabled:cursor-not-allowed disabled:opacity-45 hover:bg-[#f3f7ff]"
-              >
-                Previous
-              </button>
-
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={!selectedOption}
-                className="cc-body rounded-xl bg-[#2f63d7] px-5 py-2 text-sm font-bold text-white transition hover:bg-[#2658c7] disabled:cursor-not-allowed disabled:bg-[#8ea7dd]"
-              >
-                {questionIndex === ASSESSMENT_QUESTIONS.length - 1 ? "See My Matches" : "Next"}
-              </button>
-            </div>
-          </div>
-        ) : null}
-
-        {!isLoadingCareers && !loadError && result ? (
-          <div className="mt-8">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="cc-display text-2xl font-black text-[#0f2552] sm:text-3xl">Career Match Results</h2>
-              <button
-                type="button"
-                onClick={restartAssessment}
-                className="cc-body rounded-xl border border-[#b9cdf8] bg-[#eef4ff] px-4 py-2 text-sm font-bold text-[#2b55aa] transition hover:bg-[#e2ecff]"
-              >
-                Retake Assessment
-              </button>
-            </div>
-
-            {isFirebaseConfigured ? (
-              <div className="mb-4 rounded-xl border border-[#d6e4ff] bg-[#f4f8ff] px-4 py-3">
-                {saveState === "saving" ? (
-                  <p className="cc-body text-sm font-semibold text-[#2d5dbf]">Saving assessment to Firebase...</p>
-                ) : null}
-                {saveState === "saved" ? (
-                  <p className="cc-body text-sm font-semibold text-[#226a3f]">Assessment saved to Firebase successfully.</p>
-                ) : null}
-                {saveState === "error" ? (
-                  <p className="cc-body text-sm font-semibold text-[#9b2d2d]">Could not save assessment to Firebase: {saveError}</p>
-                ) : null}
-              </div>
-            ) : null}
-
-            <div className="mb-6 grid gap-3 rounded-2xl border border-[#ccdcff] bg-[#f5f9ff] p-4 sm:grid-cols-3">
-              <div>
-                <p className="cc-body text-xs font-bold uppercase tracking-[0.14em] text-[#4a72ba]">Work World</p>
-                <p className="cc-display mt-1 text-lg font-extrabold text-[#102a5d]">{result.studentProfile.dominant.ww}</p>
-              </div>
-              <div>
-                <p className="cc-body text-xs font-bold uppercase tracking-[0.14em] text-[#4a72ba]">Thinking Style</p>
-                <p className="cc-display mt-1 text-lg font-extrabold text-[#102a5d]">{result.studentProfile.dominant.hw}</p>
-              </div>
-              <div>
-                <p className="cc-body text-xs font-bold uppercase tracking-[0.14em] text-[#4a72ba]">Motivation</p>
-                <p className="cc-display mt-1 text-lg font-extrabold text-[#102a5d]">{result.studentProfile.dominant.mw}</p>
-              </div>
-            </div>
-
-            <div className="grid gap-4">
-              {result.topMatches.map((match, index) => (
-                <article
-                  key={match.id}
-                  onClick={() => {
-                    onOpenCluster?.(match.cluster);
-                  }}
-                  className="cursor-pointer rounded-2xl border border-[#cddcff] bg-white p-5 shadow-[0_8px_24px_rgba(25,54,116,0.1)] transition hover:shadow-[0_12px_32px_rgba(25,54,116,0.2)]"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="cc-body text-xs font-bold uppercase tracking-[0.15em] text-[#4b74be]">Match #{index + 1} • {match.cluster}</p>
-                      <h3 className="cc-display mt-1 text-xl font-black text-[#102a5e]">{match.careerName}</h3>
-                      <p className="cc-body mt-1 text-sm text-[#3f5e90]">{match.summary}</p>
-                    </div>
-                    <div className="rounded-xl bg-[#edf4ff] px-4 py-2 text-center">
-                      <p className="cc-body text-xs font-bold uppercase tracking-[0.12em] text-[#4870ba]">Match</p>
-                      <p className="cc-display text-2xl font-black text-[#1a4eb0]">{Math.round(match.score)}%</p>
-                    </div>
-                  </div>
-
-                  <p className="cc-body mt-3 text-sm text-[#29477f]">{match.explanation}</p>
-
-                  <div className="mt-4 grid gap-2 rounded-xl border border-[#d8e4ff] bg-[#f8fbff] p-3 sm:grid-cols-4">
-                    <div>
-                      <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Money</p>
-                      <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.money}/10</p>
-                    </div>
-                    <div>
-                      <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Growth</p>
-                      <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.growth}/10</p>
-                    </div>
-                    <div>
-                      <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Stability</p>
-                      <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.stability}/10</p>
-                    </div>
-                    <div>
-                      <p className="cc-body text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f80bd]">Feasibility</p>
-                      <p className="cc-display text-lg font-black text-[#15346d]">{match.realityScorecard.feasibility}/10</p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        ) : null}
       </div>
     </section>
   );

@@ -59,7 +59,8 @@ const communityTips = [
   "Use the hub to find study buddies and review each other’s work.",
 ];
 
-export default function CareerHub({ onBack }) {
+export default function CareerHub({ theme = "light", onBack }) {
+  const isDark = theme === "dark";
   const [activeHubId, setActiveHubId] = useState(hubData[0].id);
   const [message, setMessage] = useState("");
   const [postStatus, setPostStatus] = useState("");
@@ -98,7 +99,7 @@ export default function CareerHub({ onBack }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#f3f6fb] px-4 py-8 sm:px-6 lg:px-10">
+    <div className={`min-h-screen px-4 py-8 sm:px-6 lg:px-10 ${isDark ? "bg-slate-950 text-slate-100" : "bg-[#f3f6fb] text-slate-900"}`}>
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -110,14 +111,14 @@ export default function CareerHub({ onBack }) {
           </div>
           <button
             onClick={onBack}
-            className="inline-flex items-center rounded-full border border-[#d2d9ea] bg-white px-4 py-2 text-sm font-semibold text-[#3d4f71] transition hover:bg-[#eef2f9]"
+            className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition ${isDark ? "border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800" : "border border-[#d2d9ea] bg-white text-[#3d4f71] hover:bg-[#eef2f9]"}`}
           >
             Back to Home
           </button>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.1fr] xl:grid-cols-[0.8fr_1.2fr]">
-          <aside className="space-y-6 rounded-[32px] border border-[#dce4f2] bg-white p-5 shadow-[0_15px_40px_rgba(58,84,136,0.08)] sm:p-6 lg:sticky lg:top-8">
+          <aside className={`space-y-6 rounded-[32px] p-5 shadow-[0_15px_40px_rgba(58,84,136,0.08)] sm:p-6 lg:sticky lg:top-8 ${isDark ? "border border-slate-700 bg-slate-900" : "border border-[#dce4f2] bg-white"}`}>
             <div className="mb-4">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#5b79a4]">Career Hubs</p>
               <h2 className="mt-2 text-xl font-bold text-[#112749]">Choose a community</h2>
@@ -149,7 +150,7 @@ export default function CareerHub({ onBack }) {
           </aside>
 
           <main className="space-y-6">
-            <div className="rounded-[32px] border border-[#dce4f2] bg-white p-6 shadow-[0_15px_40px_rgba(58,84,136,0.08)] sm:p-8">
+            <div className={`rounded-[32px] p-6 shadow-[0_15px_40px_rgba(58,84,136,0.08)] sm:p-8 ${isDark ? "border border-slate-700 bg-slate-900" : "border border-[#dce4f2] bg-white"}`}>
               <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.32em] text-[#4b6a99]">{activeHub.name}</p>
@@ -192,7 +193,7 @@ export default function CareerHub({ onBack }) {
                   ))}
                 </div>
 
-                <div className="rounded-[24px] border border-[#e2e8f2] bg-[#fafbff] p-4">
+                <div className={`rounded-[24px] p-4 ${isDark ? "border border-slate-700 bg-slate-950 text-slate-300" : "border border-[#e2e8f2] bg-[#fafbff] text-[#425672]"}`}>
                   <p className="text-sm font-semibold text-[#3f587f]">Share your thoughts</p>
                   <textarea
                     value={message}

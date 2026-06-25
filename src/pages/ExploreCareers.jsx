@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import Papa from "papaparse";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowLeft, Search, X } from "lucide-react";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
@@ -73,7 +73,8 @@ function formatLpa(value) {
   return `${Number(value).toFixed(1)} LPA`;
 }
 
-export default function ExploreCareers({ onBack, initialSearch = "", selectedClusterId, onClusterSelected }) {
+export default function ExploreCareers({ theme = "light", onBack, initialSearch = "", selectedClusterId, onClusterSelected }) {
+  const isDark = theme === "dark";
   const [clusters, setClusters] = useState([]);
   const [careers, setCareers] = useState([]);
   const [selectedCluster, setSelectedCluster] = useState(null);
@@ -350,12 +351,12 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
   }, [selectedClusterId, loading, clusters, careers, onClusterSelected]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f9ff_0%,#f9fbff_55%,#fefaf6_100%)]">
-      <header className="border-b border-[#d7e6fb] bg-[#eff6ff]/95 backdrop-blur">
+    <div className={`min-h-screen ${isDark ? "bg-slate-950 text-slate-100" : "bg-[linear-gradient(180deg,#f4f9ff_0%,#f9fbff_55%,#fefaf6_100%)] text-slate-900"}`}>
+      <header className={`border-b backdrop-blur ${isDark ? "border-slate-800 bg-slate-950/95" : "border-[#d7e6fb] bg-[#eff6ff]/95"}`}>
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <button
             onClick={onBack}
-            className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#bdd2f3] bg-white px-4 py-2 text-sm font-semibold text-[#28569e] transition hover:bg-[#edf4ff]"
+            className={`mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${isDark ? "border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800" : "border border-[#bdd2f3] bg-white text-[#28569e] hover:bg-[#edf4ff]"}`}
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Home
@@ -385,116 +386,173 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
           {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
 
           {!loading && !error && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-              {groupedClusters.map((cluster, index) => (
-                <motion.button
-                  key={cluster.id}
-                  whileHover={{ y: -3 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setSelectedCluster(cluster)}
-                  className={`overflow-hidden rounded-2xl bg-gradient-to-br ${
-                    cardColors[index % cardColors.length]
-                  } p-5 text-left text-[#20395f] shadow-[0_10px_20px_rgba(107,143,197,0.2)]`}
-                >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#45618e]">
-                    {cluster.id}
-                  </p>
-                  <h3 className="mt-2 text-lg font-extrabold leading-tight text-[#173b71]">{cluster.name}</h3>
-                  <p className="mt-2 text-sm font-semibold text-[#365987]">{cluster.count} careers</p>
-                  <p className="mt-2 text-xs font-semibold text-[#4f6f9d]">Top Demand: {cluster.details.demandMix}</p>
-                  <p className="mt-1 text-xs text-[#4f6f9d]">Avg Entry: {formatLpa(cluster.details.avgEntry || 0)}</p>
-                  <p className="mt-1 text-xs text-[#4f6f9d]">Avg Growth: {cluster.details.avgGrowth ? `${cluster.details.avgGrowth.toFixed(1)}%` : "NA"}</p>
-                  <p className="mt-2 line-clamp-2 text-xs text-[#4f6f9d]">
-                    Industries: {cluster.details.topIndustries.join(" | ") || "NA"}
-                  </p>
-                </motion.button>
-              ))}
+            <div className="grid gap-6 xl:grid-cols-[1.5fr_0.95fr]">
+              <div className="space-y-6">
+                <div className="rounded-[32px] border border-[#dfe7f7] bg-white/90 p-6 shadow-[0_25px_60px_rgba(64,107,179,0.12)]">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#4e72a3]">Explore Careers</p>
+                      <h2 className="mt-3 text-3xl font-black text-[#152d5b]">Choose a cluster and discover the best-fit roles</h2>
+                      <p className="mt-3 max-w-2xl text-sm text-[#556a8f]">Each cluster contains real career profiles, salary signals, and skills that matter most in today’s job market.</p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                      <div className="rounded-3xl bg-[#eef4ff] px-3 py-4">
+                        <p className="text-2xl font-black text-[#2c4d8a]">{clusters.length}</p>
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-[#5f7ca5]">Clusters</p>
+                      </div>
+                      <div className="rounded-3xl bg-[#eefbf4] px-3 py-4">
+                        <p className="text-2xl font-black text-[#2e6f4b]">{careers.length}</p>
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-[#5f7ca5]">Careers</p>
+                      </div>
+                      <div className="rounded-3xl bg-[#fff5e9] px-3 py-4">
+                        <p className="text-2xl font-black text-[#a86a1f]">{Math.max(1, groupedClusters.length)}</p>
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-[#5f7ca5]">Matches</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {groupedClusters.map((cluster, index) => (
+                    <motion.button
+                      key={cluster.id}
+                      whileHover={{ y: -3 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setSelectedCluster(cluster);
+                        onClusterSelected?.();
+                      }}
+                      className={`group overflow-hidden rounded-[28px] border border-transparent bg-gradient-to-br ${
+                        cardColors[index % cardColors.length]
+                      } p-5 text-left text-[#20395f] shadow-[0_12px_30px_rgba(91,128,188,0.18)] transition hover:border-white hover:shadow-[0_18px_48px_rgba(91,128,188,0.2)]`}
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#4b6d8a]">
+                        {cluster.id}
+                      </p>
+                      <h3 className="mt-3 text-xl font-black leading-tight text-[#16355f]">{cluster.name}</h3>
+                      <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#3b5f88]">
+                        <span>{cluster.count} careers</span>
+                        <span>•</span>
+                        <span>Top Demand: {cluster.details.demandMix}</span>
+                      </div>
+                      <div className="mt-4 space-y-2 text-sm text-[#374b74]">
+                        <p>Avg Entry: {formatLpa(cluster.details.avgEntry || 0)}</p>
+                        <p>Avg Growth: {cluster.details.avgGrowth ? `${cluster.details.avgGrowth.toFixed(1)}%` : "NA"}</p>
+                        <p>Industries: {cluster.details.topIndustries.slice(0, 3).join(" • ") || "NA"}</p>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              <aside className="space-y-4 lg:space-y-6">
+                <div className="lg:sticky lg:top-6 lg:space-y-4">
+                  {selectedCluster ? (
+                    <div className="space-y-4">
+                      <div className="rounded-[32px] border border-[#dfe7f7] bg-white/95 p-6 shadow-[0_18px_40px_rgba(80,113,171,0.1)]">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#4c6ea3]">Selected cluster</p>
+                            <h3 className="mt-3 text-2xl font-black text-[#17355d]">{selectedCluster.name}</h3>
+                            <p className="mt-2 text-sm text-[#4f6d93]">Explore the {selectedCluster.count} most relevant careers and role details for this cluster.</p>
+                          </div>
+                          <button
+                            onClick={() => setSelectedCluster(null)}
+                            className="inline-flex items-center justify-center rounded-2xl border border-[#c8d6ef] bg-[#f8fbff] px-4 py-2 text-sm font-semibold text-[#3a5f92] transition hover:bg-[#eef3ff]"
+                          >
+                            <X className="mr-2 h-4 w-4" />
+                            Clear selection
+                          </button>
+                        </div>
+
+                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                          <div className="rounded-3xl bg-[#eef4ff] p-4 text-sm text-[#2f5180]">
+                            <p className="font-semibold">Cluster size</p>
+                            <p className="mt-2 text-3xl font-black">{selectedCluster.count}</p>
+                          </div>
+                          <div className="rounded-3xl bg-[#eefbf4] p-4 text-sm text-[#2f5f4f]">
+                            <p className="font-semibold">Demand profile</p>
+                            <p className="mt-2 text-lg font-black text-[#2a5d45]">{selectedCluster.details.demandMix}</p>
+                          </div>
+                          <div className="rounded-3xl bg-[#fff5e9] p-4 text-sm text-[#7b5a2d]">
+                            <p className="font-semibold">Average entry salary</p>
+                            <p className="mt-2 text-lg font-black text-[#9a6a2f]">{formatLpa(selectedCluster.details.avgEntry)}</p>
+                          </div>
+                          <div className="rounded-3xl bg-[#f9f0ff] p-4 text-sm text-[#5f467d]">
+                            <p className="font-semibold">Avg growth</p>
+                            <p className="mt-2 text-lg font-black text-[#593d8f]">{selectedCluster.details.avgGrowth ? `${selectedCluster.details.avgGrowth.toFixed(1)}%` : "NA"}</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                          <div className="rounded-3xl bg-[#f4f7ff] p-4 text-sm text-[#3b5b84]">
+                            <p className="font-semibold">Top industries</p>
+                            <p className="mt-2 text-sm text-[#4c648b]">{selectedCluster.details.topIndustries.join(" • ") || "NA"}</p>
+                          </div>
+                          <div className="rounded-3xl bg-[#f4f7ff] p-4 text-sm text-[#3b5b84]">
+                            <p className="font-semibold">Top skills</p>
+                            <p className="mt-2 text-sm text-[#4c648b]">{selectedCluster.details.topSkills.join(" • ") || "NA"}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-[32px] border border-[#dfe7f7] bg-white/95 p-6 shadow-[0_18px_40px_rgba(80,113,171,0.1)]">
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#4c6ea3]">Career detail cards</p>
+                        <div className="mt-5 space-y-4">
+                          {selectedCareers.map((career) => (
+                            <article
+                              key={career.id}
+                              className="rounded-3xl border border-[#d4e2fa] bg-[#f8fbff] p-4 shadow-sm"
+                            >
+                              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                  <h4 className="text-lg font-bold text-[#14366d]">{career.name}</h4>
+                                  <p className="mt-2 text-sm text-[#3f6293]">{career.summary}</p>
+                                </div>
+                                <span className="rounded-full bg-[#eaf2ff] px-3 py-1 text-xs font-semibold text-[#2c5eab]">#{career.id}</span>
+                              </div>
+
+                              <div className="mt-4 grid gap-2 text-xs sm:grid-cols-2">
+                                {career.demand && <p className="rounded bg-white/80 px-2 py-1 text-[#355988]">Demand: {career.demand}</p>}
+                                {career.entrySalary && <p className="rounded bg-white/80 px-2 py-1 text-[#355988]">Entry: {career.entrySalary}</p>}
+                                {career.midSalary && <p className="rounded bg-white/80 px-2 py-1 text-[#355988]">Mid: {career.midSalary}</p>}
+                                {career.seniorSalary && <p className="rounded bg-white/80 px-2 py-1 text-[#355988]">Senior: {career.seniorSalary}</p>}
+                                {career.topEarnings && <p className="rounded bg-white/80 px-2 py-1 text-[#355988]">Top: {career.topEarnings}</p>}
+                                {career.growthRate && <p className="rounded bg-white/80 px-2 py-1 text-[#355988]">Growth: {career.growthRate}</p>}
+                              </div>
+
+                              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                                <p className="text-sm text-[#4a6a99]"><span className="font-semibold text-[#2d518d]">Skills:</span> {career.coreSkills}</p>
+                                <p className="text-sm text-[#4a6a99]"><span className="font-semibold text-[#2d518d]">Degree:</span> {career.degreeRequired}</p>
+                              </div>
+                            </article>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="rounded-[28px] border border-[#d8e4f5] bg-[#f8fbff] p-6 shadow-[0_18px_40px_rgba(80,113,171,0.1)]">
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#4c6ea3]">Need help?</p>
+                        <h3 className="mt-3 text-xl font-black text-[#17355d]">How to use this page</h3>
+                        <ul className="mt-4 space-y-3 text-sm text-[#4c6080]">
+                          <li>• Search for a cluster or career name.</li>
+                          <li>• Open any cluster to see the career list.</li>
+                          <li>• Use the details panel to compare roles and paths.</li>
+                        </ul>
+                      </div>
+                      <div className="rounded-[28px] border border-[#d9e7f7] bg-white p-6 shadow-[0_18px_40px_rgba(89,129,181,0.08)]">
+                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#4b6e97]">Tips</p>
+                        <p className="mt-3 text-sm text-[#3b5480]">If you want to focus quickly, start with the clusters that match your interests above and explore the top careers in each.</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </aside>
             </div>
           )}
         </div>
       </section>
-
-      <AnimatePresence>
-        {selectedCluster && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-[#2d4d80]/30"
-              onClick={() => setSelectedCluster(null)}
-            />
-
-            <motion.aside
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 120, damping: 20 }}
-              className="fixed right-0 top-0 z-50 h-full w-full max-w-2xl overflow-y-auto bg-[#fbfdff] shadow-2xl"
-            >
-              <div className="sticky top-0 z-10 border-b border-[#d7e5fb] bg-[#f3f8ff] px-6 py-4 flex items-center justify-between">
-                <h2 className="text-xl font-black text-[#173a70]">{selectedCluster.name}</h2>
-                <button
-                  onClick={() => setSelectedCluster(null)}
-                  className="rounded-lg border border-[#c9daf8] p-2 text-[#4c6e9e] transition hover:bg-[#eaf2ff]"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="space-y-3 px-6 py-5">
-                {selectedCareers.map((career) => (
-                  <article
-                    key={career.id}
-                    className="rounded-xl border border-[#d4e2fa] bg-white p-4 shadow-[0_4px_14px_rgba(113,148,205,0.14)]"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-lg font-bold text-[#14366d]">{career.name}</h3>
-                      <span className="rounded-full bg-[#eaf2ff] px-2.5 py-1 text-xs font-semibold text-[#2c5eab]">
-                        #{career.id}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm text-[#3f6293]">{career.summary}</p>
-                    <p className="mt-2 text-sm text-[#3f6293]">{career.whatTheyDo}</p>
-
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Demand: {career.demand}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Entry: {career.entrySalary}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Mid: {career.midSalary}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Senior: {career.seniorSalary}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Top: {career.topEarnings}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Growth: {career.growthRate}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">AI Impact: {career.aiImpact}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Work-Life: {career.workLifeBalance}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Stress: {career.stressLevel}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Money Score: {career.moneyScore}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Growth Score: {career.growthScore}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Stability Score: {career.stabilityScore}</p>
-                    </div>
-
-                    <div className="mt-3 space-y-1 text-xs text-[#4a6a99]">
-                      <p><span className="font-semibold text-[#2d518d]">Industries:</span> {career.industries}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Core Skills:</span> {career.coreSkills}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Certifications:</span> {career.keyCertifications}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Degree Required:</span> {career.degreeRequired}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Entry Path:</span> {career.entryPath}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Who Should Choose:</span> {career.whoShouldChoose}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Who Should Avoid:</span> {career.whoShouldAvoid}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Verdict:</span> {career.verdict}</p>
-                    </div>
-                  </article>
-                ))}
-
-                {selectedCareers.length === 0 && (
-                  <p className="rounded-lg border border-dashed border-[#c9d9f6] bg-[#f4f8ff] p-4 text-sm text-[#5879a8]">
-                    No careers found for this search.
-                  </p>
-                )}
-              </div>
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

@@ -33,7 +33,7 @@ console.log("Firebase configured:", isFirebaseConfigured);
 if (!isFirebaseConfigured) {
   // eslint-disable-next-line no-console
   console.warn(
-    "Firebase is not configured. Add REACT_APP_FIREBASE_* values in .env."
+    "Firebase is not configured. Using mock auth for testing."
   );
 }
 
@@ -41,10 +41,36 @@ let app;
 let auth = null;
 let db = null;
 
+// Mock auth for testing without Firebase credentials
+class MockAuth {
+  constructor() {
+    this.currentUser = null;
+    this.listeners = [];
+  }
+
+  setCurrentUser(user) {
+    this.currentUser = user;
+    this.listeners.forEach((cb) => cb(user));
+  }
+
+  addAuthStateListener(callback) {
+    this.listeners.push(callback);
+    callback(this.currentUser);
+    return () => {
+      this.listeners = this.listeners.filter((cb) => cb !== callback);
+    };
+  }
+}
+
+const mockAuth = new MockAuth();
+
 if (isFirebaseConfigured) {
   app = getApps().length ? getApp() : initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
+} else {
+  // Use mock auth for development without Firebase
+  auth = mockAuth;
 }
 
 export { auth, db };
