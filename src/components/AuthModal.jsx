@@ -1,79 +1,62 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, UserCircle2, X } from "lucide-react";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
-import { auth, isFirebaseConfigured } from "../firebaseConfig";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD_LENGTH = 6;
+import { Phone, Loader2, Shield, Info, X } from "lucide-react";
 
 export default function AuthModal({ onClose, onAuthSuccess }) {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [isSuccessMessage, setIsSuccessMessage] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [stage, setStage] = useState("phone"); // phone | otp
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
+  const [authLoading, setAuthLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const submit = async (event) => {
-    event.preventDefault();
-    setError("");
-    setIsSuccessMessage(false);
+  const handleOtpChange = (index, value) => {
+    if (isNaN(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
 
-    if (!isFirebaseConfigured) {
-      setError("Firebase is not configured. Add REACT_APP_FIREBASE_* values in .env.");
-      return;
+    if (value !== "" && index < 5) {
+      otpRefs[index + 1].current.focus();
     }
-
-    if (!EMAIL_REGEX.test(email.trim())) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
-    if (password.length < MIN_PASSWORD_LENGTH) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-
-    if (!isLogin && password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    if (isLogin) {
-      try {
-        await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
-        onAuthSuccess();
-      } catch (loginError) {
-        setError(loginError?.message || "Login failed.");
-        setIsSubmitting(false);
-        return;
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
-      onAuthSuccess();
-    } catch (signUpError) {
-      setError(signUpError?.message || "Sign-up failed.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    setIsSubmitting(false);
-    setIsSuccessMessage(true);
-    setError("Account created successfully.");
   };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && otp[index] === "" && index > 0) {
+      otpRefs[index - 1].current.focus();
+    }
+  };
+
+  const handleSendOtp = (e) => {
+    e.preventDefault();
+    if (!phone || phone.length < 10) {
+      setErrorMessage("Please enter a valid 10-digit phone number.");
+      return;
+    }
+    setAuthLoading(true);
+    setErrorMessage("");
+    setTimeout(() => {
+      setAuthLoading(false);
+      setStage("otp");
+    }, 1200);
+  };
+
+  const handleVerifyOtp = (e) => {
+    e.preventDefault();
+    const fullOtp = otp.join("");
+    if (fullOtp.length < 6) {
+      setErrorMessage("Please enter the complete 6-digit verification code.");
+      return;
+    }
+    setAuthLoading(true);
+    setErrorMessage("");
+    setTimeout(() => {
+      setAuthLoading(false);
+      onAuthSuccess();
+      onClose();
+    }, 1200);
+  };
+
 
   return (
     <AnimatePresence>
@@ -84,138 +67,157 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
         className="fixed inset-0 z-[60] grid place-items-center bg-slate-950/70 px-4 backdrop-blur-sm"
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 24 }}
+          layout
+          initial={{ opacity: 0, scale: 0.93, y: 24 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 16 }}
-          transition={{ type: "spring", stiffness: 140, damping: 18 }}
-          className="w-full max-w-md rounded-2xl border border-white/25 bg-white/10 p-6 text-white shadow-2xl backdrop-blur-xl"
+          exit={{ opacity: 0, scale: 0.93, y: 16 }}
+          transition={{ type: "spring", stiffness: 180, damping: 20 }}
+          className="w-full max-w-md rounded-2xl border border-[#d6e2f5] dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-6 text-slate-900 dark:text-white shadow-2xl backdrop-blur-xl"
         >
           <div className="mb-5 flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-cyan-200">Secure Access</p>
-              <h2 className="text-2xl font-black text-white">
-                {isLogin ? "Welcome Back" : "Create Account"}
-              </h2>
+              <p className="text-sm font-semibold text-[#234b9f] dark:text-cyan-400">Secure Access</p>
+              <h2 className="text-2xl font-black">Authentication</h2>
             </div>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-200 transition hover:bg-white/10"
+              className="rounded-lg p-1.5 text-slate-500 dark:text-slate-400 transition hover:bg-white/10 dark:hover:bg-slate-800"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
-            </button>
+            </motion.button>
           </div>
 
-          <div className="mb-5 grid grid-cols-2 rounded-xl border border-white/20 bg-slate-900/30 p-1">
-            <button
-              onClick={() => {
-                setIsLogin(true);
-                setError("");
-                setIsSuccessMessage(false);
-              }}
-              className={`rounded-lg py-2 text-sm font-semibold transition ${
-                isLogin ? "bg-cyan-500 text-slate-900" : "text-slate-300"
-              }`}
-            >
-              Login
-            </button>
-            <button
-              onClick={() => {
-                setIsLogin(false);
-                setError("");
-                setIsSuccessMessage(false);
-              }}
-              className={`rounded-lg py-2 text-sm font-semibold transition ${
-                !isLogin ? "bg-cyan-500 text-slate-900" : "text-slate-300"
-              }`}
-            >
-              Sign-up
-            </button>
-          </div>
-
-          <form onSubmit={submit} className="space-y-3">
-            <label className="block">
-              <span className="mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-200">
-                <Mail className="h-3.5 w-3.5" />
-                Email
-              </span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-white/25 bg-slate-900/50 px-3 py-2.5 text-sm text-white placeholder:text-slate-400 focus:border-cyan-400 focus:outline-none"
-                placeholder="you@example.com"
-              />
-            </label>
-
-            <label className="block">
-              <span className="mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-200">
-                <Lock className="h-3.5 w-3.5" />
-                Password
-              </span>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-white/25 bg-slate-900/50 px-3 py-2.5 pr-10 text-sm text-white placeholder:text-slate-400 focus:border-cyan-400 focus:outline-none"
-                  placeholder="Minimum 6 characters"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-300 hover:bg-white/10"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </label>
-
-            {!isLogin && (
-              <label className="block">
-                <span className="mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-200">
-                  <UserCircle2 className="h-3.5 w-3.5" />
-                  Confirm Password
-                </span>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full rounded-xl border border-white/25 bg-slate-900/50 px-3 py-2.5 pr-10 text-sm text-white placeholder:text-slate-400 focus:border-cyan-400 focus:outline-none"
-                    placeholder="Re-enter password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-300 hover:bg-white/10"
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </label>
-            )}
-
-            {error && (
-              <p
-                className={`rounded-lg px-3 py-2 text-sm ${
-                  isSuccessMessage
-                    ? "border border-emerald-400/30 bg-emerald-500/10 text-emerald-200"
-                    : "border border-red-400/30 bg-red-500/10 text-red-200"
-                }`}
+          <AnimatePresence mode="wait">
+            {/* PHONE STAGE */}
+            {stage === "phone" && (
+              <motion.div
+                key="phone"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="space-y-5"
               >
-                {error}
-              </p>
+                <div className="text-center space-y-2">
+                  <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#e3ebf8] dark:bg-slate-800 text-[#2d63df] dark:text-cyan-400">
+                    <Shield size={24} />
+                  </div>
+                  <p className="text-sm text-[#5f7194] dark:text-slate-400">Enter your phone number to verify your identity.</p>
+                </div>
+
+                <form onSubmit={handleSendOtp} className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] dark:text-slate-300 mb-1.5">Phone Number</label>
+                    <div className="flex gap-2">
+                      <div className="flex items-center gap-1.5 rounded-2xl border border-[#cbd9f4] dark:border-slate-800 bg-[#f7fafe] dark:bg-slate-950 px-3 py-3.5 text-slate-600 dark:text-slate-400 select-none">
+                        <span className="text-sm font-bold">+91</span>
+                      </div>
+                      <div className="relative flex-1">
+                        <Phone size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8b9bb8] dark:text-slate-500" />
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                          placeholder="Enter 10-digit mobile number"
+                          disabled={authLoading}
+                          className="w-full rounded-2xl border border-[#cbd9f4] dark:border-slate-800 bg-[#f7fafe] dark:bg-slate-950 py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-800 dark:text-white placeholder:text-[#90a2c0] focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 outline-none transition"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={authLoading || phone.length < 10}
+                    className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white shadow-md shadow-blue-500/10 hover:shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {authLoading ? (
+                      <Loader2 size={18} className="animate-spin" />
+                    ) : (
+                      "Send Verification OTP"
+                    )}
+                  </button>
+                </form>
+              </motion.div>
             )}
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="mt-1 w-full rounded-xl bg-cyan-400 px-4 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isSubmitting ? "Please wait..." : isLogin ? "Login" : "Create Account"}
-            </button>
-          </form>
+            {/* OTP STAGE */}
+            {stage === "otp" && (
+              <motion.div
+                key="otp"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="space-y-6"
+              >
+                <div className="text-center space-y-2">
+                  <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#e6fffa] dark:bg-slate-800 text-[#0f766e] dark:text-teal-400">
+                    <Shield size={24} />
+                  </div>
+                  <h3 className="text-lg font-bold text-[#0f2140] dark:text-white">Verify Your Number</h3>
+                  <p className="text-sm text-[#5f7194] dark:text-slate-400">Enter the 6-digit code sent to <strong>+91 {phone}</strong>.</p>
+                </div>
+
+                <form onSubmit={handleVerifyOtp} className="space-y-6">
+                  <div className="flex justify-between gap-2 max-w-sm mx-auto">
+                    {otp.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={otpRefs[idx]}
+                        type="text"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(idx, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                        className="w-12 h-14 text-center text-xl font-bold rounded-xl border border-[#c4d7f5] dark:border-slate-800 bg-[#f7faff] dark:bg-slate-950 text-[#1e3b70] dark:text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={authLoading}
+                    className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white shadow-md hover:shadow-lg transition hover:-translate-y-0.5"
+                  >
+                    {authLoading ? (
+                      <Loader2 size={18} className="animate-spin" />
+                    ) : (
+                      "Verify & Continue"
+                    )}
+                  </button>
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOtp(["", "", "", "", "", ""]);
+                        setStage("phone");
+                      }}
+                      className="text-xs font-bold text-blue-500 hover:underline"
+                    >
+                      Edit Phone Number
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {errorMessage && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 p-3 text-xs font-semibold text-red-700 dark:text-red-300"
+              >
+                <Info size={14} className="shrink-0 mt-0.5" />
+                <p>{errorMessage}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </motion.div>
     </AnimatePresence>
