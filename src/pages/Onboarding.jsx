@@ -1,10 +1,32 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  User, Phone, GraduationCap,
+  User, Phone,
   ChevronRight, ChevronLeft, ChevronDown, Loader2,
   Shield, Info
 } from "lucide-react";
+import { registerUser } from "../services/users";
+
+function calculateAge(dateOfBirth) {
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+
+  if (Number.isNaN(birthDate.getTime()) || birthDate > today) {
+    return null;
+  }
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthOffset = today.getMonth() - birthDate.getMonth();
+
+  if (
+    monthOffset < 0 ||
+    (monthOffset === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age -= 1;
+  }
+
+  return age;
+}
 
 export default function Onboarding({ onBack, onContinue }) {
   const [stage, setStage] = useState("auth"); // auth | phone-otp | registration
@@ -24,6 +46,7 @@ export default function Onboarding({ onBack, onContinue }) {
   const [areaOfInterest, setAreaOfInterest] = useState("");
   
   const [errorMessage, setErrorMessage] = useState("");
+  const [registrationLoading, setRegistrationLoading] = useState(false);
 
   // OTP handlers
   const handleOtpChange = (index, value) => {
@@ -85,7 +108,7 @@ export default function Onboarding({ onBack, onContinue }) {
     }, 1200);
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
       setErrorMessage("Please enter your name.");
@@ -108,25 +131,50 @@ export default function Onboarding({ onBack, onContinue }) {
       return;
     }
 
-    const mockProfile = {
-      id: `local-${Date.now()}`,
-      name: name.trim(),
-      email: authEmail || `student.${phone || Date.now()}@gmail.com`,
-      gender,
-      dateOfBirth,
-      currentlyPursuing,
-      areaOfInterest,
-      grade: currentlyPursuing,
-      profile_summary: `${name} is exploring career tracks. Currently pursuing ${currentlyPursuing} with interest in ${areaOfInterest}.`,
-      superpowers: ["Problem Solving", "Adaptability"],
-      subjects: [areaOfInterest],
-      passions: ["Building Technology"],
-      suggested_careers: [],
-      created_at: new Date().toISOString(),
-      source: "local-registration"
-    };
+    const age = calculateAge(dateOfBirth);
 
-    onContinue?.(mockProfile);
+    if (age === null) {
+      setErrorMessage("Please enter a valid date of birth.");
+      return;
+    }
+
+    setRegistrationLoading(true);
+    setErrorMessage("");
+
+    try {
+      const registrationPayload = {
+        name: name.trim(),
+        gender,
+        age,
+        current_education: currentlyPursuing.trim(),
+        area_of_interest: areaOfInterest,
+      };
+
+      console.log("Register user payload:", registrationPayload);
+
+      const user = await registerUser(registrationPayload);
+
+      const profile = {
+        ...user,
+        email: authEmail || `student.${phone || user.id}@gmail.com`,
+        dateOfBirth,
+        currentlyPursuing: user.current_education,
+        areaOfInterest: user.area_of_interest,
+        grade: user.current_education,
+        profile_summary: `${user.name} is exploring career tracks. Currently pursuing ${user.current_education} with interest in ${user.area_of_interest}.`,
+        superpowers: ["Problem Solving", "Adaptability"],
+        subjects: [user.area_of_interest],
+        passions: ["Building Technology"],
+        suggested_careers: [],
+        source: "api-registration",
+      };
+
+      onContinue?.(profile);
+    } catch (error) {
+      setErrorMessage(error.message || "Registration failed. Please try again.");
+    } finally {
+      setRegistrationLoading(false);
+    }
   };
 
   return (
@@ -408,10 +456,17 @@ export default function Onboarding({ onBack, onContinue }) {
 
                     <button
                       type="submit"
-                      className="w-full mt-4 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white shadow-md shadow-blue-500/15 hover:shadow-lg transition hover:-translate-y-0.5"
+                      disabled={registrationLoading}
+                      className="w-full mt-4 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white shadow-md shadow-blue-500/15 hover:shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      <span>Submit & Start Assessment</span>
-                      <ChevronRight size={18} />
+                      {registrationLoading ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <>
+                          <span>Submit & Start Assessment</span>
+                          <ChevronRight size={18} />
+                        </>
+                      )}
                     </button>
                   </form>
                 </motion.div>
