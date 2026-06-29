@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
@@ -12,7 +11,7 @@ import CareerReality from "./pages/CareerReality";
 import InsightsFeed from "./pages/InsightsFeed";
 import AuthModal from "./components/AuthModal";
 import AppLayout from "./components/AppLayout";
-import { auth, isFirebaseConfigured } from "./firebaseConfig";
+import { supabase, isSupabaseConfigured } from "./supabaseConfig";
 import careersData from "./data/clearcareers_data.json";
 
 const PROFILE_STORAGE_KEY = "clear-careers-generated-profile";
@@ -51,15 +50,23 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    if (!isFirebaseConfigured || !auth) {
+    if (!isSupabaseConfigured || !supabase) {
       return () => { };
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
-      setUser(nextUser || null);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
     });
 
-    return () => unsubscribe();
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // Careers data for search autocomplete
@@ -121,8 +128,8 @@ function App() {
   };
 
   const handleLogout = async () => {
-    if (isFirebaseConfigured && auth) {
-      await signOut(auth);
+    if (isSupabaseConfigured && supabase) {
+      await supabase.auth.signOut();
     }
     setUser(null);
   };

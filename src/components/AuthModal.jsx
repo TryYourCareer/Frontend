@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Phone, Loader2, Shield, Info, X } from "lucide-react";
+import { sendOtp, verifyOtp } from "../services/auth";
 
 export default function AuthModal({ onClose, onAuthSuccess }) {
   const [stage, setStage] = useState("phone"); // phone | otp
@@ -27,7 +28,7 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
     }
   };
 
-  const handleSendOtp = (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!phone || phone.length < 10) {
       setErrorMessage("Please enter a valid 10-digit phone number.");
@@ -35,13 +36,17 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
     }
     setAuthLoading(true);
     setErrorMessage("");
-    setTimeout(() => {
-      setAuthLoading(false);
+    try {
+      await sendOtp(phone); // service handles +91 prefix
       setStage("otp");
-    }, 1200);
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
-  const handleVerifyOtp = (e) => {
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
     const fullOtp = otp.join("");
     if (fullOtp.length < 6) {
@@ -50,13 +55,16 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
     }
     setAuthLoading(true);
     setErrorMessage("");
-    setTimeout(() => {
-      setAuthLoading(false);
-      onAuthSuccess();
+    try {
+      const result = await verifyOtp(phone, fullOtp); // service handles +91 prefix
+      onAuthSuccess(result?.user ?? null);
       onClose();
-    }, 1200);
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setAuthLoading(false);
+    }
   };
-
 
   return (
     <AnimatePresence>

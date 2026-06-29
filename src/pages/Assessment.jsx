@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
 import { motion } from "framer-motion";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { supabase, isSupabaseConfigured as isFirebaseConfigured } from "../supabaseConfig";
 import { ASSESSMENT_QUESTIONS, evaluateAssessment } from "../utils/matchingEngine";
-import { db, isFirebaseConfigured } from "../firebaseConfig";
 import { ArrowLeft, RefreshCw, ChevronLeft, ChevronRight, TrendingUp, DollarSign, Activity, ShieldCheck, Loader2, Target, CheckCircle2, AlertCircle, ArrowRight, Trophy, Star, Sparkles } from "lucide-react";
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
 const API_TIMEOUT_MS = 3000;
@@ -171,8 +170,8 @@ export default function Assessment({ onBack, onOpenCluster, user = null }) {
     }));
   };
 
-  const saveAssessmentToFirebase = async (computedResult, selectedAnswers) => {
-    if (!isFirebaseConfigured || !db) {
+  const saveAssessmentToSupabase = async (computedResult, selectedAnswers) => {
+    if (!isFirebaseConfigured || !supabase) {
       return;
     }
 
@@ -180,14 +179,20 @@ export default function Assessment({ onBack, onOpenCluster, user = null }) {
       setSaveState("saving");
       setSaveError("");
 
-      await addDoc(collection(db, "assessments"), {
-        userId: user?.uid || null,
-        userEmail: user?.email || null,
-        answers: selectedAnswers,
-        studentProfile: computedResult.studentProfile,
-        topMatches: computedResult.topMatches,
-        createdAt: serverTimestamp(),
-      });
+      const { error } = await supabase
+        .from('assessments')
+        .insert([
+          {
+            user_id: user?.id || null, // Supabase user id
+            user_email: user?.email || null,
+            answers: selectedAnswers,
+            student_profile: computedResult.studentProfile,
+            top_matches: computedResult.topMatches,
+            // createdAt is handled by Postgres default now()
+          }
+        ]);
+
+      if (error) throw error;
 
       setSaveState("saved");
     } catch (error) {
@@ -202,7 +207,7 @@ export default function Assessment({ onBack, onOpenCluster, user = null }) {
     if (questionIndex === ASSESSMENT_QUESTIONS.length - 1) {
       const computed = evaluateAssessment(answers, careers);
       setResult(computed);
-      void saveAssessmentToFirebase(computed, answers);
+      void saveAssessmentToSupabase(computed, answers);
       return;
     }
 

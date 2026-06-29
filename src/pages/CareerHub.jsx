@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Users, TrendingUp, Sparkles, Activity, Send, ArrowLeft, MessageSquare } from "lucide-react";
-import { isFirebaseReady, saveDocument, addDocument, getDocuments } from "../utils/firebaseStorage";
+import { isFirebaseReady, saveDocument, addDocument, getDocuments } from "../utils/supabaseStorage";
 const hubData = [
   { id: "software-engineering", name: "Software Engineering", description: "Live discussion for learners building software careers.", explorers: 1240, status: "Active", icon: "💻" },
   { id: "ux-design", name: "UX Design", description: "Share design thinking, prototyping tips, and portfolio advice.", explorers: 892, status: "Growing", icon: "🎨" },

@@ -6,6 +6,7 @@ import {
   Shield, Info
 } from "lucide-react";
 import { registerUser } from "../services/users";
+import { sendOtp, verifyOtp, signInWithGoogle } from "../services/auth";
 
 function calculateAge(dateOfBirth) {
   const birthDate = new Date(dateOfBirth);
@@ -36,7 +37,6 @@ export default function Onboarding({ onBack, onContinue }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
   const [authLoading, setAuthLoading] = useState(false);
-  const [authEmail, setAuthEmail] = useState("");
   
   // Registration details
   const [name, setName] = useState("");
@@ -67,19 +67,19 @@ export default function Onboarding({ onBack, onContinue }) {
     }
   };
 
-  // Trigger Google Login Mock
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setAuthLoading(true);
     setErrorMessage("");
-    setTimeout(() => {
+    try {
+      await signInWithGoogle(); // Supabase handles the redirect automatically
+    } catch (error) {
+      setErrorMessage(error.message);
       setAuthLoading(false);
-      setAuthEmail("demo.student@gmail.com");
-      setStage("registration");
-    }, 1500);
+    }
   };
 
-  // Trigger Phone verification Mock
-  const handleSendOtp = (e) => {
+  // Trigger Phone verification
+  const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!phone || phone.length < 10) {
       setErrorMessage("Please enter a valid 10-digit phone number.");
@@ -87,13 +87,17 @@ export default function Onboarding({ onBack, onContinue }) {
     }
     setAuthLoading(true);
     setErrorMessage("");
-    setTimeout(() => {
-      setAuthLoading(false);
+    try {
+      await sendOtp(phone);
       setStage("phone-otp");
-    }, 1200);
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
-  const handleVerifyOtp = (e) => {
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
     const fullOtp = otp.join("");
     if (fullOtp.length < 6) {
@@ -102,10 +106,14 @@ export default function Onboarding({ onBack, onContinue }) {
     }
     setAuthLoading(true);
     setErrorMessage("");
-    setTimeout(() => {
-      setAuthLoading(false);
+    try {
+      await verifyOtp(phone, fullOtp);
       setStage("registration");
-    }, 1200);
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   const handleRegisterSubmit = async (e) => {
@@ -156,7 +164,7 @@ export default function Onboarding({ onBack, onContinue }) {
 
       const profile = {
         ...user,
-        email: authEmail || `student.${phone || user.id}@gmail.com`,
+        email: `student.${phone || user.id}@gmail.com`,
         dateOfBirth,
         currentlyPursuing: user.current_education,
         areaOfInterest: user.area_of_interest,
@@ -249,7 +257,7 @@ export default function Onboarding({ onBack, onContinue }) {
                         disabled={authLoading || phone.length < 10}
                         className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white shadow-md shadow-blue-500/10 hover:shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {authLoading && !authEmail ? (
+                        {authLoading ? (
                           <Loader2 size={18} className="animate-spin" />
                         ) : (
                           "Send Verification OTP"
@@ -270,7 +278,7 @@ export default function Onboarding({ onBack, onContinue }) {
                       disabled={authLoading}
                       className="w-full flex items-center justify-center gap-3 rounded-2xl border border-[#cbd9f4] dark:border-slate-800 bg-white dark:bg-slate-950 px-5 py-4 text-base font-bold text-slate-700 dark:text-slate-200 shadow-sm transition hover:bg-[#f6f9fe] dark:hover:bg-slate-900 hover:-translate-y-0.5"
                     >
-                      {authLoading && authEmail ? (
+                      {authLoading ? (
                         <Loader2 size={18} className="animate-spin text-[#3b82f6]" />
                       ) : (
                         <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">

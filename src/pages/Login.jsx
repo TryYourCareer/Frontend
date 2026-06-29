@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Phone, Loader2, Shield, Info, ChevronLeft, Globe, Apple
+  Phone, Loader2, Shield, Info, ChevronLeft
 } from "lucide-react";
+import { sendOtp, verifyOtp, signInWithGoogle } from "../services/auth";
 
 export default function Login({ onBack }) {
   const [stage, setStage] = useState("phone"); // phone | otp | registration
@@ -33,7 +34,7 @@ export default function Login({ onBack }) {
     }
   };
 
-  const handleSendOtp = (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!phone || phone.length < 10) {
       setErrorMessage("Please enter a valid 10-digit phone number.");
@@ -41,13 +42,17 @@ export default function Login({ onBack }) {
     }
     setAuthLoading(true);
     setErrorMessage("");
-    setTimeout(() => {
-      setAuthLoading(false);
+    try {
+      await sendOtp(phone);
       setStage("otp");
-    }, 1200);
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
-  const handleVerifyOtp = (e) => {
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
     const fullOtp = otp.join("");
     if (fullOtp.length < 6) {
@@ -56,19 +61,25 @@ export default function Login({ onBack }) {
     }
     setAuthLoading(true);
     setErrorMessage("");
-    setTimeout(() => {
+    try {
+      await verifyOtp(phone, fullOtp);
+      // Auth state change in App.js will handle the rest
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
       setAuthLoading(false);
-      setStage("registration");
-    }, 1200);
+    }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setAuthLoading(true);
     setErrorMessage("");
-    setTimeout(() => {
+    try {
+      await signInWithGoogle(); // Supabase handles the redirect automatically
+    } catch (error) {
+      setErrorMessage(error.message);
       setAuthLoading(false);
-      setStage("registration");
-    }, 1500);
+    }
   };
 
   const handleRegisterSubmit = (e) => {
