@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import Papa from "papaparse";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Search, X } from "lucide-react";
-
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
 const API_TIMEOUT_MS = 3000;
 const CSV_TIMEOUT_MS = 8000;
@@ -350,151 +349,152 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
   }, [selectedClusterId, loading, clusters, careers, onClusterSelected]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f9ff_0%,#f9fbff_55%,#fefaf6_100%)]">
-      <header className="border-b border-[#d7e6fb] bg-[#eff6ff]/95 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <button
-            onClick={onBack}
-            className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#bdd2f3] bg-white px-4 py-2 text-sm font-semibold text-[#28569e] transition hover:bg-[#edf4ff]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </button>
-          <h1 className="text-4xl font-black text-[#173b72]">Explore Careers</h1>
-          <p className="mt-2 text-[#47689f]">
-            Browse 10 career clusters and discover the right path with real career data.
-          </p>
+    <>
+      <div className="min-h-screen bg-[linear-gradient(180deg,#f4f9ff_0%,#f9fbff_55%,#fefaf6_100%)]">
+        <header className="border-b border-[#d7e6fb] bg-[#eff6ff]/95 backdrop-blur">
+          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <button
+              onClick={onBack}
+              className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#bdd2f3] bg-white px-4 py-2 text-sm font-semibold text-[#28569e] transition hover:bg-[#edf4ff]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </button>
+            <h1 className="text-4xl font-black text-[#173b72]">Explore Careers</h1>
+            <p className="mt-2 text-[#47689f]">
+              Browse 10 career clusters and discover the right path with real career data.
+            </p>
 
-          <div className="mt-5 max-w-lg">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7091c3]" />
-              <input
-                value={globalSearch}
-                onChange={(event) => setGlobalSearch(event.target.value)}
-                placeholder="Search cluster or career name"
-                className="w-full rounded-xl border border-[#c6d9f7] bg-white py-2.5 pl-10 pr-4 text-sm text-[#1f497f] placeholder:text-[#88a5d0] focus:border-[#84aee8] focus:outline-none"
-              />
+            <div className="mt-5 max-w-lg">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7091c3]" />
+                <input
+                  value={globalSearch}
+                  onChange={(event) => setGlobalSearch(event.target.value)}
+                  placeholder="Search cluster or career name"
+                  className="w-full rounded-xl border border-[#c6d9f7] bg-white py-2.5 pl-10 pr-4 text-sm text-[#1f497f] placeholder:text-[#88a5d0] focus:border-[#84aee8] focus:outline-none"
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <section className="py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {loading && <p className="text-sm font-semibold text-[#5f7ead]">Loading career data...</p>}
-          {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+        <section className="py-10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {loading && <p className="text-sm font-semibold text-[#5f7ead]">Loading career data...</p>}
+            {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
 
-          {!loading && !error && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-              {groupedClusters.map((cluster, index) => (
-                <motion.button
-                  key={cluster.id}
-                  whileHover={{ y: -3 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setSelectedCluster(cluster)}
-                  className={`overflow-hidden rounded-2xl bg-gradient-to-br ${
-                    cardColors[index % cardColors.length]
-                  } p-5 text-left text-[#20395f] shadow-[0_10px_20px_rgba(107,143,197,0.2)]`}
-                >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#45618e]">
-                    {cluster.id}
-                  </p>
-                  <h3 className="mt-2 text-lg font-extrabold leading-tight text-[#173b71]">{cluster.name}</h3>
-                  <p className="mt-2 text-sm font-semibold text-[#365987]">{cluster.count} careers</p>
-                  <p className="mt-2 text-xs font-semibold text-[#4f6f9d]">Top Demand: {cluster.details.demandMix}</p>
-                  <p className="mt-1 text-xs text-[#4f6f9d]">Avg Entry: {formatLpa(cluster.details.avgEntry || 0)}</p>
-                  <p className="mt-1 text-xs text-[#4f6f9d]">Avg Growth: {cluster.details.avgGrowth ? `${cluster.details.avgGrowth.toFixed(1)}%` : "NA"}</p>
-                  <p className="mt-2 line-clamp-2 text-xs text-[#4f6f9d]">
-                    Industries: {cluster.details.topIndustries.join(" | ") || "NA"}
-                  </p>
-                </motion.button>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <AnimatePresence>
-        {selectedCluster && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-[#2d4d80]/30"
-              onClick={() => setSelectedCluster(null)}
-            />
-
-            <motion.aside
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 120, damping: 20 }}
-              className="fixed right-0 top-0 z-50 h-full w-full max-w-2xl overflow-y-auto bg-[#fbfdff] shadow-2xl"
-            >
-              <div className="sticky top-0 z-10 border-b border-[#d7e5fb] bg-[#f3f8ff] px-6 py-4 flex items-center justify-between">
-                <h2 className="text-xl font-black text-[#173a70]">{selectedCluster.name}</h2>
-                <button
-                  onClick={() => setSelectedCluster(null)}
-                  className="rounded-lg border border-[#c9daf8] p-2 text-[#4c6e9e] transition hover:bg-[#eaf2ff]"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="space-y-3 px-6 py-5">
-                {selectedCareers.map((career) => (
-                  <article
-                    key={career.id}
-                    className="rounded-xl border border-[#d4e2fa] bg-white p-4 shadow-[0_4px_14px_rgba(113,148,205,0.14)]"
+            {!loading && !error && (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+                {groupedClusters.map((cluster, index) => (
+                  <motion.button
+                    key={cluster.id}
+                    whileHover={{ y: -3 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedCluster(cluster)}
+                    className={`overflow-hidden rounded-2xl bg-gradient-to-br ${cardColors[index % cardColors.length]
+                      } p-5 text-left text-[#20395f] shadow-[0_10px_20px_rgba(107,143,197,0.2)]`}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-lg font-bold text-[#14366d]">{career.name}</h3>
-                      <span className="rounded-full bg-[#eaf2ff] px-2.5 py-1 text-xs font-semibold text-[#2c5eab]">
-                        #{career.id}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm text-[#3f6293]">{career.summary}</p>
-                    <p className="mt-2 text-sm text-[#3f6293]">{career.whatTheyDo}</p>
-
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Demand: {career.demand}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Entry: {career.entrySalary}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Mid: {career.midSalary}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Senior: {career.seniorSalary}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Top: {career.topEarnings}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Growth: {career.growthRate}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">AI Impact: {career.aiImpact}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Work-Life: {career.workLifeBalance}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Stress: {career.stressLevel}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Money Score: {career.moneyScore}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Growth Score: {career.growthScore}</p>
-                      <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Stability Score: {career.stabilityScore}</p>
-                    </div>
-
-                    <div className="mt-3 space-y-1 text-xs text-[#4a6a99]">
-                      <p><span className="font-semibold text-[#2d518d]">Industries:</span> {career.industries}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Core Skills:</span> {career.coreSkills}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Certifications:</span> {career.keyCertifications}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Degree Required:</span> {career.degreeRequired}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Entry Path:</span> {career.entryPath}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Who Should Choose:</span> {career.whoShouldChoose}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Who Should Avoid:</span> {career.whoShouldAvoid}</p>
-                      <p><span className="font-semibold text-[#2d518d]">Verdict:</span> {career.verdict}</p>
-                    </div>
-                  </article>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[#45618e]">
+                      {cluster.id}
+                    </p>
+                    <h3 className="mt-2 text-lg font-extrabold leading-tight text-[#173b71]">{cluster.name}</h3>
+                    <p className="mt-2 text-sm font-semibold text-[#365987]">{cluster.count} careers</p>
+                    <p className="mt-2 text-xs font-semibold text-[#4f6f9d]">Top Demand: {cluster.details.demandMix}</p>
+                    <p className="mt-1 text-xs text-[#4f6f9d]">Avg Entry: {formatLpa(cluster.details.avgEntry || 0)}</p>
+                    <p className="mt-1 text-xs text-[#4f6f9d]">Avg Growth: {cluster.details.avgGrowth ? `${cluster.details.avgGrowth.toFixed(1)}%` : "NA"}</p>
+                    <p className="mt-2 line-clamp-2 text-xs text-[#4f6f9d]">
+                      Industries: {cluster.details.topIndustries.join(" | ") || "NA"}
+                    </p>
+                  </motion.button>
                 ))}
-
-                {selectedCareers.length === 0 && (
-                  <p className="rounded-lg border border-dashed border-[#c9d9f6] bg-[#f4f8ff] p-4 text-sm text-[#5879a8]">
-                    No careers found for this search.
-                  </p>
-                )}
               </div>
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
+            )}
+          </div>
+        </section>
+
+        <AnimatePresence>
+          {selectedCluster && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-40 bg-[#2d4d80]/30"
+                onClick={() => setSelectedCluster(null)}
+              />
+
+              <motion.aside
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                className="fixed right-0 top-0 z-50 h-full w-full max-w-2xl overflow-y-auto bg-[#fbfdff] shadow-2xl"
+              >
+                <div className="sticky top-0 z-10 border-b border-[#d7e5fb] bg-[#f3f8ff] px-6 py-4 flex items-center justify-between">
+                  <h2 className="text-xl font-black text-[#173a70]">{selectedCluster.name}</h2>
+                  <button
+                    onClick={() => setSelectedCluster(null)}
+                    className="rounded-lg border border-[#c9daf8] p-2 text-[#4c6e9e] transition hover:bg-[#eaf2ff]"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="space-y-3 px-6 py-5">
+                  {selectedCareers.map((career) => (
+                    <article
+                      key={career.id}
+                      className="rounded-xl border border-[#d4e2fa] bg-white p-4 shadow-[0_4px_14px_rgba(113,148,205,0.14)]"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="text-lg font-bold text-[#14366d]">{career.name}</h3>
+                        <span className="rounded-full bg-[#eaf2ff] px-2.5 py-1 text-xs font-semibold text-[#2c5eab]">
+                          #{career.id}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm text-[#3f6293]">{career.summary}</p>
+                      <p className="mt-2 text-sm text-[#3f6293]">{career.whatTheyDo}</p>
+
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Demand: {career.demand}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Entry: {career.entrySalary}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Mid: {career.midSalary}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Senior: {career.seniorSalary}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Top: {career.topEarnings}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Growth: {career.growthRate}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">AI Impact: {career.aiImpact}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Work-Life: {career.workLifeBalance}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Stress: {career.stressLevel}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Money Score: {career.moneyScore}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Growth Score: {career.growthScore}</p>
+                        <p className="rounded bg-[#f2f7ff] px-2 py-1 text-[#355988]">Stability Score: {career.stabilityScore}</p>
+                      </div>
+
+                      <div className="mt-3 space-y-1 text-xs text-[#4a6a99]">
+                        <p><span className="font-semibold text-[#2d518d]">Industries:</span> {career.industries}</p>
+                        <p><span className="font-semibold text-[#2d518d]">Core Skills:</span> {career.coreSkills}</p>
+                        <p><span className="font-semibold text-[#2d518d]">Certifications:</span> {career.keyCertifications}</p>
+                        <p><span className="font-semibold text-[#2d518d]">Degree Required:</span> {career.degreeRequired}</p>
+                        <p><span className="font-semibold text-[#2d518d]">Entry Path:</span> {career.entryPath}</p>
+                        <p><span className="font-semibold text-[#2d518d]">Who Should Choose:</span> {career.whoShouldChoose}</p>
+                        <p><span className="font-semibold text-[#2d518d]">Who Should Avoid:</span> {career.whoShouldAvoid}</p>
+                        <p><span className="font-semibold text-[#2d518d]">Verdict:</span> {career.verdict}</p>
+                      </div>
+                    </article>
+                  ))}
+
+                  {selectedCareers.length === 0 && (
+                    <p className="rounded-lg border border-dashed border-[#c9d9f6] bg-[#f4f8ff] p-4 text-sm text-[#5879a8]">
+                      No careers found for this search.
+                    </p>
+                  )}
+                </div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   );
 }
