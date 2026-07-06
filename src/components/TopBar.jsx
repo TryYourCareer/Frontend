@@ -6,6 +6,8 @@ import {
 
 export default function TopBar({
   onToggleMobileSidebar,
+  onNavigate,
+  onOpenAuth,
   user,
   searchQuery = "",
   onSearchChange,
@@ -17,6 +19,14 @@ export default function TopBar({
   const isDark = theme === "dark";
   const [searchFocused, setSearchFocused] = useState(false);
   const hasSearchQuery = Boolean(String(searchQuery || "").trim());
+
+  const handleProfileClick = () => {
+    if (user) {
+      onNavigate?.("profile");
+    } else {
+      onNavigate?.("login", { redirectTo: "profile" });
+    }
+  };
 
   return (
     <header
@@ -128,26 +138,32 @@ export default function TopBar({
         </button>
 
         {/* User avatar + name */}
-        {user ? (
-          <div className={`hidden sm:flex items-center gap-2.5 rounded-xl px-3 py-1.5 ${isDark ? "bg-slate-800/60" : "bg-[#f8fafc]"
-            }`}>
-            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
-              {user.email?.charAt(0).toUpperCase() || "U"}
-            </div>
-            <div className="min-w-0 hidden md:block">
-              <p className={`text-sm font-semibold truncate ${isDark ? "text-slate-200" : "text-[#1e293b]"}`}>
-                {user.email?.split("@")[0]}
-              </p>
-              <p className={`text-[10px] ${isDark ? "text-slate-500" : "text-[#94a3b8]"}`}>Student</p>
-            </div>
-          </div>
-        ) : (
-          <div className={`hidden sm:flex items-center gap-2 rounded-xl px-3 py-1.5 ${isDark ? "bg-slate-800/60" : "bg-[#f8fafc]"
-            }`}>
-            <UserCircle2 size={18} className={isDark ? "text-slate-500" : "text-[#94a3b8]"} />
-            <span className={`text-sm font-medium ${isDark ? "text-slate-400" : "text-[#64748b]"}`}>Guest</span>
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={handleProfileClick}
+          className={`hidden sm:flex items-center gap-2.5 rounded-xl px-3 py-1.5 transition ${isDark ? "bg-slate-800/60 hover:bg-slate-700/70" : "bg-[#f8fafc] hover:bg-[#eef4ff]"
+            }`}
+          aria-label={user ? "Open profile details" : "Login or sign up"}
+        >
+          {user ? (
+            <>
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
+                {user.email?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <div className="min-w-0 hidden md:block">
+                <p className={`text-sm font-semibold truncate ${isDark ? "text-slate-200" : "text-[#1e293b]"}`}>
+                  {user.email?.split("@")[0]}
+                </p>
+                <p className={`text-[10px] ${isDark ? "text-slate-500" : "text-[#94a3b8]"}`}>Student</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <UserCircle2 size={18} className={isDark ? "text-slate-500" : "text-[#94a3b8]"} />
+              <span className={`text-sm font-medium ${isDark ? "text-slate-400" : "text-[#64748b]"}`}>Guest</span>
+            </>
+          )}
+        </button>
       </div>
     </header>
   );

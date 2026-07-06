@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { sendOtp, verifyOtp, signInWithGoogle } from "../services/auth";
 
-export default function Login({ onBack }) {
+export default function Login({ onBack, onAuthSuccess }) {
   const [stage, setStage] = useState("phone"); // phone | otp | registration
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -63,7 +63,7 @@ export default function Login({ onBack }) {
     setErrorMessage("");
     try {
       await verifyOtp(phone, fullOtp);
-      // Auth state change in App.js will handle the rest
+      onAuthSuccess?.();
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
@@ -76,6 +76,7 @@ export default function Login({ onBack }) {
     setErrorMessage("");
     try {
       await signInWithGoogle(); // Supabase handles the redirect automatically
+      onAuthSuccess?.();
     } catch (error) {
       setErrorMessage(error.message);
       setAuthLoading(false);

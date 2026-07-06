@@ -40,6 +40,8 @@ export default function AppLayout({
         {/* Top Bar */}
         <TopBar
           onToggleMobileSidebar={() => setMobileMenuOpen((prev) => !prev)}
+          onNavigate={onNavigate}
+          onOpenAuth={onOpenAuth}
           user={user}
           searchQuery={searchQuery}
           onSearchChange={onSearchChange}

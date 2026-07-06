@@ -22,6 +22,7 @@ function App() {
   const [generatedProfile, setGeneratedProfile] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
   const [user, setUser] = useState(null);
+  const [loginRedirect, setLoginRedirect] = useState(null);
   const [theme, setTheme] = useState("light");
   const [careerSearchQuery, setCareerSearchQuery] = useState("");
   const [selectedClusterId, setSelectedClusterId] = useState(null);
@@ -107,10 +108,13 @@ function App() {
   };
 
   // Navigation handler for the sidebar
-  const handleNavigate = (action) => {
+  const handleNavigate = (action, options = {}) => {
     if (action === "landing") {
       setStep("landing");
     } else if (action === "login") {
+      if (options.redirectTo) {
+        setLoginRedirect(options.redirectTo);
+      }
       setStep("login");
     } else if (action === "assessment") {
       setStep("assessment");
@@ -124,6 +128,8 @@ function App() {
       setStep("student-dashboard");
     } else if (action === "onboarding") {
       setStep("onboarding");
+    } else if (action === "profile") {
+      setStep("profile");
     }
   };
 
@@ -136,6 +142,20 @@ function App() {
 
   const handleToggleTheme = () =>
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
+
+  const handleLoginSuccess = () => {
+    if (loginRedirect) {
+      setStep(loginRedirect);
+      setLoginRedirect(null);
+    }
+  };
+
+  useEffect(() => {
+    if (user && step === "login" && loginRedirect) {
+      setStep(loginRedirect);
+      setLoginRedirect(null);
+    }
+  }, [user, step, loginRedirect]);
 
   return (
     <div>
@@ -181,6 +201,7 @@ function App() {
         {step === "login" && (
           <Login
             onBack={() => setStep("landing")}
+            onAuthSuccess={handleLoginSuccess}
           />
         )}
 
