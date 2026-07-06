@@ -156,7 +156,7 @@ export default function Sidebar({
         ) : (
           <button
             type="button"
-            onClick={() => { handleNav("onboarding"); }}
+            onClick={() => { onOpenAuth?.(); onCloseMobile?.(); }}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition hover:shadow-xl hover:shadow-blue-900/30"
           >
             <LogIn size={15} />

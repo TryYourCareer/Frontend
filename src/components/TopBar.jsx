@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, Search, Bell, UserCircle2, ChevronLeft
+  Menu, Search, Bell, ChevronLeft
 } from "lucide-react";
 
 export default function TopBar({
   onToggleMobileSidebar,
   user,
+  onOpenProfile,
   searchQuery = "",
   onSearchChange,
   onSearchSubmit,
@@ -128,26 +129,17 @@ export default function TopBar({
         </button>
 
         {/* User avatar + name */}
-        {user ? (
-          <div className={`hidden sm:flex items-center gap-2.5 rounded-xl px-3 py-1.5 ${isDark ? "bg-slate-800/60" : "bg-[#f8fafc]"
-            }`}>
+          <button
+            type="button"
+            onClick={onOpenProfile}
+            className={`hidden sm:flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-left transition hover:-translate-y-0.5 hover:shadow-sm ${isDark ? "bg-slate-800/60 hover:bg-slate-800" : "bg-[#f8fafc] hover:bg-white"
+              }`}
+            aria-label="Open profile"
+          >
             <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
-              {user.email?.charAt(0).toUpperCase() || "U"}
+              {user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
             </div>
-            <div className="min-w-0 hidden md:block">
-              <p className={`text-sm font-semibold truncate ${isDark ? "text-slate-200" : "text-[#1e293b]"}`}>
-                {user.email?.split("@")[0]}
-              </p>
-              <p className={`text-[10px] ${isDark ? "text-slate-500" : "text-[#94a3b8]"}`}>Student</p>
-            </div>
-          </div>
-        ) : (
-          <div className={`hidden sm:flex items-center gap-2 rounded-xl px-3 py-1.5 ${isDark ? "bg-slate-800/60" : "bg-[#f8fafc]"
-            }`}>
-            <UserCircle2 size={18} className={isDark ? "text-slate-500" : "text-[#94a3b8]"} />
-            <span className={`text-sm font-medium ${isDark ? "text-slate-400" : "text-[#64748b]"}`}>Guest</span>
-          </div>
-        )}
+          </button>
       </div>
     </header>
   );

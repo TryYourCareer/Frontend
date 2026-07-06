@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import Onboarding from "./pages/Onboarding";
+import Login from "./components/Login";
+import Registration from "./pages/Registration";
+import OAuthCallback from "./pages/OAuthCallback";
 import Assessment from "./pages/Assessment";
 import Profile from "./pages/Profile";
 import ExploreCareers from "./pages/ExploreCareers";
@@ -9,250 +11,105 @@ import CareerHub from "./pages/CareerHub";
 import StudentDashboard from "./pages/StudentDashboard";
 import CareerRealityV2 from "./pages/CareerRealityV2";
 import InsightsFeed from "./pages/InsightsFeed";
-import AuthModal from "./components/AuthModal";
 import AppLayout from "./components/AppLayout";
-import { supabase, isSupabaseConfigured } from "./supabaseConfig";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import careersData from "./data/clearcareers_data.json";
 
-const PROFILE_STORAGE_KEY = "clear-careers-generated-profile";
 const THEME_STORAGE_KEY = "clear-careers-theme";
 
-function App() {
-  const [step, setStep] = useState("landing");
-  const [generatedProfile, setGeneratedProfile] = useState(null);
-  const [showAuth, setShowAuth] = useState(false);
-  const [user, setUser] = useState(null);
-  const [theme, setTheme] = useState("light");
+function ProtectedRoute({ children, requireRegistration = false }) {
+  const { loading, token, isRegistered } = useAuth();
+  if (loading) return <div className="min-h-screen grid place-items-center text-slate-600">Loading...</div>;
+  if (!token) return <Navigate to="/login" replace />;
+  if (requireRegistration && !isRegistered) return <Navigate to="/register" replace />;
+  return children;
+}
+
+function AppShell({ children }) {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [theme, setTheme] = useState(() => localStorage.getItem(THEME_STORAGE_KEY) || "light");
   const [careerSearchQuery, setCareerSearchQuery] = useState("");
-  const [selectedClusterId, setSelectedClusterId] = useState(null);
 
-  useEffect(() => {
-    const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
-    if (saved) {
-      try {
-        setGeneratedProfile(JSON.parse(saved));
-      } catch {
-        localStorage.removeItem(PROFILE_STORAGE_KEY);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    if (savedTheme === "dark" || savedTheme === "light") {
-      setTheme(savedTheme);
-    }
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
-  }, [theme]);
-
-  useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) {
-      return () => { };
-    }
-
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user || null);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Careers data for search autocomplete
   const careers = useMemo(
-    () =>
-      (careersData || [])
-        .map((item) => ({
-          title: item["Career Name"] || "",
-          cluster: item.Cluster || "",
-        }))
-        .filter((career) => career.title && career.cluster),
+    () => (careersData || []).map((item) => ({ title: item["Career Name"] || "", cluster: item.Cluster || "" })).filter((career) => career.title && career.cluster),
     []
   );
 
   const clusterResults = useMemo(() => {
     const query = String(careerSearchQuery || "").trim().toLowerCase();
     if (!query) return [];
-    const clusters = [
-      ...new Set(
-        careers
-          .map((career) => String(career.cluster || "").trim())
-          .filter(Boolean)
-      ),
-    ];
-    return clusters
-      .filter((cluster) => cluster.toLowerCase().includes(query))
-      .slice(0, 8);
+    return [...new Set(careers.map((career) => career.cluster).filter(Boolean))].filter((cluster) => cluster.toLowerCase().includes(query)).slice(0, 8);
   }, [careers, careerSearchQuery]);
 
-  const handleSearchSubmit = () => {
-    setCareerSearchQuery(careerSearchQuery);
-    setStep("explore-careers");
-  };
-
-  const handleSelectCluster = (clusterName) => {
-    setCareerSearchQuery(clusterName);
-    setStep("explore-careers");
-  };
-
-  // Navigation handler for the sidebar
   const handleNavigate = (action) => {
-    if (action === "landing") {
-      setStep("landing");
-    } else if (action === "login") {
-      setStep("login");
-    } else if (action === "assessment") {
-      setStep("assessment");
-    } else if (action === "career-reality") {
-      setStep("career-reality");
-    } else if (action === "insights-feed") {
-      setStep("insights-feed");
-    } else if (action === "career-hubs") {
-      setStep("career-hubs");
-    } else if (action === "student-dashboard") {
-      setStep("student-dashboard");
-    } else if (action === "onboarding") {
-      setStep("onboarding");
-    }
+    const map = {
+      landing: "/",
+      login: "/login",
+      assessment: "/assessment",
+      "career-reality": "/career-reality",
+      "insights-feed": "/insights-feed",
+      "career-hubs": "/career-hubs",
+      "student-dashboard": "/dashboard",
+      onboarding: "/register",
+      profile: "/profile",
+    };
+    navigate(map[action] || "/");
   };
 
-  const handleLogout = async () => {
-    if (isSupabaseConfigured && supabase) {
-      await supabase.auth.signOut();
-    }
-    setUser(null);
-  };
-
-  const handleToggleTheme = () =>
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-
+  const isDark = theme === "dark";
   return (
-    <div>
+    <div className={`cc-app-layout min-h-screen ${isDark ? "bg-[#0f172a]" : "bg-[#f1f5f9]"}`}>
       <AppLayout
-        activePage={step}
+        activePage="landing"
         onNavigate={handleNavigate}
         user={user}
-        onOpenAuth={() => setShowAuth(true)}
-        onLogout={handleLogout}
+        onOpenProfile={() => navigate("/profile")}
+        onOpenAuth={() => navigate("/login")}
+        onLogout={logout}
         theme={theme}
-        onToggleTheme={handleToggleTheme}
+        onToggleTheme={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}
         searchQuery={careerSearchQuery}
         onSearchChange={setCareerSearchQuery}
-        onSearchSubmit={handleSearchSubmit}
+        onSearchSubmit={() => navigate("/explore-careers")}
         clusterResults={clusterResults}
-        onSelectCluster={handleSelectCluster}
+        onSelectCluster={(clusterName) => {
+          setCareerSearchQuery(clusterName);
+          navigate("/explore-careers");
+        }}
       >
-        {step === "landing" && (
-          <Landing
-            onStartDiscovery={() => setStep("onboarding")}
-            onOpenAssessment={() => setStep("assessment")}
-            onOpenCareerReality={() => setStep("career-reality")}
-            onOpenInsightsFeed={() => setStep("insights-feed")}
-            onOpenCareerHubs={() => setStep("career-hubs")}
-            onOpenStudentDashboard={() => setStep("student-dashboard")}
-            onExploreCareers={(query = "") => {
-              if (typeof query === "string") {
-                setCareerSearchQuery(query);
-              }
-              setStep("explore-careers");
-            }}
-            onOpenAuth={() => setShowAuth(true)}
-            profile={generatedProfile}
-            user={user}
-            theme={theme}
-            searchQuery={careerSearchQuery}
-            onSearchChange={setCareerSearchQuery}
-            onToggleTheme={handleToggleTheme}
-            onLogout={handleLogout}
-          />
-        )}
-
-        {step === "login" && (
-          <Login
-            onBack={() => setStep("landing")}
-          />
-        )}
-
-        {step === "onboarding" && (
-          <Onboarding
-            onBack={() => setStep("landing")}
-            onContinue={(profile) => {
-              setGeneratedProfile(profile);
-              localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
-              setStep("assessment");
-            }}
-          />
-        )}
-
-        {step === "assessment" && (
-          <Assessment
-            onBack={() => setStep("landing")}
-            onOpenCluster={(clusterId) => {
-              setSelectedClusterId(clusterId);
-              setStep("explore-careers");
-            }}
-            user={user}
-          />
-        )}
-
-        {step === "profile" && (
-          <Profile
-            profile={generatedProfile}
-            onRestart={() => {
-              setGeneratedProfile(null);
-              localStorage.removeItem(PROFILE_STORAGE_KEY);
-              setStep("landing");
-            }}
-          />
-        )}
-
-        {step === "career-reality" && (
-          <CareerRealityV2 onBack={() => setStep("landing")} />
-        )}
-
-        {step === "insights-feed" && (
-          <InsightsFeed onBack={() => setStep("landing")} />
-        )}
-
-        {step === "career-hubs" && (
-          <CareerHub onBack={() => setStep("landing")} />
-        )}
-
-        {step === "student-dashboard" && (
-          <StudentDashboard onBack={() => setStep("landing")} />
-        )}
-
-        {step === "explore-careers" && (
-          <ExploreCareers
-            onBack={() => setStep("landing")}
-            user={user}
-            onOpenAuth={() => setShowAuth(true)}
-            initialSearch={careerSearchQuery}
-            selectedClusterId={selectedClusterId}
-            onClusterSelected={() => setSelectedClusterId(null)}
-          />
-        )}
+        {children}
       </AppLayout>
-
-      {showAuth && (
-        <AuthModal
-          onClose={() => setShowAuth(false)}
-          onAuthSuccess={() => setShowAuth(false)}
-        />
-      )}
     </div>
   );
 }
 
-export default App;
+function AppRoutes() {
+  const { token, isRegistered, profile } = useAuth();
+  return (
+    <Routes>
+      <Route path="/" element={<AppShell><Landing onStartDiscovery={() => {}} onOpenAuth={() => {}} theme="light" /></AppShell>} />
+      <Route path="/login" element={<Login onBack={() => window.history.back()} />} />
+      <Route path="/oauth/callback" element={<OAuthCallback />} />
+      <Route path="/register" element={<ProtectedRoute><Registration /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><AppShell><Profile profile={profile} /></AppShell></ProtectedRoute>} />
+      <Route path="/assessment" element={<ProtectedRoute requireRegistration><AppShell><Assessment user={profile} /></AppShell></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute requireRegistration><AppShell><StudentDashboard /></AppShell></ProtectedRoute>} />
+      <Route path="/career-reality" element={<ProtectedRoute><AppShell><CareerRealityV2 /></AppShell></ProtectedRoute>} />
+      <Route path="/insights-feed" element={<ProtectedRoute><AppShell><InsightsFeed /></AppShell></ProtectedRoute>} />
+      <Route path="/career-hubs" element={<ProtectedRoute><AppShell><CareerHub /></AppShell></ProtectedRoute>} />
+      <Route path="/explore-careers" element={<ProtectedRoute><AppShell><ExploreCareers /></AppShell></ProtectedRoute>} />
+      <Route path="*" element={<Navigate to={token ? (isRegistered ? "/dashboard" : "/register") : "/login"} replace />} />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}

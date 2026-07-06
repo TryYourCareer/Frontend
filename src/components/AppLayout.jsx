@@ -7,6 +7,7 @@ export default function AppLayout({
   onNavigate,
   user,
   onOpenAuth,
+  onOpenProfile,
   onLogout,
   theme = "light",
   onToggleTheme,
@@ -41,6 +42,7 @@ export default function AppLayout({
         <TopBar
           onToggleMobileSidebar={() => setMobileMenuOpen((prev) => !prev)}
           user={user}
+          onOpenProfile={onOpenProfile}
           searchQuery={searchQuery}
           onSearchChange={onSearchChange}
           onSearchSubmit={onSearchSubmit}
