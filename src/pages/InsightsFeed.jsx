@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, Filter, Clock, ExternalLink, Tag, RefreshCw, Rss } from "lucide-react";
 import { isFirebaseReady, saveDocument, getDocuments } from "../utils/supabaseStorage";
+import BACKEND_BASE_URL from "../API/BaseURL";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
+const API_BASE_URL = BACKEND_BASE_URL;
 const CATEGORY_TABS = ["All", "News", "Opportunity", "Scholarship", "Innovation"];
 
 const INITIAL_INSIGHTS = [

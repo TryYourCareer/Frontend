@@ -39,7 +39,7 @@ export default function OAuthCallback() {
           const registered = Boolean(profile?.isRegistered);
           setIsRegistered(registered);
           setUser(profile?.user || null);
-          navigate(registered ? "/dashboard" : "/register", { replace: true });
+          navigate(registered ? "/profile" : "/register", { replace: true });
         } catch (err) {
           setError(err.message || "OAuth login failed.");
         }
@@ -58,7 +58,7 @@ export default function OAuthCallback() {
         const registered = Boolean(profile?.isRegistered);
         setIsRegistered(registered);
         setUser(profile?.user || result.user || null);
-        navigate(registered ? "/dashboard" : "/register", { replace: true });
+        navigate(registered ? "/profile" : "/register", { replace: true });
       })
       .catch((err) => setError(err.message || "OAuth login failed."));
   }, [navigate, params, setIsRegistered, setTokenState, setUser]);

@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import Registration from "./pages/Registration";
 import OAuthCallback from "./pages/OAuthCallback";
 import Assessment from "./pages/Assessment";
+import DiscoveryTest from "./pages/DiscoveryTest";
 import Profile from "./pages/Profile";
 import ExploreCareers from "./pages/ExploreCareers";
 import CareerHub from "./pages/CareerHub";
@@ -57,6 +58,11 @@ function AppShell({ children }) {
     navigate(map[action] || "/");
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
   const isDark = theme === "dark";
   return (
     <div className={`cc-app-layout min-h-screen ${isDark ? "bg-[#0f172a]" : "bg-[#f1f5f9]"}`}>
@@ -66,7 +72,7 @@ function AppShell({ children }) {
         user={user}
         onOpenProfile={() => navigate("/profile")}
         onOpenAuth={() => navigate("/login")}
-        onLogout={logout}
+        onLogout={handleLogout}
         theme={theme}
         onToggleTheme={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}
         searchQuery={careerSearchQuery}
@@ -94,12 +100,13 @@ function AppRoutes() {
       <Route path="/register" element={<ProtectedRoute><Registration /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><AppShell><Profile profile={profile} /></AppShell></ProtectedRoute>} />
       <Route path="/assessment" element={<ProtectedRoute requireRegistration><AppShell><Assessment user={profile} /></AppShell></ProtectedRoute>} />
+      <Route path="/discovery-test" element={<ProtectedRoute requireRegistration><AppShell><DiscoveryTest /></AppShell></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute requireRegistration><AppShell><StudentDashboard /></AppShell></ProtectedRoute>} />
       <Route path="/career-reality" element={<ProtectedRoute><AppShell><CareerRealityV2 /></AppShell></ProtectedRoute>} />
       <Route path="/insights-feed" element={<ProtectedRoute><AppShell><InsightsFeed /></AppShell></ProtectedRoute>} />
       <Route path="/career-hubs" element={<ProtectedRoute><AppShell><CareerHub /></AppShell></ProtectedRoute>} />
       <Route path="/explore-careers" element={<ProtectedRoute><AppShell><ExploreCareers /></AppShell></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to={token ? (isRegistered ? "/dashboard" : "/register") : "/login"} replace />} />
+      <Route path="*" element={<Navigate to={token ? (isRegistered ? "/profile" : "/register") : "/login"} replace />} />
     </Routes>
   );
 }

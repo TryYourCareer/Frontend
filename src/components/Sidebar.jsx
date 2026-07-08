@@ -31,6 +31,7 @@ export default function Sidebar({
   activePage = "landing",
   onNavigate,
   user,
+  onOpenProfile,
   onOpenAuth,
   onLogout,
   theme = "light",
@@ -44,6 +45,13 @@ export default function Sidebar({
     onNavigate?.(action);
     onCloseMobile?.();
   };
+
+  const displayName =
+    user?.name ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "User";
 
   const sidebarContent = (
     <div className="sidebar-inner flex h-full flex-col">
@@ -132,18 +140,25 @@ export default function Sidebar({
         {/* User Section */}
         {user ? (
           <div className="space-y-2">
-            <div className="flex items-center gap-3 rounded-xl bg-white/[0.05] px-3 py-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                onOpenProfile?.();
+                onCloseMobile?.();
+              }}
+              className="flex w-full items-center gap-3 rounded-xl bg-white/[0.05] px-3 py-2.5 text-left transition hover:bg-white/[0.08]"
+            >
               <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
-                {user.email?.charAt(0).toUpperCase() || "U"}
+                {displayName?.charAt(0)?.toUpperCase() || "U"}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white truncate">{user.email?.split("@")[0]}</p>
+                <p className="text-sm font-semibold text-white truncate">{displayName}</p>
                 <div className="flex items-center gap-1 mt-0.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 cc-pulse-dot" />
                   <p className="text-[10px] text-slate-400">Online</p>
                 </div>
               </div>
-            </div>
+            </button>
             <button
               type="button"
               onClick={() => { onLogout?.(); onCloseMobile?.(); }}

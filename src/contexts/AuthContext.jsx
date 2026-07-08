@@ -2,9 +2,11 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useNavigate } from "react-router-dom";
 import {
   fetchCurrentUser,
+  getSupabaseSession,
   loginWithOAuth,
   loginWithOtp,
   registerProfile,
+  updateCurrentUser,
   setAuthToken,
 } from "../services/auth";
 
@@ -60,6 +62,18 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const saveProfile = async (userId, payload) => {
+    setAuthLoading(true);
+    try {
+      const result = await updateCurrentUser(userId, payload);
+      setProfile(result || null);
+      setUser(result || null);
+      return result;
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   const logout = useCallback((shouldNavigate = true) => {
     setTokenState("");
     setUser(null);
@@ -81,16 +95,28 @@ export function AuthProvider({ children }) {
     let mounted = true;
 
     async function restore() {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       try {
+        const session = await getSupabaseSession();
+        const sessionToken = session?.access_token || "";
+        const nextToken = sessionToken || token;
+
+        if (!nextToken) {
+          if (mounted) setLoading(false);
+          return;
+        }
+
+        if (sessionToken && sessionToken !== token) {
+          setTokenState(sessionToken);
+        }
+
+        setAuthToken(nextToken);
+        if (session?.user) {
+          setUser(session.user);
+        }
         const profile = await fetchCurrentUser();
         if (!mounted) return;
         setProfile(profile?.user || null);
-        setUser(profile?.user || null);
+        setUser(profile?.user || session?.user || null);
         setIsRegistered(Boolean(profile?.isRegistered));
       } catch {
         if (!mounted) return;
@@ -118,6 +144,7 @@ export function AuthProvider({ children }) {
       loginWithPhone,
       loginWithGoogle,
       completeRegistration,
+      saveProfile,
       logout,
       setTokenState,
       setUser,

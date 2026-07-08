@@ -28,6 +28,7 @@ export default function AppLayout({
         activePage={activePage}
         onNavigate={onNavigate}
         user={user}
+        onOpenProfile={onOpenProfile}
         onOpenAuth={onOpenAuth}
         onLogout={onLogout}
         theme={theme}

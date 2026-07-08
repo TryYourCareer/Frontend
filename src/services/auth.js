@@ -17,6 +17,12 @@ function authHeaders(extra = {}) {
 async function parseApiError(response) {
   try {
     const data = await response.json();
+    if (Array.isArray(data?.detail)) {
+      return data.detail
+        .map((item) => item?.msg || item?.message)
+        .filter(Boolean)
+        .join(" ");
+    }
     return data?.detail || data?.message || "Request failed.";
   } catch {
     return "Request failed.";
@@ -37,7 +43,7 @@ export async function verifyOtp(phone, otp) {
   const response = await fetch(`${BACKEND_BASE_URL}/auth/verify-otp`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ phone, otp, token: otp }),
+    body: JSON.stringify({ phone, otp }),
   });
   if (!response.ok) throw new Error(await parseApiError(response));
   return response.json();
@@ -79,6 +85,23 @@ export async function registerProfile(payload) {
 export async function fetchCurrentUser() {
   const response = await fetch(`${BACKEND_BASE_URL}/user/profile`, {
     headers: authHeaders(),
+  });
+  if (!response.ok) throw new Error(await parseApiError(response));
+  return response.json();
+}
+
+export async function getSupabaseSession() {
+  if (!supabase) return null;
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw new Error(error.message);
+  return data?.session || null;
+}
+
+export async function updateCurrentUser(userId, payload) {
+  const response = await fetch(`${BACKEND_BASE_URL}/users/${userId}`, {
+    method: "PUT",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) throw new Error(await parseApiError(response));
   return response.json();

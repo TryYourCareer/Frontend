@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import Papa from "papaparse";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Search, X } from "lucide-react";
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
+import BACKEND_BASE_URL from "../API/BaseURL";
+const API_BASE_URL = BACKEND_BASE_URL;
 const API_TIMEOUT_MS = 3000;
 const CSV_TIMEOUT_MS = 8000;
 
