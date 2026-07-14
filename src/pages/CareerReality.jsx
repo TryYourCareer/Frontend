@@ -1,30 +1,112 @@
 import { useState } from "react";
-import { ArrowLeft, Clock, TrendingUp, Activity, CheckCircle2, DollarSign, Wrench, BookOpen, AlertCircle } from "lucide-react";
-const careerData = {
-  title: "Software Engineer",
-  tagline: "Build products, solve problems, and ship real software.",
-  demandBadge: "High Demand – 12% Growth",
-  medianSalary: "₹15 LPA",
-  icon: "💻",
-  timeline: [
-    { time: "09:00 AM", title: "Standup Meeting", description: "Sync with your team on progress, blockers, and priorities.", icon: "🗣️" },
-    { time: "10:00 AM", title: "Deep Work (Coding)", description: "Focus on writing and refining code for a feature or bug fix.", icon: "💻" },
-    { time: "02:00 PM", title: "Debugging", description: "Track down issues, reproduce bugs, and verify fixes.", icon: "🔍" },
-    { time: "04:00 PM", title: "Code Review", description: "Review teammates' changes and improve code quality together.", icon: "✅" },
-  ],
-  realityCheck: [
-    "You will read a lot of other people's code.",
-    "Frequent meetings are part of the job, even on coding days.",
-    "Debugging can be frustrating, but it teaches you how systems work.",
-  ],
-  proInsights: [
-    "Beginner mistake: copy-pasting without understanding the flow.",
-    "Real-world skills: clear communication and code readability.",
-    "College rarely prepares you for complex legacy systems.",
-  ],
-  hardSkills: ["JavaScript", "Python", "React", "Git", "SQL", "AWS"],
-  softSkills: ["Problem Solving", "Communication", "Teamwork", "Adaptability"],
-  educationPathways: ["B.S. Computer Science", "Coding Bootcamps", "Self-Learning"],
+import { ArrowLeft, Clock, TrendingUp, Activity, CheckCircle2, DollarSign, Wrench, BookOpen, AlertCircle, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const CAREERS_DATA = {
+  "software engineer": {
+    title: "Software Engineer",
+    tagline: "Build products, solve problems, and ship real software.",
+    demandBadge: "High Demand – 12% Growth",
+    medianSalary: "₹15 LPA",
+    icon: "💻",
+    timeline: [
+      { time: "09:00 AM", title: "Standup Meeting", description: "Sync with your team on progress, blockers, and priorities.", icon: "🗣️" },
+      { time: "10:00 AM", title: "Deep Work (Coding)", description: "Focus on writing and refining code for a feature or bug fix.", icon: "💻" },
+      { time: "02:00 PM", title: "Debugging", description: "Track down issues, reproduce bugs, and verify fixes.", icon: "🔍" },
+      { time: "04:00 PM", title: "Code Review", description: "Review teammates' changes and improve code quality together.", icon: "✅" },
+    ],
+    realityCheck: [
+      "You will read a lot of other people's code.",
+      "Frequent meetings are part of the job, even on coding days.",
+      "Debugging can be frustrating, but it teaches you how systems work.",
+    ],
+    proInsights: [
+      "Beginner mistake: copy-pasting without understanding the flow.",
+      "Real-world skills: clear communication and code readability.",
+      "College rarely prepares you for complex legacy systems.",
+    ],
+    hardSkills: ["JavaScript", "Python", "React", "Git", "SQL", "AWS"],
+    softSkills: ["Problem Solving", "Communication", "Teamwork", "Adaptability"],
+    educationPathways: ["B.S. Computer Science", "Coding Bootcamps", "Self-Learning"],
+  },
+  "data scientist": {
+    title: "Data Scientist",
+    tagline: "Uncover insights, build data models, and tell data stories.",
+    demandBadge: "Extreme Demand – 35% Growth",
+    medianSalary: "₹16 LPA",
+    icon: "📊",
+    timeline: [
+      { time: "09:30 AM", title: "Data Standup", description: "Coordinate analytics priorities with product teams.", icon: "🗣️" },
+      { time: "10:30 AM", title: "Data Wrangling & Pipeline Clean", description: "Clean missing attributes, format dates, and query databases.", icon: "🧹" },
+      { time: "02:00 PM", title: "Model Training & Validation", description: "Run regression algorithms, compute confidence coefficients.", icon: "🤖" },
+      { time: "04:30 PM", title: "Insight Presentation", description: "Draft slides or dashboard visual maps for stakeholders.", icon: "📈" },
+    ],
+    realityCheck: [
+      "80% of your time will be spent cleaning and formatting messy data.",
+      "Stakeholders will frequently ask for simple summaries rather than complex models.",
+      "Accuracy metrics don't matter if the model isn't deployable.",
+    ],
+    proInsights: [
+      "Beginner mistake: jumping to deep neural nets when simple regression suffices.",
+      "Understand the business logic before coding the mathematical solution.",
+      "SQL is your most important daily skill, even more than machine learning libraries.",
+    ],
+    hardSkills: ["Python", "SQL", "Pandas & NumPy", "Scikit-Learn", "Tableau", "R"],
+    softSkills: ["Analytical Thinking", "Data Storytelling", "Critical Thinking", "Stakeholder Alignment"],
+    educationPathways: ["B.S. Statistics/Math", "Data Analytics Bootcamps", "Self-Learning"],
+  },
+  "ai engineer": {
+    title: "AI Engineer",
+    tagline: "Build neural nets, train models, and deploy intelligent agents.",
+    demandBadge: "Extreme Demand – 40% Growth",
+    medianSalary: "₹22 LPA",
+    icon: "🧠",
+    timeline: [
+      { time: "09:00 AM", title: "Model Sync", description: "Discuss training runs, loss curves, and resource usage.", icon: "🗣️" },
+      { time: "10:00 AM", title: "Model Architecture Design", description: "Write training loops and structure network architectures.", icon: "🧠" },
+      { time: "02:00 PM", title: "GPU Grid Operations", description: "Launch and monitor distributed GPU jobs on the cloud.", icon: "⚡" },
+      { time: "04:30 PM", title: "Integration Testing", description: "Serve trained model endpoints via FastAPI and run validation tests.", icon: "🔌" },
+    ],
+    realityCheck: [
+      "Hyperparameter tuning can feel like endless trial and error.",
+      "Training models takes hours, during which you'll monitor log curves.",
+      "Deploying model weights is highly complex and systems-heavy.",
+    ],
+    proInsights: [
+      "Beginner mistake: not tracking training parameters and weight checkpoints.",
+      "Data quality determines model accuracy. Better data > complex model.",
+      "Learn Linux and docker early; AI systems depend heavily on system configs.",
+    ],
+    hardSkills: ["Python", "PyTorch", "TensorFlow", "FastAPI", "Docker", "CUDA"],
+    softSkills: ["System Design", "Cognitive Reasoning", "Patience", "Research Skills"],
+    educationPathways: ["M.S. Computer Science / AI", "AI Certifications", "Self-Learning"],
+  },
+  "full stack developer": {
+    title: "Full Stack Developer",
+    tagline: "Design front-end layouts and construct secure back-end databases.",
+    demandBadge: "Very High Demand – 15% Growth",
+    medianSalary: "₹14 LPA",
+    icon: "📦",
+    timeline: [
+      { time: "09:00 AM", title: "Agile Standup", description: "Sync on frontend state management and API integration blockers.", icon: "🗣️" },
+      { time: "10:00 AM", title: "Frontend Layout Styling", description: "Construct responsive pages, hover triggers, and input forms.", icon: "🎨" },
+      { time: "02:00 PM", title: "API Development", description: "Write backend controllers, secure routes, and index queries.", icon: "⚙️" },
+      { time: "04:00 PM", title: "Review & CI/CD", description: "Push commits to Git and verify production test suites.", icon: "🚀" },
+    ],
+    realityCheck: [
+      "JavaScript library frameworks change extremely frequently.",
+      "Debugging client state synchronizations requires deep persistence.",
+      "CSS layout alignment can take surprisingly long to perfect.",
+    ],
+    proInsights: [
+      "Beginner mistake: trying to learn 5 frameworks at once. Master core HTML/JS first.",
+      "Good developers write robust tests; don't rely only on local manual clicks.",
+      "API design rules (REST standards) are vital for scalable team collaboration.",
+    ],
+    hardSkills: ["JavaScript/TypeScript", "React / Next.js", "Node.js & Express", "SQL & NoSQL", "Git", "CSS"],
+    softSkills: ["Rapid Adaptability", "Visual Ergonomics", "Coordination", "Logical Reasoning"],
+    educationPathways: ["B.S. Software Engineering", "Full Stack Bootcamps", "Self-Learning"],
+  }
 };
 
 const TABS = [
@@ -33,19 +115,36 @@ const TABS = [
   { key: "pro", label: "Pro Insights", icon: TrendingUp },
 ];
 
-export default function CareerReality({ onBack }) {
+export default function CareerReality({ onBack, careerTitle = "" }) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("day");
+
+  const normalizedKey = String(careerTitle || "").trim().toLowerCase();
+  const careerData = CAREERS_DATA[normalizedKey] || CAREERS_DATA["software engineer"];
 
   return (
     <>
       <section className="min-h-screen bg-[#f4f7fb] px-4 py-8 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          {/* Breadcrumbs Navigation */}
+          <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#8fa0c2] mb-6">
+            <span className="cursor-pointer hover:text-[#3748ff] transition" onClick={() => navigate("/dashboard")}>Home</span>
+            <ChevronRight size={12} className="text-[#b0c0de]" />
+            <span className="cursor-pointer hover:text-[#3748ff] transition" onClick={onBack}>Matches</span>
+            <ChevronRight size={12} className="text-[#b0c0de]" />
+            <span className="cursor-pointer hover:text-[#3748ff] transition" onClick={onBack}>Technology Cluster</span>
+            <ChevronRight size={12} className="text-[#b0c0de]" />
+            <span className="text-[#10213f] font-black">{careerData.title}</span>
+          </nav>
+        </div>
+
         <div className="mx-auto max-w-7xl space-y-6">
 
           {/* Back button */}
           {onBack && (
             <button onClick={onBack} className="inline-flex items-center gap-2 rounded-full border border-[#d2d9ea] bg-white px-4 py-2 text-sm font-semibold text-[#3d4f71] transition hover:bg-[#eef2f9] hover:-translate-y-0.5">
               <ArrowLeft size={16} />
-              Back to Home
+              Back
             </button>
           )}
 

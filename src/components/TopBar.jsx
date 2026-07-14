@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, Search, Bell, ChevronLeft
+  Menu, Search, Bell, ChevronLeft, Moon, Sun
 } from "lucide-react";
 
 export default function TopBar({
   onToggleMobileSidebar,
   user,
   onOpenProfile,
+  onOpenAuth,
   searchQuery = "",
   onSearchChange,
   onSearchSubmit,
   clusterResults = [],
   onSelectCluster,
   theme = "light",
+  onToggleTheme,
 }) {
   const isDark = theme === "dark";
   const [searchFocused, setSearchFocused] = useState(false);
@@ -116,6 +118,21 @@ export default function TopBar({
 
       {/* Right: User info */}
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* Theme toggler */}
+        {onToggleTheme && (
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            className={`rounded-lg p-2 transition ${isDark
+              ? "text-slate-400 hover:bg-slate-800 hover:text-slate-250"
+              : "text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#334155]"
+              }`}
+            title={theme === "light" ? "Dark Mode" : "Light Mode"}
+          >
+            {theme === "light" ? <Moon size={18} /> : <Sun size={18} className="text-amber-400" />}
+          </button>
+        )}
+
         {/* Notification bell */}
         <button
           type="button"
@@ -128,18 +145,29 @@ export default function TopBar({
           <Bell size={18} />
         </button>
 
-        {/* User avatar + name */}
+        {/* User avatar + name or Login Option */}
+        {user ? (
           <button
             type="button"
             onClick={onOpenProfile}
-            className={`hidden sm:flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-left transition hover:-translate-y-0.5 hover:shadow-sm ${isDark ? "bg-slate-800/60 hover:bg-slate-800" : "bg-[#f8fafc] hover:bg-white"
-              }`}
+            className={`hidden sm:flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-left transition hover:-translate-y-0.5 hover:shadow-sm ${
+              isDark ? "bg-slate-800/60 hover:bg-slate-800" : "bg-[#f8fafc] hover:bg-white"
+            }`}
             aria-label="Open profile"
           >
             <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
               {user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
             </div>
           </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onOpenAuth}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:opacity-90 transition"
+          >
+            Login / Sign-up
+          </button>
+        )}
       </div>
     </header>
   );

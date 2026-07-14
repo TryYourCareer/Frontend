@@ -1,21 +1,18 @@
-﻿import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
-  Bookmark,
   BarChart3,
   Activity,
   ShieldCheck,
-  CircleDollarSign,
-  Users,
   Download,
-  FolderOpen,
-  Briefcase,
-  TrendingUp,
   DownloadCloud,
+  ChevronRight,
 } from "lucide-react";
 import CareerCluster from "./CareerCluster";
+import CareerReality from "./CareerReality";
+import { useNavigate } from "react-router-dom";
 
 const CAREER_TEMPLATES = {
   aiEngineer: {
@@ -219,109 +216,9 @@ const CAREER_TEMPLATES = {
       },
     ],
   },
-  dataScientist: {
-    title: "Data Scientist",
-    subtitle: "Data Insights",
-    category: "Technology",
-    description:
-      "Your passion for data and experimentation makes you a great fit for uncovering insights that power product decisions.",
-    matchPercentage: 93,
-    skillTags: ["Python & SQL", "Statistical Modeling", "Data Storytelling"],
-    alternativeMatches: [
-      {
-        score: 95,
-        title: "Technology",
-        description: "Continue honing the technical skills that make data science possible.",
-      },
-      {
-        score: 92,
-        title: "Business & Development",
-        description: "Bring insight-driven storytelling into business strategy.",
-      },
-    ],
-    roleSuggestions: ["Research Scientist", "Analytics Lead", "Machine Learning Engineer"],
-    roadmapTitle: "Want to see your detailed roadmap?",
-    roadmapDescription:
-      "Every match comes with a curated learning path, mentorship opportunities, and industry certifications to get you started.",
-    strengths: [
-      { label: "Analytical Thinking", percent: 95 },
-      { label: "Logical Reasoning", percent: 86 },
-      { label: "Problem Solving", percent: 82 },
-    ],
-    reports: [
-      { label: "Personality Profile", icon: BarChart3 },
-      { label: "Interest Assessment", icon: Activity },
-      { label: "Aptitude Report", icon: ShieldCheck },
-    ],
-    detailTitle: "Data Science Career Reality",
-    detailItems: [
-      {
-        label: "Typical day",
-        value: "Analyze datasets, validate models, and communicate results to stakeholders.",
-      },
-      {
-        label: "What you need",
-        value: "Storytelling with data, math fundamentals, and strong coding discipline.",
-      },
-      {
-        label: "Career focus",
-        value: "Turning raw data into actionable business and product strategies.",
-      },
-    ],
-  },
-  softwareEngineer: {
-    title: "Software Engineer",
-    subtitle: "Engineering Excellence",
-    category: "Technology",
-    description:
-      "Your practical problem solving and technical focus make you a strong fit for building reliable software systems.",
-    matchPercentage: 91,
-    skillTags: ["Python & SQL", "System Design", "Collaboration"],
-    alternativeMatches: [
-      {
-        score: 95,
-        title: "Technology",
-        description: "Explore high-impact engineering roles driven by strong systems design skills.",
-      },
-      {
-        score: 92,
-        title: "Business & Development",
-        description: "Bridge engineering with business outcomes through product-led delivery.",
-      },
-    ],
-    roleSuggestions: ["Backend Developer", "Full Stack Engineer", "DevOps Specialist"],
-    roadmapTitle: "Want to see your detailed roadmap?",
-    roadmapDescription:
-      "Every match comes with a curated learning path, mentorship opportunities, and industry certifications to get you started.",
-    strengths: [
-      { label: "Analytical Thinking", percent: 95 },
-      { label: "Logical Reasoning", percent: 87 },
-      { label: "Problem Solving", percent: 85 },
-    ],
-    reports: [
-      { label: "Personality Profile", icon: BarChart3 },
-      { label: "Interest Assessment", icon: Activity },
-      { label: "Aptitude Report", icon: ShieldCheck },
-    ],
-    detailTitle: "Software Engineering Career Reality",
-    detailItems: [
-      {
-        label: "Typical day",
-        value: "Write code, review architecture, and ship features with a collaborative team.",
-      },
-      {
-        label: "What you need",
-        value: "Strong problem solving, clean code habits, and a solid understanding of systems.",
-      },
-      {
-        label: "Career focus",
-        value: "Creating scalable products, solving technical challenges, and building engineering best practices.",
-      },
-    ],
-  },
+
 };
 
-const ROLE_DEFAULTS = ["Software Developer", "System Analyst", "Security Analyst"];
 
 function parseProfileFromStorage() {
   if (typeof window === "undefined") return null;
@@ -374,36 +271,60 @@ function getQueryCareerKey() {
   }
 }
 
-function getCurrentCareerTemplate() {
-  const profile = parseProfileFromStorage();
-  const profileKey = resolveCareerKey(profile);
-  if (profileKey && CAREER_TEMPLATES[profileKey]) return CAREER_TEMPLATES[profileKey];
-
-  const queryKey = getQueryCareerKey();
-  if (queryKey && CAREER_TEMPLATES[queryKey]) return CAREER_TEMPLATES[queryKey];
-
-  return CAREER_TEMPLATES.aiEngineer;
-}
 
 export default function CareerRealityV2({ onBack }) {
+  const navigate = useNavigate();
   const [activePage, setActivePage] = useState("results");
-  const roadmapRef = useRef(null);
-  const career = useMemo(() => getCurrentCareerTemplate(), []);
+  const [selectedClusterCareer, setSelectedClusterCareer] = useState(null);
 
-  const scrollToRoadmap = () => {
-    if (roadmapRef.current) {
-      roadmapRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  };
+  const initialCareerKey = useMemo(() => {
+    const profile = parseProfileFromStorage();
+    const profileKey = resolveCareerKey(profile);
+    if (profileKey && CAREER_TEMPLATES[profileKey]) return profileKey;
+
+    const queryKey = getQueryCareerKey();
+    if (queryKey && CAREER_TEMPLATES[queryKey]) return queryKey;
+
+    return "aiEngineer";
+  }, []);
+
+  const [selectedCareerKey, setSelectedCareerKey] = useState(initialCareerKey);
+  const career = useMemo(() => CAREER_TEMPLATES[selectedCareerKey] || CAREER_TEMPLATES.aiEngineer, [selectedCareerKey]);
 
   if (activePage === "cluster") {
-    return <CareerCluster onBack={() => setActivePage("results")} />;
+    return (
+      <CareerCluster
+        onBack={() => setActivePage("results")}
+        onSelectCareer={(careerTitle) => {
+          setSelectedClusterCareer(careerTitle);
+          setActivePage("realityDetail");
+        }}
+      />
+    );
+  }
+
+  if (activePage === "realityDetail") {
+    return (
+      <CareerReality
+        onBack={() => setActivePage("cluster")}
+        careerTitle={selectedClusterCareer}
+      />
+    );
   }
 
   return (
     <section className="min-h-screen bg-[#f3f6ff] px-4 py-8 sm:px-6 lg:px-10">
+      <div className="mx-auto max-w-7xl">
+        {/* Breadcrumbs Navigation */}
+        <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#8fa0c2] mb-6 md:px-8">
+          <span className="cursor-pointer hover:text-[#3748ff] transition" onClick={() => navigate("/dashboard")}>Home</span>
+          <ChevronRight size={12} className="text-[#b0c0de]" />
+          <span className="text-[#10213f] font-black">Matches</span>
+        </nav>
+      </div>
+
       <div className="mx-auto max-w-7xl space-y-8">
-        <div className="flex flex-col gap-5 rounded-[32px] border border-[#d9e4ff] bg-white/90 p-6 shadow-[0_28px_80px_rgba(37,78,181,0.08)] md:p-8">
+        <div className="flex flex-col gap-5  md:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-3">
               <span className="inline-flex items-center rounded-full bg-[#dff6e4] px-4 py-2 text-sm font-semibold text-[#1c6b30]">
@@ -431,205 +352,173 @@ export default function CareerRealityV2({ onBack }) {
           </div>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[1.8fr_1fr]">
-          <div className="space-y-6">
-            <div className="rounded-[32px] border border-[#dbe5ff] bg-white p-6 shadow-[0_24px_64px_rgba(24,64,142,0.08)] sm:p-8">
-              <div className="grid gap-6 lg:grid-cols-[1.1fr_0.7fr] lg:items-center">
-                <div className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
-                  <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-[#eef4ff] shadow-sm sm:h-32 sm:w-32">
-                    <div className="grid h-20 w-20 place-items-center rounded-3xl bg-gradient-to-br from-[#5069f0] to-[#6f47e4] text-[28px] text-white shadow-md">
-                      <Briefcase size={32} />
-                    </div>
-                  </div>
+        {/* Careers Grid Container (100% Width) */}
+        <div className="space-y-4">
+          <div className="grid gap-6 sm:grid-cols-2">
+            {Object.entries(CAREER_TEMPLATES).map(([key, template]) => {
+              const isSelected = selectedCareerKey === key;
+              return (
+                <div
+                  key={key}
+                  onClick={() => setSelectedCareerKey(key)}
+                  className={`group rounded-[32px] border p-6 transition-all duration-300 flex flex-col justify-between cursor-pointer ${isSelected
+                    ? "border-[#3748ff] bg-blue-50/10 shadow-[0_24px_50px_rgba(55,72,255,0.06)] ring-1 ring-[#3748ff]/30"
+                    : "border-[#e2e7ff] bg-white hover:border-[#ccd8ea] hover:shadow-lg"
+                    }`}
+                >
                   <div className="space-y-4">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-full bg-[#eef5ff] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#3b63d3]">
-                        Match #1
+                    <div className="flex items-center justify-between gap-4">
+                      <span className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider ${isSelected ? "bg-[#3748ff]/10 text-[#3748ff]" : "bg-slate-100 text-slate-600"
+                        }`}>
+                        {template.subtitle}
                       </span>
-                      <span className="rounded-full bg-[#f2f6ff] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5b77b4]">
-                        {career.title}
+                      <span className="rounded-full bg-emerald-50 border border-emerald-250 px-3 py-1.5 text-xs font-black text-emerald-700">
+                        {template.matchPercentage}% Match
                       </span>
                     </div>
                     <div>
-                      <h2 className="text-3xl font-black text-[#0e1f45] sm:text-4xl">{career.category}</h2>
-                      <p className="mt-3 max-w-2xl text-sm leading-7 text-[#556987]">
-                        {career.description}
-                      </p>
+                      <h4 className="text-xl font-bold text-[#10213f]">{template.title}</h4>
                     </div>
-                    <div className="flex flex-wrap gap-3">
-                      {career.skillTags.map((tag) => (
-                        <span key={tag} className="rounded-full bg-[#eef5ff] px-3 py-2 text-xs font-semibold text-[#2e57c0]">
+                    <div className="flex flex-wrap gap-2">
+                      {template.skillTags.map((tag) => (
+                        <span key={tag} className="rounded-full bg-slate-50 border border-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-550">
                           {tag}
                         </span>
                       ))}
                     </div>
                   </div>
-                </div>
 
-                <div className="rounded-[28px] border border-[#e5edff] bg-[#f7f9ff] p-6 text-center shadow-sm">
-                  <div className="text-sm font-semibold uppercase tracking-[0.24em] text-[#556987]">
-                    Match Score
-                  </div>
-                  <div className="mt-6 flex items-center justify-center rounded-[26px] bg-white px-6 py-7 text-center shadow-[0_12px_24px_rgba(43,87,213,0.12)]">
-                    <div>
-                      <p className="text-5xl font-black text-[#1c305e]">{career.matchPercentage}%</p>
-                      <p className="mt-2 text-sm font-semibold uppercase tracking-[0.24em] text-[#5d6c95]">Top match</p>
-                    </div>
+                  <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:items-center">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCareerKey(key);
+                        setActivePage("cluster");
+                      }}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-[#3748ff] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#2235d6]"
+                    >
+                      <BookOpen size={13} />
+                      Explore Career
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCareerKey(key);
+                        navigate(`/roadmap?career=${key}`);
+                      }}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-205 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
+                    >
+                      <ArrowRight size={13} />
+                      Roadmap
+                    </button>
                   </div>
                 </div>
-              </div>
+              );
+            })}
+          </div>
+        </div>
 
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <button
-                  type="button"
-                  onClick={() => setActivePage("cluster")}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#3748ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(55,72,255,0.24)] transition hover:bg-[#2235d6]"
-                >
-                  <BookOpen size={16} />
-                  Explore Career
-                </button>
-                <button
-                  type="button"
-                  onClick={scrollToRoadmap}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#d7defd] bg-white px-6 py-3 text-sm font-semibold text-[#3b4f7d] transition hover:bg-[#f6f8ff]"
-                >
-                  <ArrowRight size={16} />
-                  Roadmap
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#d7defd] bg-white text-[#3b4f7d] transition hover:bg-[#f6f8ff]"
-                >
-                  <Bookmark size={18} />
-                </button>
+        {/* Analytics Section (Below Careers) */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Core Strengths */}
+          <div className="rounded-[32px] border border-[#dbe5ff] bg-white p-6 shadow-[0_24px_70px_rgba(20,49,126,0.08)]">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#5f75a9]">Core Strengths</p>
+                <h3 className="mt-3 text-2xl font-black text-[#10213f]">Core Strengths</h3>
               </div>
+              <span className="rounded-full bg-[#eef6ff] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3758d4]">
+                {career.strengths[0].percent}%
+              </span>
             </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {career.alternativeMatches.map((match) => (
-                <div key={match.title} className="rounded-[28px] border border-[#e2e7ff] bg-white p-5 shadow-[0_18px_40px_rgba(20,51,121,0.04)]">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#5f75a9]">{match.score}%</p>
-                      <h3 className="mt-3 text-xl font-bold text-[#10213f]">{match.title}</h3>
-                    </div>
-                    <div className="rounded-3xl bg-[#eef4ff] px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#3c5fd1]">
-                      View Details
-                    </div>
+            <div className="mt-6 space-y-5">
+              {career.strengths.map((strength) => (
+                <div key={strength.label}>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-[#12224d]">{strength.label}</p>
+                    <span className="text-sm font-semibold text-[#4f5d84]">{strength.percent}%</span>
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-[#5a6a8e]">{match.description}</p>
+                  <div className="mt-3 h-3 overflow-hidden rounded-full bg-[#eef3ff]">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-[#4f6df7] to-[#7f55ff]"
+                      style={{ width: `${strength.percent}%` }}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
-
-            <div className="rounded-[28px] border border-[#dbe5ff] bg-white p-5 shadow-[0_18px_40px_rgba(24,64,142,0.05)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#5c72a6]">Quick role suggestions</p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {(career.roleSuggestions.length ? career.roleSuggestions : ROLE_DEFAULTS).map((role) => (
-                  <span key={role} className="rounded-full bg-[#eef3ff] px-4 py-2 text-sm font-semibold text-[#2545a0]">
-                    {role}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div
-              ref={roadmapRef}
-              className="rounded-[32px] border border-[#cfe0ff] bg-gradient-to-r from-[#4669ff] via-[#5772ff] to-[#7f63ff] p-6 text-white shadow-[0_24px_80px_rgba(65,93,233,0.18)] sm:p-8"
-            >
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                <div className="space-y-4">
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#d9e4ff]">Roadmap</p>
-                  <h3 className="text-3xl font-black tracking-[-0.03em] text-white">{career.roadmapTitle}</h3>
-                  <p className="max-w-2xl text-sm leading-7 text-[#dce4ff]">
-                    {career.roadmapDescription}
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <button className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#2f3f8f] shadow-[0_10px_24px_rgba(255,255,255,0.24)] transition hover:bg-[#f7f8ff]">
-                    <ArrowRight size={16} />
-                    View Full Roadmap
-                  </button>
-                  <button className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20">
-                    <DownloadCloud size={16} />
-                    Download Report
-                  </button>
-                </div>
-              </div>
-            </div>
-
           </div>
 
-          <aside className="space-y-6">
-            <div className="rounded-[32px] border border-[#dbe5ff] bg-white p-6 shadow-[0_24px_70px_rgba(20,49,126,0.08)]">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#5f75a9]">Core Strengths</p>
-                  <h3 className="mt-3 text-2xl font-black text-[#10213f]">Core Strengths</h3>
-                </div>
-                <span className="rounded-full bg-[#eef6ff] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3758d4]">
-                  {career.strengths[0].percent}%
-                </span>
+          {/* Analytic Reports */}
+          <div className="rounded-[32px] border border-[#dbe5ff] bg-white p-6 shadow-[0_24px_70px_rgba(20,49,126,0.08)]">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#5f75a9]">Analytic Reports</p>
+                <h3 className="mt-3 text-2xl font-black text-[#10213f]">Analytic Reports</h3>
               </div>
-              <div className="mt-6 space-y-5">
-                {career.strengths.map((strength) => (
-                  <div key={strength.label}>
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-[#12224d]">{strength.label}</p>
-                      <span className="text-sm font-semibold text-[#4f5d84]">{strength.percent}%</span>
-                    </div>
-                    <div className="mt-3 h-3 overflow-hidden rounded-full bg-[#eef3ff]">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#4f6df7] to-[#7f55ff]"
-                        style={{ width: `${strength.percent}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <span className="rounded-full bg-[#eef4ff] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3d5fcf]">
+                3 reports
+              </span>
             </div>
-
-            <div className="rounded-[32px] border border-[#dbe5ff] bg-white p-6 shadow-[0_24px_70px_rgba(20,49,126,0.08)]">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#5f75a9]">Analytic Reports</p>
-                  <h3 className="mt-3 text-2xl font-black text-[#10213f]">Analytic Reports</h3>
-                </div>
-                <span className="rounded-full bg-[#eef4ff] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3d5fcf]">
-                  3 reports
-                </span>
-              </div>
-              <div className="mt-6 space-y-3">
-                {career.reports.map((report) => {
-                  const Icon = report.icon;
-                  return (
-                    <div key={report.label} className="flex items-center justify-between rounded-[22px] border border-[#edf1ff] bg-[#f7f8ff] px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-[#3d5fd2] shadow-sm">
-                          <Icon size={18} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-[#10213f]">{report.label}</p>
-                          <p className="text-xs text-[#6e7a9a]">Download or view your insights</p>
-                        </div>
+            <div className="mt-6 space-y-3">
+              {career.reports.map((report) => {
+                const Icon = report.icon;
+                return (
+                  <div key={report.label} className="flex items-center justify-between rounded-[22px] border border-[#edf1ff] bg-[#f7f8ff] px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-[#3d5fd2] shadow-sm">
+                        <Icon size={18} />
                       </div>
-                      <button className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#364f9f] transition hover:bg-[#e5ebff]">
-                        <Download size={16} />
-                      </button>
+                      <div>
+                        <p className="text-sm font-semibold text-[#10213f]">{report.label}</p>
+                        <p className="text-xs text-[#6e7a9a]">Download or view your insights</p>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
+                    <button className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#364f9f] transition hover:bg-[#e5ebff]">
+                      <Download size={16} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          </aside>
+          </div>
         </div>
 
-        <div className="flex justify-center">
+        <div
+          className="rounded-[32px] border border-[#cfe0ff] bg-gradient-to-r from-[#4669ff] via-[#5772ff] to-[#7f63ff] p-6 text-white shadow-[0_24px_80px_rgba(65,93,233,0.18)] sm:p-8"
+        >
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-4">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#d9e4ff]">Roadmap</p>
+              <h3 className="text-3xl font-black tracking-[-0.03em] text-white">{career.roadmapTitle}</h3>
+              <p className="max-w-2xl text-sm leading-7 text-[#dce4ff]">
+                {career.roadmapDescription}
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                onClick={() => navigate(`/roadmap?career=${selectedCareerKey}`)}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#2f3f8f] shadow-[0_10px_24px_rgba(255,255,255,0.24)] transition hover:bg-[#f7f8ff]"
+              >
+                <ArrowRight size={16} />
+                View Full Roadmap
+              </button>
+              <button className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20">
+                <DownloadCloud size={16} />
+                Download Report
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* <div className="flex justify-center">
           <button className="inline-flex items-center justify-center rounded-full bg-[#3748ff] px-8 py-4 text-base font-semibold text-white shadow-[0_18px_56px_rgba(55,72,255,0.24)] transition hover:bg-[#273ae9]">
             <DownloadCloud size={18} />
             Download Full Report
           </button>
-        </div>
+        </div> */}
       </div>
     </section>
   );

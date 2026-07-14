@@ -97,6 +97,11 @@ export async function getSupabaseSession() {
   return data?.session || null;
 }
 
+export async function supabaseSignOut() {
+  if (!supabase) return;
+  await supabase.auth.signOut();
+}
+
 export async function updateCurrentUser(userId, payload) {
   const response = await fetch(`${BACKEND_BASE_URL}/users/${userId}`, {
     method: "PUT",

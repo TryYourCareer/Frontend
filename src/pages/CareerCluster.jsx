@@ -1,5 +1,6 @@
-﻿import { ArrowLeft, ArrowRight, Cpu, Activity, Sparkles, Box } from "lucide-react";
+import { ArrowLeft, ArrowRight, Cpu, Activity, Sparkles, Box, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const TABS = ["All Roles", "Trending Now", "Fastest Growing", "Future-Proof"];
 const CAREERS = [
@@ -31,11 +32,23 @@ const CAREERS = [
   },
 ];
 
-export default function CareerCluster({ onBack }) {
+export default function CareerCluster({ onBack, onSelectCareer }) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("All Roles");
 
   return (
     <section className="min-h-screen bg-[#f4f6ff] px-4 py-8 sm:px-6 lg:px-10">
+      <div className="mx-auto max-w-6xl">
+        {/* Breadcrumbs Navigation */}
+        <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#8fa0c2] mb-6">
+          <span className="cursor-pointer hover:text-[#3748ff] transition" onClick={() => navigate("/dashboard")}>Home</span>
+          <ChevronRight size={12} className="text-[#b0c0de]" />
+          <span className="cursor-pointer hover:text-[#3748ff] transition" onClick={onBack}>Matches</span>
+          <ChevronRight size={12} className="text-[#b0c0de]" />
+          <span className="text-[#10213f] font-black">Technology Cluster</span>
+        </nav>
+      </div>
+
       <div className="mx-auto max-w-6xl space-y-8">
         <div className="rounded-[32px] border border-[#d9e4ff] bg-white p-8 shadow-[0_24px_80px_rgba(37,78,181,0.08)]">
           <div className="space-y-8">
@@ -85,6 +98,7 @@ export default function CareerCluster({ onBack }) {
                   <button
                     key={career.title}
                     type="button"
+                    onClick={() => onSelectCareer?.(career.title)}
                     className="w-full rounded-[28px] border border-[#e7ecff] bg-[#ffffff] p-5 text-left shadow-[0_10px_30px_rgba(23,51,132,0.06)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(23,51,132,0.12)]"
                   >
                     <div className="flex items-center gap-4">

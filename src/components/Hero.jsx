@@ -4,7 +4,7 @@ import {
   Sparkles, TrendingUp, Terminal, Users,
   ArrowRight, Zap, Compass, Play, RefreshCw,
   BarChart3, Star, ChevronDown, Brain,
-  Code2, Target, Award, Cpu, Globe, Lock
+  Code2, Target, Award, Cpu, Globe, Lock, Search
 } from "lucide-react";
 
 
@@ -196,10 +196,12 @@ export default function Hero({ onStartDiscovery, onExploreCareers, careersCount 
 
 /* ─────────────────────────── Hero Banner ────────────────────────────────── */
 function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, onScrollDown }) {
-  return (
-    <div className={`relative overflow-hidden px-4 py-14 sm:px-6 sm:py-20 lg:py-28 ${isDark ? "bg-slate-950" : "bg-[#eef3fb]"}`}>
+  const [query, setQuery] = useState("");
 
-      <div className="relative z-10 mx-auto max-w-4xl text-center">
+  return (
+    <div className={`relative overflow-hidden px-4 py-14 sm:px-6 sm:py-20 lg:py-24 ${isDark ? "bg-slate-950" : "bg-[#eef3fb]"}`}>
+
+      <div className="relative z-10 mx-auto max-w-5xl text-center">
         <motion.div variants={stagger} initial="hidden" animate="show">
           <motion.span
             variants={fadeUp}
@@ -228,6 +230,45 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
             Four interactive simulator sandboxes that let you discover your archetype, analyse real market data, trial-run daily tasks, and receive a unified alignment report — all before picking a course.
           </motion.p>
 
+          {/* Search bar inspired by W3Schools & GeeksforGeeks */}
+          <motion.div variants={fadeUp} className="mt-8 max-w-xl mx-auto">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search our career tutorials (e.g. Frontend Dev, DevOps, Python, AI)..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className={`w-full px-5 py-4 pl-12 rounded-full border shadow-md outline-none text-sm transition-all ${
+                  isDark
+                    ? "bg-slate-900 border-slate-700 text-white placeholder-slate-500 focus:border-cyan-500/50"
+                    : "bg-white border-[#ccd8ea] text-[#0b1a36] placeholder-slate-400 focus:border-blue-500/50"
+                }`}
+              />
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <Search size={18} />
+              </span>
+            </div>
+            {/* Quick Suggestions Pills */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-slate-500" : "text-slate-500"}`}>Popular:</span>
+              {["Python", "Fullstack", "DevOps", "AI Engineer", "UX Design"].map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => setQuery(tag)}
+                  className={`text-[11px] font-semibold px-3 py-1 rounded-full border transition-colors ${
+                    isDark
+                      ? "border-slate-800 bg-slate-900/60 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30"
+                      : "border-slate-200 bg-white text-slate-600 hover:text-blue-600 hover:border-blue-300"
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Main buttons */}
           <motion.div variants={fadeUp} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <motion.button
               whileHover={{ scale: 1.03, y: -2, boxShadow: "0 14px 32px rgba(79,70,229,0.38)" }}
@@ -250,6 +291,76 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
               <Compass size={16} />
               Simulate Pathways ({careersCount}+ loaded)
             </motion.button>
+          </motion.div>
+
+          {/* Card Grid inspired by GFG / W3Schools */}
+          <motion.div variants={fadeUp} className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left max-w-5xl mx-auto">
+            {[
+              {
+                title: "HTML / CSS / JS",
+                subtitle: "Frontend Track",
+                desc: "Learn to build user interfaces. Simulate layout styling and interactive web behaviors.",
+                color: "from-emerald-500 to-teal-600",
+                bg: "hover:border-emerald-500/30 hover:bg-emerald-500/5",
+                action: "Try it Yourself"
+              },
+              {
+                title: "Python / Node / SQL",
+                subtitle: "Backend Track",
+                desc: "Build servers, design databases, and connect APIs. Experience structural logic.",
+                color: "from-blue-500 to-cyan-600",
+                bg: "hover:border-blue-500/30 hover:bg-blue-500/5",
+                action: "Solve Challenge"
+              },
+              {
+                title: "TensorFlow / AI Model",
+                subtitle: "Data & ML Track",
+                desc: "Train models, perform data analysis, and process neural nets inside the simulator.",
+                color: "from-purple-500 to-indigo-600",
+                bg: "hover:border-purple-500/30 hover:bg-purple-500/5",
+                action: "Run Model"
+              },
+              {
+                title: "Docker / AWS Cloud",
+                subtitle: "DevOps Track",
+                desc: "Deploy code, balance loads, manage Kubernetes, and configure secure gateways.",
+                color: "from-amber-500 to-orange-600",
+                bg: "hover:border-amber-500/30 hover:bg-amber-500/5",
+                action: "Deploy Code"
+              }
+            ].map((track, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ y: -6, scale: 1.02 }}
+                className={`rounded-2xl border p-5 transition-all flex flex-col justify-between h-[210px] ${
+                  isDark
+                    ? "border-slate-800 bg-slate-900/40 text-slate-300"
+                    : "border-slate-200 bg-white text-slate-700"
+                } ${track.bg}`}
+              >
+                <div>
+                  <div className="flex justify-between items-start">
+                    <span className={`text-[10px] font-extrabold uppercase tracking-wider bg-gradient-to-r ${track.color} bg-clip-text text-transparent`}>
+                      {track.subtitle}
+                    </span>
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  </div>
+                  <h3 className={`font-black text-base mt-1.5 ${isDark ? "text-white" : "text-[#0f1d3c]"}`}>
+                    {track.title}
+                  </h3>
+                  <p className={`text-xs mt-2 leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    {track.desc}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={onStartDiscovery}
+                  className={`mt-4 w-full py-2 px-3 text-[11px] font-bold rounded-lg text-center text-white bg-gradient-to-r ${track.color} hover:brightness-110 shadow-sm transition`}
+                >
+                  {track.action}
+                </button>
+              </motion.div>
+            ))}
           </motion.div>
 
           {/* Social proof strip */}

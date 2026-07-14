@@ -19,6 +19,7 @@ export default function AppLayout({
   children,
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isDark = theme === "dark";
 
   return (
@@ -35,21 +36,27 @@ export default function AppLayout({
         onToggleTheme={onToggleTheme}
         mobileOpen={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
 
       {/* Main Content Area — offset by sidebar width on desktop */}
-      <div className="lg:ml-[260px] flex flex-col min-h-screen">
+      <div className={`flex flex-col min-h-screen transition-all duration-350 ease-in-out ${
+        sidebarCollapsed ? "lg:ml-[80px]" : "lg:ml-[260px]"
+      }`}>
         {/* Top Bar */}
         <TopBar
           onToggleMobileSidebar={() => setMobileMenuOpen((prev) => !prev)}
           user={user}
           onOpenProfile={onOpenProfile}
+          onOpenAuth={onOpenAuth}
           searchQuery={searchQuery}
           onSearchChange={onSearchChange}
           onSearchSubmit={onSearchSubmit}
           clusterResults={clusterResults}
           onSelectCluster={onSelectCluster}
           theme={theme}
+          onToggleTheme={onToggleTheme}
         />
 
         {/* Page Content */}

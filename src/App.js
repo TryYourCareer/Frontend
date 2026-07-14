@@ -13,6 +13,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import CareerRealityV2 from "./pages/CareerRealityV2";
 import InsightsFeed from "./pages/InsightsFeed";
 import AppLayout from "./components/AppLayout";
+import Roadmap from "./pages/Roadmap";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import careersData from "./data/clearcareers_data.json";
 
@@ -54,13 +55,14 @@ function AppShell({ children }) {
       "student-dashboard": "/dashboard",
       onboarding: "/register",
       profile: "/profile",
+      roadmap: "/roadmap",
     };
     navigate(map[action] || "/");
   };
 
   const handleLogout = () => {
     logout();
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true });
   };
 
   const isDark = theme === "dark";
@@ -106,6 +108,7 @@ function AppRoutes() {
       <Route path="/insights-feed" element={<ProtectedRoute><AppShell><InsightsFeed /></AppShell></ProtectedRoute>} />
       <Route path="/career-hubs" element={<ProtectedRoute><AppShell><CareerHub /></AppShell></ProtectedRoute>} />
       <Route path="/explore-careers" element={<ProtectedRoute><AppShell><ExploreCareers /></AppShell></ProtectedRoute>} />
+      <Route path="/roadmap" element={<ProtectedRoute><AppShell><Roadmap /></AppShell></ProtectedRoute>} />
       <Route path="*" element={<Navigate to={token ? (isRegistered ? "/profile" : "/register") : "/login"} replace />} />
     </Routes>
   );

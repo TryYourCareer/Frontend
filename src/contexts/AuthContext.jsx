@@ -8,6 +8,7 @@ import {
   registerProfile,
   updateCurrentUser,
   setAuthToken,
+  supabaseSignOut,
 } from "../services/auth";
 
 const AuthContext = createContext(null);
@@ -74,12 +75,15 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = useCallback((shouldNavigate = true) => {
+  const logout = useCallback(async (shouldNavigate = true) => {
+    try {
+      await supabaseSignOut();
+    } catch { /* ignore */ }
     setTokenState("");
     setUser(null);
     setProfile(null);
     setIsRegistered(false);
-    if (shouldNavigate) navigate("/login", { replace: true });
+    if (shouldNavigate) navigate("/", { replace: true });
   }, [navigate]);
 
   useEffect(() => {

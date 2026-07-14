@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, ClipboardList, Compass, Newspaper,
   Users, LayoutDashboard, LogIn, LogOut,
-  Moon, Sun, X
+  X, ChevronLeft, ChevronRight
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -38,6 +38,8 @@ export default function Sidebar({
   onToggleTheme,
   mobileOpen = false,
   onCloseMobile,
+  isCollapsed = false,
+  onToggleCollapse,
 }) {
   const isDark = theme === "dark";
 
@@ -56,16 +58,36 @@ export default function Sidebar({
   const sidebarContent = (
     <div className="sidebar-inner flex h-full flex-col">
       {/* Logo / Brand */}
-      <div className={`sidebar-brand flex items-center gap-3 px-5 py-5 border-b ${
+      <div className={`sidebar-brand flex items-center justify-between gap-3 px-4 py-5 border-b ${
         isDark ? "border-slate-800" : "border-[#1e2d4a]"
       }`}>
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-sm font-black text-white shadow-md">
-          C
-        </span>
-        <div className="min-w-0">
-          <p className="cc-display text-sm font-black text-white truncate">Try Your Career</p>
-          <p className="text-[11px] font-medium text-slate-400">Career Discovery</p>
+        <div className="flex items-center gap-3 overflow-hidden">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-sm font-black text-white shadow-md">
+            C
+          </span>
+          {!isCollapsed && (
+            <motion.div 
+              initial={{ opacity: 0, width: 0 }}
+              animate={{ opacity: 1, width: "auto" }}
+              className="min-w-0"
+            >
+              <p className="cc-display text-sm font-black text-white truncate">Try Your Career</p>
+              <p className="text-[11px] font-medium text-slate-400">Career Discovery</p>
+            </motion.div>
+          )}
         </div>
+
+        {/* Collapse Button (Desktop Only) */}
+        {!mobileOpen && onToggleCollapse && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className={`hidden lg:grid h-7 w-7 place-items-center rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors shrink-0`}
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+        )}
       </div>
 
       {/* Navigation Links */}
@@ -84,14 +106,17 @@ export default function Sidebar({
               variants={sidebarItemVariants}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleNav(action)}
-              className={`sidebar-nav-item group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-all duration-200 ${
+              title={isCollapsed ? label : undefined}
+              className={`sidebar-nav-item group flex w-full items-center gap-3 rounded-xl py-2.5 text-left text-sm font-semibold transition-all duration-200 ${
+                isCollapsed ? "justify-center px-0" : "px-3"
+              } ${
                 isActive
                   ? "bg-gradient-to-r from-cyan-500/20 to-blue-600/20 text-white shadow-[inset_0_0_0_1px_rgba(99,179,237,0.15)]"
                   : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-200"
               }`}
             >
               {/* Active indicator bar */}
-              <span className={`absolute left-0 h-7 w-[3px] rounded-r-full transition-all duration-200 ${
+              <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-r-full transition-all duration-200 ${
                 isActive ? "bg-cyan-400 opacity-100" : "opacity-0"
               }`} />
               <Icon
@@ -100,7 +125,7 @@ export default function Sidebar({
                   isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300"
                 }`}
               />
-              <span className="truncate">{label}</span>
+              {!isCollapsed && <span className="truncate">{label}</span>}
             </motion.button>
           );
         })}
@@ -110,33 +135,6 @@ export default function Sidebar({
       <div className={`mt-auto border-t px-3 py-4 space-y-3 ${
         isDark ? "border-slate-800" : "border-[#1e2d4a]"
       }`}>
-        {/* Theme Toggle */}
-        {onToggleTheme && (
-          <button
-            type="button"
-            onClick={onToggleTheme}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-200"
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={theme}
-                className="flex items-center gap-3"
-                initial={{ opacity: 0, rotate: -45 }}
-                animate={{ opacity: 1, rotate: 0 }}
-                exit={{ opacity: 0, rotate: 45 }}
-                transition={{ duration: 0.15 }}
-              >
-                {theme === "light" ? (
-                  <Moon size={17} className="text-slate-500" />
-                ) : (
-                  <Sun size={17} className="text-amber-400" />
-                )}
-                <span>{theme === "light" ? "Dark Mode" : "Light Mode"}</span>
-              </motion.div>
-            </AnimatePresence>
-          </button>
-        )}
-
         {/* User Section */}
         {user ? (
           <div className="space-y-2">
@@ -146,36 +144,47 @@ export default function Sidebar({
                 onOpenProfile?.();
                 onCloseMobile?.();
               }}
-              className="flex w-full items-center gap-3 rounded-xl bg-white/[0.05] px-3 py-2.5 text-left transition hover:bg-white/[0.08]"
+              title={isCollapsed ? displayName : undefined}
+              className={`flex w-full items-center gap-3 rounded-xl bg-white/[0.05] py-2.5 text-left transition hover:bg-white/[0.08] ${
+                isCollapsed ? "justify-center px-0" : "px-3"
+              }`}
             >
               <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
                 {displayName?.charAt(0)?.toUpperCase() || "U"}
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white truncate">{displayName}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 cc-pulse-dot" />
-                  <p className="text-[10px] text-slate-400">Online</p>
+              {!isCollapsed && (
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-white truncate">{displayName}</p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 cc-pulse-dot" />
+                    <p className="text-[10px] text-slate-400">Online</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </button>
             <button
               type="button"
               onClick={() => { onLogout?.(); onCloseMobile?.(); }}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
+              title={isCollapsed ? "Logout" : undefined}
+              className={`flex w-full items-center gap-3 rounded-xl py-2.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300 ${
+                isCollapsed ? "justify-center px-0" : "px-3"
+              }`}
             >
-              <LogOut size={17} />
-              <span>Logout</span>
+              <LogOut size={17} className="shrink-0" />
+              {!isCollapsed && <span>Logout</span>}
             </button>
           </div>
         ) : (
           <button
             type="button"
             onClick={() => { onOpenAuth?.(); onCloseMobile?.(); }}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition hover:shadow-xl hover:shadow-blue-900/30"
+            title={isCollapsed ? "Login / Sign-up" : undefined}
+            className={`flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition hover:shadow-xl hover:shadow-blue-900/30 ${
+              isCollapsed ? "px-0 w-10 h-10 mx-auto" : "px-4"
+            }`}
           >
-            <LogIn size={15} />
-            Login / Sign-up
+            <LogIn size={15} className="shrink-0" />
+            {!isCollapsed && <span>Login / Sign-up</span>}
           </button>
         )}
       </div>
@@ -185,7 +194,9 @@ export default function Sidebar({
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className={`cc-sidebar hidden lg:flex lg:flex-col lg:w-[260px] lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:z-40 ${
+      <aside className={`cc-sidebar hidden lg:flex lg:flex-col lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:z-40 transition-all duration-350 ease-in-out ${
+        isCollapsed ? "lg:w-[80px]" : "lg:w-[260px]"
+      } ${
         isDark ? "bg-slate-950" : "bg-[#111827]"
       }`}>
         {sidebarContent}
