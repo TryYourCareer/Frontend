@@ -1,498 +1,318 @@
-import { useState } from "react";
-import careersData from "../data/clearcareers_data.json";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ChevronDown, ChevronLeft, ChevronRight, Loader2, Phone, Shield, User } from "lucide-react";
+import { sendOtp, verifyOtp } from "../services/auth";
+import { registerUser } from "../services/users";
+import { useAuth } from "../contexts/AuthContext";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
-
-const STEPS = [
-  { key: "basics", label: "The Basics", icon: "✓" },
-  { key: "academics", label: "Academics", icon: "▭" },
-  { key: "superpowers", label: "Superpowers", icon: "◎" },
-  { key: "passions", label: "Passions", icon: "♡" },
-];
-
-
-const SUBJECTS = [
-  "Math",
-  "Science",
-  "Literature",
-  "History",
-  "Art",
-  "Computer Science",
-  "Languages",
-  "Music",
-  "Business",
-];
-
-const SUPERPOWERS = [
-  "Problem Solving",
-  "Public Speaking",
-  "Writing",
-  "Coding",
-  "Design",
-  "Leadership",
-  "Empathy",
-  "Data Analysis",
-  "Debate",
-  "Organization",
-  "Creativity",
-];
-
-const PASSIONS = [
-  {
-    title: "Building Technology",
-    subtitle: "Software, AI, Hardware",
-  },
-  {
-    title: "Helping People",
-    subtitle: "Medicine, Psychology, Therapy",
-  },
-  {
-    title: "Creating Art/Media",
-    subtitle: "Design, Film, Writing",
-  },
-  {
-    title: "Running a Business",
-    subtitle: "Startups, Finance, Marketing",
-  },
-  {
-    title: "Environment",
-    subtitle: "Sustainability, Biology, Outdoors",
-  },
-  {
-    title: "Law & Society",
-    subtitle: "Politics, Activism, Law",
-  },
-];
-
-const STAGE_ORDER = ["basics", "academics", "superpowers", "passions"];
-
-const PASSION_TO_CLUSTER = {
-  "Building Technology": "Cluster 1",
-  "Helping People": "Cluster 2",
-  "Creating Art/Media": "Cluster 3",
-  "Running a Business": "Cluster 4",
-  Environment: "Cluster 5",
-  "Law & Society": "Cluster 6",
-};
-
-// Validation functions
-function isValidEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email.trim());
-}
-
-function isValidIndianContact(contact) {
-  const normalized = contact.trim().replace(/\s|-/g, "");
-  const contactRegex = /^(?:\+91|91)?\d{10}$/;
-  return contactRegex.test(normalized);
-}
-
-function dedupeById(list) {
-  const seen = new Set();
-  return list.filter((item) => {
-    const key = item.id;
-    if (seen.has(key)) {
-      return false;
-    }
-    seen.add(key);
-    return true;
-  });
-}
-
-function buildFallbackProfile({ name, email, contact, subjects, superpowers, passions }) {
-  const preferredClusters = passions
-    .map((passion) => PASSION_TO_CLUSTER[passion])
-    .filter(Boolean);
-
-  const mappedCareers = (careersData || [])
-    .map((career) => ({
-      id: Number(career["No."] || 0),
-      title: career["Career Name"] || "",
-      cluster: career.Cluster || "",
-      demand_level: career["Demand Level"] || "",
-      entry_salary: career["Entry Salary (LPA)"] || "",
-    }))
-    .filter((career) => career.id > 0 && career.title && career.cluster);
-
-  const preferredCareerMatches = mappedCareers.filter((career) =>
-    preferredClusters.includes(career.cluster)
-  );
-  const fallbackCareerMatches = mappedCareers.slice(0, 5);
-
-  const suggested_careers = dedupeById(
-    (preferredCareerMatches.length > 0 ? preferredCareerMatches : fallbackCareerMatches).slice(0, 5)
-  );
-
-  const primaryPassions = passions.length ? passions.join(", ") : "your interests";
-  const strongestSkills = superpowers.length ? superpowers.slice(0, 2).join(" and ") : "your strengths";
-
-  const profile_summary = `${name} is passionate about ${primaryPassions}. With strong ${strongestSkills}, this profile is aligned to career paths that combine these interests and strengths.`;
-
-  return {
-    id: `local-${Date.now()}`,
-    name,
-    email,
-    contact,
-    subjects,
-    superpowers,
-    passions,
-    profile_summary,
-    suggested_careers,
-    created_at: new Date().toISOString(),
-    source: "fallback",
-  };
+function calculateAge(dateOfBirth) {
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+  if (Number.isNaN(birthDate.getTime()) || birthDate > today) return null;
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthOffset = today.getMonth() - birthDate.getMonth();
+  if (monthOffset < 0 || (monthOffset === 0 && today.getDate() < birthDate.getDate())) age -= 1;
+  return age;
 }
 
 export default function Onboarding({ onBack, onContinue }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [contact, setContact] = useState("");
-  const [selectedSubjects, setSelectedSubjects] = useState([]);
-  const [selectedSuperpowers, setSelectedSuperpowers] = useState([]);
-  const [selectedPassions, setSelectedPassions] = useState([]);
-  const [stage, setStage] = useState("basics");
-  const [isSaving, setIsSaving] = useState(false);
+  const navigate = useNavigate();
+  const { user, setUser, setTokenState, setIsRegistered } = useAuth();
+  const [stage, setStage] = useState("auth");
+  const [phone, setPhone] = useState(user?.phone || "");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [name, setName] = useState(user?.user_metadata?.full_name || "");
+  const [gender, setGender] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [currentlyPursuing, setCurrentlyPursuing] = useState("");
+  const [areaOfInterest, setAreaOfInterest] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [registrationLoading, setRegistrationLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
-  const canContinueBasics = 
-    name.trim().length > 1 && 
-    isValidEmail(email) && 
-    isValidIndianContact(contact);
-  const canContinueAcademics = selectedSubjects.length > 0;
-  const canContinueSuperpowers = selectedSuperpowers.length > 0;
-  const canContinuePassions = selectedPassions.length > 0;
+  useEffect(() => {
+    setPhone(user?.phone || "");
+    setName(user?.email ? user?.user_metadata?.full_name || name : name);
+  }, [user]);
 
-  const activeIndex = STAGE_ORDER.indexOf(stage);
+  const shortcuts = useMemo(
+    () => [
+      "Technology & Digital Infrastructure",
+      "Healthcare, Medical & Life Sciences",
+      "Corporate Strategy, Business & Finance",
+      "Applied Arts, Design & Media",
+      "Engineering, Manufacturing & Heavy Industry",
+      "Public Service, Social Impact & Education",
+    ],
+    []
+  );
 
-  const handleContinue = async () => {
-    if (stage === "basics") {
-      if (!canContinueBasics) return;
-      setStage("academics");
-      return;
+  const handleOtpChange = (index, value) => {
+    if (!/^\d?$/.test(value)) return;
+    const next = [...otp];
+    next[index] = value;
+    setOtp(next);
+    if (value && index < otpRefs.length - 1) otpRefs[index + 1].current?.focus();
+  };
+
+  const handleOtpKeyDown = (index, event) => {
+    if (event.key === "Backspace" && !otp[index] && index > 0) {
+      otpRefs[index - 1].current?.focus();
     }
+  };
 
-    if (stage === "academics") {
-      if (!canContinueAcademics) return;
-      setStage("superpowers");
-      return;
-    }
-
-    if (stage === "superpowers") {
-      if (!canContinueSuperpowers) return;
-      setStage("passions");
-      return;
-    }
-
-    if (!canContinuePassions || isSaving) return;
-
+  const handleSendOtp = async (event) => {
+    event.preventDefault();
     setErrorMessage("");
-    setIsSaving(true);
+    setAuthLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/profiles`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          contact: contact.trim(),
-          subjects: selectedSubjects,
-          superpowers: selectedSuperpowers,
-          passions: selectedPassions,
-        }),
-      });
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload.error || "Could not generate profile");
-      }
-
-      const profile = await response.json();
-      onContinue?.(profile);
-    } catch {
-      const fallbackProfile = buildFallbackProfile({
-        name: name.trim(),
-        email: email.trim(),
-        contact: contact.trim(),
-        subjects: selectedSubjects,
-        superpowers: selectedSuperpowers,
-        passions: selectedPassions,
-      });
-
-      setErrorMessage("Backend is unreachable, so we generated your profile locally.");
-      onContinue?.(fallbackProfile);
+      await sendOtp(phone);
+      setStage("phone-otp");
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to send OTP.");
     } finally {
-      setIsSaving(false);
+      setAuthLoading(false);
     }
   };
 
-  const handleBack = () => {
-    if (stage === "passions") {
-      setStage("superpowers");
+  const handleVerifyOtp = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
+    setAuthLoading(true);
+    try {
+      const result = await verifyOtp(phone, otp.join(""));
+      setTokenState(result.token || "");
+      setUser(result.user || null);
+      setIsRegistered(Boolean(result.isRegistered));
+      setStage("registration");
+    } catch (error) {
+      setErrorMessage(error.message || "OTP verification failed.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleRegisterSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
+
+    const age = calculateAge(dateOfBirth);
+    if (!age) {
+      setErrorMessage("Please enter a valid date of birth.");
       return;
     }
 
-    if (stage === "superpowers") {
-      setStage("academics");
-      return;
+    setRegistrationLoading(true);
+    try {
+      const saved = await registerUser({
+        auth_user_id: user?.id,
+        email: user?.email || null,
+        phone: phone || user?.phone || null,
+        name: name.trim(),
+        gender,
+        age,
+        current_education: currentlyPursuing.trim(),
+        area_of_interest: areaOfInterest,
+        is_registered: true,
+        dateOfBirth,
+      });
+
+      setIsRegistered(true);
+      setUser({
+        ...(user || {}),
+        ...(saved || {}),
+      });
+      onContinue?.(saved);
+      navigate("/profile", { replace: true });
+    } catch (error) {
+      setErrorMessage(error.message || "Registration failed. Please try again.");
+    } finally {
+      setRegistrationLoading(false);
     }
-
-    if (stage === "academics") {
-      setStage("basics");
-      return;
-    }
-
-    onBack?.();
   };
-
-  const toggleSubject = (subject) => {
-    setSelectedSubjects((prev) => {
-      if (prev.includes(subject)) {
-        return prev.filter((item) => item !== subject);
-      }
-      return [...prev, subject];
-    });
-  };
-
-  const toggleSuperpower = (superpower) => {
-    setSelectedSuperpowers((prev) => {
-      if (prev.includes(superpower)) {
-        return prev.filter((item) => item !== superpower);
-      }
-      return [...prev, superpower];
-    });
-  };
-
-  const togglePassion = (passionTitle) => {
-    setSelectedPassions((prev) => {
-      if (prev.includes(passionTitle)) {
-        return prev.filter((item) => item !== passionTitle);
-      }
-      return [...prev, passionTitle];
-    });
-  };
-
-  const canContinueCurrent =
-    (stage === "basics" && canContinueBasics) ||
-    (stage === "academics" && canContinueAcademics) ||
-    (stage === "superpowers" && canContinueSuperpowers) ||
-    (stage === "passions" && canContinuePassions);
-
-  const continueLabel = stage === "passions" ? "Generate Profile" : "Continue";
 
   return (
-    <section className="min-h-screen bg-[#dbe4f2] px-4 py-6 sm:px-7">
-      <div className="mx-auto max-w-5xl">
-        <div className="grid grid-cols-4 items-center gap-3 pb-6 sm:gap-5">
-          {STEPS.map((step, idx) => (
-            <div key={step.key} className="flex flex-col items-center">
-              <div className="relative w-full pb-2">
-                {idx < STEPS.length - 1 ? (
-                  <span
-                    className={`absolute left-1/2 top-5 h-[2px] w-full ${
-                      idx < activeIndex ? "bg-[#3573ea]" : "bg-[#cfd8e8]"
-                    }`}
-                  />
-                ) : null}
-                <div
-                  className={`relative z-10 mx-auto grid h-11 w-11 place-items-center rounded-full border text-base ${
-                    idx === activeIndex
-                      ? "border-[#2e66df] bg-[#2f66de] text-white shadow-[0_8px_24px_rgba(47,102,222,0.35)]"
-                      : idx < activeIndex
-                        ? "border-[#9eb9ef] bg-[#dbe8ff] text-[#2f66de]"
-                        : "border-[#cad4e6] bg-[#dbe3f1] text-[#b2bfd6]"
-                  }`}
-                >
-                  {step.icon}
-                </div>
-              </div>
-              <span
-                className={`cc-body text-sm font-semibold sm:text-base ${
-                  idx === activeIndex || idx < activeIndex
-                    ? "text-[#2f66de]"
-                    : "text-[#7f92b5]"
-                }`}
-              >
-                {step.label}
-              </span>
+    <section className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#e0f2fe_0%,_#f1f5f9_40%,_#e2e8f0_100%)] px-4 py-8 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="w-full max-w-2xl">
+        <div className="overflow-hidden rounded-[32px] border border-[#d6e2f5] bg-white/90 shadow-[0_25px_60px_rgba(15,35,80,0.08)] backdrop-blur-xl">
+          <div className="border-b border-[#e2edf9] bg-[#f8faff] px-6 py-5 sm:px-8 flex items-center justify-between">
+            <button
+              onClick={() => {
+                if (stage === "phone-otp" || stage === "registration") setStage("auth");
+                else onBack?.();
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#b8cbf7] bg-[#edf3ff] px-4 py-2 text-sm font-bold text-[#234b9f] transition hover:bg-[#e0ebff] hover:-translate-y-0.5"
+            >
+              <ChevronLeft size={16} />
+              Back
+            </button>
+            <div className="flex items-center gap-2">
+              <span className={`h-2.5 w-2.5 rounded-full ${stage !== "registration" ? "bg-[#3b82f6]" : "bg-[#c8d8ee]"}`} />
+              <span className={`h-2.5 w-2.5 rounded-full ${stage === "registration" ? "bg-[#3b82f6]" : "bg-[#c8d8ee]"}`} />
             </div>
-          ))}
-        </div>
+          </div>
 
-        <div className="overflow-hidden rounded-[26px] border border-[#d4dbe8] bg-[#f7f9fc] shadow-[0_15px_40px_rgba(49,73,117,0.12)]">
-          <div className="px-6 pb-7 pt-8 sm:px-12 sm:pb-9 sm:pt-9">
-            {stage === "basics" ? (
-              <>
-                <div className="mx-auto max-w-2xl text-center">
-                  <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-[#e3ebf8] text-2xl text-[#2d63df]">
-                    ✧
+          <div className="px-6 py-8 sm:px-10 sm:py-10">
+            {stage === "auth" && (
+              <div className="space-y-6">
+                <div className="text-center space-y-2">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#e3ebf8] text-[#2d63df]">
+                    <Shield size={28} />
                   </div>
-                  <h1 className="cc-display text-3xl font-black tracking-[-0.02em] text-[#0f1c3d] sm:text-4xl">
-                    Start your career discovery journey
-                  </h1>
-                  <p className="cc-body mt-3 text-lg text-[#5f7194] sm:text-2xl">First, what should we call you?</p>
+                  <h2 className="text-2xl font-black tracking-tight text-[#0f2140] sm:text-3xl">Secure Onboarding</h2>
+                  <p className="text-sm text-[#5f7194]">Choose an authentication method to start your career discovery path.</p>
                 </div>
 
-                <div className="mx-auto mt-6 max-w-xl">
-                  <label className="cc-display mb-2 block text-xl font-bold text-[#21365d] sm:text-2xl">Your Name</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    placeholder="e.g. Alex"
-                    className="cc-body w-full rounded-xl border border-[#d6ddeb] bg-[#f2f5fa] px-4 py-3.5 text-xl text-[#2b3f66] placeholder:text-[#889ab9] outline-none focus:border-[#9cb4e5] focus:ring-2 focus:ring-[#c3d4f4]"
-                  />
-
-                  <label className="cc-display mb-2 mt-6 block text-xl font-bold text-[#21365d] sm:text-2xl">Email</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="e.g. alex@gmail.com"
-                    className="cc-body w-full rounded-xl border border-[#d6ddeb] bg-[#f2f5fa] px-4 py-3.5 text-xl text-[#2b3f66] placeholder:text-[#889ab9] outline-none focus:border-[#9cb4e5] focus:ring-2 focus:ring-[#c3d4f4]"
-                  />
-                  {email && !isValidEmail(email) && (
-                    <p className="cc-body mt-2 text-sm text-[#d64545]">Please enter a valid email format</p>
-                  )}
-
-                  <label className="cc-display mb-2 mt-6 block text-xl font-bold text-[#21365d] sm:text-2xl">Contact</label>
-                  <input
-                    type="tel"
-                    value={contact}
-                    onChange={(event) => setContact(event.target.value)}
-                    placeholder="e.g. 9876543210 or +91 9876543210"
-                    className="cc-body w-full rounded-xl border border-[#d6ddeb] bg-[#f2f5fa] px-4 py-3.5 text-xl text-[#2b3f66] placeholder:text-[#889ab9] outline-none focus:border-[#9cb4e5] focus:ring-2 focus:ring-[#c3d4f4]"
-                  />
-                  {contact && !isValidIndianContact(contact) && (
-                    <p className="cc-body mt-2 text-sm text-[#d64545]">Please enter a valid Indian phone number (10 digits, +91 optional, e.g. 9876543210 or +91 9876543210)</p>
-                  )}
-                </div>
-              </>
-            ) : stage === "academics" ? (
-              <div className="mx-auto max-w-4xl">
-                <div className="text-center">
-                  <h1 className="cc-display text-3xl font-black tracking-[-0.02em] text-[#0f1c3d] sm:text-5xl">
-                    What do you enjoy learning?
-                  </h1>
-                  <p className="cc-body mt-3 text-lg text-[#5f7194] sm:text-2xl">
-                    Select the subjects you actually look forward to.
-                  </p>
-                </div>
-
-                <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {SUBJECTS.map((subject) => {
-                    const selected = selectedSubjects.includes(subject);
-                    return (
-                      <button
-                        key={subject}
-                        onClick={() => toggleSubject(subject)}
-                        className={`rounded-2xl border p-4.5 text-left transition ${
-                          selected
-                            ? "border-[#8fb0f0] bg-[#e6efff]"
-                            : "border-[#dee4ef] bg-[#f7f9fc] hover:bg-[#edf2fb]"
-                        }`}
-                      >
-                        <span
-                          className={`mb-5 block h-6 w-6 rounded-full border ${
-                            selected
-                              ? "border-[#2f66de] bg-[#2f66de]"
-                              : "border-[#e2e7f1] bg-[#eef2f8]"
-                          }`}
-                        />
-                        <span className="cc-display text-2xl font-semibold text-[#334f78]">{subject}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : stage === "superpowers" ? (
-              <div className="mx-auto max-w-4xl">
-                <div className="text-center">
-                  <h1 className="cc-display text-3xl font-black tracking-[-0.02em] text-[#0f1c3d] sm:text-5xl">
-                    What are your superpowers?
-                  </h1>
-                  <p className="cc-body mt-3 text-lg text-[#5f7194] sm:text-2xl">
-                    Don't be humble. What are you naturally good at?
-                  </p>
-                </div>
-
-                <div className="mx-auto mt-8 flex max-w-4xl flex-wrap items-center justify-center gap-4">
-                  {SUPERPOWERS.map((power) => {
-                    const selected = selectedSuperpowers.includes(power);
-                    return (
-                      <button
-                        key={power}
-                        onClick={() => toggleSuperpower(power)}
-                        className={`cc-display rounded-full border px-6 py-3 text-lg font-semibold transition sm:text-xl ${
-                          selected
-                            ? "border-[#5e79ff] bg-[#edf1ff] text-[#274fce]"
-                            : "border-[#d6deeb] bg-[#f7f9fc] text-[#334f78] hover:bg-[#edf2fb]"
-                        }`}
-                      >
-                        {power}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <div className="mx-auto max-w-5xl">
-                <div className="text-center">
-                  <h1 className="cc-display text-3xl font-black tracking-[-0.02em] text-[#0f1c3d] sm:text-5xl">
-                    What sparks your curiosity?
-                  </h1>
-                  <p className="cc-body mt-3 text-lg text-[#5f7194] sm:text-2xl">
-                    Pick a few areas you'd love to explore in the real world.
-                  </p>
-                </div>
-
-                <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {PASSIONS.map((passion) => {
-                    const selected = selectedPassions.includes(passion.title);
-                    return (
-                      <button
-                        key={passion.title}
-                        onClick={() => togglePassion(passion.title)}
-                        className={`rounded-2xl border p-5 text-left transition ${
-                          selected
-                            ? "border-[#5e79ff] bg-[#edf1ff]"
-                            : "border-[#dee4ef] bg-[#f7f9fc] hover:bg-[#edf2fb]"
-                        }`}
-                      >
-                        <p className="cc-display text-xl font-bold text-[#2d4270]">{passion.title}</p>
-                        <p className="cc-body mt-2 text-base text-[#7b8ba7]">{passion.subtitle}</p>
-                      </button>
-                    );
-                  })}
-                </div>
+                <form onSubmit={handleSendOtp} className="space-y-3">
+                  <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-1.5">Phone Authentication</label>
+                  <div className="flex gap-2">
+                    <div className="flex items-center gap-1.5 rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] px-3 py-3.5 text-slate-600 select-none">
+                      <span className="text-sm font-bold">+91</span>
+                    </div>
+                    <div className="relative flex-1">
+                      <Phone size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8b9bb8]" />
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                        placeholder="Enter 10-digit mobile number"
+                        disabled={authLoading}
+                        className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-[#90a2c0] focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                      />
+                    </div>
+                  </div>
+                  <button type="submit" disabled={authLoading || phone.length < 10} className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white disabled:opacity-50">
+                    {authLoading ? <Loader2 size={18} className="animate-spin" /> : "Send Verification OTP"}
+                  </button>
+                </form>
               </div>
             )}
-          </div>
 
-          <div className="flex items-center justify-between border-t border-[#dde3ee] bg-[#eef2f8] px-6 py-4.5 sm:px-12">
-            <button
-              onClick={handleBack}
-              className="cc-display text-lg font-bold text-[#9fb0cb] transition hover:text-[#7f93b5]"
-            >
-              ← Back
-            </button>
+            {stage === "phone-otp" && (
+              <div className="space-y-6">
+                <div className="text-center space-y-2">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#e6fffa] text-[#0f766e]">
+                    <Shield size={28} />
+                  </div>
+                  <h2 className="text-2xl font-black tracking-tight text-[#0f2140] sm:text-3xl">Verify Your Number</h2>
+                  <p className="text-sm text-[#5f7194]">Enter the 6-digit confirmation code sent to <strong>+91 {phone}</strong>.</p>
+                </div>
 
-            <button
-              onClick={handleContinue}
-              disabled={!canContinueCurrent || isSaving}
-              className={`cc-display rounded-full px-9 py-3 text-lg font-bold text-white transition ${
-                canContinueCurrent && !isSaving
-                  ? "bg-[#0f1c3d] shadow-[0_10px_28px_rgba(15,28,61,0.26)] hover:translate-y-[-1px]"
-                  : "bg-[#93a3c2]"
-              }`}
-            >
-              {isSaving ? "Saving..." : `${continueLabel} →`}
-            </button>
+                <form onSubmit={handleVerifyOtp} className="space-y-6">
+                  <div className="rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] p-6 space-y-4">
+                    <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d]">Enter OTP Code</label>
+                    <div className="flex justify-between gap-2 max-w-sm mx-auto">
+                      {otp.map((digit, idx) => (
+                        <input
+                          key={idx}
+                          ref={otpRefs[idx]}
+                          type="text"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handleOtpChange(idx, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                          className="w-12 h-14 text-center text-xl font-bold rounded-xl border border-[#c4d7f5] bg-white text-[#1e3b70] focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <button type="submit" disabled={authLoading} className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white">
+                    {authLoading ? <Loader2 size={18} className="animate-spin" /> : "Verify & Continue"}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {stage === "registration" && (
+              <div className="space-y-6">
+                <div className="text-center space-y-2">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#f5f3ff] text-[#6d28d9]">
+                    <User size={28} />
+                  </div>
+                  <h2 className="text-2xl font-black tracking-tight text-[#0f2140] sm:text-3xl">Complete Profile</h2>
+                  <p className="text-sm text-[#5f7194]">Please provide your details to personalize your discovery path.</p>
+                </div>
+
+                <form onSubmit={handleRegisterSubmit} className="space-y-5">
+                  <div>
+                    <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-1.5">Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. Rahul Sharma"
+                      className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3.5 px-4 text-sm font-semibold text-slate-800 placeholder:text-[#90a2c0] focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-12">
+                    <div className="sm:col-span-4">
+                      <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-1.5">Date of Birth</label>
+                      <input
+                        type="date"
+                        required
+                        value={dateOfBirth}
+                        onChange={(e) => setDateOfBirth(e.target.value)}
+                        className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3 px-4 text-sm font-semibold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                      />
+                    </div>
+                    <div className="sm:col-span-4">
+                      <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-1.5">Currently Pursuing</label>
+                      <input
+                        type="text"
+                        required
+                        value={currentlyPursuing}
+                        onChange={(e) => setCurrentlyPursuing(e.target.value)}
+                        placeholder="e.g. Class 12 / B.Tech"
+                        className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3 px-4 text-sm font-semibold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                      />
+                    </div>
+                    <div className="sm:col-span-4">
+                      <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-1.5">Gender</label>
+                      <select
+                        value={gender}
+                        required
+                        onChange={(e) => setGender(e.target.value)}
+                        className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3 px-4 text-sm font-semibold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                      >
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Non-binary">Non-binary</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-2">Area of Interest</label>
+                    <select
+                      value={areaOfInterest}
+                      required
+                      onChange={(e) => setAreaOfInterest(e.target.value)}
+                      className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3 px-4 pr-10 text-sm font-semibold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition appearance-none"
+                    >
+                      <option value="">Select area of interest</option>
+                      {shortcuts.map((item) => (
+                        <option key={item} value={item}>{item}</option>
+                      ))}
+                      <option value="Other">Other</option>
+                    </select>
+                    <ChevronDown size={18} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8b9bb8]" />
+                  </div>
+
+                  <button type="submit" disabled={registrationLoading} className="w-full mt-4 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
+                    {registrationLoading ? <Loader2 size={18} className="animate-spin" /> : <><span>Submit & Start Assessment</span><ChevronRight size={18} /></>}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {errorMessage && <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">{errorMessage}</p>}
           </div>
-          {errorMessage ? (
-            <p className="cc-body px-6 pb-5 text-sm font-semibold text-[#be2f2f] sm:px-14">{errorMessage}</p>
-          ) : null}
         </div>
       </div>
     </section>
