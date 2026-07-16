@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, Filter, Clock, ExternalLink, Tag, RefreshCw, Rss } from "lucide-react";
+import { Search, Filter, Clock, ExternalLink, Tag } from "lucide-react";
+
 import { isFirebaseReady, saveDocument, getDocuments } from "../utils/supabaseStorage";
 import BACKEND_BASE_URL from "../API/BaseURL";
 
@@ -34,8 +35,7 @@ export default function InsightsFeed({ onBack }) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [lastUpdated, setLastUpdated] = useState(null);
+
 
   useEffect(() => {
     const cachedPayload = localStorage.getItem("clearcareers-insights-cache");
@@ -46,7 +46,6 @@ export default function InsightsFeed({ onBack }) {
     if (cachedPayload && cachedTimestamp && now - Number(cachedTimestamp) < oneDay) {
       try {
         setInsights(JSON.parse(cachedPayload));
-        setLastUpdated(new Date(Number(cachedTimestamp)).toISOString());
         setLoading(false);
         return;
       } catch { /* fall through */ }
@@ -54,7 +53,6 @@ export default function InsightsFeed({ onBack }) {
 
     const fetchInsights = async () => {
       setLoading(true);
-      setError("");
       try {
         const response = await fetch(`${API_BASE_URL}/insights`);
         if (!response.ok) throw new Error("Failed to fetch insights");
@@ -63,11 +61,8 @@ export default function InsightsFeed({ onBack }) {
         setInsights(payload);
         localStorage.setItem("clearcareers-insights-cache", JSON.stringify(payload));
         localStorage.setItem("clearcareers-insights-ts", String(Date.now()));
-        setLastUpdated(new Date().toISOString());
       } catch {
-        setError("We could not refresh today's insights, showing the latest available feed.");
         setInsights(INITIAL_INSIGHTS);
-        setLastUpdated(new Date().toISOString());
       } finally {
         setLoading(false);
       }
@@ -80,7 +75,6 @@ export default function InsightsFeed({ onBack }) {
         const fbInsights = await getDocuments("insightsFeed", 50);
         if (fbInsights && fbInsights.length > 0) {
           setInsights(fbInsights);
-          setLastUpdated(new Date().toISOString());
         }
       } catch { /* ignore */ }
     };
@@ -99,130 +93,99 @@ export default function InsightsFeed({ onBack }) {
   }, [activeCategory, insights, searchQuery]);
 
   return (
-    <section className="min-h-screen bg-[#f3f6fb] px-4 py-8 sm:px-6 lg:px-10">
-      <div className="mx-auto max-w-5xl space-y-6">
+    <section className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-10">
+      <div className="mx-auto max-w-6xl space-y-6">
 
-        {/* Header card */}
-        <div className="flex flex-col gap-5 rounded-[32px] border border-[#d7e0f2] bg-white px-6 py-6 shadow-[0_20px_60px_rgba(35,60,115,0.08)] sm:px-8 sm:py-8 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Rss size={14} className="text-[#3b5d98]" />
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#3b5d98]">Your Daily Insights</p>
-            </div>
-            <h1 className="text-3xl font-black tracking-[-0.03em] text-[#0e2140] sm:text-4xl">Your Daily Insights</h1>
-            <p className="max-w-xl text-sm leading-relaxed text-[#556a8f] sm:text-base">Curated opportunities based on your Software Engineering & Design interests.</p>
-            {lastUpdated && (
-              <div className="flex items-center gap-1.5 text-xs text-[#7b8aa4]">
-                <RefreshCw size={12} />
-                Last updated: {new Date(lastUpdated).toLocaleDateString()}
-              </div>
+        {/* Toolbar: categories left, search right */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Category pills */}
+          <div className="flex flex-wrap gap-2">
+            {CATEGORY_TABS.map((category) => (
+              <button key={category} type="button" onClick={() => setActiveCategory(category)}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${activeCategory === category ? "bg-[#0b1a36] text-white shadow-sm" : "bg-white border border-slate-300 text-slate-800 hover:bg-slate-50"}`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
+          {/* Search input */}
+          <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2 shadow-sm min-w-[200px]">
+            <Search size={14} className="shrink-0 text-slate-500" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search keywords..."
+              className="w-full border-none bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400"
+            />
+            {searchQuery && (
+              <button type="button" onClick={() => setSearchQuery("")} className="shrink-0 rounded-lg p-0.5 text-slate-400 hover:text-slate-600">
+                <Filter size={12} />
+              </button>
             )}
           </div>
-
-          <div className="w-full max-w-sm">
-            <div className="flex items-center gap-2 rounded-2xl border border-[#d8e1ef] bg-[#f8fafc] px-4 py-3 shadow-sm">
-              <Search size={16} className="shrink-0 text-[#5c6f8f]" />
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by keyword, tag, or source"
-                className="w-full border-none bg-transparent text-sm text-[#1f3052] outline-none placeholder:text-[#8b9bb8]"
-              />
-              {searchQuery && (
-                <button type="button" onClick={() => setSearchQuery("")} className="shrink-0 rounded-lg p-0.5 text-[#8b9bb8] hover:text-[#4a5f7f]">
-                  <Filter size={13} />
-                </button>
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* Category tabs */}
-        <div className="flex flex-wrap gap-2">
-          {CATEGORY_TABS.map((category) => (
-            <button key={category} type="button" onClick={() => setActiveCategory(category)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition hover:-translate-y-0.5 ${activeCategory === category ? "bg-[#2f5fde] text-white shadow-[0_8px_20px_rgba(47,93,222,0.22)]" : "bg-[#f4f7fe] text-[#4f6090] hover:bg-[#e7ecfc]"}`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
 
-        {/* Status bar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#e2e9f5] bg-[#eef4fc] px-5 py-3 text-sm text-[#4e627f]">
-          <span>{filteredInsights.length} insights in <strong>{activeCategory}</strong></span>
-          {loading && (
-            <div className="flex items-center gap-2 text-[#3b5d98]">
-              <RefreshCw size={13} className="animate-spin" />
-              Refreshing...
-            </div>
-          )}
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div className="rounded-2xl border border-[#f3d0d0] bg-[#fff2f2] px-5 py-3.5 text-sm text-[#8f2d2d]">{error}</div>
-        )}
 
         {/* Cards */}
         {loading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="animate-pulse rounded-[28px] border border-[#dde5f0] bg-white p-6">
+              <div key={i} className="animate-pulse rounded-3xl border border-slate-300 bg-white p-5">
                 <div className="flex flex-col gap-4 sm:flex-row">
-                  <div className="h-44 w-full rounded-2xl bg-[#e8eef7] sm:h-36 sm:w-52 shrink-0" />
-                  <div className="flex-1 space-y-3">
-                    <div className="h-4 w-1/4 rounded-full bg-[#e8eef7]" />
-                    <div className="h-6 w-3/4 rounded-full bg-[#e8eef7]" />
-                    <div className="h-4 w-full rounded-full bg-[#e8eef7]" />
-                    <div className="h-4 w-5/6 rounded-full bg-[#e8eef7]" />
+                  <div className="h-32 w-full rounded-xl bg-slate-100 sm:h-28 sm:w-44 shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 w-1/4 rounded-full bg-slate-100" />
+                    <div className="h-5 w-3/4 rounded-full bg-slate-100" />
+                    <div className="h-3 w-full rounded-full bg-slate-100" />
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : filteredInsights.length === 0 ? (
-          <div className="rounded-[28px] border border-[#dfe7f1] bg-white p-10 text-center">
-            <Search size={32} className="mx-auto mb-4 text-[#b2c0d6]" />
-            <p className="font-semibold text-[#5b6d87]">No insights matched your search.</p>
-            <p className="mt-1 text-sm text-[#8a9bb5]">Try a different keyword or category.</p>
+          <div className="rounded-3xl border border-slate-300 bg-white p-8 text-center">
+            <Search size={28} className="mx-auto mb-3 text-slate-400" />
+            <p className="font-bold text-slate-900 text-sm">No insights matched your search.</p>
+            <p className="mt-0.5 text-xs text-slate-500">Try a different keyword or category.</p>
           </div>
         ) : (
-          <div className="grid gap-5">
+          <div className="grid gap-4">
             {filteredInsights.map((insight) => (
-              <article key={insight.id} className="overflow-hidden rounded-[28px] border border-[#d8e2f4] bg-white shadow-[0_16px_40px_rgba(34,61,112,0.07)] transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(34,61,112,0.12)] sm:grid sm:grid-cols-[220px_1fr]">
-                <div className="relative h-52 overflow-hidden sm:h-auto">
+              <article key={insight.id} className="overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-sm transition hover:shadow-md sm:grid sm:grid-cols-[200px_1fr]">
+                <div className="relative h-44 overflow-hidden sm:h-auto">
                   <img src={insight.imageUrl} alt={insight.title} className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent sm:bg-gradient-to-r" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
                 </div>
-                <div className="flex flex-col justify-between p-5 sm:p-6">
-                  <div className="space-y-3">
+                <div className="flex flex-col justify-between p-4 sm:p-5">
+                  <div className="space-y-2.5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.15em] ${badgeStyles[insight.category]}`}>{insight.category}</span>
-                      <span className="text-xs font-semibold text-[#68779a]">{insight.source}</span>
-                      <span className="flex items-center gap-1 text-xs text-[#8f9fb7]">
+                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${badgeStyles[insight.category] || "bg-slate-100 text-slate-800"}`}>{insight.category}</span>
+                      <span className="text-[10px] font-bold text-slate-500">{insight.source}</span>
+                      <span className="flex items-center gap-1 text-[10px] text-slate-400">
                         <Clock size={10} />
                         {formatTimeAgo(insight.publishedAt)}
                       </span>
                     </div>
-                    <a href={insight.link} target="_blank" rel="noreferrer" className="block text-xl font-bold leading-snug text-[#0f2140] transition hover:text-[#2f5fde]">
+                    <a href={insight.link} target="_blank" rel="noreferrer" className="block text-base font-bold leading-snug text-slate-900 transition hover:text-slate-750">
                       {insight.title}
                     </a>
-                    <p className="text-sm leading-relaxed text-[#515f7d]">{insight.summary}</p>
-                    <div className="flex flex-wrap gap-1.5">
+                    <p className="text-xs leading-relaxed text-slate-650">{insight.summary}</p>
+                    <div className="flex flex-wrap gap-1">
                       {insight.tags.map((tag) => (
-                        <span key={tag} className="flex items-center gap-1 rounded-full bg-[#eef3ff] px-2.5 py-0.5 text-xs font-semibold text-[#2e58b4]">
-                          <Tag size={9} />
+                        <span key={tag} className="flex items-center gap-1 rounded-full bg-[#FAF2DB] border border-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-900 shadow-sm">
+                          <Tag size={8} />
                           {tag}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <div className="mt-4 flex items-center justify-between border-t border-[#e6ecf6] pt-4">
-                    <span className="text-xs font-semibold text-[#3b4f76]">Daily briefing item</span>
-                    <a href={insight.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2f5fde] transition hover:text-[#274fc4]">
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+                    <span className="text-[10px] font-bold text-slate-400">Daily briefing item</span>
+                    <a href={insight.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-bold text-[#0b1a36] hover:underline transition">
                       Read Full Story
-                      <ExternalLink size={13} />
+                      <ExternalLink size={10} />
                     </a>
                   </div>
                 </div>

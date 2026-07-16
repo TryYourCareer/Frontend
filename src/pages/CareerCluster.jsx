@@ -37,92 +37,88 @@ export default function CareerCluster({ onBack, onSelectCareer }) {
   const [activeTab, setActiveTab] = useState("All Roles");
 
   return (
-    <section className="min-h-screen bg-[#f4f6ff] px-4 py-8 sm:px-6 lg:px-10">
+    <section className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-6xl">
         {/* Breadcrumbs Navigation */}
-        <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#8fa0c2] mb-6">
-          <span className="cursor-pointer hover:text-[#3748ff] transition" onClick={() => navigate("/dashboard")}>Home</span>
-          <ChevronRight size={12} className="text-[#b0c0de]" />
-          <span className="cursor-pointer hover:text-[#3748ff] transition" onClick={onBack}>Matches</span>
-          <ChevronRight size={12} className="text-[#b0c0de]" />
-          <span className="text-[#10213f] font-black">Technology Cluster</span>
+        <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 mb-6">
+          <span className="cursor-pointer hover:text-slate-900 transition" onClick={() => navigate("/dashboard")}>Home</span>
+          <ChevronRight size={10} className="text-slate-400" />
+          <span className="cursor-pointer hover:text-slate-900 transition" onClick={onBack}>Matches</span>
+          <ChevronRight size={10} className="text-slate-400" />
+          <span className="text-slate-900 font-bold">Technology Cluster</span>
         </nav>
       </div>
 
-      <div className="mx-auto max-w-6xl space-y-8">
-        <div className="rounded-[32px] border border-[#d9e4ff] bg-white p-8 shadow-[0_24px_80px_rgba(37,78,181,0.08)]">
-          <div className="space-y-8">
-            <div className="flex flex-col gap-6 lg:gap-8">
-              <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div className="max-w-3xl space-y-4">
-                  <h1 className="text-4xl font-black tracking-[-0.04em] text-[#08184a] sm:text-5xl">
-                    Technology Career Cluster
-                  </h1>
-                  <p className="text-sm leading-7 text-[#5f6f8f] sm:text-base">
-                    The backbone of the modern world. Explore roles that involve building software, analyzing massive datasets, and architecting the next generation of artificial intelligence.
-                  </p>
-                </div>
-                {onBack ? (
-                  <button
-                    type="button"
-                    onClick={onBack}
-                    className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#d7defd] bg-white text-[#354d85] transition hover:bg-[#f6f7ff]"
-                  >
-                    <ArrowLeft size={18} />
-                  </button>
-                ) : null}
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                {TABS.map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setActiveTab(tab)}
-                    className={`rounded-full px-5 py-3 text-sm font-semibold transition ${
-                      tab === activeTab
-                        ? "bg-[#3748ff] text-white shadow-[0_10px_30px_rgba(55,72,255,0.16)]"
-                        : "bg-[#f4f6fb] text-[#5c6b92] hover:bg-[#eef2ff]"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="flex flex-col gap-6 lg:gap-8">
+          <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl space-y-3">
+              <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 tracking-tight leading-tight">
+                Technology Career Cluster
+              </h1>
+              <p className="text-sm text-slate-650 leading-relaxed">
+                The backbone of the modern world. Explore roles that involve building software, analyzing massive datasets, and architecting the next generation of artificial intelligence.
+              </p>
             </div>
-
-            <div className="space-y-4">
-              {CAREERS.map((career) => {
-                const Icon = career.icon;
-                return (
-                  <button
-                    key={career.title}
-                    type="button"
-                    onClick={() => onSelectCareer?.(career.title)}
-                    className="w-full rounded-[28px] border border-[#e7ecff] bg-[#ffffff] p-5 text-left shadow-[0_10px_30px_rgba(23,51,132,0.06)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(23,51,132,0.12)]"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="grid h-16 w-16 place-items-center rounded-3xl bg-[#eef3ff] text-[#3c5fd1] shadow-sm">
-                        <Icon size={22} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h2 className="text-xl font-semibold text-[#0f1f45]">{career.title}</h2>
-                        <p className="mt-2 text-sm leading-6 text-[#5b6a8f]">{career.description}</p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className="rounded-full bg-[#eef4ff] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#2e57c0]">
-                          {career.match}
-                        </span>
-                        <div className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#f5f7ff] text-[#3d5fd2] transition hover:bg-[#eef2ff]">
-                          <ArrowRight size={18} />
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+            {onBack ? (
+              <button
+                type="button"
+                onClick={onBack}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-850 transition hover:bg-slate-55 shadow-sm shrink-0"
+              >
+                <ArrowLeft size={16} />
+              </button>
+            ) : null}
           </div>
+
+          <div className="flex flex-wrap gap-2.5">
+            {TABS.map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`rounded-full px-4 py-2 text-xs font-bold transition ${
+                  tab === activeTab
+                    ? "bg-[#0b1a36] text-white shadow-sm"
+                    : "bg-white border border-slate-300 text-slate-800 hover:bg-slate-50"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {CAREERS.map((career) => {
+            const Icon = career.icon;
+            return (
+              <button
+                key={career.title}
+                type="button"
+                onClick={() => onSelectCareer?.(career.title)}
+                className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-left hover:border-slate-400 hover:shadow-sm transition duration-200"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#FAF2DB] text-slate-900 border border-slate-200 shadow-sm shrink-0">
+                    <Icon size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-sm font-bold text-slate-900">{career.title}</h2>
+                    <p className="mt-1 text-xs text-slate-600 leading-relaxed">{career.description}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <span className="rounded-full bg-[#FAF2DB]/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-950">
+                      {career.match}
+                    </span>
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-800 transition hover:bg-slate-200">
+                      <ArrowRight size={14} />
+                    </div>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>

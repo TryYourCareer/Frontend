@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, Loader2, User, Mail, Phone, Calendar, BookOpen, Briefcase, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Loader2, Save } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 function calculateAge(dateOfBirth) {
@@ -13,10 +13,39 @@ function calculateAge(dateOfBirth) {
   return age;
 }
 
+const INTERESTS = [
+  "Technology & Digital Infrastructure",
+  "Healthcare, Medical & Life Sciences",
+  "Corporate Strategy, Business & Finance",
+  "Applied Arts, Design & Media",
+  "Engineering, Manufacturing & Heavy Industry",
+  "Public Service, Social Impact & Education",
+  "Other",
+];
+
+const EDUCATION_OPTIONS = [
+  "Class 9",
+  "Class 10 (SSC)",
+  "Class 11",
+  "Class 12 (HSC / +2)",
+  "Diploma / ITI",
+  "Bachelor's Degree (B.A / B.Sc / B.Com)",
+  "B.Tech / B.E.",
+  "B.Arch / B.Des",
+  "BBA / BMS",
+  "MBBS / BDS / BAMS",
+  "Master's Degree (M.A / M.Sc / M.Com)",
+  "M.Tech / M.E.",
+  "MBA / PGDM",
+  "LLB / LLM",
+  "PhD / Doctorate",
+  "Other",
+];
+
 export default function Registration() {
+  const { user, profile, completeRegistration, authLoading } = useAuth();
   const navigate = useNavigate();
-  const { user, profile, completeRegistration, authLoading, isRegistered } = useAuth();
-  const resolvedUser = profile || user;
+
   const [form, setForm] = useState({
     name: "",
     email: user?.email || "",
@@ -29,11 +58,6 @@ export default function Registration() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    if (isRegistered && resolvedUser) {
-      navigate("/profile", { replace: true });
-    }
-  }, [isRegistered, navigate, resolvedUser]);
 
   useEffect(() => {
     setForm((prev) => ({
@@ -46,18 +70,6 @@ export default function Registration() {
       areaOfInterest: profile?.area_of_interest || prev.areaOfInterest,
     }));
   }, [profile, user]);
-
-  const shortcuts = useMemo(
-    () => [
-      "Technology & Digital Infrastructure",
-      "Healthcare, Medical & Life Sciences",
-      "Corporate Strategy, Business & Finance",
-      "Applied Arts, Design & Media",
-      "Engineering, Manufacturing & Heavy Industry",
-      "Public Service, Social Impact & Education",
-    ],
-    []
-  );
 
   const handleChange = (field) => (event) => {
     setForm((prev) => ({ ...prev, [field]: event.target.value }));
@@ -76,6 +88,11 @@ export default function Registration() {
       return;
     }
 
+    if (!form.name.trim()) { setError("Full name is required."); return; }
+    if (!form.gender) { setError("Please select your gender."); return; }
+    if (!form.currentEducation.trim()) { setError("Current education is required."); return; }
+    if (!form.areaOfInterest) { setError("Please select an area of interest."); return; }
+
     try {
       await completeRegistration({
         name: form.name.trim(),
@@ -89,103 +106,206 @@ export default function Registration() {
         auth_user_id: user?.id,
         is_registered: true,
       });
-      setSuccess("Profile saved successfully.");
-      window.setTimeout(() => {
-        navigate("/profile", { replace: true });
-      }, 900);
+      setSuccess("Profile saved! Welcome aboard 🎉");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(err.message || "Unable to register.");
     }
   };
 
-  return (
-    <section className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#eef6ff_0%,_#dbe7ff_45%,_#f4f7fb_100%)] px-4 py-8 sm:px-6">
-      <div className="mx-auto max-w-6xl overflow-hidden rounded-[32px] border border-slate-200 bg-white/90 shadow-[0_25px_70px_rgba(37,64,116,0.12)] backdrop-blur">
-        <div className="grid gap-0 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="bg-gradient-to-br from-[#0f1c3d] via-[#123a74] to-[#1e5bd8] p-8 text-white sm:p-10">
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-cyan-200">Complete Registration</p>
-            <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Build your career profile</h1>
-            <p className="mt-4 max-w-md text-base leading-7 text-slate-200">
-              We&apos;ll use these details to personalize your assessment, save your progress, and keep the experience aligned with the backend profile record.
-            </p>
+  const inputClass =
+    "w-full rounded-xl border border-[#e2d9c8] bg-white/80 px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-[#5B7EC9] focus:ring-2 focus:ring-[#5B7EC9]/20 placeholder:text-slate-400";
 
-            <div className="mt-8 space-y-3">
-              {shortcuts.map((item) => (
-                <div key={item} className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold">
-                  {item}
-                </div>
-              ))}
-            </div>
+  const iconClass = "absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3D1F08]/40 p-4 backdrop-blur-sm overflow-y-auto">
+
+      {/* Modal Card */}
+      <div className="relative w-full max-w-[640px] overflow-hidden rounded-3xl bg-[#FAF6EC] shadow-2xl shadow-[#3D1F08]/20 pointer-events-auto my-8 border border-[#e8dfc8]">
+
+        {/* Decorative top band */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#5B7EC9] via-[#B8712E] to-[#7B4A28]" />
+
+        <div className="p-7 sm:p-9">
+
+          {/* Header */}
+          <div className="mb-7">
+            <span className="inline-flex items-center rounded-full border border-[#5B7EC9]/30 bg-[#5B7EC9]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#5B7EC9] mb-3">
+              Career Profile Setup
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#3D1F08] leading-tight">
+              Complete Your Profile
+            </h2>
+            <p className="mt-1.5 text-sm text-[#7B4A28]/80">
+              Tell us a bit about yourself to personalise your career discovery experience.
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 sm:p-10">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Row 1: Name + Email */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Full Name" value={form.name} onChange={handleChange("name")} placeholder="Your name" />
-              <Field label="Email" value={form.email} onChange={handleChange("email")} placeholder="you@example.com" />
-              <Field label="Phone" value={form.phone} onChange={handleChange("phone")} placeholder="10-digit mobile number" />
-              <Field label="Date of Birth" type="date" value={form.dateOfBirth} onChange={handleChange("dateOfBirth")} />
-              <Field label="Current Education" value={form.currentEducation} onChange={handleChange("currentEducation")} placeholder="Class 12, B.Tech, etc." />
-              <Field label="Gender" as="select" value={form.gender} onChange={handleChange("gender")} options={["", "Male", "Female", "Non-binary", "Prefer not to say"]} />
+              <Field
+                label="Full Name"
+                icon={<User size={14} className={iconClass} />}
+                value={form.name}
+                onChange={handleChange("name")}
+                placeholder="Your full name"
+                className={inputClass}
+                withIcon
+              />
+              <Field
+                label="Email Address"
+                type="email"
+                icon={<Mail size={14} className={iconClass} />}
+                value={form.email}
+                onChange={handleChange("email")}
+                placeholder="you@example.com"
+                className={inputClass}
+                withIcon
+              />
             </div>
 
-            <div className="mt-4">
-              <label className="mb-2 block text-xs font-extrabold uppercase tracking-[0.2em] text-slate-500">Area of Interest</label>
-              <select
-                value={form.areaOfInterest}
-                onChange={handleChange("areaOfInterest")}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-              >
-                <option value="">Select area of interest</option>
-                {shortcuts.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-                <option value="Other">Other</option>
-              </select>
+            {/* Row 2: Phone + Date of Birth */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label="Phone Number"
+                icon={<Phone size={14} className={iconClass} />}
+                value={form.phone}
+                onChange={handleChange("phone")}
+                placeholder="10-digit mobile number"
+                className={inputClass}
+                withIcon
+              />
+              <Field
+                label="Date of Birth"
+                type="date"
+                icon={<Calendar size={14} className={iconClass} />}
+                value={form.dateOfBirth}
+                onChange={handleChange("dateOfBirth")}
+                className={inputClass}
+                withIcon
+              />
             </div>
 
-            {error && <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>}
-            {success && <p className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">{success}</p>}
+            {/* Row 3: Current Education + Gender */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label="Current Education"
+                icon={<BookOpen size={14} className={iconClass} />}
+                value={form.currentEducation}
+                onChange={handleChange("currentEducation")}
+                className={inputClass}
+                asSelect
+                withIcon
+              />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-[#7B4A28] uppercase tracking-wider">Gender</label>
+                <div className="relative">
+                  <select
+                    value={form.gender}
+                    onChange={handleChange("gender")}
+                    className={`${inputClass} appearance-none pr-9`}
+                  >
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+            </div>
 
+            {/* Area of Interest */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-[#7B4A28] uppercase tracking-wider flex items-center gap-1.5">
+                <Briefcase size={12} />
+                Area of Interest
+              </label>
+              <div className="relative">
+                <select
+                  value={form.areaOfInterest}
+                  onChange={handleChange("areaOfInterest")}
+                  className={`${inputClass} appearance-none pr-9`}
+                >
+                  <option value="">Select your primary area of interest</option>
+                  {INTERESTS.map((item) => (
+                    <option key={item} value={item}>{item}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Error / Success */}
+            {error && (
+              <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3 text-red-700">
+                <p className="text-xs font-semibold">{error}</p>
+              </div>
+            )}
+            {success && (
+              <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-700">
+                <CheckCircle2 size={14} className="shrink-0" />
+                <p className="text-xs font-semibold">{success}</p>
+              </div>
+            )}
+
+            {/* Submit */}
             <button
               type="submit"
               disabled={authLoading}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 text-sm font-bold text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] transition hover:shadow-[0_16px_35px_rgba(37,99,235,0.32)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl bg-[#5B7EC9] hover:bg-[#4a6db8] active:bg-[#3d5ea8] py-3 text-sm font-bold text-white transition shadow-md shadow-[#5B7EC9]/30 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              {authLoading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-              Save & Continue
+              {authLoading ? (
+                <><Loader2 size={16} className="animate-spin" /> Saving...</>
+              ) : (
+                "Save & Continue →"
+              )}
             </button>
 
-            <p className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-slate-500">
-              <CheckCircle2 size={14} />
-              Your profile is saved through the authenticated backend route.
+            <p className="flex items-center justify-center gap-2 text-center text-[11px] text-slate-400">
+              <CheckCircle2 size={12} className="text-slate-400 shrink-0" />
+              Your profile is securely stored and never shared.
             </p>
           </form>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
-function Field({ label, value, onChange, type = "text", as = "input", options = [], placeholder = "" }) {
-  const baseClass =
-    "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100";
-
+function Field({ label, value, onChange, type = "text", placeholder = "", className, icon, withIcon, asSelect }) {
   return (
-    <label className="block">
-      <span className="mb-2 block text-xs font-extrabold uppercase tracking-[0.2em] text-slate-500">{label}</span>
-      {as === "select" ? (
-        <select className={baseClass} value={value} onChange={onChange}>
-          {options.map((option) => (
-            <option key={option || "empty"} value={option}>
-              {option || `Select ${label.toLowerCase()}`}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <input type={type} value={value} onChange={onChange} placeholder={placeholder} className={baseClass} />
-      )}
-    </label>
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-bold text-[#7B4A28] uppercase tracking-wider">{label}</label>
+      <div className="relative">
+        {withIcon && icon}
+        {asSelect ? (
+          <>
+            <select
+              value={value}
+              onChange={onChange}
+              className={`${className} ${withIcon ? "pl-10" : ""} appearance-none pr-9`}
+            >
+              <option value="">Select education level</option>
+              {EDUCATION_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          </>
+        ) : (
+          <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            className={`${className} ${withIcon ? "pl-10" : ""}`}
+          />
+        )}
+      </div>
+    </div>
   );
 }

@@ -68,7 +68,7 @@ export async function loginWithOAuth(code) {
   return {
     token: data.session?.access_token || "",
     user: data.user || data.session?.user || null,
-    isRegistered: false,
+    // Do NOT set isRegistered here — AuthContext restore() will fetch the real value
   };
 }
 

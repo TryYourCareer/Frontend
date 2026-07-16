@@ -280,55 +280,55 @@ export default function Roadmap() {
   }, [currentPathTotalTasks, currentPathCompletedTasksCount]);
 
   return (
-    <section className="min-h-screen bg-[#f3f6ff] px-4 py-8 sm:px-6 lg:px-10">
-      <div className="mx-auto max-w-5xl">
+    <section className="min-h-screen bg-[#FAF6EC] px-4 py-6 sm:px-6 lg:px-10">
+      <div className="mx-auto max-w-6xl">
         {/* Breadcrumbs Navigation */}
-        <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#8fa0c2] mb-6">
-          <span className="cursor-pointer hover:text-[#3748ff] transition" onClick={() => navigate("/dashboard")}>Home</span>
-          <ChevronRight size={12} className="text-[#b0c0de]" />
-          <span className="cursor-pointer hover:text-[#3748ff] transition" onClick={() => navigate("/career-reality")}>Matches</span>
-          <ChevronRight size={12} className="text-[#b0c0de]" />
-          <span className="text-[#10213f] font-black">Roadmaps</span>
-          <ChevronRight size={12} className="text-[#b0c0de]" />
-          <span className="text-[#10213f] font-black">{currentPath.title}</span>
+        <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 mb-6">
+          <span className="cursor-pointer hover:text-slate-900 transition" onClick={() => navigate("/dashboard")}>Home</span>
+          <ChevronRight size={10} className="text-slate-400" />
+          <span className="cursor-pointer hover:text-slate-900 transition" onClick={() => navigate("/career-reality")}>Matches</span>
+          <ChevronRight size={10} className="text-slate-400" />
+          <span className="text-slate-900 font-bold">Roadmaps</span>
+          <ChevronRight size={10} className="text-slate-400" />
+          <span className="text-slate-900 font-bold">{currentPath.title}</span>
         </nav>
       </div>
 
-      <div className="mx-auto max-w-5xl space-y-8">
+      <div className="mx-auto max-w-6xl space-y-6">
         
         {/* Header block */}
-        <div className="flex flex-col gap-6 rounded-[32px] border border-[#d9e4ff] bg-white p-6 shadow-[0_28px_80px_rgba(37,78,181,0.06)] md:p-8">
+        <div className="flex flex-col gap-5 rounded-3xl border border-slate-300 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#3748ff]/10 px-3 py-1.5 text-xs font-bold text-[#3748ff]">
-                  <Compass size={13} className="animate-spin" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-900/5 px-2.5 py-1 text-[10px] font-bold text-slate-800">
+                  <Compass size={12} className="animate-spin" />
                   Interactive Curated Learning Roadmap
                 </span>
               </div>
-              <h1 className="text-4xl font-black tracking-tight text-[#0f1f46] sm:text-5xl">
+              <h1 className="text-2xl font-serif font-bold text-slate-900 tracking-tight leading-tight">
                 Career Roadmap Pathways
               </h1>
-              <p className="max-w-2xl text-sm leading-relaxed text-[#556987]">
+              <p className="max-w-2xl text-xs text-slate-650 leading-relaxed">
                 Navigate your path from initial foundation modules up to advanced models and certifications. Check off milestones as you build your career portfolio.
               </p>
             </div>
             <button
               type="button"
               onClick={() => navigate("/career-reality")}
-              className="inline-flex items-center gap-2 rounded-full border border-[#d8e3ff] bg-white px-4 py-2 text-sm font-semibold text-[#344475] transition hover:bg-[#f6f8ff] self-start"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 transition hover:bg-slate-50 shadow-sm self-start"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={14} />
               Reality Board
             </button>
           </div>
 
           {/* Pathway Selector */}
-          <div className="border-t pt-6">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-3">
+          <div className="border-t border-slate-100 pt-5">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2.5">
               Select Your Target Career Path
             </label>
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2">
               {Object.entries(ROADMAP_DATA).map(([key, data]) => {
                 const isActive = activePathway === key;
                 return (
@@ -336,10 +336,10 @@ export default function Roadmap() {
                     key={key}
                     type="button"
                     onClick={() => setActivePathway(key)}
-                    className={`px-4 py-2.5 rounded-full text-xs font-bold border transition ${
+                    className={`px-3.5 py-2 rounded-full text-xs font-bold border transition ${
                       isActive
-                        ? "bg-[#3748ff] border-[#3748ff] text-white shadow-lg shadow-[#3748ff]/20"
-                        : "bg-white border-[#dcdfe7] text-[#344475] hover:bg-slate-50"
+                      ? "bg-[#0b1a36] border-[#0b1a36] text-white shadow-sm"
+                      : "bg-white border-slate-300 text-slate-800 hover:bg-slate-50"
                     }`}
                   >
                     {data.title}
@@ -351,24 +351,24 @@ export default function Roadmap() {
         </div>
 
         {/* Selected pathway detail banner */}
-        <div className={`rounded-[32px] border bg-gradient-to-r ${currentPath.color} p-6 text-white shadow-xl sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6`}>
-          <div className="space-y-3">
-            <span className="rounded-full bg-white/20 border border-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider">
+        <div className="rounded-3xl border border-slate-800 bg-[#0b1a36] p-5 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div className="space-y-2">
+            <span className="rounded-full bg-white/20 border border-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-400">
               {currentPath.category} Track
             </span>
-            <h2 className="text-3xl font-black tracking-tight">{currentPath.title} Syllabus</h2>
-            <p className="max-w-2xl text-sm leading-relaxed text-blue-50/85">
+            <h2 className="text-xl font-bold font-serif tracking-tight">{currentPath.title} Syllabus</h2>
+            <p className="max-w-2xl text-xs leading-relaxed text-blue-50/85">
               {currentPath.summary}
             </p>
-            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-white/90 pt-2">
-              <span className="flex items-center gap-1.5"><Clock size={14} /> Duration: {currentPath.duration}</span>
-              <span className="flex items-center gap-1.5"><Sliders size={14} /> Difficulty: {currentPath.difficulty}</span>
+            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-white/95 pt-2">
+              <span className="flex items-center gap-1.5"><Clock size={12} /> Duration: {currentPath.duration}</span>
+              <span className="flex items-center gap-1.5"><Sliders size={12} /> Difficulty: {currentPath.difficulty}</span>
             </div>
           </div>
 
           {/* Circular Progress Ring */}
-          <div className="shrink-0 flex items-center gap-4 bg-white/15 border border-white/10 rounded-3xl p-4 md:w-56 justify-center">
-            <div className="relative h-16 w-16 grid place-items-center">
+          <div className="shrink-0 flex items-center gap-4 bg-white/10 border border-white/5 rounded-3xl p-3.5 md:w-56 justify-center">
+            <div className="relative h-14 w-14 grid place-items-center">
               <svg className="absolute inset-0 transform -rotate-90" viewBox="0 0 36 36">
                 <path
                   className="text-white/10"
@@ -390,17 +390,17 @@ export default function Roadmap() {
                   transition={{ duration: 0.6 }}
                 />
               </svg>
-              <span className="text-sm font-black">{progressPercent}%</span>
+              <span className="text-xs font-bold">{progressPercent}%</span>
             </div>
             <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-white/80">Overall Progress</p>
-              <p className="text-xs font-black mt-0.5">{currentPathCompletedTasksCount} / {currentPathTotalTasks} Milestones</p>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-white/80">Overall Progress</p>
+              <p className="text-xs font-bold mt-0.5">{currentPathCompletedTasksCount} / {currentPathTotalTasks} Milestones</p>
             </div>
           </div>
         </div>
 
         {/* Roadmap steps flow */}
-        <div className="relative pl-6 sm:pl-8 space-y-8 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-200">
+        <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-300">
           <AnimatePresence mode="popLayout">
             {currentPath.steps.map((step, sIdx) => {
               // Check how many tasks in this step are completed
@@ -419,36 +419,36 @@ export default function Roadmap() {
                   {/* Step Connector Indicator Dot */}
                   <div className={`absolute -left-[27px] sm:-left-[31px] top-1.5 grid h-6 w-6 place-items-center rounded-full border-2 transition-all ${
                     isStepCompleted
-                      ? "bg-emerald-500 border-emerald-500 text-white shadow-md"
+                    ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
                       : completedInStep > 0
-                        ? "bg-blue-500 border-blue-500 text-white"
-                        : "bg-white border-slate-300 text-slate-400 group-hover:border-[#3748ff]"
+                      ? "bg-[#0b1a36] border-[#0b1a36] text-white"
+                      : "bg-white border-slate-400 text-slate-500 group-hover:border-[#0b1a36]"
                   } z-10`}>
                     {isStepCompleted ? <CheckCircle2 size={12} /> : <span className="text-[10px] font-black">{sIdx + 1}</span>}
                   </div>
 
                   {/* Step Card Content */}
-                  <div className="rounded-[28px] border border-slate-200 bg-white p-5 sm:p-6 shadow-[0_12px_32px_rgba(20,51,121,0.03)] hover:shadow-md transition-shadow">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <div className="rounded-3xl border border-slate-300 bg-white p-5 sm:p-6 shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                       <div>
-                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#3748ff]">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-[#0b1a36]">
                           Stage {sIdx + 1}
                         </span>
-                        <h3 className="text-xl font-bold text-[#0e1f45] mt-1">{step.title}</h3>
+                        <h3 className="text-base font-serif font-bold text-slate-900 mt-1">{step.title}</h3>
                       </div>
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100 rounded-full px-3 py-1">
-                        <Clock size={12} /> {step.estimatedTime}
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-650 bg-slate-100 border border-slate-200 rounded-full px-2.5 py-1">
+                        <Clock size={10} /> {step.estimatedTime}
                       </span>
                     </div>
 
-                    <p className="text-sm leading-relaxed text-[#556987] mb-5">
+                    <p className="text-xs leading-relaxed text-slate-650 mb-4">
                       {step.description}
                     </p>
 
                     {/* Task checklist */}
-                    <div className="space-y-2.5">
-                      <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Learning milestones:</p>
-                      <div className="grid gap-2">
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Learning milestones:</p>
+                      <div className="grid gap-1.5">
                         {step.tasks.map((task, tIdx) => {
                           const taskKey = `${activePathway}-${sIdx}-${tIdx}`;
                           const isDone = completedTasks[taskKey];
@@ -457,7 +457,7 @@ export default function Roadmap() {
                             <div
                               key={tIdx}
                               onClick={() => handleToggleTask(sIdx, tIdx)}
-                              className={`flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition ${
+                              className={`flex items-start gap-2.5 rounded-xl border p-2.5 cursor-pointer transition ${
                                 isDone
                                   ? "bg-emerald-50/20 border-emerald-250 text-slate-800"
                                   : "bg-slate-50/50 border-slate-150 hover:bg-slate-50 text-slate-700"
@@ -465,13 +465,13 @@ export default function Roadmap() {
                             >
                               <button type="button" className="mt-0.5 text-slate-400 focus:outline-none shrink-0">
                                 {isDone ? (
-                                  <CheckCircle2 size={16} className="text-emerald-555 fill-emerald-500/20" />
+                                  <CheckCircle2 size={15} className="text-emerald-600 fill-emerald-600/10" />
                                 ) : (
-                                  <Circle size={16} className="text-slate-300" />
+                                    <Circle size={15} className="text-slate-300" />
                                 )}
                               </button>
                               <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                <span className={`text-xs font-medium leading-relaxed ${isDone ? "line-through text-slate-450" : ""}`}>
+                                <span className={`text-xs font-semibold leading-relaxed ${isDone ? "line-through text-slate-400" : ""}`}>
                                   {task.name}
                                 </span>
                                 
@@ -481,10 +481,10 @@ export default function Roadmap() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center gap-1 text-[10px] font-bold text-[#3748ff] bg-[#3748ff]/5 border border-[#3748ff]/10 hover:bg-[#3748ff]/10 px-2 py-0.5 rounded-md self-start sm:self-center transition"
+                                    className="inline-flex items-center gap-1 text-[9px] font-bold text-[#0b1a36] bg-slate-200 border border-slate-300 hover:bg-slate-300 px-2 py-0.5 rounded-md self-start sm:self-center transition"
                                   >
                                     <span>{task.source} Tutorial</span>
-                                    <ExternalLink size={10} />
+                                    <ExternalLink size={8} />
                                   </a>
                                 )}
                               </div>
@@ -501,16 +501,16 @@ export default function Roadmap() {
         </div>
 
         {/* Dynamic final milestones / Placement Card */}
-        <div className="rounded-[32px] border border-[#d2dfff] bg-white p-6 shadow-lg sm:p-8 text-center max-w-xl mx-auto space-y-4">
-          <Award size={40} className="mx-auto text-emerald-500 animate-bounce" />
-          <h3 className="text-2xl font-black text-[#0f1d3c]">Complete Pathway Certification</h3>
+        <div className="rounded-3xl border border-slate-300 bg-white p-5 text-center max-w-md mx-auto space-y-3 shadow-sm">
+          <Award size={35} className="mx-auto text-emerald-500 animate-bounce" />
+          <h3 className="text-lg font-bold font-serif text-[#0f1d3c]">Complete Pathway Certification</h3>
           <p className="text-xs leading-relaxed text-slate-500">
             Once you check off all milestones for the **{currentPath.title}** path, you will unlock the graduation capstone challenge and receive your customized shareable verified completion badge!
           </p>
           <div className="pt-2">
             <button
               onClick={() => navigate("/career-reality")}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm px-6 py-3 shadow-md hover:brightness-110 transition"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold text-xs px-5 py-2.5 shadow-sm transition"
             >
               Return to Reality Dashboard
             </button>

@@ -23,7 +23,7 @@ export default function AppLayout({
   const isDark = theme === "dark";
 
   return (
-    <div className={`cc-app-layout min-h-screen ${isDark ? "bg-[#0f172a]" : "bg-[#f1f5f9]"}`}>
+    <div className={`cc-app-layout h-screen overflow-hidden ${isDark ? "bg-[#0f172a]" : "bg-[#f1f5f9]"}`}>
       {/* Sidebar */}
       <Sidebar
         activePage={activePage}
@@ -41,7 +41,7 @@ export default function AppLayout({
       />
 
       {/* Main Content Area — offset by sidebar width on desktop */}
-      <div className={`flex flex-col min-h-screen transition-all duration-350 ease-in-out ${
+      <div className={`flex flex-col h-screen overflow-hidden transition-all duration-350 ease-in-out ${
         sidebarCollapsed ? "lg:ml-[80px]" : "lg:ml-[260px]"
       }`}>
         {/* Top Bar */}
@@ -60,7 +60,7 @@ export default function AppLayout({
         />
 
         {/* Page Content */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 overflow-y-auto">
           {children}
         </main>
       </div>
