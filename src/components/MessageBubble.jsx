@@ -39,7 +39,14 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isSelf = String(message.user_id) === String(currentUserId);
-  const initials = (message.user_id || "?").slice(0, 2).toUpperCase();
+  const displayName = message.user_name || "Unknown User";
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "?";
   const gradColor = colorForUser(message.user_id);
 
   if (message.deleted) {
@@ -75,7 +82,7 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
         >
           {!isSelf && (
             <p className="text-[9px] font-bold text-slate-400 mb-0.5">
-              {initials}
+              {displayName}
             </p>
           )}
           <p className="leading-relaxed break-words whitespace-pre-wrap">{message.content}</p>
