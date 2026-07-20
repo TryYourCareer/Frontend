@@ -68,8 +68,8 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
         <div
           className={`rounded-2xl px-3.5 py-2.5 text-xs shadow-sm
             ${isSelf
-              ? "bg-[#FAF2DB] border border-slate-300 text-slate-950 rounded-br-none"
-              : "bg-white text-slate-900 rounded-bl-none border border-slate-200"
+              ? "bg-[#eff6ff] border border-[#bcd2f3] text-[#173b72] rounded-br-none"
+              : "bg-white text-slate-800 rounded-bl-none border border-slate-200"
             }
           `}
         >

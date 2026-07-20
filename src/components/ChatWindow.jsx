@@ -94,19 +94,19 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <header className="shrink-0 z-10 flex items-center justify-between border-b border-[#d7e6fb] bg-white/80 backdrop-blur-md px-4 py-3 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition"
+            className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#c6d9f7] bg-white text-[#28569e] hover:bg-[#eff6ff] transition"
           >
             <ArrowLeft size={15} />
           </button>
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-lg border border-slate-200">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#eff6ff] text-lg border border-[#bcd2f3]">
             {community.career_icon || "💬"}
           </div>
           <div>
-            <h3 className="text-xs font-bold text-slate-900 leading-none">
+            <h3 className="text-xs font-bold text-[#173b72] leading-none">
               {community.name}
             </h3>
             <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
@@ -115,18 +115,18 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
             </p>
           </div>
         </div>
-        <button className="p-1.5 rounded-full hover:bg-slate-50 text-slate-500 transition">
+        <button className="p-1.5 rounded-full hover:bg-[#eff6ff] text-[#47689f] transition">
           <Info size={16} />
         </button>
       </header>
 
       {/* Load more */}
       {hasMore && !loading && (
-        <div className="shrink-0 flex justify-center py-2 bg-[#FAF6EC]/40">
+        <div className="shrink-0 flex justify-center py-2 bg-[#eff6ff]/30">
           <button
             onClick={loadMore}
             disabled={loadingMore}
-            className="text-[11px] font-semibold text-[#0b1a36] hover:underline flex items-center gap-1"
+            className="text-[11px] font-semibold text-[#173b72] hover:underline flex items-center gap-1"
           >
             {loadingMore ? <Loader2 size={12} className="animate-spin" /> : null}
             Load older messages
