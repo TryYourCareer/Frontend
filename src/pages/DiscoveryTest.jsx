@@ -5,7 +5,7 @@ import { startTestSession, getTestQuestions, submitQuestionAnswer, submitTestSes
 import { useAuth } from "../contexts/AuthContext";
 
 export default function DiscoveryTest() {
-  const { user } = useAuth();
+  const { profile, loading } = useAuth();
   const navigate = useNavigate();
   const [testSessionId, setTestSessionId] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -23,13 +23,20 @@ export default function DiscoveryTest() {
   const displayedCount = Math.max(answeredCount, progress);
 
   useEffect(() => {
+    if (loading) return;
+    if (!profile?.id) {
+      setError("Your profile is not ready yet. Please complete registration first.");
+      setStatus("error");
+      return;
+    }
+
     let mounted = true;
 
     async function init() {
       setStatus("starting session");
       setError("");
       try {
-        const session = await startTestSession(user?.id ?? null);
+        const session = await startTestSession(profile.id);
         if (!mounted) return;
         setTestSessionId(session.test_session_id);
         setStatus("loading questions");
@@ -49,7 +56,7 @@ export default function DiscoveryTest() {
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [profile, loading]);
 
   useEffect(() => {
     async function fetchProgress() {

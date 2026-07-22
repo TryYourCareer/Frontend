@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Loader2 } from "lucide-react";
-import { fetchCurrentUser, loginWithOAuth, setAuthToken } from "../services/auth";
+import { loginWithOAuth, setAuthToken } from "../services/auth";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function OAuthCallback() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const { setTokenState, setUser, setIsRegistered } = useAuth();
+  const { setTokenState, setUser } = useAuth();
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -31,41 +30,39 @@ export default function OAuthCallback() {
 
     // If the provider returned an access token in the URL fragment, use it directly.
     if (tokenFromHash) {
-      const finishWithToken = async () => {
-        try {
-          setAuthToken(tokenFromHash);
-          setTokenState(tokenFromHash);
-          const profile = await fetchCurrentUser();
-          const registered = Boolean(profile?.isRegistered);
-          setIsRegistered(registered);
-          setUser(profile?.user || null);
-          navigate(registered ? "/profile" : "/register", { replace: true });
-        } catch (err) {
-          setError(err.message || "OAuth login failed.");
-        }
-      };
-      finishWithToken();
+      setAuthToken(tokenFromHash);
+      setTokenState(tokenFromHash);
+      // AuthContext restore() will fetch profile & isRegistered automatically.
+      // Navigate to dashboard immediately — redirect to /register happens if needed.
+      navigate("/dashboard", { replace: true });
       return;
     }
 
     // Otherwise exchange the authorization code for a session/token.
     loginWithOAuth(code)
-      .then(async (result) => {
+      .then((result) => {
         setAuthToken(result.token || "");
         setTokenState(result.token || "");
         setUser(result.user || null);
-        const profile = await fetchCurrentUser();
-        const registered = Boolean(profile?.isRegistered);
-        setIsRegistered(registered);
-        setUser(profile?.user || result.user || null);
-        navigate(registered ? "/profile" : "/register", { replace: true });
+        // AuthContext restore() will fetch profile & isRegistered automatically.
+        navigate("/dashboard", { replace: true });
       })
       .catch((err) => setError(err.message || "OAuth login failed."));
-  }, [navigate, params, setIsRegistered, setTokenState, setUser]);
+  }, [navigate, params, setTokenState, setUser]);
 
   return (
-    <div className="min-h-screen grid place-items-center bg-slate-950 text-white">
-      {error ? <p className="text-red-300">{error}</p> : <Loader2 className="animate-spin" size={28} />}
+    <div className="min-h-screen bg-[#FAF6EC] grid place-items-center">
+      {error ? (
+        <div className="text-center space-y-3">
+          <p className="text-sm font-bold text-red-600">{error}</p>
+          <button onClick={() => navigate("/login", { replace: true })} className="text-xs text-slate-500 underline">Back to login</button>
+        </div>
+      ) : (
+        <div className="text-center space-y-4">
+          <div className="mx-auto h-12 w-12 rounded-full border-4 border-[#5B7EC9] border-t-transparent animate-spin" />
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Signing you in...</p>
+        </div>
+      )}
     </div>
   );
 }

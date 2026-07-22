@@ -1,35 +1,18 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Info, Loader2, Phone, Shield } from "lucide-react";
+import { Info, Loader2, X } from "lucide-react";
 import { loginRedirect, sendOtp, verifyOtp } from "../services/auth";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Login({ onBack }) {
   const navigate = useNavigate();
-  const { setTokenState, setUser, setIsRegistered } = useAuth();
-  const [stage, setStage] = useState("phone");
+  const { setTokenState, setUser, setIsRegistered, setIsLoginOpen } = useAuth();
+  const [stage, setStage] = useState("phone"); // "phone" or "otp"
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
+  const [otp, setOtp] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  const handleOtpChange = (index, value) => {
-    if (!/^\d?$/.test(value)) return;
-    const nextOtp = [...otp];
-    nextOtp[index] = value;
-    setOtp(nextOtp);
-    if (value && index < otpRefs.length - 1) {
-      otpRefs[index + 1].current?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index, event) => {
-    if (event.key === "Backspace" && !otp[index] && index > 0) {
-      otpRefs[index - 1].current?.focus();
-    }
-  };
 
   const handleSendOtp = async (event) => {
     event.preventDefault();
@@ -50,11 +33,12 @@ export default function Login({ onBack }) {
     setErrorMessage("");
     setAuthLoading(true);
     try {
-      const result = await verifyOtp(phone, otp.join(""));
+      const result = await verifyOtp(phone, otp);
       setTokenState(result.token || "");
       setUser(result.user || null);
       setIsRegistered(Boolean(result.isRegistered));
-      navigate(result.isRegistered ? "/profile" : "/register", { replace: true });
+      if (setIsLoginOpen) setIsLoginOpen(false);
+      navigate(result.isRegistered ? "/dashboard" : "/register", { replace: true });
     } catch (error) {
       setErrorMessage(error.message || "OTP verification failed.");
     } finally {
@@ -72,149 +56,224 @@ export default function Login({ onBack }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 px-4 py-6 text-white backdrop-blur-md sm:px-6 sm:py-8">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.22)_0%,_rgba(37,99,235,0.18)_30%,_rgba(2,6,23,0.96)_100%)]" />
-      <div className="relative mx-auto flex min-h-[calc(100vh-3rem)] max-w-5xl items-center">
-        <div className="w-full overflow-hidden rounded-[34px] border border-white/10 bg-white/5 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-          <div className="border-b border-white/10 px-4 py-4 sm:px-6">
-            <div className="flex items-center justify-between gap-4">
-              <button
-                type="button"
-                onClick={onBack}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                <ChevronLeft size={16} />
-                Back
-              </button>
-              <div className="rounded-full bg-cyan-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.25em] text-cyan-200">
-                ClearCareer
-              </div>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+      {/* Backdrop */}
+      <div className="absolute inset-0 cursor-pointer" onClick={onBack} />
 
-          <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="border-b border-white/10 bg-gradient-to-br from-cyan-500/20 via-blue-500/10 to-transparent p-8 sm:p-10 lg:border-b-0 lg:border-r">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl border border-cyan-300/20 bg-white/10">
-                <Shield className="h-8 w-8 text-cyan-300" />
-              </div>
-              <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl">Secure Login</h1>
-              <p className="mt-4 max-w-md text-base leading-7 text-slate-300">
-                Sign in with OTP or Google, then we&apos;ll check `public.users` by your authenticated Supabase UUID.
-              </p>
-              <div className="mt-8 grid gap-3 text-sm text-slate-200">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">OTP verification uses the backend Supabase auth session.</div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">Registered users go to the dashboard automatically.</div>
-              </div>
-            </div>
+      {/* Modal Card */}
+      <div className="relative w-full max-w-[460px] overflow-hidden rounded-2xl bg-white p-8 shadow-2xl transition-all pointer-events-auto">
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+        >
+          <X size={20} />
+        </button>
 
-            <div className="p-6 sm:p-8">
-              <AnimatePresence mode="wait">
-                {stage === "phone" ? (
-                  <motion.form
-                    key="phone"
-                    onSubmit={handleSendOtp}
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -14 }}
-                    className="space-y-5"
-                  >
-                    <div>
-                      <label className="mb-2 block text-xs font-extrabold uppercase tracking-[0.2em] text-slate-300">
-                        Phone number
-                      </label>
-                      <div className="relative">
-                        <Phone size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-                        <input
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                          placeholder="Enter 10-digit mobile number"
-                          className="w-full rounded-2xl border border-white/10 bg-slate-950/70 py-4 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
-                        />
-                      </div>
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={authLoading || phone.length < 10}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 py-4 text-sm font-bold text-white transition hover:shadow-[0_12px_35px_rgba(34,211,238,0.25)] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {authLoading ? <Loader2 size={18} className="animate-spin" /> : "Send OTP"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleGoogleLogin}
-                      disabled={authLoading}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 py-4 text-sm font-bold text-white transition hover:bg-white/10 disabled:opacity-60"
-                    >
-                      Continue with Google
-                    </button>
-                  </motion.form>
-                ) : (
-                  <motion.form
-                    key="otp"
-                    onSubmit={handleVerifyOtp}
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -14 }}
-                    className="space-y-5"
-                  >
-                    <div>
-                      <label className="mb-2 block text-xs font-extrabold uppercase tracking-[0.2em] text-slate-300">
-                        Enter OTP
-                      </label>
-                      <div className="flex justify-between gap-2">
-                        {otp.map((digit, idx) => (
-                          <input
-                            key={idx}
-                            ref={otpRefs[idx]}
-                            value={digit}
-                            onChange={(e) => handleOtpChange(idx, e.target.value)}
-                            onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                            maxLength={1}
-                            inputMode="numeric"
-                            className="h-14 w-12 rounded-2xl border border-white/10 bg-slate-950/70 text-center text-xl font-black text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
-                          />
-                        ))}
-                      </div>
-                      <p className="mt-3 text-sm text-slate-400">Code sent to +91 {phone}</p>
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={authLoading}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 py-4 text-sm font-bold text-white transition hover:shadow-[0_12px_35px_rgba(34,211,238,0.25)] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {authLoading ? <Loader2 size={18} className="animate-spin" /> : "Verify & Continue"}
-                      <ChevronRight size={16} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setStage("phone");
-                        setOtp(["", "", "", "", "", ""]);
-                      }}
-                      className="w-full text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
-                    >
-                      Edit phone number
-                    </button>
-                  </motion.form>
-                )}
-              </AnimatePresence>
-
-              <AnimatePresence>
-                {errorMessage && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mt-6 flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4"
-                  >
-                    <Info size={16} className="mt-0.5 shrink-0 text-red-300" />
-                    <p className="text-sm font-medium text-red-100">{errorMessage}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
+        {/* Title */}
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-slate-900">Log in</h2>
+          <p className="mt-1.5 text-sm text-slate-500">
+            New user?{" "}
+            <button
+              onClick={() => {
+                if (setIsLoginOpen) setIsLoginOpen(false);
+                navigate("/register");
+              }}
+              className="font-medium text-blue-600 hover:underline"
+            >
+              Register Now
+            </button>
+          </p>
         </div>
+
+        {/* Google OAuth Button */}
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={authLoading}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <path
+              fill="#EA4335"
+              d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.68 1.54 14.98 1 12 1 7.35 1 3.4 3.65 1.49 7.56l3.85 2.99c.9-2.7 3.4-4.51 6.66-4.51z"
+            />
+            <path
+              fill="#4285F4"
+              d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.28 1.48-1.12 2.74-2.38 3.58l3.69 2.87c2.16-1.99 3.41-4.91 3.41-8.6z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.34 14.45c-.23-.69-.36-1.43-.36-2.2s.13-1.51.36-2.2L1.49 7.56C.54 9.47 0 11.62 0 13.9c0 2.28.54 4.43 1.49 6.34l3.85-2.99c-.9-2.7-3.4-4.51-6.66-4.51z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.03.69-2.35 1.1-4.27 1.1-3.26 0-5.76-1.81-6.66-4.51L1.49 17.8C3.4 21.71 7.35 23 12 23z"
+            />
+          </svg>
+          Continue with Google
+        </button>
+
+        {/* Social Icons Row */}
+        <div className="mt-4 flex items-center justify-center gap-4">
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#1877F2] hover:bg-slate-50 transition"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#0A66C2] hover:bg-slate-50 transition"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#24292F] hover:bg-slate-50 transition"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#0F9D58] hover:bg-slate-50 transition"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div className="relative my-6 flex items-center justify-center">
+          <div className="absolute inset-x-0 h-px bg-slate-200" />
+          <span className="relative bg-white px-3 text-sm text-slate-400">or</span>
+        </div>
+
+        {/* OTP Auth Form */}
+        <AnimatePresence mode="wait">
+          {stage === "phone" ? (
+            <motion.form
+              key="phone"
+              onSubmit={handleSendOtp}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  placeholder="Enter 10-digit mobile number"
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 px-3.5 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600/30"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={authLoading || phone.length < 10}
+                className="w-full rounded-lg bg-[#0f6646] py-3 text-base font-bold text-white transition hover:bg-[#0c5238] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {authLoading ? (
+                  <Loader2 size={18} className="mx-auto animate-spin" />
+                ) : (
+                  "Send OTP"
+                )}
+              </button>
+            </motion.form>
+          ) : (
+            <motion.form
+              key="otp"
+              onSubmit={handleVerifyOtp}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    Enter OTP
+                  </label>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="Enter 6-digit OTP"
+                    className="w-full rounded-lg border border-slate-200 bg-white py-2.5 px-3.5 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600/30"
+                  />
+                  <p className="mt-1.5 text-xs text-slate-400">Code sent to +91 {phone}</p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStage("phone");
+                    setOtp("");
+                  }}
+                    className="text-xs font-semibold text-blue-600 hover:underline"
+                  >
+                    Edit phone number
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={authLoading || otp.length < 6}
+                  className="w-full rounded-lg bg-[#0f6646] py-3 text-base font-bold text-white transition hover:bg-[#0c5238] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {authLoading ? (
+                    <Loader2 size={18} className="mx-auto animate-spin" />
+                  ) : (
+                    "Verify & Continue"
+                  )}
+                </button>
+            </motion.form>
+          )}
+        </AnimatePresence>
+
+        {/* Error message */}
+        <AnimatePresence>
+          {errorMessage && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-4 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-red-800"
+            >
+              <Info size={16} className="mt-0.5 shrink-0" />
+              <p className="text-xs font-medium">{errorMessage}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Disclaimer */}
+        <p className="mt-6 text-center text-xs leading-normal text-slate-400">
+          By creating this account, you agree to our{" "}
+          <button type="button" className="font-semibold text-slate-600 hover:underline">
+            Privacy Policy
+          </button>{" "}
+          &{" "}
+          <button type="button" className="font-semibold text-slate-600 hover:underline">
+            Cookie Policy
+          </button>
+          .
+        </p>
       </div>
     </div>
   );

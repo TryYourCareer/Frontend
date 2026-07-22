@@ -1,30 +1,61 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CalendarDays, CheckCircle2, Loader2, Save, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Save, Camera, AlertCircle, Loader2, ChevronDown } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
-function toInputDate(value) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().slice(0, 10);
-}
+const INTERESTS = [
+  "Technology & Digital Infrastructure",
+  "Healthcare, Medical & Life Sciences",
+  "Corporate Strategy, Business & Finance",
+  "Applied Arts, Design & Media",
+  "Engineering, Manufacturing & Heavy Industry",
+  "Public Service, Social Impact & Education",
+  "Other",
+];
+
+const EDUCATION_OPTIONS = [
+  "Class 9",
+  "Class 10 (SSC)",
+  "Class 11",
+  "Class 12 (HSC / +2)",
+  "Diploma / ITI",
+  "Bachelor's Degree (B.A / B.Sc / B.Com)",
+  "B.Tech / B.E.",
+  "B.Arch / B.Des",
+  "BBA / BMS",
+  "MBBS / BDS / BAMS",
+  "Master's Degree (M.A / M.Sc / M.Com)",
+  "M.Tech / M.E.",
+  "MBA / PGDM",
+  "LLB / LLM",
+  "PhD / Doctorate",
+  "Other",
+];
 
 export default function Profile({ profile, onRestart, onSave }) {
-  const navigate = useNavigate();
   const { saveProfile, authLoading } = useAuth();
-  const initialForm = useMemo(
-    () => ({
-      name: profile?.name || "",
-      gender: profile?.gender || "",
-      dateOfBirth: toInputDate(profile?.dateOfBirth),
-      currentEducation: profile?.currentlyPursuing || profile?.current_education || "",
-      areaOfInterest: profile?.areaOfInterest || profile?.area_of_interest || "",
+
+  const splitName = (fullName = "") => {
+    const parts = fullName.trim().split(" ");
+    return { first: parts[0] || "", last: parts.slice(1).join(" ") || "" };
+  };
+
+  const initialForm = useMemo(() => {
+    const names = splitName(profile?.name);
+    return {
+      firstName: names.first,
+      lastName: names.last,
       email: profile?.email || "",
       phone: profile?.phone || "",
-    }),
-    [profile]
-  );
+      phoneCode: "+91",
+      country: profile?.country || "India",
+      city: profile?.city || "",
+      zipCode: profile?.zipCode || "",
+      gender: profile?.gender || "",
+      dateOfBirth: profile?.dateOfBirth || "",
+      currentEducation: profile?.current_education || profile?.currentlyPursuing || "",
+      areaOfInterest: profile?.area_of_interest || profile?.areaOfInterest || "",
+    };
+  }, [profile]);
 
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState("");
@@ -34,19 +65,27 @@ export default function Profile({ profile, onRestart, onSave }) {
     setForm(initialForm);
   }, [initialForm]);
 
+  /* ── Skeleton while profile loads ── */
   if (!profile) {
     return (
-      <section className="min-h-screen bg-slate-100 px-4 py-8">
-        <div className="mx-auto max-w-3xl rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-3xl font-black text-slate-900">No profile found</h1>
-          <p className="mt-3 text-slate-600">Please complete registration to load your profile.</p>
-          <button
-            onClick={onRestart}
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white"
-          >
-            <ArrowLeft size={16} />
-            Back to start
-          </button>
+      <section className="min-h-screen bg-[#FAF6EC] px-6 py-10 text-slate-800">
+        <div className="mx-auto max-w-5xl space-y-8 animate-pulse">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-6">
+            <div className="space-y-2">
+              <div className="h-3 w-24 rounded-full bg-[#e8dfc8]" />
+              <div className="h-7 w-56 rounded-xl bg-[#e8dfc8]" />
+            </div>
+            <div className="h-9 w-28 rounded-full bg-[#e8dfc8]" />
+          </div>
+          <div className="h-24 w-24 rounded-full bg-[#e8dfc8]" />
+          <div className="grid gap-6 md:grid-cols-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-2.5 w-20 rounded-full bg-[#e8dfc8]" />
+                <div className="h-11 w-full rounded-xl bg-[#e8dfc8]" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -64,146 +103,302 @@ export default function Profile({ profile, onRestart, onSave }) {
     setSuccess("");
 
     try {
+      const combinedName = `${form.firstName} ${form.lastName}`.trim();
       const updated = await saveProfile(profile.id, {
-        name: form.name.trim(),
-        gender: form.gender,
-        age: profile.age ?? 0,
-        dateOfBirth: form.dateOfBirth,
-        current_education: form.currentEducation.trim(),
-        area_of_interest: form.areaOfInterest,
+        name: combinedName,
+        gender: form.gender || profile.gender || "",
+        dateOfBirth: form.dateOfBirth || profile.dateOfBirth,
+        current_education: form.currentEducation || profile.current_education || "",
+        area_of_interest: form.areaOfInterest || profile.area_of_interest || "",
         email: form.email.trim() || null,
         phone: form.phone.trim() || null,
+        country: form.country || null,
+        city: form.city || null,
+        zipCode: form.zipCode || null,
         is_registered: true,
       });
 
       onSave?.({
         ...profile,
         ...updated,
-        currentlyPursuing: updated?.current_education || form.currentEducation,
-        areaOfInterest: updated?.area_of_interest || form.areaOfInterest,
+        currentlyPursuing: updated?.current_education || profile.currentlyPursuing,
+        areaOfInterest: updated?.area_of_interest || profile.areaOfInterest,
       });
-      setSuccess("Profile updated successfully.");
+      setSuccess("Changes saved successfully.");
     } catch (err) {
       setError(err.message || "Unable to save profile.");
     }
   };
 
+  const inputClass =
+    "w-full rounded-xl border border-[#e2d9c8] bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#5B7EC9] focus:ring-2 focus:ring-[#5B7EC9]/20 placeholder:text-slate-400";
+
+  const labelClass = "text-xs font-bold text-[#7B4A28] uppercase tracking-wider";
+
   return (
-    <section className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#eef6ff_0%,_#dbe7ff_45%,_#f4f7fb_100%)] px-4 py-8 sm:px-6">
-      <div className="mx-auto max-w-6xl rounded-[32px] border border-slate-200 bg-white/90 shadow-[0_25px_70px_rgba(37,64,116,0.12)] backdrop-blur">
-        <div className="border-b border-slate-200 p-6 sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+    <section className="min-h-screen bg-[#FAF6EC] px-6 py-10 text-slate-800 text-left">
+      <form onSubmit={handleSubmit} className="mx-auto max-w-5xl space-y-10">
+
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#e2d9c8] pb-6">
+          <div className="flex items-center gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.28em] text-blue-600">Profile Settings</p>
-              <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">{profile.name}'s Career Profile</h1>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[#7B4A28]/60">Account</span>
+              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#3D1F08]">Personal Information</h1>
             </div>
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-            >
-              <ArrowLeft size={16} />
-              Dashboard
-            </button>
+            {authLoading && (
+              <span className="flex items-center gap-1.5 text-xs text-[#5B7EC9] font-semibold">
+                <Loader2 size={13} className="animate-spin" />
+                Saving...
+              </span>
+            )}
+            {success && !authLoading && (
+              <span className="text-xs text-emerald-600 font-semibold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                ✓ {success}
+              </span>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={authLoading}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#5B7EC9] hover:bg-[#4a6db8] px-5 py-2.5 text-xs font-bold text-white transition disabled:opacity-60 shadow-md shadow-[#5B7EC9]/20"
+          >
+            {authLoading ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+            Save Changes
+          </button>
+        </div>
+
+        {/* Avatar */}
+        <div className="flex justify-start">
+          <div className="relative group cursor-pointer">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#e2d9c8] shadow-md">
+              <img
+                src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&crop=face"
+                alt="Profile Avatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="absolute inset-0 bg-[#3D1F08]/40 rounded-full opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
+              <Camera size={18} />
+            </div>
+            <div className="absolute bottom-0 right-0 bg-[#5B7EC9] text-white p-1.5 rounded-full border-2 border-[#FAF6EC] shadow-sm">
+              <Camera size={11} />
+            </div>
           </div>
         </div>
 
-        <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
-          <form onSubmit={handleSubmit} className="space-y-5 p-6 sm:p-8">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Full Name" icon={<User size={16} />} value={form.name} onChange={handleChange("name")} />
-              <Field label="Email" value={form.email} onChange={handleChange("email")} />
-              <Field label="Phone" value={form.phone} onChange={handleChange("phone")} />
-              <Field label="Date of Birth" icon={<CalendarDays size={16} />} type="date" value={form.dateOfBirth} onChange={handleChange("dateOfBirth")} />
-            </div>
+        {/* ── Section 1: Basic Info ── */}
+        <div className="space-y-5">
+          <SectionHeading title="Basic Information" />
+          <div className="grid gap-5 md:grid-cols-2">
+            <FormField label="First Name" className={labelClass}>
+              <input
+                type="text"
+                value={form.firstName}
+                onChange={handleChange("firstName")}
+                placeholder="First name"
+                className={inputClass}
+              />
+            </FormField>
 
-            <Field
-              label="Currently Pursuing"
-              as="select"
-              value={form.currentEducation}
-              onChange={handleChange("currentEducation")}
-              options={["10th Grade", "12th Grade", "Bachelor's Degree", "Master's Degree", "PhD", "Professional Certification"]}
-            />
-            <Field
-              label="Gender"
-              as="select"
-              value={form.gender}
-              onChange={handleChange("gender")}
-              options={["", "Male", "Female", "Non-binary", "Prefer not to say"]}
-            />
-            <Field
-              label="Area of Interest"
-              as="select"
-              value={form.areaOfInterest}
-              onChange={handleChange("areaOfInterest")}
-              options={["Technology & Digital Infrastructure", "Healthcare, Medical & Life Sciences", "Corporate Strategy, Business & Finance", "Applied Arts, Design & Media", "Engineering, Manufacturing & Heavy Industry", "Public Service, Social Impact & Education", "Other"]}
-            />
+            <FormField label="Last Name" className={labelClass}>
+              <input
+                type="text"
+                value={form.lastName}
+                onChange={handleChange("lastName")}
+                placeholder="Last name"
+                className={inputClass}
+              />
+            </FormField>
 
-            {error && <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>}
-            {success && <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">{success}</p>}
+            <FormField label="Email Address" className={labelClass}>
+              <input
+                type="email"
+                value={form.email}
+                onChange={handleChange("email")}
+                placeholder="you@example.com"
+                className={inputClass}
+              />
+            </FormField>
 
-            <button
-              type="submit"
-              disabled={authLoading}
-              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 text-sm font-bold text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] transition disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {authLoading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-              Save Profile
-            </button>
-          </form>
-
-          <aside className="border-t border-slate-200 bg-slate-50 p-6 sm:p-8 lg:border-l lg:border-t-0">
-            <div className="rounded-[24px] border border-blue-100 bg-white p-6 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.25em] text-blue-600">Backend-linked profile</p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
-                Your edits are saved through the authenticated backend update route, so the same data is available for assessment and dashboard screens.
-              </p>
-              <div className="mt-5 space-y-3 text-sm">
-                <InfoRow label="Profile ID" value={String(profile.id)} />
-                <InfoRow label="Education" value={form.currentEducation || "Not set"} />
-                <InfoRow label="Interest" value={form.areaOfInterest || "Not set"} />
+            <FormField label="Phone Number" className={labelClass}>
+              <div className="flex rounded-xl border border-[#e2d9c8] overflow-hidden focus-within:ring-2 focus-within:ring-[#5B7EC9]/20 focus-within:border-[#5B7EC9] bg-white">
+                <select
+                  value={form.phoneCode}
+                  onChange={handleChange("phoneCode")}
+                  className="bg-transparent pl-4 pr-2 py-3 text-sm text-slate-600 outline-none border-r border-[#e2d9c8]"
+                >
+                  <option value="+91">+91 (IN)</option>
+                  <option value="+1">+1 (US)</option>
+                  <option value="+44">+44 (UK)</option>
+                  <option value="+880">+880 (BD)</option>
+                </select>
+                <input
+                  type="text"
+                  value={form.phone}
+                  onChange={handleChange("phone")}
+                  placeholder="Mobile number"
+                  className="flex-1 bg-transparent px-4 py-3 text-sm text-slate-800 outline-none"
+                />
               </div>
-              <div className="mt-6 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700">
-                <CheckCircle2 className="mr-2 inline-block" size={16} />
-                Changes persist immediately after save.
+            </FormField>
+
+            <FormField label="Gender" className={labelClass}>
+              <div className="relative">
+                <select
+                  value={form.gender}
+                  onChange={handleChange("gender")}
+                  className={`${inputClass} appearance-none pr-9`}
+                >
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Non-binary">Non-binary</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
-            </div>
-          </aside>
+            </FormField>
+
+            <FormField label="Date of Birth" className={labelClass}>
+              <input
+                type="date"
+                value={form.dateOfBirth}
+                onChange={handleChange("dateOfBirth")}
+                className={inputClass}
+              />
+            </FormField>
+          </div>
         </div>
-      </div>
+
+        {/* ── Section 2: Academic & Career ── */}
+        <div className="space-y-5">
+          <SectionHeading title="Academic & Career" />
+          <div className="grid gap-5 md:grid-cols-2">
+            <FormField label="Current Education" className={labelClass}>
+              <div className="relative">
+                <select
+                  value={form.currentEducation}
+                  onChange={handleChange("currentEducation")}
+                  className={`${inputClass} appearance-none pr-9`}
+                >
+                  <option value="">Select education level</option>
+                  {EDUCATION_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
+            </FormField>
+
+            <FormField label="Area of Interest" className={labelClass}>
+              <div className="relative">
+                <select
+                  value={form.areaOfInterest}
+                  onChange={handleChange("areaOfInterest")}
+                  className={`${inputClass} appearance-none pr-9`}
+                >
+                  <option value="">Select your area of interest</option>
+                  {INTERESTS.map((item) => (
+                    <option key={item} value={item}>{item}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
+            </FormField>
+          </div>
+        </div>
+
+        {/* ── Section 3: Location ── */}
+        <div className="space-y-5">
+          <SectionHeading title="Location" />
+          <div className="grid gap-5 md:grid-cols-3">
+            <FormField label="Country" className={labelClass}>
+              <div className="relative">
+                <select
+                  value={form.country}
+                  onChange={handleChange("country")}
+                  className={`${inputClass} appearance-none pr-9`}
+                >
+                  <option value="India">India</option>
+                  <option value="United States">United States</option>
+                  <option value="United Kingdom">United Kingdom</option>
+                  <option value="Bangladesh">Bangladesh</option>
+                  <option value="Canada">Canada</option>
+                  <option value="Australia">Australia</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
+            </FormField>
+
+            <FormField label="City" className={labelClass}>
+              <input
+                type="text"
+                value={form.city}
+                onChange={handleChange("city")}
+                placeholder="Your city"
+                className={inputClass}
+              />
+            </FormField>
+
+            <FormField label="ZIP / Postal Code" className={labelClass}>
+              <input
+                type="text"
+                value={form.zipCode}
+                onChange={handleChange("zipCode")}
+                placeholder="e.g. 110001"
+                className={inputClass}
+              />
+            </FormField>
+          </div>
+        </div>
+
+        {error && (
+          <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-red-700 text-xs font-semibold">
+            <AlertCircle size={14} className="mt-0.5 shrink-0" />
+            {error}
+          </div>
+        )}
+
+        {/* ── Danger Zone ── */}
+        <div className="border-t border-[#e2d9c8] pt-8 space-y-4">
+          <h2 className="text-base font-serif font-bold text-[#3D1F08]">Delete Account</h2>
+          <div className="flex items-start gap-3 rounded-xl bg-white p-4 border border-[#e2d9c8] text-xs text-slate-600 shadow-sm">
+            <AlertCircle size={15} className="mt-0.5 shrink-0 text-slate-400" />
+            <p>
+              After making a deletion request, you will have{" "}
+              <strong className="text-slate-900">6 months</strong> to maintain this account before permanent deletion.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="rounded-xl border border-red-200 text-red-600 hover:bg-red-50 px-4 py-2.5 text-xs font-bold transition bg-white"
+          >
+            Request Account Deletion
+          </button>
+        </div>
+
+      </form>
     </section>
   );
 }
 
-function Field({ label, value, onChange, type = "text", as = "input", options = [], icon }) {
-  const baseClass =
-    "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100";
-
+function SectionHeading({ title }) {
   return (
-    <label className="block">
-      <span className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.2em] text-slate-500">
-        {icon}
-        {label}
-      </span>
-      {as === "select" ? (
-        <select className={baseClass} value={value} onChange={onChange}>
-          {options.map((option) => (
-            <option key={option || "empty"} value={option}>
-              {option || `Select ${label.toLowerCase()}`}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <input className={baseClass} type={type} value={value} onChange={onChange} />
-      )}
-    </label>
+    <div className="flex items-center gap-3">
+      <h2 className="text-xs font-bold uppercase tracking-widest text-[#7B4A28]/70">{title}</h2>
+      <div className="flex-1 h-px bg-[#e2d9c8]" />
+    </div>
   );
 }
 
-function InfoRow({ label, value }) {
+function FormField({ label, children, className }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-      <span className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">{label}</span>
-      <span className="text-sm font-semibold text-slate-800">{value}</span>
+    <div className="flex flex-col gap-1.5">
+      <label className={className || "text-xs font-bold text-[#7B4A28] uppercase tracking-wider"}>
+        {label}
+      </label>
+      {children}
     </div>
   );
 }

@@ -68,7 +68,7 @@ export async function loginWithOAuth(code) {
   return {
     token: data.session?.access_token || "",
     user: data.user || data.session?.user || null,
-    isRegistered: false,
+    // Do NOT set isRegistered here — AuthContext restore() will fetch the real value
   };
 }
 
@@ -95,6 +95,11 @@ export async function getSupabaseSession() {
   const { data, error } = await supabase.auth.getSession();
   if (error) throw new Error(error.message);
   return data?.session || null;
+}
+
+export async function supabaseSignOut() {
+  if (!supabase) return;
+  await supabase.auth.signOut();
 }
 
 export async function updateCurrentUser(userId, payload) {

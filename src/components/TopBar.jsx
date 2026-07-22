@@ -1,19 +1,22 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, Search, Bell, ChevronLeft
+  Menu, Search, Bell
 } from "lucide-react";
+
 
 export default function TopBar({
   onToggleMobileSidebar,
   user,
   onOpenProfile,
+  onOpenAuth,
   searchQuery = "",
   onSearchChange,
   onSearchSubmit,
   clusterResults = [],
   onSelectCluster,
   theme = "light",
+  onToggleTheme,
 }) {
   const isDark = theme === "dark";
   const [searchFocused, setSearchFocused] = useState(false);
@@ -23,7 +26,7 @@ export default function TopBar({
     <header
       className={`cc-topbar h-20 sticky top-0 z-30 flex items-center justify-between gap-3 border-b px-4 py-2.5 sm:px-6 backdrop-blur-xl ${isDark
         ? "border-slate-800/80 bg-slate-950/90"
-        : "border-[#e2e8f0] bg-white/95 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+        : "border-slate-400 bg-[#FAF6EC]/95"
         }`}
     >
       {/* Left: Mobile hamburger + sidebar toggle */}
@@ -33,7 +36,7 @@ export default function TopBar({
           onClick={onToggleMobileSidebar}
           className={`rounded-lg p-2 transition lg:hidden ${isDark
             ? "text-slate-400 hover:bg-slate-800 hover:text-white"
-            : "text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#334155]"
+            : "text-slate-650 hover:bg-slate-900/5 hover:text-slate-900"
             }`}
           aria-label="Toggle sidebar"
         >
@@ -41,16 +44,16 @@ export default function TopBar({
         </button>
 
         {/* Collapse toggle for desktop — visible as a subtle chevron */}
-        <button
+        {/* <button
           type="button"
           className={`hidden lg:flex items-center justify-center rounded-lg p-1.5 transition ${isDark
             ? "text-slate-500 hover:bg-slate-800 hover:text-slate-300"
-            : "text-[#94a3b8] hover:bg-[#f1f5f9] hover:text-[#475569]"
+            : "text-slate-400 hover:bg-slate-900/5 hover:text-slate-800"
             }`}
           aria-label="Toggle sidebar"
         >
           <ChevronLeft size={18} />
-        </button>
+        </button> */}
       </div>
 
       {/* Center: Search bar */}
@@ -69,7 +72,7 @@ export default function TopBar({
           placeholder="Search careers..."
           className={`w-full rounded-xl border py-2 pl-10 pr-4 text-sm font-medium outline-none transition ${isDark
             ? "border-slate-700 bg-slate-900/80 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15"
-            : "border-[#e2e8f0] bg-[#f8fafc] text-[#1e293b] placeholder:text-[#94a3b8] focus:border-[#3b82f6] focus:bg-white focus:ring-2 focus:ring-[#3b82f6]/10"
+            : "border-slate-900/5 bg-white text-[#0b1a36] placeholder:text-slate-400 focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-stone-200/50"
             }`}
         />
 
@@ -116,6 +119,7 @@ export default function TopBar({
 
       {/* Right: User info */}
       <div className="flex items-center gap-2 sm:gap-3">
+
         {/* Notification bell */}
         <button
           type="button"
@@ -128,18 +132,29 @@ export default function TopBar({
           <Bell size={18} />
         </button>
 
-        {/* User avatar + name */}
+        {/* User avatar + name or Login Option */}
+        {user ? (
           <button
             type="button"
             onClick={onOpenProfile}
-            className={`hidden sm:flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-left transition hover:-translate-y-0.5 hover:shadow-sm ${isDark ? "bg-slate-800/60 hover:bg-slate-800" : "bg-[#f8fafc] hover:bg-white"
-              }`}
+            className={`hidden sm:flex items-center gap-2.5 rounded-full p-0.5 transition hover:scale-105`}
             aria-label="Open profile"
           >
-            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
-              {user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
-            </div>
+            <img
+              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face"
+              alt="User Profile"
+              className="h-8 w-8 rounded-full object-cover border border-slate-200"
+            />
           </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onOpenAuth}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:opacity-90 transition"
+          >
+            Login / Sign-up
+          </button>
+        )}
       </div>
     </header>
   );

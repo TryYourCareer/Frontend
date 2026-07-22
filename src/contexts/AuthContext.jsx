@@ -8,6 +8,7 @@ import {
   registerProfile,
   updateCurrentUser,
   setAuthToken,
+  supabaseSignOut,
 } from "../services/auth";
 
 const AuthContext = createContext(null);
@@ -22,6 +23,8 @@ export function AuthProvider({ children }) {
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
+
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   const loginWithPhone = async ({ phone, otp }) => {
     setAuthLoading(true);
@@ -42,7 +45,7 @@ export function AuthProvider({ children }) {
       const result = await loginWithOAuth(code);
       setTokenState(result.token || "");
       setUser(result.user || null);
-      setIsRegistered(Boolean(result.isRegistered));
+      // isRegistered will be set by the restore() effect once token updates
       return result;
     } finally {
       setAuthLoading(false);
@@ -74,12 +77,15 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = useCallback((shouldNavigate = true) => {
+  const logout = useCallback(async (shouldNavigate = true) => {
+    try {
+      await supabaseSignOut();
+    } catch { /* ignore */ }
     setTokenState("");
     setUser(null);
     setProfile(null);
     setIsRegistered(false);
-    if (shouldNavigate) navigate("/login", { replace: true });
+    if (shouldNavigate) navigate("/", { replace: true });
   }, [navigate]);
 
   useEffect(() => {
@@ -149,8 +155,10 @@ export function AuthProvider({ children }) {
       setTokenState,
       setUser,
       setIsRegistered,
+      isLoginOpen,
+      setIsLoginOpen,
     }),
-    [token, user, profile, isRegistered, loading, authLoading, logout]
+    [token, user, profile, isRegistered, loading, authLoading, logout, isLoginOpen]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

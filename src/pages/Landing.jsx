@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Hero from "../components/Hero";
 import careersData from "../data/clearcareers_data.json";
+import LandingNavbar from "../components/LandingNavbar";
+import LandingFooter from "../components/LandingFooter";
 
 export default function Landing({
   onStartDiscovery,
@@ -19,6 +21,7 @@ export default function Landing({
   searchQuery = "",
   onSearchChange,
 }) {
+
   const [careers] = useState(
     (careersData || [])
       .map((item) => ({
@@ -30,14 +33,26 @@ export default function Landing({
   const isDark = theme === "dark";
 
   return (
-    <div className={`min-h-full transition-colors duration-300 ${isDark ? "bg-[#0f172a]" : "bg-[#f1f5f9]"}`}>
-      {/* Main content — no more inline sidebar or Navbar, handled by AppLayout */}
-      <Hero
-        onStartDiscovery={onStartDiscovery}
-        onExploreCareers={onExploreCareers}
-        careersCount={careers.length}
+    <div className={`min-h-screen transition-colors duration-300 flex flex-col ${isDark ? "bg-[#0f172a]" : "bg-[#FAF6EC]"}`}>
+      {/* Separated Sticky Top Navbar */}
+      <LandingNavbar
         isDark={isDark}
+        onExploreCareers={onExploreCareers}
+        onStartDiscovery={onStartDiscovery}
       />
+
+      {/* Main content */}
+      <div className="flex-1">
+        <Hero
+          onStartDiscovery={onStartDiscovery}
+          onExploreCareers={onExploreCareers}
+          careersCount={careers.length}
+          isDark={isDark}
+        />
+      </div>
+
+      {/* Landing Footer */}
+      <LandingFooter isDark={isDark} />
     </div>
   );
 }
