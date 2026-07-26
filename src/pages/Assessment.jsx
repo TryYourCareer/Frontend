@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -21,6 +21,7 @@ export default function Assessment() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const savesRef = useRef(new Map());
 
   const currentQuestion = questions[currentIndex];
   const currentAnswer = currentQuestion ? (answers[currentQuestion.question_id] || "") : "";
@@ -64,7 +65,7 @@ export default function Assessment() {
       }
     }
     fetchProgress();
-  }, [testSessionId, answers]);
+  }, [testSessionId]);
 
   const handleAnswer = (optionId) => {
     if (!currentQuestion) return;
@@ -78,32 +79,48 @@ export default function Assessment() {
 
   const handleNext = async () => {
     if (!currentQuestion || !currentAnswer?.trim() || !testSessionId) return;
-    setIsSubmitting(true);
     setError("");
 
-    try {
-      await submitQuestionAnswer({
-        testSessionId,
-        questionId: currentQuestion.question_id,
-        selectedOptionId: currentQuestion.question_type === "open_text" ? null : currentAnswer,
-        responseText: currentQuestion.question_type === "open_text" ? currentAnswer.trim() : null,
-        responseTimeMs: null,
-      });
-      setProgress((prev) => Math.max(prev, answeredCount));
-      if (currentIndex === totalQuestions - 1) {
+    const questionId = currentQuestion.question_id;
+    // Launch save in background
+    const savePromise = submitQuestionAnswer({
+      testSessionId,
+      questionId,
+      selectedOptionId: currentQuestion.question_type === "open_text" ? null : currentAnswer,
+      responseText: currentQuestion.question_type === "open_text" ? currentAnswer.trim() : null,
+      responseTimeMs: null,
+    }).then((res) => {
+      savesRef.current.delete(questionId);
+      return res;
+    }).catch((err) => {
+      savesRef.current.delete(questionId);
+      setError("Some answers failed to save in background. Please check connection.");
+      throw err;
+    });
+
+    savesRef.current.set(questionId, savePromise);
+
+    // Optimistically update progress and advance index
+    setProgress((prev) => Math.max(prev, answeredCount));
+
+    if (currentIndex === totalQuestions - 1) {
+      setIsSubmitting(true);
+      try {
+        // Wait for all background saves to finish
+        await Promise.all(savesRef.current.values());
         setStatus("analyzing");
         await submitTestSession(testSessionId);
         setTimeout(() => {
           setStatus("completed");
         }, 3000);
-        return;
+      } catch (err) {
+        setError(err.message || "Failed to save all answers or submit test.");
+        setIsSubmitting(false);
       }
-      setCurrentIndex((prev) => prev + 1);
-    } catch (err) {
-      setError(err.message || "Failed to save answer.");
-    } finally {
-      setIsSubmitting(false);
+      return;
     }
+
+    setCurrentIndex((prev) => prev + 1);
   };
 
   const handlePrevious = () => {

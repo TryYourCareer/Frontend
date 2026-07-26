@@ -31,6 +31,20 @@ const EDUCATION_OPTIONS = [
   "Other",
 ];
 
+function formatDateToYYYYMMDD(dateVal) {
+  if (!dateVal) return "";
+  try {
+    const d = new Date(dateVal);
+    if (Number.isNaN(d.getTime())) return "";
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  } catch {
+    return "";
+  }
+}
+
 export default function Profile({ profile, onRestart, onSave }) {
   const { saveProfile, authLoading } = useAuth();
 
@@ -49,9 +63,9 @@ export default function Profile({ profile, onRestart, onSave }) {
       phoneCode: "+91",
       country: profile?.country || "India",
       city: profile?.city || "",
-      zipCode: profile?.zipCode || "",
+      zipCode: profile?.zipCode || profile?.zip_code || "",
       gender: profile?.gender || "",
-      dateOfBirth: profile?.dateOfBirth || "",
+      dateOfBirth: formatDateToYYYYMMDD(profile?.dateOfBirth) || "",
       currentEducation: profile?.current_education || profile?.currentlyPursuing || "",
       areaOfInterest: profile?.area_of_interest || profile?.areaOfInterest || "",
     };
@@ -107,7 +121,7 @@ export default function Profile({ profile, onRestart, onSave }) {
       const updated = await saveProfile(profile.id, {
         name: combinedName,
         gender: form.gender || profile.gender || "",
-        dateOfBirth: form.dateOfBirth || profile.dateOfBirth,
+        dateOfBirth: form.dateOfBirth || null,
         current_education: form.currentEducation || profile.current_education || "",
         area_of_interest: form.areaOfInterest || profile.area_of_interest || "",
         email: form.email.trim() || null,

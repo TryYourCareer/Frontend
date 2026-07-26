@@ -13,6 +13,20 @@ function calculateAge(dateOfBirth) {
   return age;
 }
 
+function formatDateToYYYYMMDD(dateVal) {
+  if (!dateVal) return "";
+  try {
+    const d = new Date(dateVal);
+    if (Number.isNaN(d.getTime())) return "";
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  } catch {
+    return "";
+  }
+}
+
 const INTERESTS = [
   "Technology & Digital Infrastructure",
   "Healthcare, Medical & Life Sciences",
@@ -66,6 +80,7 @@ export default function Registration() {
       phone: profile?.phone || user?.phone || prev.phone,
       name: profile?.name || user?.user_metadata?.full_name || prev.name,
       gender: profile?.gender || prev.gender,
+      dateOfBirth: profile?.dateOfBirth ? formatDateToYYYYMMDD(profile.dateOfBirth) : prev.dateOfBirth,
       currentEducation: profile?.current_education || prev.currentEducation,
       areaOfInterest: profile?.area_of_interest || prev.areaOfInterest,
     }));
@@ -100,7 +115,7 @@ export default function Registration() {
         phone: form.phone.trim() || user?.phone || null,
         gender: form.gender,
         age,
-        dateOfBirth: form.dateOfBirth,
+        dateOfBirth: form.dateOfBirth || null,
         current_education: form.currentEducation.trim(),
         area_of_interest: form.areaOfInterest,
         auth_user_id: user?.id,
