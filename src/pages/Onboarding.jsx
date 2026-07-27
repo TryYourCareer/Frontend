@@ -6,12 +6,30 @@ import { registerUser } from "../services/users";
 import { useAuth } from "../contexts/AuthContext";
 
 function calculateAge(dateOfBirth) {
-  const birthDate = new Date(dateOfBirth);
+  if (!dateOfBirth) return null;
+  const match = String(dateOfBirth).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) {
+    const d = new Date(dateOfBirth);
+    if (Number.isNaN(d.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const monthOffset = today.getMonth() - d.getMonth();
+    if (monthOffset < 0 || (monthOffset === 0 && today.getDate() < d.getDate())) age -= 1;
+    return age;
+  }
+  const birthYear = parseInt(match[1], 10);
+  const birthMonth = parseInt(match[2], 10);
+  const birthDay = parseInt(match[3], 10);
+
   const today = new Date();
-  if (Number.isNaN(birthDate.getTime()) || birthDate > today) return null;
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthOffset = today.getMonth() - birthDate.getMonth();
-  if (monthOffset < 0 || (monthOffset === 0 && today.getDate() < birthDate.getDate())) age -= 1;
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth() + 1; // 1-indexed
+  const todayDay = today.getDate();
+
+  let age = todayYear - birthYear;
+  if (todayMonth < birthMonth || (todayMonth === birthMonth && todayDay < birthDay)) {
+    age -= 1;
+  }
   return age;
 }
 

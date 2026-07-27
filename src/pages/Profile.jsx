@@ -34,11 +34,25 @@ const EDUCATION_OPTIONS = [
 function formatDateToYYYYMMDD(dateVal) {
   if (!dateVal) return "";
   try {
+    if (dateVal instanceof Date) {
+      const year = dateVal.getFullYear();
+      const month = String(dateVal.getMonth() + 1).padStart(2, "0");
+      const day = String(dateVal.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    if (typeof dateVal === "string") {
+      const match = dateVal.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        return `${match[1]}-${match[2]}-${match[3]}`;
+      }
+    }
+
     const d = new Date(dateVal);
     if (Number.isNaN(d.getTime())) return "";
-    const year = d.getUTCFullYear();
-    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(d.getUTCDate()).padStart(2, "0");
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   } catch {
     return "";
@@ -106,7 +120,14 @@ export default function Profile({ profile, onRestart, onSave }) {
   }
 
   const handleChange = (field) => (event) => {
-    setForm((prev) => ({ ...prev, [field]: event.target.value }));
+    let value = event.target.value;
+    if (field === "phone") {
+      value = value.replace(/\D/g, "");
+      if (value.length > 10) {
+        value = value.slice(0, 10);
+      }
+    }
+    setForm((prev) => ({ ...prev, [field]: value }));
     setError("");
     setSuccess("");
   };
@@ -115,6 +136,12 @@ export default function Profile({ profile, onRestart, onSave }) {
     event.preventDefault();
     setError("");
     setSuccess("");
+
+    const phoneClean = form.phone.replace(/\D/g, "");
+    if (phoneClean && phoneClean.length !== 10) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
 
     try {
       const combinedName = `${form.firstName} ${form.lastName}`.trim();
@@ -125,7 +152,7 @@ export default function Profile({ profile, onRestart, onSave }) {
         current_education: form.currentEducation || profile.current_education || "",
         area_of_interest: form.areaOfInterest || profile.area_of_interest || "",
         email: form.email.trim() || null,
-        phone: form.phone.trim() || null,
+        phone: phoneClean || null,
         country: form.country || null,
         city: form.city || null,
         zipCode: form.zipCode || null,
@@ -248,7 +275,7 @@ export default function Profile({ profile, onRestart, onSave }) {
                   <option value="+880">+880 (BD)</option>
                 </select>
                 <input
-                  type="text"
+                  type="tel"
                   value={form.phone}
                   onChange={handleChange("phone")}
                   placeholder="Mobile number"
