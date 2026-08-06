@@ -7,6 +7,7 @@
  *   onMemberChange (isMember: boolean) => void
  *   onClick       () => void   — navigate to community chat
  */
+import { useNavigate } from "react-router-dom";
 import JoinLeaveButton from "./JoinLeaveButton";
 
 const STATUS_COLORS = {
@@ -26,8 +27,14 @@ function getStatus(count) {
 }
 
 export default function CareerCard({ career, isMember, onMemberChange, onClick }) {
+  const navigate = useNavigate();
   const status = getStatus(career.member_count);
   const colorClass = STATUS_COLORS[status] || STATUS_COLORS.New;
+
+  const handleViewDetails = (e) => {
+    e.stopPropagation();
+    navigate(`/career-details/${encodeURIComponent(career.name)}`);
+  };
 
   return (
     <div
@@ -43,12 +50,16 @@ export default function CareerCard({ career, isMember, onMemberChange, onClick }
     >
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-xl border border-slate-200">
+        <div
+          onClick={handleViewDetails}
+          className="flex items-center gap-3 cursor-pointer hover:opacity-85 group/header"
+          title="View Career Details"
+        >
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-xl border border-slate-200 group-hover/header:border-blue-400 group-hover/header:bg-[#eff6ff] transition-all">
             {career.icon_url}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-bold text-slate-900 truncate leading-tight">
+            <p className="text-xs font-bold text-[#173b72] truncate leading-tight group-hover/header:text-blue-600 group-hover/header:underline">
               {career.name}
             </p>
             <span className={`mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold ${colorClass}`}>

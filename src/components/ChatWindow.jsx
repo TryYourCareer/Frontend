@@ -7,12 +7,14 @@
  *   onBack        () => void   (mobile back button)
  */
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Info, Loader2, Send } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Info, Loader2, Send, Paperclip } from "lucide-react";
 import useCommunityMessages from "../hooks/useCommunityMessages";
 import MessageBubble from "./MessageBubble";
 import api from "../lib/api";
 
 export default function ChatWindow({ community, currentUserId, onBack }) {
+  const navigate = useNavigate();
   const { messages, loading, error, hasMore, loadingMore, loadMore } =
     useCommunityMessages(community?.id);
 
@@ -22,6 +24,10 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
 
+  const fileInputRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState(null); // { file, name, type, previewUrl }
+  const [replyTo, setReplyTo] = useState(null); // message object
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -30,21 +36,118 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Clean up selected file object URL to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (selectedFile?.previewUrl) {
+        URL.revokeObjectURL(selectedFile.previewUrl);
+      }
+    };
+  }, [selectedFile]);
+
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    let type = "file";
+    if (file.type.startsWith("image/")) {
+      type = "image";
+    } else if (file.type.startsWith("video/")) {
+      type = "video";
+    } else if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+      type = "pdf";
+    }
+
+    if (selectedFile?.previewUrl) {
+      URL.revokeObjectURL(selectedFile.previewUrl);
+    }
+
+    setSelectedFile({
+      file,
+      name: file.name,
+      type,
+      previewUrl: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+    });
+  };
+
+  const handleCancelFile = () => {
+    if (selectedFile?.previewUrl) {
+      URL.revokeObjectURL(selectedFile.previewUrl);
+    }
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   // -----------------------------------------------------------------------
   // Send a new message
   // -----------------------------------------------------------------------
   const handleSend = async () => {
     const content = text.trim();
-    if (!content || sending) return;
+    if ((!content && !selectedFile) || sending) return;
     setSending(true);
     setSendError(null);
     setText("");
+
+    let uploadedAttachment = null;
+    const currentFile = selectedFile;
+    const currentReplyTo = replyTo;
+
+    if (currentFile) {
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+    if (currentReplyTo) {
+      setReplyTo(null);
+    }
+
     try {
-      await api.post(`/api/communities/${community.id}/messages`, { content });
+      if (currentFile) {
+        const formData = new FormData();
+        formData.append("file", currentFile.file);
+        const uploadRes = await api.upload("/api/communities/upload", formData);
+        uploadedAttachment = {
+          url: uploadRes.url,
+          type: uploadRes.type,
+          name: uploadRes.name,
+        };
+      }
+
+      let finalContent = content || "";
+      if (currentReplyTo) {
+        const cleanContent = currentReplyTo.content
+          ? currentReplyTo.content.replace(/^↳ Replying to @[^:]+:[^\n]+\n\n/, "")
+          : "";
+        const replyPreview = cleanContent
+          ? cleanContent.substring(0, 60).replace(/\n/g, " ")
+          : (currentReplyTo.attachment_url ? `[${currentReplyTo.attachment_type || "Attachment"}]` : "");
+        finalContent = `↳ Replying to @${currentReplyTo.user_name || "User"}: ${replyPreview}\n\n${finalContent}`;
+      }
+
+      await api.post(`/api/communities/${community.id}/messages`, {
+        content: finalContent,
+        attachment_url: uploadedAttachment?.url || null,
+        attachment_type: uploadedAttachment?.type || null,
+        attachment_name: uploadedAttachment?.name || null,
+      });
       // Realtime will push the new message via the subscription
     } catch (err) {
       setSendError(err.message || "Failed to send message.");
-      setText(content); // restore
+      if (currentFile) {
+        setSelectedFile(currentFile);
+      } else {
+        setText(content); // restore
+      }
+      if (currentReplyTo) {
+        setReplyTo(currentReplyTo);
+      }
     } finally {
       setSending(false);
       inputRef.current?.focus();
@@ -58,18 +161,35 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
     const msg = messages.find((m) => m.id === messageId);
     if (!msg) return;
     setEditingId(messageId);
-    setEditText(msg.content);
+    
+    const replyRegex = /^↳ Replying to @([^:]+): ([^\n]+)\n\n([\s\S]*)$/;
+    const match = msg.content?.match(replyRegex);
+    setEditText(match ? match[3] : msg.content);
   };
 
   const handleEditSubmit = async () => {
     if (!editingId) return;
     try {
-      await api.patch(`/api/messages/${editingId}`, { content: editText.trim() });
+      const msg = messages.find((m) => m.id === editingId);
+      let newContent = editText.trim();
+      if (msg) {
+        const replyRegex = /^↳ Replying to @([^:]+): ([^\n]+)\n\n([\s\S]*)$/;
+        const match = msg.content?.match(replyRegex);
+        if (match) {
+          newContent = `↳ Replying to @${match[1]}: ${match[2]}\n\n${newContent}`;
+        }
+      }
+      await api.patch(`/api/messages/${editingId}`, { content: newContent });
       setEditingId(null);
       setEditText("");
     } catch (err) {
       setSendError(err.message || "Failed to edit message.");
     }
+  };
+
+  const handleReply = (message) => {
+    setReplyTo(message);
+    inputRef.current?.focus();
   };
 
   // -----------------------------------------------------------------------
@@ -115,7 +235,15 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
             </p>
           </div>
         </div>
-        <button className="p-1.5 rounded-full hover:bg-[#eff6ff] text-[#47689f] transition">
+        <button
+          onClick={() => {
+            if (community.career_name) {
+              navigate(`/career-details/${encodeURIComponent(community.career_name)}`);
+            }
+          }}
+          className="p-1.5 rounded-full hover:bg-[#eff6ff] text-[#47689f] transition"
+          title="View Career Details"
+        >
           <Info size={16} />
         </button>
       </header>
@@ -168,6 +296,7 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
             currentUserId={currentUserId}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onReply={handleReply}
           />
         ))}
         <div ref={messagesEndRef} />
@@ -206,13 +335,79 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
         </div>
       )}
 
+      {/* Reply banner */}
+      {replyTo && (
+        <div className="shrink-0 mx-4 mb-2 p-2.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3 animate-fade-in z-10">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold text-slate-500">
+              Replying to <span className="text-[#173b72]">@{replyTo.user_name || "User"}</span>
+            </p>
+            <p className="text-xs text-slate-600 truncate mt-0.5">
+              {replyTo.content ? replyTo.content.replace(/^↳ Replying to @[^:]+:[^\n]+\n\n/, "") : (replyTo.attachment_url ? `[${replyTo.attachment_type || "Attachment"}]` : "")}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setReplyTo(null)}
+            className="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded-lg hover:bg-red-50 transition shrink-0"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
       {/* Send error */}
       {sendError && (
         <p className="shrink-0 text-center text-[10px] text-red-500 px-4 pb-1">{sendError}</p>
       )}
 
+      {/* Selected file preview */}
+      {selectedFile && (
+        <div className="shrink-0 mx-4 mb-2 p-2 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3 animate-fade-in z-10">
+          <div className="flex items-center gap-3 min-w-0">
+            {selectedFile.type === "image" && selectedFile.previewUrl ? (
+              <img
+                src={selectedFile.previewUrl}
+                alt="Upload preview"
+                className="h-10 w-10 object-cover rounded-lg border border-slate-200"
+              />
+            ) : (
+              <div className="h-10 w-10 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center text-lg shrink-0">
+                {selectedFile.type === "video" ? "🎥" : selectedFile.type === "pdf" ? "📄" : "📁"}
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-[#173b72] truncate">{selectedFile.name}</p>
+              <p className="text-[9px] text-slate-400 capitalize">{selectedFile.type}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleCancelFile}
+            className="text-xs text-red-500 hover:text-red-700 px-2.5 py-1 rounded-lg hover:bg-red-50 transition shrink-0"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
       {/* Input bar */}
       <footer className="shrink-0 z-10 bg-white border-t border-slate-200 p-3 flex items-center gap-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,video/*,application/pdf"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={handleAttachmentClick}
+          disabled={sending || !!editingId}
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 shadow-sm transition disabled:opacity-40"
+        >
+          <Paperclip size={14} />
+        </button>
         <input
           ref={inputRef}
           type="text"
@@ -226,7 +421,7 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
         <button
           type="button"
           onClick={handleSend}
-          disabled={sending || !!editingId || !text.trim()}
+          disabled={sending || !!editingId || (!text.trim() && !selectedFile)}
           className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white shadow-sm transition disabled:opacity-40"
         >
           {sending

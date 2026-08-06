@@ -74,6 +74,32 @@ const api = {
   post:   (path, body)  => request("POST",   path, body),
   patch:  (path, body)  => request("PATCH",  path, body),
   delete: (path)        => request("DELETE", path),
+  upload: async (path, formData) => {
+    const headers = {};
+    const token = _token || localStorage.getItem("clearcareers_auth_token") || "";
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+
+    if (!res.ok) {
+      let detail = `HTTP ${res.status}`;
+      try {
+        const err = await res.json();
+        detail = err.detail || JSON.stringify(err);
+      } catch {
+        // ignore JSON parse errors
+      }
+      const error = new Error(detail);
+      error.status = res.status;
+      throw error;
+    }
+    return res.json();
+  },
 };
 
 export default api;
