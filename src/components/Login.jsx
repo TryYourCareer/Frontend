@@ -25,6 +25,24 @@ export default function Login({ onBack }) {
     }
   };
 
+  const handleMicrosoftLogin = async () => {
+    setErrorMessage("");
+    try {
+      await loginRedirect("azure");
+    } catch (error) {
+      setErrorMessage(error.message || "Microsoft sign-in failed.");
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    setErrorMessage("");
+    try {
+      await loginRedirect("apple");
+    } catch (error) {
+      setErrorMessage(error.message || "Apple sign-in failed.");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
       {/* Backdrop */}
@@ -77,17 +95,33 @@ export default function Login({ onBack }) {
           Continue with Google
         </button>
 
-        {/* LinkedIn OAuth Button */}
+        {/* Microsoft OAuth Button */}
         <button
           type="button"
-          onClick={handleLinkedInLogin}
+          onClick={handleMicrosoftLogin}
           disabled={authLoading}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0A66C2] py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#09559f] hover:shadow active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
         >
-          <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+          <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <rect x="3" y="3" width="8" height="8" fill="#F35325" />
+            <rect x="13" y="3" width="8" height="8" fill="#81BC06" />
+            <rect x="3" y="13" width="8" height="8" fill="#05A6F0" />
+            <rect x="13" y="13" width="8" height="8" fill="#FFBA08" />
           </svg>
-          Continue with LinkedIn
+          Continue with Microsoft
+        </button>
+
+        {/* Apple / iOS OAuth Button */}
+        <button
+          type="button"
+          onClick={handleAppleLogin}
+          disabled={authLoading}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 384 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path d="M318.7 268.7c-.2-54.9 44.6-81.4 46.6-82.7-25.5-37.3-65.1-42.4-79-43-33.6-3.4-65.5 19.9-82.6 19.9-17 0-43.7-19.4-71.9-18.9-36.9.6-71.1 21.5-90.1 54.6C5 285.5 33.7 387.3 70.7 442.7c18 27.2 39.4 57.7 67.5 56.6 26.8-1.1 36.9-17.5 69.2-17.5 32.1 0 41.5 17.5 69.6 16.9 28.5-.6 46.6-27.7 64.3-55 20.3-30.9 28.7-60.9 29-62.4-.7-.3-55.6-21.4-55.7-84.7zM259.1 74.4c15.6-18.9 26-45.1 23.1-71.4-22.3 1.1-49.2 14.8-65.2 33.7-14.3 17.3-26.7 44.9-23.4 71.4 24.7 1.9 50-12.6 65.5-33.7z" />
+          </svg>
+          Continue with iOS
         </button>
 
         {/* Divider */}

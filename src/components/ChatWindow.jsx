@@ -11,10 +11,12 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Info, Loader2, Send, Paperclip } from "lucide-react";
 import useCommunityMessages from "../hooks/useCommunityMessages";
 import MessageBubble from "./MessageBubble";
+import CommunityInfo from "./CommunityInfo";
 import api from "../lib/api";
 
 export default function ChatWindow({ community, currentUserId, onBack }) {
   const navigate = useNavigate();
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
   const { messages, loading, error, hasMore, loadingMore, loadMore } =
     useCommunityMessages(community?.id);
 
@@ -215,7 +217,7 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
       <header className="shrink-0 z-10 flex items-center justify-between border-b border-[#d7e6fb] bg-white/80 backdrop-blur-md px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setShowInfoPanel(true)}>
           <button
             onClick={onBack}
             className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#c6d9f7] bg-white text-[#28569e] hover:bg-[#eff6ff] transition"
@@ -235,17 +237,6 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => {
-            if (community.career_name) {
-              navigate(`/career-details/${encodeURIComponent(community.career_name)}`);
-            }
-          }}
-          className="p-1.5 rounded-full hover:bg-[#eff6ff] text-[#47689f] transition"
-          title="View Career Details"
-        >
-          <Info size={16} />
-        </button>
       </header>
 
       {/* Load more */}
@@ -430,6 +421,13 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
           }
         </button>
       </footer>
+      {showInfoPanel && (
+        <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-sm" onClick={() => setShowInfoPanel(false)}>
+          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <CommunityInfo community={community} onBack={() => setShowInfoPanel(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

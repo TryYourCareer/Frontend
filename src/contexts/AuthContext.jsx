@@ -10,6 +10,7 @@ import {
   setAuthToken,
   supabaseSignOut,
 } from "../services/auth";
+import { setApiToken } from "../lib/api";
 
 const AuthContext = createContext(null);
 
@@ -90,6 +91,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     setAuthToken(token);
+    setApiToken(token);
     if (token) {
       localStorage.setItem(TOKEN_KEY, token);
     } else {

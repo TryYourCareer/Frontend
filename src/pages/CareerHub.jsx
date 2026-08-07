@@ -33,7 +33,7 @@ function useDebounce(value, delay = 300) {
 // ---------------------------------------------------------------------------
 export default function CareerHub() {
   const { user, token } = useAuth();
-  const currentUserId = user?.id || "";
+  const currentUserId = user?.auth_user_id || user?.id || "";
 
   // All careers (from /api/careers)
   const [careers, setCareers] = useState([]);
