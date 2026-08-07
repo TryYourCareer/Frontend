@@ -1,314 +1,345 @@
 import { useState } from "react";
-import { ArrowLeft, Clock, TrendingUp, Activity, CheckCircle2, DollarSign, Wrench, BookOpen, AlertCircle, ChevronRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Brain,
+  Cpu,
+  Bot,
+  Code,
+  Sparkles,
+  UserCheck,
+  Shield,
+} from "lucide-react";
+import RoleDetail from "./RoleDetail";
 
-const CAREERS_DATA = {
-  "software engineer": {
-    title: "Software Engineer",
-    tagline: "Build products, solve problems, and ship real software.",
-    demandBadge: "High Demand – 12% Growth",
-    medianSalary: "₹15 LPA",
-    icon: "💻",
-    timeline: [
-      { time: "09:00 AM", title: "Standup Meeting", description: "Sync with your team on progress, blockers, and priorities.", icon: "🗣️" },
-      { time: "10:00 AM", title: "Deep Work (Coding)", description: "Focus on writing and refining code for a feature or bug fix.", icon: "💻" },
-      { time: "02:00 PM", title: "Debugging", description: "Track down issues, reproduce bugs, and verify fixes.", icon: "🔍" },
-      { time: "04:00 PM", title: "Code Review", description: "Review teammates' changes and improve code quality together.", icon: "✅" },
+const AIML_ROLES_DATA = {
+  aiml_intern: {
+    key: "aiml_intern",
+    title: "AI / ML Intern",
+    category: "Entry Level (0–2 Yrs)",
+    salary: "₹5–12 LPA",
+    experienceTier: "Entry Level (0–2 Years)",
+    icon: Code,
+    matchScore: 95,
+    tagline:
+      "Learn fundamentals, support data pipelines, and write basic code under supervision.",
+    summary:
+      "An entry-level position focused on mastering AI/ML fundamentals, supporting data pipelines, and writing baseline code under senior guidance.",
+    keyTasks: [
+      "Assisting senior engineers with dataset preparation and cleaning.",
+      "Running baseline model performance checks and validating data pipelines.",
+      "Writing simple automation scripts and documenting empirical findings.",
+      "Reviewing project execution updates and participating in daily team syncs.",
     ],
-    realityCheck: [
-      "You will read a lot of other people's code.",
-      "Frequent meetings are part of the job, even on coding days.",
-      "Debugging can be frustrating, but it teaches you how systems work.",
-    ],
-    proInsights: [
-      "Beginner mistake: copy-pasting without understanding the flow.",
-      "Real-world skills: clear communication and code readability.",
-      "College rarely prepares you for complex legacy systems.",
-    ],
-    hardSkills: ["JavaScript", "Python", "React", "Git", "SQL", "AWS"],
-    softSkills: ["Problem Solving", "Communication", "Teamwork", "Adaptability"],
-    educationPathways: ["B.S. Computer Science", "Coding Bootcamps", "Self-Learning"],
+    preparation:
+      "BSc CS / B.Tech or self-taught learning via online certifications (Coursera, deeplearning.ai, fast.ai), bootcamps, and GitHub portfolio projects.",
+    dailyFocus:
+      "Learning framework workflows, cleaning messy datasets, and assisting with code reviews.",
   },
-  "data scientist": {
-    title: "Data Scientist",
-    tagline: "Uncover insights, build data models, and tell data stories.",
-    demandBadge: "Extreme Demand – 35% Growth",
-    medianSalary: "₹16 LPA",
-    icon: "📊",
-    timeline: [
-      { time: "09:30 AM", title: "Data Standup", description: "Coordinate analytics priorities with product teams.", icon: "🗣️" },
-      { time: "10:30 AM", title: "Data Wrangling & Pipeline Clean", description: "Clean missing attributes, format dates, and query databases.", icon: "🧹" },
-      { time: "02:00 PM", title: "Model Training & Validation", description: "Run regression algorithms, compute confidence coefficients.", icon: "🤖" },
-      { time: "04:30 PM", title: "Insight Presentation", description: "Draft slides or dashboard visual maps for stakeholders.", icon: "📈" },
+  junior_ai_engineer: {
+    key: "junior_ai_engineer",
+    title: "Junior AI Engineer",
+    category: "Entry Level (0–2 Yrs)",
+    salary: "₹5–12 LPA",
+    experienceTier: "Entry Level (0–2 Years)",
+    icon: Cpu,
+    matchScore: 92,
+    tagline:
+      "Clean messy datasets, engineer model features, and run baseline accuracy evaluations.",
+    summary:
+      "Focuses on hands-on data wrangling, feature engineering, and evaluating initial machine learning model accuracy metrics.",
+    keyTasks: [
+      "Deep diving into raw datasets to clean bad or missing data.",
+      "Engineering key data features for upcoming model training runs.",
+      "Evaluating model accuracy using metrics like precision, recall, and F1-score.",
+      "Collaborating with software engineers and data analysts in daily standups.",
     ],
-    realityCheck: [
-      "80% of your time will be spent cleaning and formatting messy data.",
-      "Stakeholders will frequently ask for simple summaries rather than complex models.",
-      "Accuracy metrics don't matter if the model isn't deployable.",
-    ],
-    proInsights: [
-      "Beginner mistake: jumping to deep neural nets when simple regression suffices.",
-      "Understand the business logic before coding the mathematical solution.",
-      "SQL is your most important daily skill, even more than machine learning libraries.",
-    ],
-    hardSkills: ["Python", "SQL", "Pandas & NumPy", "Scikit-Learn", "Tableau", "R"],
-    softSkills: ["Analytical Thinking", "Data Storytelling", "Critical Thinking", "Stakeholder Alignment"],
-    educationPathways: ["B.S. Statistics/Math", "Data Analytics Bootcamps", "Self-Learning"],
+    preparation:
+      "Strong Python & SQL fundamentals, linear algebra/statistics foundation, and hands-on practice with Scikit-Learn, PyTorch, or TensorFlow.",
+    dailyFocus:
+      "60-70% of time spent on data cleaning, feature engineering, and debugging basic scripts.",
   },
-  "ai engineer": {
-    title: "AI Engineer",
-    tagline: "Build neural nets, train models, and deploy intelligent agents.",
-    demandBadge: "Extreme Demand – 40% Growth",
-    medianSalary: "₹22 LPA",
-    icon: "🧠",
-    timeline: [
-      { time: "09:00 AM", title: "Model Sync", description: "Discuss training runs, loss curves, and resource usage.", icon: "🗣️" },
-      { time: "10:00 AM", title: "Model Architecture Design", description: "Write training loops and structure network architectures.", icon: "🧠" },
-      { time: "02:00 PM", title: "GPU Grid Operations", description: "Launch and monitor distributed GPU jobs on the cloud.", icon: "⚡" },
-      { time: "04:30 PM", title: "Integration Testing", description: "Serve trained model endpoints via FastAPI and run validation tests.", icon: "🔌" },
+  ai_engineer: {
+    key: "ai_engineer",
+    title: "AI / ML Engineer",
+    category: "Mid Level (3–7 Yrs)",
+    salary: "₹12–30 LPA",
+    experienceTier: "Mid Level (3–7 Years)",
+    icon: Brain,
+    matchScore: 92,
+    tagline:
+      "Design, build, and train intelligent machine learning models that learn from data.",
+    summary:
+      "Sits at the intersection of mathematics, software engineering, and data science to build systems that learn from data and make smart decisions without being explicitly programmed.",
+    keyTasks: [
+      "Building and training production ML models and adjusting hyperparameters.",
+      "Writing clean, modular code and submitting work for peer review.",
+      "Monitoring performance dashboards and optimizing model execution speed.",
+      "Syncing daily with product managers, data analysts, and backend teams.",
     ],
-    realityCheck: [
-      "Hyperparameter tuning can feel like endless trial and error.",
-      "Training models takes hours, during which you'll monitor log curves.",
-      "Deploying model weights is highly complex and systems-heavy.",
+    schedule: [
+      {
+        time: "09:00 AM",
+        task: "Review model performance dashboards & overnight project updates.",
+      },
+      {
+        time: "11:00 AM",
+        task: "Deep dive into datasets: clean bad data & engineer features.",
+      },
+      {
+        time: "01:00 PM",
+        task: "Team standup: sync with engineers, PMs, and data analysts.",
+      },
+      {
+        time: "03:00 PM",
+        task: "Train and test ML models, adjust hyperparameters, document findings.",
+      },
+      {
+        time: "05:00 PM",
+        task: "Optimize model accuracy/efficiency; submit code for peer review.",
+      },
+      {
+        time: "07:00 PM",
+        task: "Continuous upskilling: read research papers or complete online modules.",
+      },
     ],
-    proInsights: [
-      "Beginner mistake: not tracking training parameters and weight checkpoints.",
-      "Data quality determines model accuracy. Better data > complex model.",
-      "Learn Linux and docker early; AI systems depend heavily on system configs.",
-    ],
-    hardSkills: ["Python", "PyTorch", "TensorFlow", "FastAPI", "Docker", "CUDA"],
-    softSkills: ["System Design", "Cognitive Reasoning", "Patience", "Research Skills"],
-    educationPathways: ["M.S. Computer Science / AI", "AI Certifications", "Self-Learning"],
+    preparation:
+      "3+ years of software/ML experience, strong system design, PyTorch/TensorFlow expertise, and MLOps deployment knowledge.",
+    dailyFocus:
+      "Training models, hyperparameter tuning, MLOps integrations, and cross-team alignment.",
   },
-  "full stack developer": {
-    title: "Full Stack Developer",
-    tagline: "Design front-end layouts and construct secure back-end databases.",
-    demandBadge: "Very High Demand – 15% Growth",
-    medianSalary: "₹14 LPA",
-    icon: "📦",
-    timeline: [
-      { time: "09:00 AM", title: "Agile Standup", description: "Sync on frontend state management and API integration blockers.", icon: "🗣️" },
-      { time: "10:00 AM", title: "Frontend Layout Styling", description: "Construct responsive pages, hover triggers, and input forms.", icon: "🎨" },
-      { time: "02:00 PM", title: "API Development", description: "Write backend controllers, secure routes, and index queries.", icon: "⚙️" },
-      { time: "04:00 PM", title: "Review & CI/CD", description: "Push commits to Git and verify production test suites.", icon: "🚀" },
+  senior_ai_engineer: {
+    key: "senior_ai_engineer",
+    title: "Senior AI Engineer",
+    category: "Senior Level (8+ Yrs)",
+    salary: "₹30–70+ LPA",
+    experienceTier: "Senior Level (8+ Years)",
+    icon: Sparkles,
+    matchScore: 88,
+    tagline:
+      "Optimize neural architecture efficiency, debug model weights, and lead technical peer reviews.",
+    summary:
+      "Leads complex model development, solves layered technical problems with no clear answers, and reviews peer code for scalability and accuracy.",
+    keyTasks: [
+      "Architecting robust model training pipelines and distributed training jobs.",
+      "Performing deep code and performance reviews across technical teams.",
+      "Tuning advanced neural architectures and debugging complex data edge cases.",
+      "Mentoring junior/mid-level AI engineers on production best practices.",
     ],
-    realityCheck: [
-      "JavaScript library frameworks change extremely frequently.",
-      "Debugging client state synchronizations requires deep persistence.",
-      "CSS layout alignment can take surprisingly long to perfect.",
+    preparation:
+      "8+ years in software engineering / ML, proven experience shipping models to scale, and strong architectural reasoning.",
+    dailyFocus:
+      "Complex problem solving, model architecture design, code reviews, and high-level debugging.",
+  },
+  ai_architect: {
+    key: "ai_architect",
+    title: "AI Architect",
+    category: "Senior Level (8+ Yrs)",
+    salary: "₹30–70+ LPA",
+    experienceTier: "Senior Level (8+ Years)",
+    icon: Bot,
+    matchScore: 85,
+    tagline:
+      "Design large-scale enterprise AI infrastructure, model deployment pipelines, and cloud strategies.",
+    summary:
+      "Focuses on designing end-to-end AI system infrastructure, selecting frameworks, and bridging machine learning models with enterprise software architecture.",
+    keyTasks: [
+      "Designing scalable data pipelines and real-time model inference services.",
+      "Selecting appropriate cloud services, GPU resources, and ML frameworks.",
+      "Establishing technical governance, security protocols, and system reliability.",
+      "Solving multi-step system design challenges across complex technical stacks.",
     ],
-    proInsights: [
-      "Beginner mistake: trying to learn 5 frameworks at once. Master core HTML/JS first.",
-      "Good developers write robust tests; don't rely only on local manual clicks.",
-      "API design rules (REST standards) are vital for scalable team collaboration.",
+    preparation:
+      "Deep expertise in distributed systems, cloud computing (AWS/GCP), MLOps, Docker/Kubernetes, and enterprise software architecture.",
+    dailyFocus:
+      "System architecture diagrams, cloud resource allocation, tech stack evaluation, and cross-team alignment.",
+  },
+  director_of_ai: {
+    key: "director_of_ai",
+    title: "Director of AI",
+    category: "Elite Roles (Top 1%)",
+    salary: "₹1 Crore+ LPA",
+    experienceTier: "Executive Leadership",
+    icon: UserCheck,
+    matchScore: 82,
+    tagline:
+      "Oversee organization-wide AI strategy, manage cross-functional data teams, and drive business impact.",
+    summary:
+      "Executive leadership role responsible for setting organization-wide AI strategy, managing team structures, and aligning technical delivery with business growth.",
+    keyTasks: [
+      "Managing multidisciplinary engineering, data science, and product teams.",
+      "Defining high-level technical direction and AI product roadmaps.",
+      "Allocating computational infrastructure budgets and engineering headcount.",
+      "Ensuring AI initiatives deliver measurable business ROI and strategic value.",
     ],
-    hardSkills: ["JavaScript/TypeScript", "React / Next.js", "Node.js & Express", "SQL & NoSQL", "Git", "CSS"],
-    softSkills: ["Rapid Adaptability", "Visual Ergonomics", "Coordination", "Logical Reasoning"],
-    educationPathways: ["B.S. Software Engineering", "Full Stack Bootcamps", "Self-Learning"],
-  }
+    preparation:
+      "10+ years of technical leadership, track record of managing engineering organizations, and business strategy acumen.",
+    dailyFocus:
+      "Resource allocation, executive leadership syncs, strategic planning, and organizational design.",
+  },
+  caio_founder: {
+    key: "caio_founder",
+    title: "Chief AI Officer / Founder",
+    category: "Elite Roles (Top 1%)",
+    salary: "₹1 Crore+ LPA",
+    experienceTier: "Executive Leadership / Entrepreneur",
+    icon: Shield,
+    matchScore: 80,
+    tagline:
+      "Steer corporate AI innovation, establish governance frameworks, and build cutting-edge technology.",
+    summary:
+      "Highest executive or founder level responsible for total AI vision, proprietary technology stack strategy, or building an AI-first startup venture.",
+    keyTasks: [
+      "Driving company-wide technology innovation and core vision.",
+      "Representing AI strategy to board members, investors, and enterprise clients.",
+      "Setting ethical, governance, and compliance frameworks for AI safety.",
+      "Pioneering market-shifting AI applications and proprietary IP development.",
+    ],
+    preparation:
+      "Extensive industry authority, venture-building capability, or top-tier technical expertise paired with business leadership.",
+    dailyFocus:
+      "Company vision, investor relations, ethical governance, and high-impact technology partnerships.",
+  },
 };
 
-const TABS = [
-  { key: "day", label: "Day in the Life", icon: Clock },
-  { key: "reality", label: "Reality Check", icon: AlertCircle },
-  { key: "pro", label: "Pro Insights", icon: TrendingUp },
+const FILTER_TABS = [
+  { key: "all", label: " All Roles" },
+  { key: "entry", label: " Entry Level" },
+  { key: "mid_senior", label: " Mid/Senior Level" },
+  { key: "leadership", label: " Executive & Leadership" },
 ];
 
-export default function CareerReality({ onBack, careerTitle = "" }) {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("day");
+export default function CareerReality({ onBack }) {
+  const [currentView, setCurrentView] = useState("list");
+  const [selectedRoleKey, setSelectedRoleKey] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
 
-  const normalizedKey = String(careerTitle || "").trim().toLowerCase();
-  const careerData = CAREERS_DATA[normalizedKey] || CAREERS_DATA["software engineer"];
+  const rolesList = Object.values(AIML_ROLES_DATA);
+
+  const filteredRoles = rolesList.filter((role) => {
+    if (activeTab === "entry") return role.category.includes("Entry Level");
+    if (activeTab === "mid_senior")
+      return (
+        role.category.includes("Mid Level") ||
+        role.category.includes("Senior Level")
+      );
+    if (activeTab === "leadership")
+      return (
+        role.category.includes("Executive") ||
+        role.category.includes("Elite Roles")
+      );
+    return true;
+  });
+
+  const handleOpenRoleDetail = (key) => {
+    setSelectedRoleKey(key);
+    setCurrentView("detail");
+  };
+
+  const handleBackToList = () => {
+    setCurrentView("list");
+    setSelectedRoleKey(null);
+  };
+
+  if (currentView === "detail" && selectedRoleKey) {
+    const role =
+      AIML_ROLES_DATA[selectedRoleKey] || AIML_ROLES_DATA.ai_engineer;
+    return <RoleDetail role={role} onBack={handleBackToList} />;
+  }
 
   return (
-    <>
-      <section className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-10">
-        <div className="mx-auto max-w-6xl">
-          {/* Breadcrumbs Navigation */}
-          <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 mb-6">
-            <span className="cursor-pointer hover:text-slate-900 transition" onClick={() => navigate("/dashboard")}>Home</span>
-            <ChevronRight size={10} className="text-slate-400" />
-            <span className="cursor-pointer hover:text-slate-900 transition" onClick={onBack}>Matches</span>
-            <ChevronRight size={10} className="text-slate-400" />
-            <span className="cursor-pointer hover:text-slate-900 transition" onClick={onBack}>Technology Cluster</span>
-            <ChevronRight size={10} className="text-slate-400" />
-            <span className="text-slate-900 font-bold">{careerData.title}</span>
-          </nav>
-        </div>
+    <section className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-10">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <h1 className="font-serif text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              AI / ML Career Cluster
+            </h1>
+            <p className="max-w-3xl text-xs leading-relaxed text-slate-600 sm:text-sm">
+              Explore 7 specialized AI/ML roles spanning entry-level, senior, and
+              executive pathways. Click any role card arrow button to open its
+              dedicated details page.
+            </p>
+          </div>
 
-        <div className="mx-auto max-w-6xl space-y-6">
-
-          {/* Back button */}
           {onBack && (
-            <button onClick={onBack} className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-800 transition hover:bg-slate-50 shadow-sm">
-              <ArrowLeft size={14} />
-              Back
+            <button
+              onClick={onBack}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm transition hover:bg-slate-50"
+            >
+              <ArrowLeft size={16} />
             </button>
           )}
-
-          <div className="grid gap-4 lg:grid-cols-[1.7fr_0.9fr] lg:items-start">
-            <div className="space-y-4">
-
-              {/* Career header card */}
-              <div className="rounded-3xl border border-slate-300 bg-white p-5 shadow-sm">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#FAF2DB] text-2xl border border-slate-200 shadow-sm">
-                      {careerData.icon}
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-450">Career Reality Check</p>
-                      <h1 className="mt-1 text-xl font-serif font-bold text-slate-900">{careerData.title}</h1>
-                      <p className="mt-1.5 text-xs leading-relaxed text-slate-650">{careerData.tagline}</p>
-                    </div>
-                  </div>
-
-                  <div className="shrink-0 space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700 sm:w-56">
-                    <div className="flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-slate-800">
-                      <Activity size={12} className="shrink-0" />
-                      {careerData.demandBadge}
-                    </div>
-                    <div className="flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 font-bold text-slate-900">
-                      <DollarSign size={12} className="shrink-0" />
-                      Median: {careerData.medianSalary}
-                    </div>
-                    <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0b1a36] hover:bg-[#122b59] px-4 py-2.5 text-xs font-bold text-white transition">
-                      <TrendingUp size={12} className="shrink-0" />
-                      Start Trial Mission
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tabs card */}
-              <div className="rounded-3xl border border-slate-300 bg-white p-5 shadow-sm">
-                <div className="flex flex-wrap gap-2 border-b border-slate-100 pb-3">
-                  {TABS.map(({ key, label, icon: Icon }) => (
-                    <button key={key} type="button" onClick={() => setActiveTab(key)}
-                      className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition ${activeTab === key ? "bg-[#0b1a36] text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-205"}`}
-                    >
-                      <Icon size={12} />
-                      {label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="mt-4 min-h-[200px] cc-fadein">
-                  {activeTab === "day" && (
-                    <div className="space-y-4">
-                      <p className="text-xs leading-relaxed text-slate-650">This career is built around focus, collaboration, and consistent problem solving. Here's what a realistic day can look like.</p>
-                      <ul className="space-y-4 border-l border-slate-200 pl-4">
-                        {careerData.timeline.map((item) => (
-                          <li key={item.time} className="relative pl-1">
-                            <span className="absolute -left-[1.35rem] top-1 flex h-3 w-3 items-center justify-center rounded-full border-2 border-slate-800 bg-white">
-                              <span className="h-1 w-1 rounded-full bg-slate-800" />
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">{item.icon}</span>
-                              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">{item.time}</span>
-                            </div>
-                            <h3 className="mt-1 text-xs font-bold text-slate-900">{item.title}</h3>
-                            <p className="mt-0.5 text-xs leading-relaxed text-slate-600">{item.description}</p>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {activeTab === "reality" && (
-                    <div className="space-y-3 cc-fadein">
-                      <h2 className="flex items-center gap-2 text-sm font-bold font-serif text-slate-900">
-                        <AlertCircle size={15} className="text-amber-600" />
-                        The Unglamorous Truth
-                      </h2>
-                      <p className="text-xs leading-relaxed text-slate-650">Software engineering is exciting, but it also comes with real challenges. Students should know that the job often includes time-consuming maintenance work, collaboration overhead, and repeated debugging cycles.</p>
-                      <ul className="space-y-2">
-                        {careerData.realityCheck.map((point) => (
-                          <li key={point} className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5">
-                            <AlertCircle size={14} className="mt-0.5 shrink-0 text-amber-500" />
-                            <span className="text-xs text-slate-700">{point}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {activeTab === "pro" && (
-                    <div className="space-y-3 cc-fadein">
-                      <h2 className="flex items-center gap-2 text-sm font-bold font-serif text-slate-900">
-                        <TrendingUp size={15} className="text-emerald-700" />
-                        Pro Insights
-                      </h2>
-                      <ul className="space-y-2">
-                        {careerData.proInsights.map((insight) => (
-                          <li key={insight} className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5">
-                            <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-emerald-600" />
-                            <span className="text-xs text-slate-700">{insight}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Sidebar */}
-            <aside className="space-y-4 lg:sticky lg:top-8">
-              <div className="rounded-3xl border border-slate-300 bg-white p-5 shadow-sm">
-                <h2 className="flex items-center gap-1.5 text-sm font-bold font-serif text-slate-900">
-                  <Wrench size={14} className="text-slate-800" />
-                  Core Tools & Skills
-                </h2>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {careerData.hardSkills.map((skill) => (
-                    <span key={skill} className="rounded-full bg-[#FAF2DB] px-3 py-1 text-xs font-bold text-slate-950 border border-slate-200 shadow-sm">{skill}</span>
-                  ))}
-                </div>
-                <div className="mt-4">
-                  <h3 className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">
-                    <Activity size={10} />
-                    Soft Skills
-                  </h3>
-                  <div className="mt-2 grid gap-1.5">
-                    {careerData.softSkills.map((skill) => (
-                      <div key={skill} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-                        <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
-                        {skill}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-slate-300 bg-white p-5 shadow-sm">
-                <h2 className="flex items-center gap-1.5 text-sm font-bold font-serif text-slate-900">
-                  <BookOpen size={14} className="text-slate-850" />
-                  Education Pathways
-                </h2>
-                <ul className="mt-3 space-y-2">
-                  {careerData.educationPathways.map((pathway) => (
-                    <li key={pathway} className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-700">
-                      <GraduationCapIcon />
-                      {pathway}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </aside>
-          </div>
         </div>
-      </section>
-    </>
-  );
-}
 
-function GraduationCapIcon() {
-  return (
-    <svg className="h-4 w-4 shrink-0 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" />
-    </svg>
+        {/* Filter Pills */}
+        <div className="flex flex-wrap gap-2 pt-2">
+          {FILTER_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className={`rounded-full px-4 py-2 text-xs font-bold transition ${
+                activeTab === tab.key
+                  ? "bg-[#0b1a36] text-white shadow-sm"
+                  : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Roles List */}
+        <div className="space-y-4 pt-2">
+          {filteredRoles.map((role) => {
+            const IconComponent = role.icon;
+
+            return (
+              <div
+                key={role.key}
+                onClick={() => handleOpenRoleDetail(role.key)}
+                className="group flex flex-col items-start justify-between gap-4 rounded-2xl border border-slate-300 bg-white p-5 cursor-pointer transition-all duration-200 hover:border-slate-800 hover:shadow-md sm:flex-row sm:items-center"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-slate-200 bg-[#FAF2DB] text-slate-900 shadow-sm">
+                    <IconComponent size={20} />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-base font-bold text-slate-900 transition group-hover:text-[#0b1a36]">
+                        {role.title}
+                      </h3>
+                      <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">
+                        {role.category}
+                      </span>
+                      <span className="rounded-full border border-slate-300 bg-[#FAF2DB] px-2.5 py-0.5 text-[10px] font-bold text-slate-900">
+                        {role.salary}
+                      </span>
+                    </div>
+                    <p className="max-w-2xl text-xs leading-relaxed text-slate-600">
+                      {role.tagline}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 self-end shrink-0 sm:self-center">
+                  <span className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">
+                    {role.matchScore}% Match
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="View role details"
+                    className="grid h-10 w-10 place-items-center rounded-full bg-[#0b1a36] text-white transition-transform group-hover:scale-105 group-hover:bg-[#122b59]"
+                  >
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }
