@@ -17,7 +17,7 @@ import api from "../lib/api";
 export default function ChatWindow({ community, currentUserId, onBack }) {
   const navigate = useNavigate();
   const [showInfoPanel, setShowInfoPanel] = useState(false);
-  const { messages, loading, error, hasMore, loadingMore, loadMore } =
+  const { messages, loading, error, hasMore, loadingMore, loadMore, deleteMessage } =
     useCommunityMessages(community?.id);
 
   const [text, setText] = useState("");
@@ -197,9 +197,9 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
   // -----------------------------------------------------------------------
   // Delete a message
   // -----------------------------------------------------------------------
-  const handleDelete = async (messageId) => {
+  const handleDelete = async (messageId, mode = "everyone") => {
     try {
-      await api.delete(`/api/messages/${messageId}`);
+      await deleteMessage(messageId, mode);
     } catch (err) {
       setSendError(err.message || "Failed to delete message.");
     }

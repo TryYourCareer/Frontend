@@ -54,11 +54,19 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
     .toUpperCase() || "?";
   const gradColor = colorForUser(message.user_id);
 
+  if (message.deleted_for_me) {
+    return null;
+  }
+
   if (message.deleted) {
     return (
-      <div className={`flex items-end gap-2 max-w-[80%] ${isSelf ? "ml-auto flex-row-reverse" : ""}`}>
-        <div className="rounded-2xl px-3.5 py-2 text-[11px] italic text-slate-400 bg-slate-100 border border-slate-200">
-          This message was deleted.
+      <div className={`flex max-w-[80%] ${isSelf ? "ml-auto justify-end" : ""}`}>
+        <div
+          className={`rounded-2xl border px-3.5 py-2 text-[11px] italic text-slate-500 bg-slate-100 border-slate-200 ${
+            isSelf ? "text-right" : "text-left"
+          }`}
+        >
+          This message was deleted
         </div>
       </div>
     );
@@ -196,10 +204,16 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
                       </button>
                     )}
                     <button
-                      onClick={() => { setMenuOpen(false); onDelete?.(message.id); }}
-                      className="flex items-center gap-2 px-3 py-1.5 w-full text-left text-[11px] text-red-500 hover:bg-red-50 border-t border-slate-100"
+                      onClick={() => { setMenuOpen(false); onDelete?.(message.id, "me"); }}
+                      className="flex items-center gap-2 px-3 py-1.5 w-full text-left text-[11px] text-slate-700 hover:bg-slate-50 border-t border-slate-100"
                     >
-                      <Trash2 size={11} /> Delete
+                      <Trash2 size={11} /> Delete for me
+                    </button>
+                    <button
+                      onClick={() => { setMenuOpen(false); onDelete?.(message.id, "everyone"); }}
+                      className="flex items-center gap-2 px-3 py-1.5 w-full text-left text-[11px] text-red-500 hover:bg-red-50"
+                    >
+                      <Trash2 size={11} /> Delete for everyone
                     </button>
                   </>
                 )}
