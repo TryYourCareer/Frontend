@@ -76,14 +76,13 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
       )}
 
       {/* Bubble */}
-      <div className="relative">
+      <div className={`relative ${isSelf ? "ml-auto text-right" : "text-left"}`}>
         <div
-          className={`rounded-2xl px-3.5 py-2.5 text-xs shadow-sm
-            ${isSelf
-              ? "bg-[#eff6ff] border border-[#bcd2f3] text-[#173b72] rounded-br-none"
-              : "bg-white text-slate-800 rounded-bl-none border border-slate-200"
-            }
-          `}
+          className={`rounded-2xl px-3.5 py-2.5 text-xs shadow-sm ${
+            isSelf
+              ? "bg-[#dcf8c6] border border-[#c6e2b3] text-[#173b72] rounded-br-none text-right"
+              : "bg-white text-slate-800 rounded-bl-none border border-slate-200 text-left"
+          }`}
         >
           {!isSelf && (
             <p className="text-[9px] font-bold text-slate-400 mb-0.5">
