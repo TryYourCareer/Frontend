@@ -144,10 +144,11 @@ function AppShell({ children }) {
 
 function AppRoutes() {
   const { token, isRegistered, loading, profile, isLoginOpen, setIsLoginOpen } = useAuth();
+  const navigate = useNavigate();
   return (
     <>
       <Routes>
-        <Route path="/" element={<Landing onStartDiscovery={() => setIsLoginOpen(true)} onOpenAuth={() => setIsLoginOpen(true)} theme="light" />} />
+        <Route path="/" element={<Landing onStartDiscovery={() => setIsLoginOpen(true)} onExploreCareers={() => navigate("/explore-careers")} onOpenAuth={() => setIsLoginOpen(true)} theme="light" />} />
         <Route path="/login" element={<Login onBack={() => window.history.back()} />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
         {/* /register now redirects to / — the Registration modal is rendered globally below */}
@@ -159,10 +160,10 @@ function AppRoutes() {
         <Route path="/career-reality" element={<ProtectedRoute><AppShell><CareerRealityV2 /></AppShell></ProtectedRoute>} />
         <Route path="/insights-feed" element={<ProtectedRoute><AppShell><InsightsFeed /></AppShell></ProtectedRoute>} />
         <Route path="/career-hubs" element={<ProtectedRoute><AppShell><CareerHub /></AppShell></ProtectedRoute>} />
-        <Route path="/explore-careers" element={<ProtectedRoute><AppShell><ExploreCareers /></AppShell></ProtectedRoute>} />
+        <Route path="/explore-careers" element={<ExploreCareers />} />
         <Route path="/roadmap" element={<ProtectedRoute><AppShell><Roadmap /></AppShell></ProtectedRoute>} />
         <Route path="/career-search" element={<ProtectedRoute><AppShell><CareerSearch /></AppShell></ProtectedRoute>} />
-        <Route path="/career-details/:careerName" element={<ProtectedRoute><AppShell><CareerDetails /></AppShell></ProtectedRoute>} />
+        <Route path="/career-details/:careerName" element={<CareerDetails />} />
         <Route path="*" element={<Navigate to={token ? "/" : "/login"} replace />} />
 
 

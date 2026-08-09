@@ -104,94 +104,221 @@ export default function Hero({ onStartDiscovery, onExploreCareers, careersCount 
 
 /* ─────────────────────────── Hero Banner ────────────────────────────────── */
 function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, onScrollDown }) {
+  // Anim-variants for the mock browser elements
+  const containerVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    show: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 80,
+        damping: 20,
+        delayChildren: 0.3,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: 20 },
+    show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 100, damping: 15 } },
+  };
+
   return (
-    <div className={`relative px-6 py-12 md:py-20 ${isDark ? "bg-[#161513] text-slate-100" : "bg-[#FAF6EC] text-[#0b1a36]"}`}>
-      <div className="mx-auto max-w-6xl">
-        <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-12">
-          {/* Two-column Header Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            {/* Left Column: Pill & Heading */}
-            <motion.div variants={fadeUp} className="flex flex-col items-start text-left">
-              <span className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider uppercase ${
-                isDark ? "border-amber-500/25 bg-amber-500/10 text-amber-300" : "border-slate-800 bg-transparent text-slate-800"
-              }`}>
-                CAREER ADVENTURE
-              </span>
-              <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-serif font-semibold leading-[1.1] tracking-tight text-slate-900">
-                Find the perfect<br />career. Stop guessing<br />your future.
-              </h1>
+    <div className={`relative px-6 py-16 md:py-24 transition-colors duration-300 ${
+      isDark 
+        ? "bg-gradient-to-br from-[#0b0f19] via-[#0f172a] to-[#0b0f19] text-slate-100" 
+        : "bg-[#FAF6EC] text-[#0b1a36]"
+    }`}>
+      {/* Background decoration or grid lines */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
+
+      <div className="mx-auto max-w-6xl relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          {/* Left Column: Heading, description & buttons */}
+          <motion.div 
+            variants={stagger} 
+            initial="hidden" 
+            animate="show" 
+            className="lg:col-span-7 flex flex-col items-start text-left space-y-6"
+          >
+            {/* Pill */}
+            <motion.div 
+              variants={fadeUp}
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wider uppercase ${
+                isDark 
+                  ? "border-amber-500/25 bg-amber-500/10 text-amber-300" 
+                  : "border-[#0b1a36]/10 bg-[#FAF2DB] text-[#0b1a36]"
+              }`}
+            >
+              <span className={`h-2 w-2 rounded-full animate-pulse ${isDark ? "bg-amber-300" : "bg-[#0b1a36]"}`}></span>
+              THE FUTURE OF CAREER DISCOVERY
             </motion.div>
 
-            {/* Right Column: Blurb & Gold Button */}
-            <motion.div variants={fadeUp} className="flex flex-col items-start md:pt-14 text-left">
-              <p className={`text-base sm:text-lg leading-relaxed max-w-md ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-                Not sure what career is right for you? Take our fun Discovery Test, explore job salaries and paths, try simple trial missions, and chat with real experts—all in one place.
-              </p>
+            {/* Title */}
+            <motion.h1 
+              variants={fadeUp}
+              className={`text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] ${
+                isDark ? "text-white" : "text-[#0b1a36]"
+              }`}
+            >
+              Stop guessing <br className="hidden sm:inline" />
+              your future. <br />
+              <span className="text-amber-600 dark:text-amber-400">Experience it.</span>
+            </motion.h1>
+
+            {/* Description */}
+            <motion.p 
+              variants={fadeUp}
+              className={`text-base sm:text-lg leading-relaxed max-w-xl ${
+                isDark ? "text-slate-400" : "text-slate-600"
+              }`}
+            >
+              Eliminate career confusion caused by pressure and trends. Discover your true path through structured assessment, real-world trials, and evidence-based guidance.
+            </motion.p>
+
+            {/* Button Row */}
+            <motion.div 
+              variants={fadeUp}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto pt-2"
+            >
               <button
                 type="button"
                 onClick={onStartDiscovery}
-                className="mt-6 rounded-md bg-[#F3E3B6] hover:bg-[#ebd08b] text-slate-900 font-bold px-6 py-3.5 text-sm shadow-sm transition-colors duration-200"
+                className="group inline-flex items-center justify-center gap-2 bg-[#F3E3B6] hover:bg-[#ebd08b] active:scale-95 text-[#0b1a36] font-bold rounded-full px-8 py-4 shadow-lg shadow-amber-500/5 transition-all duration-200 text-sm sm:text-base cursor-pointer"
               >
-                Get started today
+                <span>Start Your Career Discovery</span>
+                <ArrowRight size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
               </button>
-            </motion.div>
-          </div>
 
-          {/* Centered Career Discovery Graphic */}
-          <motion.div variants={fadeUp} className="relative rounded-2xl overflow-hidden shadow-xl">
-            <img
-              src="/career_discovery.png"
-              alt="Personalized Career Pathway"
-              className="w-full object-cover max-h-[520px]"
-            />
-          </motion.div>
-
-          {/* Gold Bottom Validation Banner */}
-          <motion.div
-            variants={fadeUp}
-            className={`rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 ${
-              isDark ? "bg-[#25221b] text-amber-100" : "bg-[#F9E9BE] text-[#0b1a36]"
-            }`}
-          >
-            {/* Left Content */}
-            <div className="flex flex-col items-start gap-4 text-left max-w-xl">
-              <p className="text-sm sm:text-base font-medium leading-relaxed">
-                TryYourCareers helps you find what you love. We offer interactive trial games, expert advice, and clear guides to take the stress out of planning your future.
-              </p>
               <button
                 type="button"
                 onClick={onExploreCareers}
-                className={`rounded-md px-5 py-2.5 text-xs font-bold transition-colors ${
-                  isDark ? "bg-amber-400 hover:bg-amber-500 text-slate-900" : "bg-[#0b1a36] hover:bg-[#122b59] text-white"
+                className={`inline-flex items-center justify-center gap-2 border font-bold rounded-full px-8 py-4 transition-all duration-200 text-sm sm:text-base active:scale-95 cursor-pointer ${
+                  isDark 
+                    ? "border-slate-800 bg-slate-900/50 hover:bg-slate-800 text-slate-200" 
+                    : "border-[#0b1a36]/10 bg-transparent text-[#0b1a36] hover:bg-[#0b1a36]/5"
                 }`}
               >
-                Learn more
+                <span>🎯 Explore Careers</span>
               </button>
-            </div>
+            </motion.div>
+          </motion.div>
 
-            {/* Right Content: Social Proof */}
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="flex -space-x-2.5">
-                <img
-                  className="inline-block h-8 w-8 rounded-full ring-2 ring-[#F9E9BE]"
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face"
-                  alt="Student 1"
-                />
-                <img
-                  className="inline-block h-8 w-8 rounded-full ring-2 ring-[#F9E9BE]"
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
-                  alt="Student 2"
-                />
-                <img
-                  className="inline-block h-8 w-8 rounded-full ring-2 ring-[#F9E9BE]"
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face"
-                  alt="Student 3"
-                />
+          {/* Right Column: Beautiful Browser Mockup */}
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-5 w-full flex justify-center"
+          >
+            <div className={`w-full max-w-md rounded-[2rem] shadow-2xl p-6 relative overflow-hidden transition-all duration-300 border ${
+              isDark ? "bg-[#111827]/90 border-slate-800" : "bg-white/95 border-slate-100/80"
+            }`}>
+              {/* Browser Title Bar / Top Bar */}
+              <div className={`flex items-center gap-2 pb-4 mb-5 border-b ${isDark ? "border-slate-800/80" : "border-slate-100"}`}>
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
+                  <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
+                  <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
+                </div>
+                <div className={`h-6 w-3/5 rounded-full mx-auto ${isDark ? "bg-slate-800/60" : "bg-slate-100"}`} />
               </div>
-              <span className="text-xs font-bold tracking-tight">+{careersCount ? (careersCount * 60).toLocaleString() : "12,400"} Members</span>
+
+              {/* Steps List */}
+              <div className="flex flex-col gap-4">
+                {/* Step 1 */}
+                <motion.div 
+                  variants={itemVariants}
+                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                    isDark 
+                      ? "bg-slate-950/60 border-slate-800/60 hover:border-slate-700/60" 
+                      : "bg-white border-slate-100 hover:border-slate-200"
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold text-lg shrink-0">
+                    1
+                  </div>
+                  <div className="text-left">
+                    <h4 className={`font-bold text-base leading-snug ${isDark ? "text-slate-200" : "text-[#0B1A36]"}`}>
+                      Direction Assessment
+                    </h4>
+                    <p className={`text-xs sm:text-sm mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      Psychometric & interest routing
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* Step 2 */}
+                <motion.div 
+                  variants={itemVariants}
+                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                    isDark 
+                      ? "bg-slate-950/60 border-slate-800/60 hover:border-slate-700/60" 
+                      : "bg-white border-slate-100 hover:border-slate-200"
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-bold text-lg shrink-0">
+                    2
+                  </div>
+                  <div className="text-left">
+                    <h4 className={`font-bold text-base leading-snug ${isDark ? "text-slate-200" : "text-[#0B1A36]"}`}>
+                      Reality-Based Intel
+                    </h4>
+                    <p className={`text-xs sm:text-sm mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      Data-driven authentic reality
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* Step 3 */}
+                <motion.div 
+                  variants={itemVariants}
+                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                    isDark 
+                      ? "bg-slate-950/60 border-slate-800/60 hover:border-slate-700/60" 
+                      : "bg-white border-slate-100 hover:border-slate-200"
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold text-lg shrink-0">
+                    3
+                  </div>
+                  <div className="text-left">
+                    <h4 className={`font-bold text-base leading-snug ${isDark ? "text-slate-200" : "text-[#0B1A36]"}`}>
+                      Career Trial Missions
+                    </h4>
+                    <p className={`text-xs sm:text-sm mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      Experiential micro-internships
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* Step 4 */}
+                <motion.div 
+                  variants={itemVariants}
+                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                    isDark 
+                      ? "bg-slate-950/60 border-slate-800/60 hover:border-slate-700/60" 
+                      : "bg-white border-slate-100 hover:border-slate-200"
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 font-bold text-lg shrink-0">
+                    4
+                  </div>
+                  <div className="text-left">
+                    <h4 className={`font-bold text-base leading-snug ${isDark ? "text-slate-200" : "text-[#0B1A36]"}`}>
+                      Dual-Confidence Reports
+                    </h4>
+                    <p className={`text-xs sm:text-sm mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      Actionable analytics for all
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
 
         {/* Scroll down indicator */}
         <motion.button
@@ -199,7 +326,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.6 }}
-          className={`mt-12 flex flex-col items-center gap-1.5 mx-auto text-[10px] font-bold tracking-widest uppercase ${isDark ? "text-slate-600 hover:text-slate-400" : "text-[#99adc7] hover:text-[#4f6283]"} transition`}
+          className={`mt-16 flex flex-col items-center gap-1.5 mx-auto text-[10px] font-bold tracking-widest uppercase ${isDark ? "text-slate-600 hover:text-slate-400" : "text-[#99adc7] hover:text-[#4f6283]"} transition`}
         >
           <span>Explore Stages</span>
           <motion.div
