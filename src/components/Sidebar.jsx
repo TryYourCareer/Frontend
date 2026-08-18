@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardList, Compass, Newspaper,
   Users, LayoutDashboard, LogIn, LogOut,
-  X, ChevronLeft, ChevronRight
+  X, ChevronLeft, ChevronRight, Rocket
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { label: "Career Reality", icon: Compass, action: "career-reality" },
   { label: "Insights Feed", icon: Newspaper, action: "insights-feed" },
   { label: "Career Hubs", icon: Users, action: "career-hubs" },
+  { label: "Trial Mission", icon: Rocket, action: "trial-mission", isLaunchingSoon: true },
 ];
 
 const sidebarItemVariants = {
@@ -96,7 +97,7 @@ export default function Sidebar({
         animate="show"
         className="flex-1 overflow-y-auto px-3 py-4 space-y-1"
       >
-        {NAV_LINKS.map(({ label, icon: Icon, action }) => {
+        {NAV_LINKS.map(({ label, icon: Icon, action, isLaunchingSoon }) => {
           const isActive = activePage === action;
           return (
             <motion.button
@@ -105,12 +106,14 @@ export default function Sidebar({
               variants={sidebarItemVariants}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleNav(action)}
-              title={isCollapsed ? label : undefined}
+              title={isCollapsed ? (isLaunchingSoon ? `${label} (Launching Soon)` : label) : undefined}
               className={`sidebar-nav-item group flex w-full items-center gap-3 rounded-xl py-2.5 text-left text-sm font-semibold transition-all duration-200 ${
                 isCollapsed ? "justify-center px-0" : "px-3"
               } ${
                 isActive
                   ? "bg-[#FAF2DB] text-slate-900 shadow-sm"
+                  : isLaunchingSoon
+                  ? "text-slate-650 hover:bg-slate-900/5 hover:text-slate-900"
                   : "text-slate-600 hover:bg-slate-900/5 hover:text-slate-900"
               }`}
             >
@@ -121,10 +124,25 @@ export default function Sidebar({
               <Icon
                 size={17}
                 className={`shrink-0 transition-colors ${
-                  isActive ? "text-slate-900" : "text-slate-500 group-hover:text-slate-800"
+                  isActive ? "text-slate-900" : isLaunchingSoon ? "text-amber-600 group-hover:text-amber-700" : "text-slate-500 group-hover:text-slate-800"
                 }`}
               />
-              {!isCollapsed && <span className="truncate">{label}</span>}
+              {!isCollapsed && (
+                <div className="flex items-center justify-between w-full min-w-0">
+                  <span className="truncate">{label}</span>
+                  {isLaunchingSoon && (
+                    <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full ml-auto border border-amber-200 shrink-0">
+                      Soon
+                    </span>
+                  )}
+                </div>
+              )}
+              {isCollapsed && isLaunchingSoon && (
+                <div className="absolute top-1 right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </div>
+              )}
             </motion.button>
           );
         })}

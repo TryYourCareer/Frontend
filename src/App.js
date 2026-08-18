@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Login from "./components/Login";
 import Registration from "./pages/Registration";
@@ -16,6 +16,7 @@ import AppLayout from "./components/AppLayout";
 import Roadmap from "./pages/Roadmap";
 import CareerSearch from "./pages/CareerSearch";
 import CareerDetails from "./pages/CareerDetails";
+import TrialMission from "./pages/TrialMission";
 
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -65,9 +66,21 @@ function ProtectedRoute({ children, requireRegistration = false }) {
 
 function AppShell({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout, setIsLoginOpen } = useAuth();
   const theme = "light";
   const [careerSearchQuery, setCareerSearchQuery] = useState("");
+
+  const activePage = useMemo(() => {
+    const path = location.pathname;
+    if (path === "/dashboard") return "student-dashboard";
+    if (path === "/assessment") return "assessment";
+    if (path === "/career-reality") return "career-reality";
+    if (path === "/insights-feed") return "insights-feed";
+    if (path === "/career-hubs") return "career-hubs";
+    if (path === "/trial-mission") return "trial-mission";
+    return "landing";
+  }, [location.pathname]);
 
   const careers = useMemo(
     () => (careersData || []).map((item) => ({ title: item["Career Name"] || "", cluster: item.Cluster || "" })).filter((career) => career.title && career.cluster),
@@ -97,6 +110,7 @@ function AppShell({ children }) {
       onboarding: "/register",
       profile: "/profile",
       roadmap: "/roadmap",
+      "trial-mission": "/trial-mission",
     };
     if (action === "login") {
       setIsLoginOpen(true);
@@ -114,7 +128,7 @@ function AppShell({ children }) {
   return (
     <div className={`cc-app-layout min-h-screen ${isDark ? "bg-[#0f172a]" : "bg-[#f1f5f9]"}`}>
       <AppLayout
-        activePage="landing"
+        activePage={activePage}
         onNavigate={handleNavigate}
         user={user}
         onOpenProfile={() => navigate("/profile")}
@@ -164,6 +178,7 @@ function AppRoutes() {
         <Route path="/roadmap" element={<ProtectedRoute><AppShell><Roadmap /></AppShell></ProtectedRoute>} />
         <Route path="/career-search" element={<ProtectedRoute><AppShell><CareerSearch /></AppShell></ProtectedRoute>} />
         <Route path="/career-details/:careerName" element={<CareerDetails />} />
+        <Route path="/trial-mission" element={<ProtectedRoute><AppShell><TrialMission /></AppShell></ProtectedRoute>} />
         <Route path="*" element={<Navigate to={token ? "/" : "/login"} replace />} />
 
 

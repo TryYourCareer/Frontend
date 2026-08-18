@@ -185,7 +185,7 @@ export default function InsightsFeed({ onBack }) {
 
         {/* Title Header */}
         <div className="space-y-1.5 pb-2">
-          <h1 className="text-3xl font-extrabold tracking-tight text-[#0b1a36]">
+          <h1 className="font-serif text-3xl font-bold tracking-tight text-[#0b1a36]">
             Daily Career Insights
           </h1>
           <p className="text-xs font-semibold text-slate-500 max-w-2xl">
