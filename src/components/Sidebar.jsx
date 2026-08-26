@@ -55,25 +55,31 @@ export default function Sidebar({
     user?.email?.split("@")[0] ||
     "User";
 
+  const initial = displayName.trim().charAt(0).toUpperCase() || "U";
+  const avatarUrl = user?.avatarUrl || user?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+
   const sidebarContent = (
     <div className="sidebar-inner flex h-full flex-col">
       {/* Logo / Brand */}
       <div className={`sidebar-brand flex h-20 items-center justify-between gap-3 px-4 border-b ${
         isDark ? "border-slate-800" : "border-slate-400"
       }`}>
-        <div className="flex items-center overflow-hidden">
-          {!isCollapsed ? (
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <img
+            src="/favicon.ico"
+            alt="Company Logo"
+            className="h-7 w-7 shrink-0 object-contain"
+          />
+          {!isCollapsed && (
             <motion.div 
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
               className="min-w-0"
             >
-              <p className="text-xl font-bold font-sans tracking-tight text-slate-900">TryYourCareers</p>
+              <p className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-slate-900"}`}>
+                TryYourCareers
+              </p>
             </motion.div>
-          ) : (
-            <span className="text-xl font-bold font-sans tracking-tight text-slate-900 px-2">
-              T
-            </span>
           )}
         </div>
 
@@ -160,11 +166,17 @@ export default function Sidebar({
               title={isCollapsed ? displayName : undefined}
               className="shrink-0 focus:outline-none"
             >
-              <img
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face"
-                alt="User Profile"
-                className="h-8 w-8 rounded-full object-cover border border-slate-300"
-              />
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="User Profile"
+                  className="h-8 w-8 rounded-full object-cover border border-slate-300"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white border border-slate-300 shadow-sm shrink-0">
+                  {initial}
+                </div>
+              )}
             </button>
 
             {/* Name + status */}

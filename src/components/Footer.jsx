@@ -15,9 +15,11 @@ export default function Footer({ theme = "light" }) {
         {/* Brand & Mission */}
         <div className="space-y-4 md:col-span-1">
           <div className="flex items-center gap-3">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 text-xs font-black text-white shadow-md">
-              C
-            </span>
+            <img
+              src="/favicon.ico"
+              alt="Company Logo"
+              className="h-8 w-8 shrink-0 object-contain"
+            />
             <span className={`cc-display font-black text-base ${isDark ? "text-white" : "text-[#0f1d3c]"}`}>
               Try Your Career
             </span>

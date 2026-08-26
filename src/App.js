@@ -17,6 +17,9 @@ import Roadmap from "./pages/Roadmap";
 import CareerSearch from "./pages/CareerSearch";
 import CareerDetails from "./pages/CareerDetails";
 import TrialMission from "./pages/TrialMission";
+import StrideStage from "./pages/StrideStage";
+import CompanyInfo from "./pages/CompanyInfo";
+import SupportInfo from "./pages/SupportInfo";
 
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -59,7 +62,7 @@ function AppLoadingSkeleton() {
 function ProtectedRoute({ children, requireRegistration = false }) {
   const { loading, token, isRegistered } = useAuth();
   if (loading) return <AppLoadingSkeleton />;
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) return <Navigate to="/" replace />;
   if (requireRegistration && !isRegistered) return <Navigate to="/" replace />;
   return children;
 }
@@ -179,7 +182,10 @@ function AppRoutes() {
         <Route path="/career-search" element={<ProtectedRoute><AppShell><CareerSearch /></AppShell></ProtectedRoute>} />
         <Route path="/career-details/:careerName" element={<CareerDetails />} />
         <Route path="/trial-mission" element={<ProtectedRoute><AppShell><TrialMission /></AppShell></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to={token ? "/" : "/login"} replace />} />
+        <Route path="/stride-journey/:stageId" element={<AppShell><StrideStage /></AppShell>} />
+        <Route path="/company/:tabId" element={<CompanyInfo />} />
+        <Route path="/support/:tabId" element={<SupportInfo />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
 
 
       </Routes>

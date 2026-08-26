@@ -12,40 +12,34 @@ export default function LandingFooter({ isDark }) {
     } py-16 px-6`}>
       <div className="max-w-6xl mx-auto w-full">
         {/* Top Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 items-start mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-start mb-12">
           {/* Brand Info */}
           <div className="lg:col-span-2 flex flex-col items-start gap-4">
-            <h3 className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-stone-100"}`}>
-              TryYourCareers
-            </h3>
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/favicon.ico"
+                alt="Company Logo"
+                className="h-7 w-7 shrink-0 object-contain"
+              />
+              <h3 className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-stone-100"}`}>
+                TryYourCareers
+              </h3>
+            </div>
             <p className="text-sm leading-relaxed max-w-sm">
               Your personalized path to lasting success. We combine interactive simulator sandboxes, real market data, and personalized validation to build your career confidence.
             </p>
           </div>
 
-          {/* Column 1: Simulator */}
-          <div className="flex flex-col gap-3 text-left">
-            <h4 className={`text-xs font-bold uppercase tracking-widest ${isDark ? "text-slate-300" : "text-stone-200"}`}>
-              Simulator
-            </h4>
-            <div className="flex flex-col gap-2 text-sm">
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Discover archetypes</button>
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Explore salary bands</button>
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Experience tasks</button>
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Align pathways</button>
-            </div>
-          </div>
-
-          {/* Column 2: Company */}
+          {/* Column 1: Company */}
           <div className="flex flex-col gap-3 text-left">
             <h4 className={`text-xs font-bold uppercase tracking-widest ${isDark ? "text-slate-300" : "text-stone-200"}`}>
               Company
             </h4>
             <div className="flex flex-col gap-2 text-sm">
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">About Us</button>
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Elevate Program</button>
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Success Stories</button>
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Careers</button>
+              <button onClick={() => navigate("/company/about")} className="hover:text-stone-200 transition text-left">About Us</button>
+              <button onClick={() => navigate("/company/elevate")} className="hover:text-stone-200 transition text-left">Elevate Program</button>
+              <button onClick={() => navigate("/company/stories")} className="hover:text-stone-200 transition text-left">Success Stories</button>
+              <button onClick={() => navigate("/company/careers")} className="hover:text-stone-200 transition text-left">Careers</button>
             </div>
           </div>
 
@@ -55,10 +49,10 @@ export default function LandingFooter({ isDark }) {
               Support
             </h4>
             <div className="flex flex-col gap-2 text-sm">
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Help Center</button>
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Contact Support</button>
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Privacy Policy</button>
-              <button onClick={() => navigate("/")} className="hover:text-stone-200 transition text-left">Terms of Service</button>
+              <button onClick={() => navigate("/support/help")} className="hover:text-stone-200 transition text-left">Help Center</button>
+              <button onClick={() => navigate("/support/contact")} className="hover:text-stone-200 transition text-left">Contact Support</button>
+              <button onClick={() => navigate("/support/privacy")} className="hover:text-stone-200 transition text-left">Privacy Policy</button>
+              <button onClick={() => navigate("/support/terms")} className="hover:text-stone-200 transition text-left">Terms of Service</button>
             </div>
           </div>
         </div>
@@ -69,9 +63,9 @@ export default function LandingFooter({ isDark }) {
         }`}>
           <span>© 2026 TryYourCareers. All rights reserved.</span>
           <div className="flex gap-6">
-            <button onClick={() => navigate("/")} className="hover:text-stone-200 transition">Privacy</button>
-            <button onClick={() => navigate("/")} className="hover:text-stone-200 transition">Terms</button>
-            <button onClick={() => navigate("/")} className="hover:text-stone-200 transition">Sitemap</button>
+            <button onClick={() => navigate("/support/privacy")} className="hover:text-stone-200 transition">Privacy</button>
+            <button onClick={() => navigate("/support/terms")} className="hover:text-stone-200 transition">Terms</button>
+            <button onClick={() => navigate("/support/help")} className="hover:text-stone-200 transition">Sitemap</button>
           </div>
         </div>
       </div>

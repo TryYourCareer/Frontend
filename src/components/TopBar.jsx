@@ -22,6 +22,16 @@ export default function TopBar({
   const [searchFocused, setSearchFocused] = useState(false);
   const hasSearchQuery = Boolean(String(searchQuery || "").trim());
 
+  const displayName =
+    user?.name ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "User";
+
+  const initial = displayName.trim().charAt(0).toUpperCase() || "U";
+  const avatarUrl = user?.avatarUrl || user?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+
   return (
     <header
       className={`cc-topbar h-20 sticky top-0 z-30 flex items-center justify-between gap-3 border-b px-4 py-2.5 sm:px-6 backdrop-blur-xl ${isDark
@@ -140,11 +150,17 @@ export default function TopBar({
             className={`hidden sm:flex items-center gap-2.5 rounded-full p-0.5 transition hover:scale-105`}
             aria-label="Open profile"
           >
-            <img
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face"
-              alt="User Profile"
-              className="h-8 w-8 rounded-full object-cover border border-slate-200"
-            />
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="User Profile"
+                className="h-8 w-8 rounded-full object-cover border border-slate-200"
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white border border-slate-200 shadow-sm shrink-0">
+                {initial}
+              </div>
+            )}
           </button>
         ) : (
           <button
