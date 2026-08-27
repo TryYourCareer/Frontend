@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardList, Compass, Newspaper,
   Users, LayoutDashboard, LogIn, LogOut,
-  X, ChevronLeft, ChevronRight
+  X, ChevronLeft, ChevronRight, Rocket
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { label: "Career Reality", icon: Compass, action: "career-reality" },
   { label: "Insights Feed", icon: Newspaper, action: "insights-feed" },
   { label: "Career Hubs", icon: Users, action: "career-hubs" },
+  { label: "Trial Mission", icon: Rocket, action: "trial-mission", isLaunchingSoon: true },
 ];
 
 const sidebarItemVariants = {
@@ -54,25 +55,31 @@ export default function Sidebar({
     user?.email?.split("@")[0] ||
     "User";
 
+  const initial = displayName.trim().charAt(0).toUpperCase() || "U";
+  const avatarUrl = user?.avatarUrl || user?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+
   const sidebarContent = (
     <div className="sidebar-inner flex h-full flex-col">
       {/* Logo / Brand */}
       <div className={`sidebar-brand flex h-20 items-center justify-between gap-3 px-4 border-b ${
         isDark ? "border-slate-800" : "border-slate-400"
       }`}>
-        <div className="flex items-center overflow-hidden">
-          {!isCollapsed ? (
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <img
+            src="/favicon.ico"
+            alt="Company Logo"
+            className="h-7 w-7 shrink-0 object-contain"
+          />
+          {!isCollapsed && (
             <motion.div 
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
               className="min-w-0"
             >
-              <p className="text-xl font-bold font-sans tracking-tight text-slate-900">TryYourCareers</p>
+              <p className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-slate-900"}`}>
+                TryYourCareers
+              </p>
             </motion.div>
-          ) : (
-            <span className="text-xl font-bold font-sans tracking-tight text-slate-900 px-2">
-              T
-            </span>
           )}
         </div>
 
@@ -96,7 +103,7 @@ export default function Sidebar({
         animate="show"
         className="flex-1 overflow-y-auto px-3 py-4 space-y-1"
       >
-        {NAV_LINKS.map(({ label, icon: Icon, action }) => {
+        {NAV_LINKS.map(({ label, icon: Icon, action, isLaunchingSoon }) => {
           const isActive = activePage === action;
           return (
             <motion.button
@@ -105,12 +112,14 @@ export default function Sidebar({
               variants={sidebarItemVariants}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleNav(action)}
-              title={isCollapsed ? label : undefined}
+              title={isCollapsed ? (isLaunchingSoon ? `${label} (Launching Soon)` : label) : undefined}
               className={`sidebar-nav-item group flex w-full items-center gap-3 rounded-xl py-2.5 text-left text-sm font-semibold transition-all duration-200 ${
                 isCollapsed ? "justify-center px-0" : "px-3"
               } ${
                 isActive
                   ? "bg-[#FAF2DB] text-slate-900 shadow-sm"
+                  : isLaunchingSoon
+                  ? "text-slate-650 hover:bg-slate-900/5 hover:text-slate-900"
                   : "text-slate-600 hover:bg-slate-900/5 hover:text-slate-900"
               }`}
             >
@@ -121,10 +130,25 @@ export default function Sidebar({
               <Icon
                 size={17}
                 className={`shrink-0 transition-colors ${
-                  isActive ? "text-slate-900" : "text-slate-500 group-hover:text-slate-800"
+                  isActive ? "text-slate-900" : isLaunchingSoon ? "text-amber-600 group-hover:text-amber-700" : "text-slate-500 group-hover:text-slate-800"
                 }`}
               />
-              {!isCollapsed && <span className="truncate">{label}</span>}
+              {!isCollapsed && (
+                <div className="flex items-center justify-between w-full min-w-0">
+                  <span className="truncate">{label}</span>
+                  {isLaunchingSoon && (
+                    <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full ml-auto border border-amber-200 shrink-0">
+                      Soon
+                    </span>
+                  )}
+                </div>
+              )}
+              {isCollapsed && isLaunchingSoon && (
+                <div className="absolute top-1 right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </div>
+              )}
             </motion.button>
           );
         })}
@@ -142,11 +166,17 @@ export default function Sidebar({
               title={isCollapsed ? displayName : undefined}
               className="shrink-0 focus:outline-none"
             >
-              <img
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face"
-                alt="User Profile"
-                className="h-8 w-8 rounded-full object-cover border border-slate-300"
-              />
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="User Profile"
+                  className="h-8 w-8 rounded-full object-cover border border-slate-300"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white border border-slate-300 shadow-sm shrink-0">
+                  {initial}
+                </div>
+              )}
             </button>
 
             {/* Name + status */}

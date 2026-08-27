@@ -1,50 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Info, Loader2, X } from "lucide-react";
-import { loginRedirect, sendOtp, verifyOtp } from "../services/auth";
-import { useAuth } from "../contexts/AuthContext";
+import { Info, X } from "lucide-react";
+import { loginRedirect } from "../services/auth";
 
 export default function Login({ onBack }) {
-  const navigate = useNavigate();
-  const { setTokenState, setUser, setIsRegistered, setIsLoginOpen } = useAuth();
-  const [stage, setStage] = useState("phone"); // "phone" or "otp"
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  const handleSendOtp = async (event) => {
-    event.preventDefault();
-    setErrorMessage("");
-    setAuthLoading(true);
-    try {
-      await sendOtp(phone);
-      setStage("otp");
-    } catch (error) {
-      setErrorMessage(error.message || "Unable to send OTP.");
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (event) => {
-    event.preventDefault();
-    setErrorMessage("");
-    setAuthLoading(true);
-    try {
-      const result = await verifyOtp(phone, otp);
-      setTokenState(result.token || "");
-      setUser(result.user || null);
-      setIsRegistered(Boolean(result.isRegistered));
-      if (setIsLoginOpen) setIsLoginOpen(false);
-      navigate(result.isRegistered ? "/dashboard" : "/register", { replace: true });
-    } catch (error) {
-      setErrorMessage(error.message || "OTP verification failed.");
-    } finally {
-      setAuthLoading(false);
-    }
-  };
 
   const handleGoogleLogin = async () => {
     setErrorMessage("");
@@ -52,6 +13,33 @@ export default function Login({ onBack }) {
       await loginRedirect("google");
     } catch (error) {
       setErrorMessage(error.message || "Google sign-in failed.");
+    }
+  };
+
+  const handleLinkedInLogin = async () => {
+    setErrorMessage("");
+    try {
+      await loginRedirect("linkedin");
+    } catch (error) {
+      setErrorMessage(error.message || "LinkedIn sign-in failed.");
+    }
+  };
+
+  const handleMicrosoftLogin = async () => {
+    setErrorMessage("");
+    try {
+      await loginRedirect("azure");
+    } catch (error) {
+      setErrorMessage(error.message || "Microsoft sign-in failed.");
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    setErrorMessage("");
+    try {
+      await loginRedirect("apple");
+    } catch (error) {
+      setErrorMessage(error.message || "Apple sign-in failed.");
     }
   };
 
@@ -75,16 +63,7 @@ export default function Login({ onBack }) {
         <div className="mb-6">
           <h2 className="text-3xl font-bold text-slate-900">Log in</h2>
           <p className="mt-1.5 text-sm text-slate-500">
-            New user?{" "}
-            <button
-              onClick={() => {
-                if (setIsLoginOpen) setIsLoginOpen(false);
-                navigate("/register");
-              }}
-              className="font-medium text-blue-600 hover:underline"
-            >
-              Register Now
-            </button>
+            Start your Journey
           </p>
         </div>
 
@@ -93,7 +72,7 @@ export default function Login({ onBack }) {
           type="button"
           onClick={handleGoogleLogin}
           disabled={authLoading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -116,35 +95,65 @@ export default function Login({ onBack }) {
           Continue with Google
         </button>
 
-        {/* Social Icons Row */}
-        <div className="mt-4 flex items-center justify-center gap-4">
+        {/* Microsoft OAuth Button */}
+        <button
+          type="button"
+          onClick={handleMicrosoftLogin}
+          disabled={authLoading}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <rect x="3" y="3" width="8" height="8" fill="#F35325" />
+            <rect x="13" y="3" width="8" height="8" fill="#81BC06" />
+            <rect x="3" y="13" width="8" height="8" fill="#05A6F0" />
+            <rect x="13" y="13" width="8" height="8" fill="#FFBA08" />
+          </svg>
+          Continue with Microsoft
+        </button>
+
+        {/* Apple / iOS OAuth Button */}
+        <button
+          type="button"
+          onClick={handleAppleLogin}
+          disabled={authLoading}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 384 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path d="M318.7 268.7c-.2-54.9 44.6-81.4 46.6-82.7-25.5-37.3-65.1-42.4-79-43-33.6-3.4-65.5 19.9-82.6 19.9-17 0-43.7-19.4-71.9-18.9-36.9.6-71.1 21.5-90.1 54.6C5 285.5 33.7 387.3 70.7 442.7c18 27.2 39.4 57.7 67.5 56.6 26.8-1.1 36.9-17.5 69.2-17.5 32.1 0 41.5 17.5 69.6 16.9 28.5-.6 46.6-27.7 64.3-55 20.3-30.9 28.7-60.9 29-62.4-.7-.3-55.6-21.4-55.7-84.7zM259.1 74.4c15.6-18.9 26-45.1 23.1-71.4-22.3 1.1-49.2 14.8-65.2 33.7-14.3 17.3-26.7 44.9-23.4 71.4 24.7 1.9 50-12.6 65.5-33.7z" />
+          </svg>
+          Continue with iOS
+        </button>
+
+        {/* Divider */}
+        <div className="relative my-6 flex items-center justify-center">
+          <div className="absolute inset-x-0 h-px bg-slate-200" />
+          <span className="relative bg-white px-3 text-sm text-slate-400">or</span>
+        </div>
+
+        {/* Secondary Social Options */}
+        <div className="flex items-center justify-center gap-4">
+          {/* Facebook */}
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#1877F2] hover:bg-slate-50 transition"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#1877F2] hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm active:scale-[0.95] transition duration-200"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
             </svg>
           </button>
+          {/* GitHub */}
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#0A66C2] hover:bg-slate-50 transition"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#24292F] hover:bg-slate-50 transition"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#24292F] hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm active:scale-[0.95] transition duration-200"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
               <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z" />
             </svg>
           </button>
+          {/* Globe/Web */}
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#0F9D58] hover:bg-slate-50 transition"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#0F9D58] hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm active:scale-[0.95] transition duration-200"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -154,98 +163,6 @@ export default function Login({ onBack }) {
           </button>
         </div>
 
-        {/* Divider */}
-        <div className="relative my-6 flex items-center justify-center">
-          <div className="absolute inset-x-0 h-px bg-slate-200" />
-          <span className="relative bg-white px-3 text-sm text-slate-400">or</span>
-        </div>
-
-        {/* OTP Auth Form */}
-        <AnimatePresence mode="wait">
-          {stage === "phone" ? (
-            <motion.form
-              key="phone"
-              onSubmit={handleSendOtp}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-4"
-            >
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                  Phone Number
-                </label>
-                <input
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                  placeholder="Enter 10-digit mobile number"
-                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 px-3.5 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600/30"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={authLoading || phone.length < 10}
-                className="w-full rounded-lg bg-[#0f6646] py-3 text-base font-bold text-white transition hover:bg-[#0c5238] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {authLoading ? (
-                  <Loader2 size={18} className="mx-auto animate-spin" />
-                ) : (
-                  "Send OTP"
-                )}
-              </button>
-            </motion.form>
-          ) : (
-            <motion.form
-              key="otp"
-              onSubmit={handleVerifyOtp}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="space-y-4"
-              >
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">
-                    Enter OTP
-                  </label>
-                  <input
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    placeholder="Enter 6-digit OTP"
-                    className="w-full rounded-lg border border-slate-200 bg-white py-2.5 px-3.5 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600/30"
-                  />
-                  <p className="mt-1.5 text-xs text-slate-400">Code sent to +91 {phone}</p>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStage("phone");
-                    setOtp("");
-                  }}
-                    className="text-xs font-semibold text-blue-600 hover:underline"
-                  >
-                    Edit phone number
-                  </button>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={authLoading || otp.length < 6}
-                  className="w-full rounded-lg bg-[#0f6646] py-3 text-base font-bold text-white transition hover:bg-[#0c5238] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {authLoading ? (
-                    <Loader2 size={18} className="mx-auto animate-spin" />
-                  ) : (
-                    "Verify & Continue"
-                  )}
-                </button>
-            </motion.form>
-          )}
-        </AnimatePresence>
 
         {/* Error message */}
         <AnimatePresence>

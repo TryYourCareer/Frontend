@@ -4,13 +4,59 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 function calculateAge(dateOfBirth) {
-  const birthDate = new Date(dateOfBirth);
+  if (!dateOfBirth) return null;
+  const match = String(dateOfBirth).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) {
+    const d = new Date(dateOfBirth);
+    if (Number.isNaN(d.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const monthOffset = today.getMonth() - d.getMonth();
+    if (monthOffset < 0 || (monthOffset === 0 && today.getDate() < d.getDate())) age -= 1;
+    return age;
+  }
+  const birthYear = parseInt(match[1], 10);
+  const birthMonth = parseInt(match[2], 10);
+  const birthDay = parseInt(match[3], 10);
+
   const today = new Date();
-  if (Number.isNaN(birthDate.getTime()) || birthDate > today) return null;
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthOffset = today.getMonth() - birthDate.getMonth();
-  if (monthOffset < 0 || (monthOffset === 0 && today.getDate() < birthDate.getDate())) age -= 1;
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth() + 1; // 1-indexed
+  const todayDay = today.getDate();
+
+  let age = todayYear - birthYear;
+  if (todayMonth < birthMonth || (todayMonth === birthMonth && todayDay < birthDay)) {
+    age -= 1;
+  }
   return age;
+}
+
+function formatDateToYYYYMMDD(dateVal) {
+  if (!dateVal) return "";
+  try {
+    if (dateVal instanceof Date) {
+      const year = dateVal.getFullYear();
+      const month = String(dateVal.getMonth() + 1).padStart(2, "0");
+      const day = String(dateVal.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    if (typeof dateVal === "string") {
+      const match = dateVal.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        return `${match[1]}-${match[2]}-${match[3]}`;
+      }
+    }
+
+    const d = new Date(dateVal);
+    if (Number.isNaN(d.getTime())) return "";
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  } catch {
+    return "";
+  }
 }
 
 const INTERESTS = [
@@ -66,13 +112,21 @@ export default function Registration() {
       phone: profile?.phone || user?.phone || prev.phone,
       name: profile?.name || user?.user_metadata?.full_name || prev.name,
       gender: profile?.gender || prev.gender,
+      dateOfBirth: profile?.dateOfBirth ? formatDateToYYYYMMDD(profile.dateOfBirth) : prev.dateOfBirth,
       currentEducation: profile?.current_education || prev.currentEducation,
       areaOfInterest: profile?.area_of_interest || prev.areaOfInterest,
     }));
   }, [profile, user]);
 
   const handleChange = (field) => (event) => {
-    setForm((prev) => ({ ...prev, [field]: event.target.value }));
+    let value = event.target.value;
+    if (field === "phone") {
+      value = value.replace(/\D/g, "");
+      if (value.length > 10) {
+        value = value.slice(0, 10);
+      }
+    }
+    setForm((prev) => ({ ...prev, [field]: value }));
     setError("");
     setSuccess("");
   };
@@ -93,14 +147,20 @@ export default function Registration() {
     if (!form.currentEducation.trim()) { setError("Current education is required."); return; }
     if (!form.areaOfInterest) { setError("Please select an area of interest."); return; }
 
+    const phoneClean = form.phone.replace(/\D/g, "");
+    if (phoneClean && phoneClean.length !== 10) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
     try {
       await completeRegistration({
         name: form.name.trim(),
         email: form.email.trim() || user?.email || null,
-        phone: form.phone.trim() || user?.phone || null,
+        phone: phoneClean || user?.phone || null,
         gender: form.gender,
         age,
-        dateOfBirth: form.dateOfBirth,
+        dateOfBirth: form.dateOfBirth || null,
         current_education: form.currentEducation.trim(),
         area_of_interest: form.areaOfInterest,
         auth_user_id: user?.id,
@@ -172,6 +232,7 @@ export default function Registration() {
                 label="Phone Number"
                 icon={<Phone size={14} className={iconClass} />}
                 value={form.phone}
+                type="tel"
                 onChange={handleChange("phone")}
                 placeholder="10-digit mobile number"
                 className={inputClass}

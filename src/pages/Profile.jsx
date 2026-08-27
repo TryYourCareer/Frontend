@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Save, Camera, AlertCircle, Loader2, ChevronDown } from "lucide-react";
+import { Save, Camera, AlertCircle, Loader2, ChevronDown, LogOut } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 const INTERESTS = [
@@ -31,8 +31,36 @@ const EDUCATION_OPTIONS = [
   "Other",
 ];
 
+function formatDateToYYYYMMDD(dateVal) {
+  if (!dateVal) return "";
+  try {
+    if (dateVal instanceof Date) {
+      const year = dateVal.getFullYear();
+      const month = String(dateVal.getMonth() + 1).padStart(2, "0");
+      const day = String(dateVal.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    if (typeof dateVal === "string") {
+      const match = dateVal.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        return `${match[1]}-${match[2]}-${match[3]}`;
+      }
+    }
+
+    const d = new Date(dateVal);
+    if (Number.isNaN(d.getTime())) return "";
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  } catch {
+    return "";
+  }
+}
+
 export default function Profile({ profile, onRestart, onSave }) {
-  const { saveProfile, authLoading } = useAuth();
+  const { saveProfile, authLoading, logout } = useAuth();
 
   const splitName = (fullName = "") => {
     const parts = fullName.trim().split(" ");
@@ -49,9 +77,9 @@ export default function Profile({ profile, onRestart, onSave }) {
       phoneCode: "+91",
       country: profile?.country || "India",
       city: profile?.city || "",
-      zipCode: profile?.zipCode || "",
+      zipCode: profile?.zipCode || profile?.zip_code || "",
       gender: profile?.gender || "",
-      dateOfBirth: profile?.dateOfBirth || "",
+      dateOfBirth: formatDateToYYYYMMDD(profile?.dateOfBirth) || "",
       currentEducation: profile?.current_education || profile?.currentlyPursuing || "",
       areaOfInterest: profile?.area_of_interest || profile?.areaOfInterest || "",
     };
@@ -64,6 +92,13 @@ export default function Profile({ profile, onRestart, onSave }) {
   useEffect(() => {
     setForm(initialForm);
   }, [initialForm]);
+
+  const displayName =
+    profile?.name ||
+    profile?.email?.split("@")[0] ||
+    "User";
+  const initial = displayName.trim().charAt(0).toUpperCase() || "U";
+  const avatarUrl = profile?.avatarUrl || profile?.avatar_url || profile?.user_metadata?.avatar_url || profile?.user_metadata?.picture;
 
   /* ── Skeleton while profile loads ── */
   if (!profile) {
@@ -92,7 +127,14 @@ export default function Profile({ profile, onRestart, onSave }) {
   }
 
   const handleChange = (field) => (event) => {
-    setForm((prev) => ({ ...prev, [field]: event.target.value }));
+    let value = event.target.value;
+    if (field === "phone") {
+      value = value.replace(/\D/g, "");
+      if (value.length > 10) {
+        value = value.slice(0, 10);
+      }
+    }
+    setForm((prev) => ({ ...prev, [field]: value }));
     setError("");
     setSuccess("");
   };
@@ -102,16 +144,22 @@ export default function Profile({ profile, onRestart, onSave }) {
     setError("");
     setSuccess("");
 
+    const phoneClean = form.phone.replace(/\D/g, "");
+    if (phoneClean && phoneClean.length !== 10) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
     try {
       const combinedName = `${form.firstName} ${form.lastName}`.trim();
       const updated = await saveProfile(profile.id, {
         name: combinedName,
         gender: form.gender || profile.gender || "",
-        dateOfBirth: form.dateOfBirth || profile.dateOfBirth,
+        dateOfBirth: form.dateOfBirth || null,
         current_education: form.currentEducation || profile.current_education || "",
         area_of_interest: form.areaOfInterest || profile.area_of_interest || "",
         email: form.email.trim() || null,
-        phone: form.phone.trim() || null,
+        phone: phoneClean || null,
         country: form.country || null,
         city: form.city || null,
         zipCode: form.zipCode || null,
@@ -171,12 +219,16 @@ export default function Profile({ profile, onRestart, onSave }) {
         {/* Avatar */}
         <div className="flex justify-start">
           <div className="relative group cursor-pointer">
-            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#e2d9c8] shadow-md">
-              <img
-                src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&crop=face"
-                alt="Profile Avatar"
-                className="w-full h-full object-cover"
-              />
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#e2d9c8] shadow-md flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Profile Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-3xl font-bold text-white uppercase">{initial}</span>
+              )}
             </div>
             <div className="absolute inset-0 bg-[#3D1F08]/40 rounded-full opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
               <Camera size={18} />
@@ -234,7 +286,7 @@ export default function Profile({ profile, onRestart, onSave }) {
                   <option value="+880">+880 (BD)</option>
                 </select>
                 <input
-                  type="text"
+                  type="tel"
                   value={form.phone}
                   onChange={handleChange("phone")}
                   placeholder="Mobile number"
@@ -360,21 +412,22 @@ export default function Profile({ profile, onRestart, onSave }) {
           </div>
         )}
 
-        {/* ── Danger Zone ── */}
+        {/* ── Logout Section ── */}
         <div className="border-t border-[#e2d9c8] pt-8 space-y-4">
-          <h2 className="text-base font-serif font-bold text-[#3D1F08]">Delete Account</h2>
+          <h2 className="text-base font-serif font-bold text-[#3D1F08]">Logout</h2>
           <div className="flex items-start gap-3 rounded-xl bg-white p-4 border border-[#e2d9c8] text-xs text-slate-600 shadow-sm">
             <AlertCircle size={15} className="mt-0.5 shrink-0 text-slate-400" />
             <p>
-              After making a deletion request, you will have{" "}
-              <strong className="text-slate-900">6 months</strong> to maintain this account before permanent deletion.
+              Sign out of your session on this device. You can log back in at any time to access your data.
             </p>
           </div>
           <button
             type="button"
-            className="rounded-xl border border-red-200 text-red-600 hover:bg-red-50 px-4 py-2.5 text-xs font-bold transition bg-white"
+            onClick={() => logout()}
+            className="rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 px-5 py-2.5 text-xs font-bold transition bg-white shadow-sm flex items-center gap-1.5"
           >
-            Request Account Deletion
+            <LogOut size={13} />
+            <span>Log out</span>
           </button>
         </div>
 
