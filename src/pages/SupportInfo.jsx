@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
 import LandingNavbar from "../components/LandingNavbar";
 import LandingFooter from "../components/LandingFooter";
 import { 
@@ -11,7 +10,6 @@ import {
 export default function SupportInfo() {
   const { tabId } = useParams();
   const navigate = useNavigate();
-  const { token, setIsLoginOpen } = useAuth();
   const [activeTab, setActiveTab] = useState(tabId || "help");
 
   const [contactSubmitted, setContactSubmitted] = useState(false);
@@ -27,7 +25,7 @@ export default function SupportInfo() {
     if (tabId && tabId !== activeTab) {
       setActiveTab(tabId);
     }
-  }, [tabId]);
+  }, [tabId, activeTab]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
