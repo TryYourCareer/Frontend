@@ -1,11 +1,10 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, TrendingUp, Terminal, Users,
   ArrowRight, ArrowLeft, ChevronDown, Brain,
-  Target, Globe, Lock, Star, CheckCircle2, Clock, X, Loader2
+  CheckCircle2, Clock, X, Loader2
 } from "lucide-react";
 
 
@@ -104,8 +103,6 @@ const STAGES_DATA = {
 };
 
 export default function Hero({ onStartDiscovery, onExploreCareers, careersCount = 0, isDark = false }) {
-  const navigate = useNavigate();
-  const { token, setIsLoginOpen } = useAuth();
   const [selectedStageModal, setSelectedStageModal] = useState(null);
 
   const handleStageClick = (stageId) => {
@@ -730,7 +727,6 @@ function TestimonialSlider({ isDark }) {
 
 /* ─────────────────────────── Stride Stage Modal ─────────────────────────── */
 function StrideStageModal({ stageId, onClose, isDark }) {
-  const navigate = useNavigate();
   const { token, setIsLoginOpen } = useAuth();
   const [activeStageId, setActiveStageId] = useState(stageId);
   const [demoCompleted, setDemoCompleted] = useState(false);

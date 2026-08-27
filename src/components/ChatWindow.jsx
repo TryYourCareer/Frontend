@@ -7,15 +7,13 @@
  *   onBack        () => void   (mobile back button)
  */
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Info, Loader2, Send, Paperclip } from "lucide-react";
+import { ArrowLeft, Loader2, Send, Paperclip } from "lucide-react";
 import useCommunityMessages from "../hooks/useCommunityMessages";
 import MessageBubble from "./MessageBubble";
 import CommunityInfo from "./CommunityInfo";
 import api from "../lib/api";
 
 export default function ChatWindow({ community, currentUserId, onBack }) {
-  const navigate = useNavigate();
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const { messages, loading, error, hasMore, loadingMore, loadMore, deleteMessage } =
     useCommunityMessages(community?.id);

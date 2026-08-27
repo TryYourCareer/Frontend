@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, DollarSign, TrendingUp, BarChart3, Zap, Star,
-  Award, BookOpen, Briefcase, Compass, Users, CheckCircle, ShieldAlert,
-  Calendar, AlertCircle
+  ArrowLeft, DollarSign, TrendingUp, Star,
+  Award, BookOpen, Compass, CheckCircle, ShieldAlert,
+  AlertCircle
 } from "lucide-react";
 
 const LOGO_BLUE = "#5B7EC9";

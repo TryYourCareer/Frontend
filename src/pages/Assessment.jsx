@@ -11,7 +11,7 @@ const LOGO_TAN = "#B8712E";
 
 
 export default function Assessment() {
-  const { profile, loading } = useAuth();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const [testSessionId, setTestSessionId] = useState(null);
   const [questions, setQuestions] = useState([]);

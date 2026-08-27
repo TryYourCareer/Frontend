@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import LandingNavbar from "../components/LandingNavbar";
 import LandingFooter from "../components/LandingFooter";
 import { 
   Users, Briefcase, TrendingUp, Heart, Award, Sparkles, 
-  ChevronRight, ArrowRight, Clock, CheckCircle2, Smile, Building, Send 
+  Clock, CheckCircle2, Smile, Building, Send 
 } from "lucide-react";
 
 export default function CompanyInfo() {
@@ -24,7 +24,7 @@ export default function CompanyInfo() {
     if (tabId && tabId !== activeTab) {
       setActiveTab(tabId);
     }
-  }, [tabId]);
+  }, [tabId, activeTab]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
