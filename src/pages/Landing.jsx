@@ -16,7 +16,7 @@ export default function Landing({
   profile,
   user,
   onLogout,
-  theme = "light",
+  theme = "dark",
   onToggleTheme,
   searchQuery = "",
   onSearchChange,

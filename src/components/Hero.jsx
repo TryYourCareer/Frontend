@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, TrendingUp, Terminal, Users,
-  ArrowRight, ArrowLeft, ChevronDown, Brain,
-  CheckCircle2, Clock, X, Loader2
+  ArrowRight, ArrowLeft, ChevronDown,
+  CheckCircle2, Clock, X, Loader2, ChevronRight
 } from "lucide-react";
 
 
@@ -102,7 +103,7 @@ const STAGES_DATA = {
   }
 };
 
-export default function Hero({ onStartDiscovery, onExploreCareers, careersCount = 0, isDark = false }) {
+export default function Hero({ onStartDiscovery, onExploreCareers, careersCount = 0, isDark = true }) {
   const [selectedStageModal, setSelectedStageModal] = useState(null);
 
   const handleStageClick = (stageId) => {
@@ -123,154 +124,425 @@ export default function Hero({ onStartDiscovery, onExploreCareers, careersCount 
         }}
       />
 
-      {/* ── Journey Section ────────────────────────────────────────────────────── */}
-      <div id="journey-section" className={`py-20 px-6 ${isDark ? "bg-slate-950" : "bg-[#FAF6EC]"} scroll-mt-6 text-left`}>
-        <div className="mx-auto max-w-6xl">
-          {/* Header row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start mb-12">
-            <div>
-              <span className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider uppercase ${
-                isDark ? "border-amber-500/25 bg-amber-500/10 text-amber-300" : "border-slate-800 bg-transparent text-slate-800"
-              }`}>
-                THE STRIDE JOURNEY
-              </span>
-              <h2 className="mt-4 text-4xl sm:text-5xl font-serif font-semibold tracking-tight text-slate-900 leading-tight">
-                Your journey to lasting success with TryYourCareers
-              </h2>
-            </div>
-            <div className="md:pt-12">
-              <p className={`text-base sm:text-lg leading-relaxed max-w-md ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-                TryYourCareers guides your personalized journey, ensuring interactive skill test-drives and clear career validation.
-              </p>
-            </div>
-          </div>
+      {/* ── Stride Journey Section (CareerExplorer Scroll-Pinned Style) ──────── */}
+      <StrideJourneySection
+        isDark={isDark}
+        onStartDiscovery={onStartDiscovery}
+        onExploreCareers={onExploreCareers}
+        onOpenModal={handleStageClick}
+      />
 
-          {/* Connected Stride Roadway */}
-          <div className="relative">
-            {/* Horizontal roadway line for desktop */}
-            <div className="absolute top-[28px] left-[8%] right-[8%] h-[2px] bg-gradient-to-r from-amber-400 via-blue-400 via-violet-400 to-emerald-400 hidden lg:block z-0 opacity-35" />
+      {/* Testimonials */}
+      <TestimonialSlider isDark={isDark} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                {
-                  id: "discover",
-                  stage: "Stage 01",
-                  phase: "Discover",
-                  title: "Fun Discovery Test",
-                  subtitle: "Find Your Fit",
-                  desc: "Answer simple questions and let our AI match you with the best jobs.",
-                  icon: Sparkles,
-                  gradient: "from-amber-400 to-orange-500",
-                  shadow: "shadow-amber-500/20",
-                  badgeBg: "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400",
-                  badgeBorder: "border-amber-100 dark:border-amber-900/30"
-                },
-                {
-                  id: "explore",
-                  stage: "Stage 02",
-                  phase: "Explore",
-                  title: "Explore Job Realities",
-                  subtitle: "Salaries & Trends",
-                  desc: "See salaries, future growth, skill paths, and job stats before deciding.",
-                  icon: TrendingUp,
-                  gradient: "from-blue-400 to-indigo-500",
-                  shadow: "shadow-blue-500/20",
-                  badgeBg: "bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400",
-                  badgeBorder: "border-blue-100 dark:border-blue-900/30"
-                },
-                {
-                  id: "experience",
-                  stage: "Stage 03",
-                  phase: "Experience",
-                  title: "Practice Trial Tasks",
-                  subtitle: "Play the Role",
-                  desc: "Try real day-to-day tasks (like basic coding or design) to see if you enjoy it.",
-                  icon: Terminal,
-                  gradient: "from-violet-400 to-purple-500",
-                  shadow: "shadow-violet-500/20",
-                  badgeBg: "bg-violet-50 dark:bg-violet-950/20 text-violet-600 dark:text-violet-400",
-                  badgeBorder: "border-violet-100 dark:border-violet-900/30"
-                },
-                {
-                  id: "align",
-                  stage: "Stage 04",
-                  phase: "Align",
-                  title: "Connect with Experts",
-                  subtitle: "Career Hubs",
-                  desc: "Join hubs to chat with real experts in that field and ask them questions.",
-                  icon: Users,
-                  gradient: "from-emerald-400 to-teal-500",
-                  shadow: "shadow-emerald-500/20",
-                  badgeBg: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400",
-                  badgeBorder: "border-emerald-100 dark:border-emerald-900/30"
-                }
-              ].map((step, idx) => {
-                const Icon = step.icon;
-                return (
-                  <div 
-                    key={idx} 
-                    onClick={() => handleStageClick(step.id)}
-                    className="group relative flex flex-col items-center lg:items-start text-center lg:text-left z-10 cursor-pointer"
-                  >
-                    {/* Step Icon container */}
-                    <div className="mb-5 relative">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br ${step.gradient} text-white shadow-lg ${step.shadow} transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
-                        <Icon size={22} />
-                      </div>
-                      {/* Badge */}
-                      <div className={`absolute -top-1.5 -right-1.5 px-2 py-0.5 rounded-md border text-[9px] font-black tracking-wider shadow-sm transition-colors ${
-                        isDark 
-                          ? "bg-slate-900 border-slate-800 text-slate-400" 
-                          : "bg-white border-slate-200 text-slate-500"
-                      }`}>
-                        {step.stage}
-                      </div>
-                    </div>
-
-                    {/* Card Content */}
-                    <div className={`w-full rounded-2xl border p-6 flex-1 flex flex-col justify-between transition-all duration-350 group-hover:-translate-y-1.5 group-hover:shadow-lg ${
-                      isDark 
-                        ? "bg-[#181d2a] border-slate-800 text-slate-100 group-hover:border-slate-700" 
-                        : "bg-[#FAF2DB]/30 border-slate-300/60 text-[#0b1a36] group-hover:border-[#ebd08b]"
-                    }`}>
-                      <div>
-                        <span className={`inline-block text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${step.badgeBg} ${step.badgeBorder}`}>
-                          {step.phase}
-                        </span>
-                        <h3 className="mt-4 text-xl font-bold font-serif leading-tight">{step.title}</h3>
-                      </div>
-                      <div className="mt-5 pt-4 border-t border-slate-950/5 dark:border-white/5">
-                        <span className="text-2xl font-black block text-[#7B4A28] dark:text-amber-400">{step.subtitle}</span>
-                        <p className={`text-xs mt-1.5 leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                          {step.desc}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-        {/* Modal Overlay */}
-        <AnimatePresence>
-          {selectedStageModal && (
-            <StrideStageModal
-              stageId={selectedStageModal}
-              onClose={() => setSelectedStageModal(null)}
-              isDark={isDark}
-            />
-          )}
-        </AnimatePresence>
-
-          {/* Testimonial Section inside Stride Journey */}
-          <TestimonialSlider isDark={isDark} />
-        </div>
-      </div>
+      {/* Modal Overlay */}
+      <AnimatePresence>
+        {selectedStageModal && (
+          <StrideStageModal
+            stageId={selectedStageModal}
+            onClose={() => setSelectedStageModal(null)}
+            isDark={isDark}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Ecosystem cards section ───────────────────────────────────────────── */}
       <EcosystemSection isDark={isDark} />
     </section>
+  );
+}
+
+/* ─────────────────────────── Abstract Career Test Continuous Loop Visualization ─────────────────────────── */
+function AbstractCareerTestLoop({ isDark }) {
+  const [activeStep, setActiveStep] = useState(0);
+
+  // Auto continuous loop across 4 steps (4.2 seconds per step for full sequential pop-ins)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % 4);
+    }, 4200);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Framer Motion spring variants for staggered word pop-ins
+  const wordPopVariant = {
+    hidden: { opacity: 0, scale: 0.6, y: 12 },
+    show: (delayIndex) => ({
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        delay: delayIndex * 0.22 + 0.15,
+        type: "spring",
+        stiffness: 140,
+        damping: 14,
+      },
+    }),
+  };
+
+  return (
+    <div className="w-full max-w-md relative flex flex-col justify-center items-center min-h-[380px] py-4">
+      {/* ── Center Visualization Area (Frameless 4-step loop with sequential word pop-ins) ──────────── */}
+      <div className="relative w-full flex items-center justify-center min-h-[340px]">
+        <AnimatePresence mode="wait">
+
+          {/* ── STEP 1: Floating Tags (Unified App Theme Colors) ──────────────────── */}
+          {activeStep === 0 && (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.4 }}
+              className="w-full flex flex-col items-center justify-center space-y-4 py-4"
+            >
+              <div className="flex flex-wrap justify-center gap-2.5 max-w-xs">
+                {/* Interests - Amber/Gold */}
+                <motion.span
+                  variants={wordPopVariant}
+                  initial="hidden"
+                  animate="show"
+                  custom={0}
+                  className="px-5 py-2.5 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 shadow-sm"
+                >
+                  Interests
+                </motion.span>
+
+                {/* Personality - Primary Blue */}
+                <motion.span
+                  variants={wordPopVariant}
+                  initial="hidden"
+                  animate="show"
+                  custom={1}
+                  className="px-5 py-2.5 rounded-full text-xs font-bold bg-blue-100 dark:bg-blue-500/20 text-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 shadow-sm"
+                >
+                  Personality
+                </motion.span>
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-2.5 max-w-xs">
+                {/* Can't stands - Rose */}
+                <motion.span
+                  variants={wordPopVariant}
+                  initial="hidden"
+                  animate="show"
+                  custom={2}
+                  className="px-4 py-2 rounded-full text-xs font-medium bg-rose-100 dark:bg-rose-500/20 text-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30"
+                >
+                  Can't stands
+                </motion.span>
+
+                {/* Ideal work environment - Purple */}
+                <motion.span
+                  variants={wordPopVariant}
+                  initial="hidden"
+                  animate="show"
+                  custom={3}
+                  className="px-6 py-3 rounded-full text-xs font-extrabold bg-purple-100 dark:bg-purple-500/25 text-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-500/40 shadow-md"
+                >
+                  Ideal work environment
+                </motion.span>
+              </div>
+
+              <div className="flex justify-center">
+                {/* Skills preferences - Emerald */}
+                <motion.span
+                  variants={wordPopVariant}
+                  initial="hidden"
+                  animate="show"
+                  custom={4}
+                  className="px-5 py-2.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 shadow-sm"
+                >
+                  Skills preferences
+                </motion.span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── STEP 2: Vibrant Yellow Circle Forming & Words Populating One by One ── */}
+          {activeStep === 1 && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.4 }}
+              className="relative w-full flex items-center justify-center py-4"
+            >
+              {/* Central Glowing Circle */}
+              <motion.div
+                initial={{ scale: 0.3, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.7, type: "spring", stiffness: 100, damping: 15 }}
+                className="w-44 h-44 rounded-full bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 text-[#0B1A36] flex flex-col items-center justify-center font-bold text-center shadow-xl border-4 border-amber-100 dark:border-amber-400/50 z-10 relative"
+              >
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.35, duration: 0.4 }}
+                  className="text-3xl font-black tracking-tight text-[#0B1A36]"
+                >
+                  94%
+                </motion.span>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 0.4 }}
+                  className="text-[10px] font-extrabold uppercase tracking-wider text-amber-950"
+                >
+                  Attributes Fit
+                </motion.span>
+              </motion.div>
+
+              {/* Satellite Words Populating One by One around the Circle */}
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={1}
+                className="absolute top-0 left-1 z-20 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md border border-slate-200 dark:border-slate-800"
+              >
+                Analytical 92%
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={2}
+                className="absolute top-1 right-1 z-20 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md border border-slate-200 dark:border-slate-800"
+              >
+                Creative Fit 98%
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={3}
+                className="absolute bottom-2 left-2 z-20 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md border border-slate-200 dark:border-slate-800"
+              >
+                Leadership 88%
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={4}
+                className="absolute bottom-1 right-2 z-20 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md border border-slate-200 dark:border-slate-800"
+              >
+                Strategic 95%
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={5}
+                className="absolute top-20 -left-4 z-20 bg-blue-50 dark:bg-blue-900/40 text-blue-900 dark:text-blue-200 text-[9px] font-extrabold px-2.5 py-1 rounded-full shadow border border-blue-200 dark:border-blue-800"
+              >
+                Problem Solver
+              </motion.div>
+            </motion.div>
+          )}
+
+          {/* ── STEP 3: Venn Circles Drawing & Words Populating One by One ───────── */}
+          {activeStep === 2 && (
+            <motion.div
+              key="step3"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.4 }}
+              className="relative w-full flex items-center justify-center py-4"
+            >
+              {/* Left Circle: YOUR SKILLS (Yellow Circle) */}
+              <motion.div
+                initial={{ x: -40, opacity: 0, scale: 0.7 }}
+                animate={{ x: 0, opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+                className="w-38 h-38 sm:w-44 sm:h-44 rounded-full bg-amber-400/40 dark:bg-amber-400/30 border-2 border-amber-400/80 flex items-center justify-center text-[11px] font-black text-amber-950 dark:text-amber-200 uppercase tracking-wider -mr-8 shadow-lg backdrop-blur-xs"
+              >
+                <motion.span
+                  variants={wordPopVariant}
+                  initial="hidden"
+                  animate="show"
+                  custom={1}
+                >
+                  YOUR SKILLS
+                </motion.span>
+              </motion.div>
+
+              {/* Right Circle: MARKET DEMAND (Purple Circle) */}
+              <motion.div
+                initial={{ x: 40, opacity: 0, scale: 0.7 }}
+                animate={{ x: 0, opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, type: "spring", stiffness: 100, delay: 0.15 }}
+                className="w-38 h-38 sm:w-44 sm:h-44 rounded-full bg-purple-400/35 dark:bg-purple-500/25 border-2 border-purple-400/80 flex items-center justify-center text-[11px] font-black text-purple-950 dark:text-purple-200 uppercase tracking-wider -ml-8 shadow-lg backdrop-blur-xs"
+              >
+                <motion.span
+                  variants={wordPopVariant}
+                  initial="hidden"
+                  animate="show"
+                  custom={2}
+                >
+                  MARKET DEMAND
+                </motion.span>
+              </motion.div>
+
+              {/* Words populating one by one inside/around Venn */}
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={3}
+                className="absolute top-0 left-0 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-xl shadow-md border border-slate-200 dark:border-slate-800"
+              >
+                Data Scientist ⭐⭐⭐⭐
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={4}
+                className="absolute bottom-0 right-0 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-xl shadow-md border border-slate-200 dark:border-slate-800"
+              >
+                Product Manager ⭐⭐⭐⭐
+              </motion.div>
+            </motion.div>
+          )}
+
+          {/* ── STEP 4: Venn Intersection ("You're a Visionary!") & Career Titles ── */}
+          {activeStep === 3 && (
+            <motion.div
+              key="step4"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.4 }}
+              className="relative w-full flex items-center justify-center py-2 h-full"
+            >
+              {/* Concentric orbit line */}
+              <div className="absolute inset-1 rounded-full border border-slate-300 dark:border-slate-800 opacity-50 pointer-events-none" />
+
+              {/* Left Circle: YOUR SKILLS */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-yellow-400/75 via-amber-400/50 to-amber-300/40 border border-amber-400/80 flex flex-col items-center justify-center text-[10px] font-extrabold text-amber-950 dark:text-amber-200 uppercase tracking-widest -mr-9 shadow-xl"
+              >
+                <span className="mt-8">YOUR SKILLS</span>
+              </motion.div>
+
+              {/* Right Circle: MARKET DEMAND */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-purple-400/45 via-purple-300/35 to-indigo-300/30 border border-purple-400/80 flex flex-col items-center justify-center text-[10px] font-extrabold text-purple-950 dark:text-purple-200 uppercase tracking-widest -ml-9 shadow-xl"
+              >
+                <span className="mt-8">MARKET DEMAND</span>
+              </motion.div>
+
+              {/* Center Overlap Headline Text: "You're a Visionary!" */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.25, duration: 0.5, type: "spring", stiffness: 120 }}
+                className="absolute z-20 text-center pointer-events-none"
+              >
+                <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#0B1A36] dark:text-white drop-shadow-md leading-tight">
+                  You're a<br />Visionary!
+                </h3>
+              </motion.div>
+
+              {/* ── Surrounding Floating Career Cards matching site typography ──── */}
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={1}
+                className="absolute top-0 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+              >
+                <p className="font-bold text-[#0B1A36] dark:text-white">Museum Curator</p>
+                <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐⭐</p>
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={2}
+                className="absolute top-10 left-0 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+              >
+                <p className="font-bold text-[#0B1A36] dark:text-white">Archaeology</p>
+                <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐⭐</p>
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={3}
+                className="absolute bottom-6 left-1 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+              >
+                <p className="font-bold text-[#0B1A36] dark:text-white">Design Thinker</p>
+                <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐☆</p>
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={4}
+                className="absolute -bottom-2 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+              >
+                <p className="font-bold text-[#0B1A36] dark:text-white">User Experience Designer</p>
+                <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐⭐</p>
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={5}
+                className="absolute top-12 right-8 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+              >
+                <p className="font-bold text-[#0B1A36] dark:text-white">Architect</p>
+                <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐⭐</p>
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={6}
+                className="absolute top-3 right-0 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+              >
+                <p className="font-bold text-[#0B1A36] dark:text-white">Engineering</p>
+                <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐⭐</p>
+              </motion.div>
+
+              <motion.div
+                variants={wordPopVariant}
+                initial="hidden"
+                animate="show"
+                custom={7}
+                className="absolute bottom-8 right-1 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+              >
+                <p className="font-bold text-[#0B1A36] dark:text-white">Product Manager</p>
+                <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐☆</p>
+              </motion.div>
+
+            </motion.div>
+          )}
+
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }
 
@@ -292,15 +564,10 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
     },
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, x: 20 },
-    show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 100, damping: 15 } },
-  };
-
   return (
     <div className={`relative px-6 py-16 md:py-24 transition-colors duration-300 ${isDark
         ? "bg-gradient-to-br from-[#0b0f19] via-[#0f172a] to-[#0b0f19] text-slate-100"
-        : "bg-[#EBF2FC] text-[#0b1a36]"
+      : "bg-[#FAF8F5] text-[#0b1a36]"
       }`}>
       {/* Background decoration or grid lines */}
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
@@ -319,17 +586,17 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
               variants={fadeUp}
               className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wider uppercase ${isDark
                   ? "border-blue-500/30 bg-blue-500/10 text-blue-300"
-                  : "border-blue-100 bg-[#E5EFFF] text-[#2b59c3]"
+                : "border-blue-200/70 bg-blue-50/80 text-[#2563eb]"
                 }`}
             >
-              <span className="h-2 w-2 rounded-full bg-[#2B59C3] animate-pulse"></span>
+              <span className="h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
               THE FUTURE OF CAREER DISCOVERY
             </motion.div>
 
             {/* Title */}
             <motion.h1
               variants={fadeUp}
-              className={`text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] ${isDark ? "text-white" : "text-[#0b1a36]"
+              className={`text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] ${isDark ? "text-white" : "text-[#0b1a36]"
                 }`}
             >
               Stop guessing <br className="hidden sm:inline" />
@@ -340,7 +607,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
             {/* Description */}
             <motion.p
               variants={fadeUp}
-              className={`text-base sm:text-lg leading-relaxed max-w-xl ${isDark ? "text-slate-400" : "text-slate-600"
+              className={`text-sm sm:text-base leading-relaxed max-w-lg ${isDark ? "text-slate-400" : "text-slate-600"
                 }`}
             >
               Eliminate career confusion caused by pressure and trends. Discover your true path through structured assessment, real-world trials, and evidence-based guidance.
@@ -349,136 +616,95 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
             {/* Button Row */}
             <motion.div
               variants={fadeUp}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto pt-2"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto pt-1"
             >
               <button
                 type="button"
                 onClick={onStartDiscovery}
-                className="group inline-flex items-center justify-center gap-2 bg-[#2B59C3] hover:bg-blue-700 active:scale-95 text-white font-bold rounded-full px-8 py-4 shadow-lg shadow-blue-500/25 transition-all duration-200 text-sm sm:text-base cursor-pointer"
+                className="group inline-flex items-center justify-center gap-2 bg-[#2B59C3] hover:bg-blue-700 active:scale-95 text-white font-bold rounded-full px-6 py-3.5 shadow-md shadow-blue-500/20 transition-all duration-200 text-xs sm:text-sm cursor-pointer"
               >
-                <span>Start Your Career Discovery</span>
-                <ArrowRight size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
+                <span>Get Start Now </span>
+                <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
               </button>
 
               <button
                 type="button"
                 onClick={onExploreCareers}
-                className={`inline-flex items-center justify-center gap-2 border font-bold rounded-full px-8 py-4 transition-all duration-200 text-sm sm:text-base active:scale-95 cursor-pointer ${isDark
+                className={`inline-flex items-center justify-center gap-2 border font-bold rounded-full px-6 py-3.5 transition-all duration-200 text-xs sm:text-sm active:scale-95 cursor-pointer ${isDark
                     ? "border-slate-800 bg-slate-900/50 hover:bg-slate-800 text-slate-200"
                     : "border-slate-200/80 bg-white/60 hover:bg-slate-50 text-[#0b1a36]"
                   }`}
               >
-                <span>🎯 Explore Careers</span>
+                <span>Explore Careers</span>
               </button>
+            </motion.div>
+
+            {/* BY THE NUMBERS Section */}
+            <motion.div
+              variants={fadeUp}
+              className="pt-5 w-full text-left mt-1"
+            >
+              <h4 className="text-[11px] font-black tracking-widest uppercase text-amber-500 dark:text-amber-400 mb-3.5">
+                BY THE NUMBERS
+              </h4>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 items-start">
+                {/* Metric 1: AVG RATING */}
+                <div className="flex flex-col justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    AVG RATING
+                  </span>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-amber-500 text-xs">⭐⭐⭐⭐</span>
+                    <span className="text-amber-500/70 text-xs">⭐</span>
+                    <span className="text-xs font-bold text-[#0b1a36] dark:text-slate-200">4.5</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
+                    860+ from the last 30 days
+                  </p>
+                </div>
+
+                {/* Metric 2: Questions Answered */}
+                <div>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-[#2563eb] dark:text-blue-400 tracking-tight">
+                    500 K
+                  </p>
+                  <p className="text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-400 mt-0.5">
+                    Trusted Users
+                  </p>
+                </div>
+
+                {/* Metric 3: Degrees & Careers */}
+                <div>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-[#7c3aed] dark:text-purple-400 tracking-tight">
+                    1500+
+                  </p>
+                  <p className="text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-400 mt-0.5">
+                    Careers
+                  </p>
+                </div>
+
+                {/* Metric 4: Personality Traits */}
+                <div>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-[#059669] dark:text-emerald-400 tracking-tight">
+                    140+
+                  </p>
+                  <p className="text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-400 mt-0.5">
+                    Hubs
+                  </p>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
 
-          {/* Right Column: Beautiful Browser Mockup */}
+          {/* Right Column: Beautiful Abstract Career Test Visualization */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="show"
             className="lg:col-span-5 w-full flex justify-center"
           >
-            <div className={`w-full max-w-md rounded-[2rem] shadow-2xl p-6 relative overflow-hidden transition-all duration-300 border ${isDark ? "bg-[#111827]/90 border-slate-800" : "bg-white/95 border-slate-100/80"
-              }`}>
-              {/* Browser Title Bar / Top Bar */}
-              <div className={`flex items-center gap-2 pb-4 mb-5 border-b ${isDark ? "border-slate-800/80" : "border-slate-100"}`}>
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
-                  <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-                  <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
-                </div>
-                <div className={`h-6 w-3/5 rounded-full mx-auto ${isDark ? "bg-slate-800/60" : "bg-slate-100"}`} />
-              </div>
-
-              {/* Steps List */}
-              <div className="flex flex-col gap-4">
-                {/* Step 1 */}
-                <motion.div
-                  variants={itemVariants}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDark
-                      ? "bg-slate-950/60 border-slate-800/60 hover:border-slate-700/60"
-                      : "bg-white border-slate-100 hover:border-slate-200"
-                    }`}
-                >
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold text-lg shrink-0">
-                    1
-                  </div>
-                  <div className="text-left">
-                    <h4 className={`font-bold text-base leading-snug ${isDark ? "text-slate-200" : "text-[#0B1A36]"}`}>
-                      Direction Assessment
-                    </h4>
-                    <p className={`text-xs sm:text-sm mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      Psychometric & interest routing
-                    </p>
-                  </div>
-                </motion.div>
-
-                {/* Step 2 */}
-                <motion.div 
-                  variants={itemVariants}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDark
-                      ? "bg-slate-950/60 border-slate-800/60 hover:border-slate-700/60"
-                      : "bg-white border-slate-100 hover:border-slate-200"
-                    }`}
-                >
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-bold text-lg shrink-0">
-                    2
-                  </div>
-                  <div className="text-left">
-                    <h4 className={`font-bold text-base leading-snug ${isDark ? "text-slate-200" : "text-[#0B1A36]"}`}>
-                      Reality-Based Intel
-                    </h4>
-                    <p className={`text-xs sm:text-sm mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      Data-driven authentic reality
-                    </p>
-                  </div>
-                </motion.div>
-
-                {/* Step 3 */}
-                <motion.div
-                  variants={itemVariants}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDark
-                      ? "bg-slate-950/60 border-slate-800/60 hover:border-slate-700/60"
-                      : "bg-white border-slate-100 hover:border-slate-200"
-                    }`}
-                >
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold text-lg shrink-0">
-                    3
-                  </div>
-                  <div className="text-left">
-                    <h4 className={`font-bold text-base leading-snug ${isDark ? "text-slate-200" : "text-[#0B1A36]"}`}>
-                      Career Trial Missions
-                    </h4>
-                    <p className={`text-xs sm:text-sm mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      Experiential micro-internships
-                    </p>
-                  </div>
-                </motion.div>
-
-                {/* Step 4 */}
-                <motion.div
-                  variants={itemVariants}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDark
-                      ? "bg-slate-950/60 border-slate-800/60 hover:border-slate-700/60"
-                      : "bg-white border-slate-100 hover:border-slate-200"
-                    }`}
-                >
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 font-bold text-lg shrink-0">
-                    4
-                  </div>
-                  <div className="text-left">
-                    <h4 className={`font-bold text-base leading-snug ${isDark ? "text-slate-200" : "text-[#0B1A36]"}`}>
-                      Dual-Confidence Reports
-                    </h4>
-                    <p className={`text-xs sm:text-sm mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                      Actionable analytics for all
-                    </p>
-                  </div>
-                </motion.div>
-              </div>
-            </div>
+            <AbstractCareerTestLoop isDark={isDark} />
           </motion.div>
         </div>
 
@@ -503,113 +729,92 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
   );
 }
 
-/* ─────────────────────────── Ecosystem Section ──────────────────────────── */
+/* ─────────────────────────── Ecosystem / Career Stages Section ──────────────────────────── */
 function EcosystemSection({ isDark }) {
-  const cards = [
+  const stages = [
     {
-      icon: Brain,
-      title: "For Students",
-      desc: "Stop guessing. Test-drive different careers through interactive simulations and discover what you excel at before choosing your college path.",
-      features: [
-        "Interactive simulator test-drives",
-        "Cognitive fit & strength matching",
-        "Real-world day-in-the-life tasks"
-      ],
-      gradient: "from-violet-500 to-indigo-600",
-      shadow: "shadow-violet-500/20",
-      bulletColor: "bg-violet-500 dark:bg-violet-400"
+      title: "Working Professionals",
+      desc: "Be your best self at work. Learn what makes you unique and how well-suited you are to your past, current, and future career choices.",
+      img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop&q=80",
+      alt: "Working Professional"
     },
     {
-      icon: Users,
-      title: "For Parents",
-      desc: "Gain absolute peace of mind. Review objective, data-backed reports that clarify exactly why a career path suits your child's natural abilities.",
-      features: [
-        "In-depth career confidence reports",
-        "Objective interest & aptitude alignment",
-        "Data-backed college investment validation"
-      ],
-      gradient: "from-amber-500 to-orange-600",
-      shadow: "shadow-orange-500/20",
-      bulletColor: "bg-orange-500 dark:bg-orange-400"
+      title: "College Students & Graduates",
+      desc: "Unsure about what to do after college? See the range of careers you can pursue with your interests, personality, and education.",
+      img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&auto=format&fit=crop&q=80",
+      alt: "College Students & Graduates"
     },
     {
-      icon: TrendingUp,
-      title: "For Schools",
-      desc: "Empower your guidance counselors. Deploy automated pathway mapping tools and track student achievements with easy-to-use cohort dashboard metrics.",
-      features: [
-        "Automated personalized roadmaps",
-        "Counselor cohort success analytics",
-        "Curriculum & skill milestone tracking"
-      ],
-      gradient: "from-emerald-500 to-teal-600",
-      shadow: "shadow-emerald-500/20",
-      bulletColor: "bg-emerald-500 dark:bg-emerald-400"
+      title: "Career Changers",
+      desc: "Looking to make a career change? Thinking about going back to school? TryYourCareers will point you in the right direction.",
+      img: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=80",
+      alt: "Career Changers"
+    },
+    {
+      title: "High School Students",
+      desc: "Discover your true potential and all of the options you have after high school. Then see which path is right for you.",
+      img: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&auto=format&fit=crop&q=80",
+      alt: "High School Students"
     }
   ];
 
   return (
-    <div className={`py-20 px-6 ${isDark ? "bg-slate-950" : "bg-[#FAF6EC]"} text-left`}>
+    <div className={`py-24 px-6 ${isDark ? "bg-slate-950" : "bg-[#FAF8F5]"} text-left`}>
       <div className="mx-auto max-w-6xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start mb-12">
-          <div>
-            <span className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider uppercase ${
-              isDark ? "border-amber-500/25 bg-amber-500/10 text-amber-300" : "border-slate-800 bg-transparent text-slate-800"
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <h2 className={`text-4xl sm:text-5xl font-serif font-light tracking-normal ${isDark ? "text-white" : "text-[#1d1d1f]"
             }`}>
-              THE EDUCATION ECOSYSTEM
-            </span>
-            <h2 className="mt-4 text-4xl sm:text-5xl font-serif font-semibold tracking-tight text-slate-900 leading-tight">
-              Designed for the entire ecosystem
-            </h2>
-          </div>
-          <div className="md:pt-12">
-            <p className={`text-base sm:text-lg leading-relaxed max-w-md ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-              Aligning students, parents, and educators with evidence-based career discovery.
-            </p>
-          </div>
+            For every career stage
+          </h2>
         </div>
 
+        {/* 2x2 Grid of Stage Cards */}
         <motion.div
-          variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
-          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          variants={{
+            hidden: { opacity: 0 },
+            show: { opacity: 1, transition: { staggerChildren: 0.12 } }
+          }}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-40px" }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
         >
-          {cards.map(card => {
-            const Icon = card.icon;
-            return (
-              <motion.article
-                key={card.title}
-                variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 90, damping: 16 } } }}
-                whileHover={{ y: -6, scale: 1.015 }}
-                className={`group rounded-2xl p-6 flex flex-col justify-between transition-all duration-350 border ${
-                  isDark 
-                    ? "bg-[#181d2a] border-slate-800/80 text-slate-100 hover:border-slate-700 hover:shadow-xl hover:shadow-violet-500/5" 
-                    : "bg-[#FAF2DB]/30 border-[#e2d9c8] text-[#0b1a36] hover:border-[#ebd08b] hover:shadow-xl"
+          {stages.map((stage) => (
+            <motion.div
+              key={stage.title}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                show: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+              }}
+              whileHover={{ y: -4 }}
+              className={`group flex flex-col sm:flex-row rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border ${isDark
+                ? "bg-[#141923] border-slate-800/80 text-slate-100"
+                : "bg-white border-slate-200/80 text-slate-900"
                 }`}
-              >
-                <div>
-                  {/* Icon Block */}
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br ${card.gradient} text-white shadow-md ${card.shadow} transition-transform duration-300 group-hover:scale-105`}>
-                    <Icon size={20} />
-                  </div>
+            >
+              {/* Image Container */}
+              <div className="w-full sm:w-[42%] h-48 sm:h-auto shrink-0 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
+                <img
+                  src={stage.img}
+                  alt={stage.alt}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
 
-                  <h3 className="mt-5 text-xl font-bold font-serif leading-tight">{card.title}</h3>
-                  <p className={`mt-3 text-sm leading-relaxed ${isDark ? "text-slate-400" : "text-slate-650"}`}>
-                    {card.desc}
-                  </p>
-
-                  {/* Bullet features list */}
-                  <ul className="mt-6 space-y-2.5">
-                    {card.features.map((feat, fidx) => (
-                      <li key={fidx} className="flex items-center gap-2.5 text-xs font-semibold">
-                        <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${card.bulletColor}`} />
-                        <span className={isDark ? "text-slate-350" : "text-slate-700"}>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.article>
-            );
-          })}
+              {/* Text Content */}
+              <div className="w-full sm:w-[58%] p-6 sm:p-7 flex flex-col justify-center text-left">
+                <h3 className={`text-xl sm:text-2xl font-serif font-normal leading-tight mb-3 ${isDark ? "text-white" : "text-[#222222]"
+                  }`}>
+                  {stage.title}
+                </h3>
+                <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? "text-slate-400" : "text-[#666666]"
+                  }`}>
+                  {stage.desc}
+                </p>
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
       </div>
     </div>
@@ -622,22 +827,25 @@ const TESTIMONIALS = [
     name: "David R.",
     role: "Business Owner / Student Parent",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-    quote: "TryYourCareers truly changed my life. I'd tried everything, but this program gave me the simulator test-drives and personalized guidance I needed. I found my fit in Software Engineering and finally feel truly energized, confident, and in control of my future. It's more than just a test; it's a complete career milestone.",
-    bgColor: "bg-[#F3E3B6]"
+    quote: "TryYourCareers truly changed my life. I tried everything, but this program gave me the simulator test-drives and personalized guidance I needed. I found my fit in Software Engineering and finally feel truly energized, confident, and in control of my future.",
+    rating: 5,
+    tag: "Software Engineering"
   },
   {
     name: "Elena M.",
     role: "Data Analyst Student",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face",
     quote: "The interactive trial sandboxes let me feel what it's actually like to analyze models and write Python code. I'm now studying Data Science with 100% confidence instead of guessing.",
-    bgColor: "bg-[#F9E9BE]"
+    rating: 5,
+    tag: "Data Science"
   },
   {
     name: "Marcus K.",
     role: "DevOps Engineer",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face",
     quote: "Having the confidence reports backed by actual runtime simulator testing made it so easy to get validation from my parents and counselors. Highly recommend the simulator!",
-    bgColor: "bg-[#FAF2DB]"
+    rating: 5,
+    tag: "DevOps & Cloud"
   }
 ];
 
@@ -645,6 +853,14 @@ function TestimonialSlider({ isDark }) {
   const [curr, setCurr] = useState(0);
   const active = TESTIMONIALS[curr];
   const next = TESTIMONIALS[(curr + 1) % TESTIMONIALS.length];
+
+  // Auto carousel loop every 5.5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurr((prev) => (prev + 1) % TESTIMONIALS.length);
+    }, 5500);
+    return () => clearInterval(timer);
+  }, []);
 
   const handlePrev = () => {
     setCurr(prev => (prev === 0 ? TESTIMONIALS.length - 1 : prev - 1));
@@ -655,70 +871,576 @@ function TestimonialSlider({ isDark }) {
   };
 
   return (
-    <div className="mt-20 border-t border-slate-900/10 pt-16 text-left">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Image Callout */}
-        <div className="lg:col-span-4 flex flex-col items-start gap-4">
+    <div className={`py-16 md:py-24 border-t transition-colors duration-300 ${isDark ? "bg-[#0b0f19] border-slate-800 text-slate-100" : "bg-[#FAF8F5] border-slate-200/80 text-[#0b1a36]"
+      }`}>
+      <div className="mx-auto max-w-6xl px-6 sm:px-8 text-left">
+
+        {/* Header Tag */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
           <div>
-            <span className="text-xs font-semibold opacity-60">Trusted by</span>
-            <p className="text-lg font-bold text-slate-800 tracking-tight mt-0.5">+12,400 Students</p>
+            <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wider uppercase ${isDark ? "border-amber-500/30 bg-amber-500/10 text-amber-300" : "border-amber-200 bg-amber-50 text-amber-900"
+              }`}>
+              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+              STUDENT TESTIMONIALS
+            </span>
+            <h2 className={`mt-3 text-3xl sm:text-4xl font-serif font-extrabold tracking-tight ${isDark ? "text-white" : "text-[#0b1a36]"
+              }`}>
+              Real Lives Changed
+            </h2>
           </div>
-          <div className="relative w-full max-w-[280px] aspect-square rounded-2xl overflow-hidden shadow-md">
-            <img src={active.image} alt={active.name} className="w-full h-full object-cover" />
+
+          {/* Navigation Buttons */}
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous Testimonial"
+              className={`p-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer ${isDark
+                ? "bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200"
+                : "bg-white border-slate-200 hover:bg-slate-50 text-[#0b1a36] shadow-sm"
+                }`}
+            >
+              <ArrowLeft size={18} />
+            </button>
+
+            {/* Dots */}
+            <div className="flex gap-1.5 px-2">
+              {TESTIMONIALS.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurr(idx)}
+                  className={`h-2 rounded-full transition-all duration-300 ${curr === idx ? "w-6 bg-blue-600" : "w-2 bg-slate-300 dark:bg-slate-700"
+                    }`}
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next Testimonial"
+              className={`p-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer ${isDark
+                ? "bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200"
+                : "bg-white border-slate-200 hover:bg-slate-50 text-[#0b1a36] shadow-sm"
+                }`}
+            >
+              <ArrowRight size={18} />
+            </button>
           </div>
         </div>
 
-        {/* Right Column: Quote & Slider Controls */}
-        <div className="lg:col-span-8 flex flex-col justify-between min-h-[280px]">
-          <div>
-            <div className="flex justify-between items-center w-full">
-              <span className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-bold tracking-wider uppercase ${
-                isDark ? "border-amber-500/25 bg-amber-500/10 text-amber-300" : "border-slate-800 bg-transparent text-slate-800"
-              }`}>
-                TESTIMONIAL
-              </span>
-              <div className="flex gap-2">
+        {/* Main Content Grid */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={curr}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.4 }}
+            className={`grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch rounded-3xl p-6 sm:p-10 border ${isDark
+              ? "bg-[#111827]/90 border-slate-800/80 shadow-2xl shadow-slate-950/60"
+              : "bg-white border-slate-200/80 shadow-xl shadow-slate-200/40"
+              }`}
+          >
+            {/* Left Column: Reviewer Photo & Trust Badge */}
+            <div className="lg:col-span-4 flex flex-col justify-between items-center sm:items-start gap-6">
+              <div className="relative w-full max-w-[260px] sm:max-w-none aspect-square rounded-2xl overflow-hidden shadow-lg border border-slate-100 dark:border-slate-800">
+                <img
+                  src={active.image}
+                  alt={active.name}
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                />
+                <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-full border border-slate-200 dark:border-slate-800 text-[10px] font-bold text-amber-500 flex items-center gap-1 shadow-sm">
+                  <span>⭐⭐⭐⭐⭐</span>
+                </div>
+              </div>
+
+              {/* Verified Student Pill */}
+              <div className={`w-full p-4 rounded-2xl border ${isDark ? "bg-slate-900/70 border-slate-800" : "bg-[#FAF8F5] border-slate-100"
+                }`}>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                  <span className="text-xs font-bold tracking-tight">Verified Graduate Match</span>
+                </div>
+                <p className={`text-[11px] mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  Matched with <span className="font-semibold text-blue-600 dark:text-blue-400">{active.tag}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Right Column: Quote & Details */}
+            <div className="lg:col-span-8 flex flex-col justify-between space-y-6 pt-2">
+              <div>
+                <div className="text-amber-500 font-serif text-5xl leading-none select-none opacity-40">“</div>
+                <p className={`text-lg sm:text-xl md:text-2xl font-serif leading-relaxed -mt-4 ${isDark ? "text-slate-200" : "text-[#0b1a36]"
+                  }`}>
+                  {active.quote}
+                </p>
+              </div>
+
+              <div className="pt-6 border-t border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h4 className={`text-lg font-bold ${isDark ? "text-white" : "text-[#0b1a36]"}`}>
+                    {active.name}
+                  </h4>
+                  <p className={`text-xs sm:text-sm font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    {active.role}
+                  </p>
+                </div>
+
+                {/* Next preview card */}
                 <button
-                  type="button"
-                  onClick={handlePrev}
-                  className="p-2 rounded-lg bg-amber-100 hover:bg-amber-200 text-slate-900 transition"
-                >
-                  <ArrowLeft size={16} />
-                </button>
-                <button
-                  type="button"
                   onClick={handleNext}
-                  className="p-2 rounded-lg bg-amber-100 hover:bg-amber-200 text-slate-900 transition"
+                  className={`flex items-center gap-3 rounded-2xl p-2.5 px-3.5 border transition-all duration-200 text-left active:scale-95 cursor-pointer ${isDark
+                    ? "bg-slate-900/80 border-slate-800 hover:bg-slate-800"
+                    : "bg-[#FAF8F5] border-slate-200/70 hover:bg-slate-100"
+                    }`}
                 >
-                  <ArrowRight size={16} />
+                  <img src={next.image} alt={next.name} className="w-9 h-9 rounded-xl object-cover" />
+                  <div>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Up Next</span>
+                    <p className="text-xs font-bold text-[#0b1a36] dark:text-white truncate max-w-[110px]">{next.name}</p>
+                  </div>
+                  <ChevronRight size={16} className="text-slate-400" />
                 </button>
               </div>
             </div>
+          </motion.div>
+        </AnimatePresence>
 
-            <h2 className="mt-6 text-3xl sm:text-4xl font-serif font-semibold tracking-tight text-slate-900">
-              Real lives changed
-            </h2>
+      </div>
+    </div>
+  );
+}
 
-            <p className={`mt-6 text-base sm:text-lg leading-relaxed ${isDark ? "text-slate-300" : "text-slate-700"}`}>
-              "{active.quote}"
-            </p>
+/* ─────────────────────────── CareerExplorer Scroll-Pinned How It Works ─────────── */
+function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOpenModal }) {
+  const navigate = useNavigate();
+  const sectionRef = useRef(null);
+  const [activeStep, setActiveStep] = useState(0);
+
+  // Auto scroll-pin calculation to step through 4 stages smoothly
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const scrollableHeight = rect.height - window.innerHeight;
+      if (scrollableHeight <= 0) return;
+
+      const scrolled = -rect.top;
+      const progress = Math.max(0, Math.min(1, scrolled / scrollableHeight));
+      const step = Math.min(3, Math.floor(progress * 4));
+      setActiveStep(step);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const STEPS = [
+    {
+      id: "discover",
+      num: "01",
+      navTitle: "Answer",
+      title: "Answer a series of questions",
+      desc: "Take the assessment and get your career matches, personality archetype, and more along the way.",
+      badge: "Stage 01: Discover",
+      ctaText: "Start Assessment",
+      ctaAction: () => {
+        if (onStartDiscovery) onStartDiscovery();
+        else navigate("/assessment");
+      },
+      gradient: "from-amber-400 to-orange-500"
+    },
+    {
+      id: "archetype",
+      num: "02",
+      navTitle: "Discover",
+      title: "Discover what makes you — You",
+      desc: "Find out what makes you stand apart from others and why certain careers are great fits for you.",
+      badge: "Stage 02: Personality & Archetype",
+      ctaText: "Explore Personality Fits",
+      ctaAction: () => {
+        if (onStartDiscovery) onStartDiscovery();
+        else navigate("/assessment");
+      },
+      gradient: "from-blue-400 to-indigo-500"
+    },
+    {
+      id: "explore",
+      num: "03",
+      navTitle: "Explore",
+      title: "Explore the world of school & work",
+      desc: "Find all the information you need to know about your dream career. Then make a plan to get there.",
+      badge: "Stage 03: Career & Salary Metrics",
+      ctaText: "Explore Salaries & Trends",
+      ctaAction: () => {
+        if (onExploreCareers) onExploreCareers();
+        else navigate("/explore-careers");
+      },
+      gradient: "from-violet-400 to-purple-500"
+    },
+    {
+      id: "align",
+      num: "04",
+      navTitle: "Align",
+      title: "Align with experts & trial sandboxes",
+      desc: "Experience real-world task sandboxes and connect with practicing mentors in career hubs.",
+      badge: "Stage 04: Practical Sandboxes & Hubs",
+      ctaText: "Launch Sandboxes & Hubs",
+      ctaAction: () => navigate("/career-hubs"),
+      gradient: "from-emerald-400 to-teal-500"
+    }
+  ];
+
+  return (
+    <div
+      id="journey-section"
+      ref={sectionRef}
+      className={`relative min-h-[320vh] ${isDark ? "bg-[#10141d] text-slate-100" : "bg-[#FAF8F5] text-slate-900"
+        } scroll-mt-6 transition-colors duration-300`}
+    >
+      {/* Sticky Fullscreen Container */}
+      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center py-6 px-4 sm:px-8 md:px-12">
+        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center h-full max-h-[88vh]">
+
+          {/* ── Far Left Rotated "How it works" Title Bar & Indicator ────────────── */}
+          <div className={`hidden xl:flex lg:col-span-1 flex-col items-center justify-center h-full pr-4 border-r ${isDark ? "border-slate-800" : "border-slate-300/80"
+            }`}>
+            <span className={`text-xs font-bold uppercase tracking-[0.25em] -rotate-90 whitespace-nowrap origin-center my-12 ${isDark ? "text-slate-500" : "text-slate-600 font-extrabold"
+              }`}>
+              How it works
+            </span>
+            <div className={`w-1 flex-1 rounded-full relative my-4 overflow-hidden ${isDark ? "bg-slate-800" : "bg-slate-300"
+              }`}>
+              <motion.div
+                className="w-full bg-amber-500 rounded-full"
+                animate={{
+                  height: `${((activeStep + 1) / 4) * 100}%`
+                }}
+                transition={{ type: "spring", stiffness: 200, damping: 25 }}
+              />
+            </div>
           </div>
 
-          <div className="mt-8 flex items-center justify-between border-t border-slate-900/10 pt-4">
-            <div>
-              <p className="text-sm font-bold text-slate-900">{active.name}</p>
-              <p className="text-xs text-slate-500 mt-0.5">{active.role}</p>
+          {/* ── Left Column: 4 Step Accordion Nav / Content ──────────────────────── */}
+          <div className="lg:col-span-5 flex flex-col justify-center space-y-6 text-left pr-0 lg:pr-6">
+
+            <div className="space-y-6">
+              {STEPS.map((step, idx) => {
+                const isActive = activeStep === idx;
+                return (
+                  <div
+                    key={step.id}
+                    onClick={() => setActiveStep(idx)}
+                    className={`cursor-pointer transition-all duration-300 ${isActive ? "opacity-100 translate-x-0" : isDark ? "opacity-35 hover:opacity-75" : "opacity-45 hover:opacity-90"
+                      }`}
+                  >
+                    {isActive ? (
+                      <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-3"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-amber-500 uppercase tracking-widest">
+                            {step.num}
+                          </span>
+                          <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${isDark
+                            ? "bg-slate-800 text-slate-300 border-slate-700"
+                            : "bg-white text-slate-700 border-slate-300 shadow-sm"
+                            }`}>
+                            {step.badge}
+                          </span>
+                        </div>
+
+                        <h3 className={`text-2xl sm:text-3xl md:text-4xl font-serif font-light leading-tight ${isDark ? "text-white" : "text-[#1d1d1f]"
+                          }`}>
+                          {step.title}
+                        </h3>
+
+                        <p className={`text-xs sm:text-sm leading-relaxed max-w-lg font-light ${isDark ? "text-slate-400" : "text-slate-600"
+                          }`}>
+                          {step.desc}
+                        </p>
+
+                        <div className="pt-2 flex flex-wrap items-center gap-3">
+                          <button
+                            onClick={step.ctaAction}
+                            className={`px-5 py-2.5 rounded-xl text-xs font-bold text-slate-900 bg-gradient-to-r ${step.gradient} shadow-lg hover:opacity-95 active:scale-95 transition-all flex items-center gap-2`}
+                          >
+                            <span>{step.ctaText}</span>
+                            <ArrowRight size={14} />
+                          </button>
+
+                          <button
+                            onClick={() => onOpenModal(step.id)}
+                            className={`px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-colors flex items-center gap-1 ${isDark
+                              ? "text-slate-300 border-slate-700 hover:bg-slate-800"
+                              : "text-slate-700 border-slate-300 bg-white hover:bg-slate-100 shadow-sm"
+                              }`}
+                          >
+                            <span>Blueprint</span>
+                            <ChevronRight size={13} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <div className="flex items-center gap-3 py-1">
+                        <span className={`text-base font-bold font-mono ${isDark ? "text-slate-500" : "text-slate-500"
+                          }`}>{step.num}</span>
+                        <span className={`text-xl sm:text-2xl font-serif font-light ${isDark ? "text-slate-400" : "text-slate-700"
+                          }`}>
+                          {step.navTitle}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
-            {/* Next preview card */}
-            <div className="hidden sm:flex items-center gap-3 bg-white/40 rounded-xl p-2 border border-slate-900/5 shadow-sm max-w-[200px]">
-              <img src={next.image} alt={next.name} className="w-10 h-10 rounded-lg object-cover" />
-              <div className="text-left">
-                <p className="text-[10px] font-bold text-slate-900 truncate max-w-[120px]">{next.name}</p>
-                <p className="text-[8px] text-slate-500 truncate max-w-[120px]">{next.role}</p>
-              </div>
-            </div>
           </div>
+
+          {/* ── Center / Right Column: Dynamic Visual Graphic Showcase ──────────────── */}
+          <div className="lg:col-span-6 flex items-center justify-center w-full h-full relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStep}
+                initial={{ opacity: 0, scale: 0.96, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -15 }}
+                transition={{ duration: 0.35 }}
+                className="w-full flex items-center justify-center"
+              >
+
+                {/* ── STEP 01 GRAPHIC (Answer a series of questions) ──────────────── */}
+                {activeStep === 0 && (
+                  <div className="w-full max-w-xl flex flex-col sm:flex-row items-center gap-6">
+                    {/* Mobile Phone Mockup */}
+                    <div className={`w-full sm:w-72 border rounded-3xl p-4 shadow-2xl space-y-4 text-left ${isDark ? "bg-[#121315] border-slate-800" : "bg-white border-slate-200 shadow-slate-300/50"
+                      }`}>
+                      <div className={`flex items-center justify-between pb-2 border-b text-[10px] font-mono ${isDark ? "border-slate-800 text-slate-400" : "border-slate-200 text-slate-500"
+                        }`}>
+                        <span>≡ TryYourCareers</span>
+                        <span className={`px-2 py-0.5 rounded font-bold ${isDark ? "bg-white/10 text-white" : "bg-slate-900 text-white"
+                          }`}>Save progress</span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold block">Would you like to...</span>
+                        <p className={`text-xs font-bold ${isDark ? "text-white" : "text-slate-900"}`}>Direct the making of a movie</p>
+                      </div>
+
+                      <div className="space-y-2 text-xs">
+                        {[
+                          { num: 1, label: "Hate it" },
+                          { num: 2, label: "Dislike it" },
+                          { num: 3, label: "Neutral" },
+                          { num: 4, label: "Like it" },
+                          { num: 5, label: "Love it", active: true }
+                        ].map((opt) => (
+                          <div
+                            key={opt.num}
+                            className={`p-2.5 rounded-xl border flex items-center gap-2 transition-all ${opt.active
+                              ? "bg-amber-500/20 border-amber-500 text-amber-800 dark:text-amber-300 font-bold"
+                              : isDark
+                                ? "bg-slate-900 border-slate-800 text-slate-400"
+                                : "bg-slate-50 border-slate-200 text-slate-700"
+                              }`}
+                          >
+                            <span className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] ${isDark ? "border-slate-700" : "border-slate-300"
+                              }`}>
+                              {opt.num}
+                            </span>
+                            <span>{opt.label}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="pt-2 text-center text-[10px] text-slate-500">
+                        Skip question
+                      </div>
+                      <div className={`pt-1 border-t flex items-center justify-between text-[9px] font-mono ${isDark ? "border-slate-800 text-slate-400" : "border-slate-200 text-slate-500"
+                        }`}>
+                        <span>UP NEXT: Personality archetype</span>
+                        <span>~ 3 MINS</span>
+                      </div>
+                    </div>
+
+                    {/* Right Timeline Checklist */}
+                    <div className={`hidden sm:flex flex-col space-y-4 text-left border-l pl-4 py-2 ${isDark ? "border-slate-800" : "border-slate-300"
+                      }`}>
+                      {[
+                        { label: "Start", done: true },
+                        { label: "Your personality archetype", done: true },
+                        { label: "Career matches", done: true },
+                        { label: "Degree matches", done: true },
+                        { label: "Final results", done: false, active: true, details: ["40 questions", "Career matches and insights", "Degree matches and insights", "Personality report", "Trait report"] }
+                      ].map((item, i) => (
+                        <div key={i} className="space-y-1">
+                          <div className="flex items-center gap-2 text-xs font-bold">
+                            {item.done ? (
+                              <div className="w-5 h-5 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center text-[10px]">✓</div>
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-slate-400 dark:bg-white border-2 border-slate-400 dark:border-white" />
+                            )}
+                            <span className={item.active ? isDark ? "text-white text-sm" : "text-slate-900 text-sm font-extrabold" : isDark ? "text-slate-400" : "text-slate-500"}>{item.label}</span>
+                          </div>
+                          {item.details && (
+                            <div className="pl-7 space-y-1 text-[10px] text-slate-500 dark:text-slate-400">
+                              <p className="font-mono text-slate-600 dark:text-slate-500">{item.details[0]}</p>
+                              {item.details.slice(1).map((d, di) => (
+                                <p key={di}>• {d}</p>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── STEP 02 GRAPHIC (Discover what makes you — You) ─────────────── */}
+                {activeStep === 1 && (
+                  <div className="w-full max-w-lg relative min-h-[320px] flex items-center justify-center">
+                    {/* Visionary Card */}
+                    <div className="absolute -top-4 -left-2 sm:left-4 z-20 w-64 p-4 rounded-2xl bg-gradient-to-br from-purple-900/90 to-slate-900 border border-purple-500/30 text-white shadow-2xl text-left">
+                      <span className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">
+                        SUPER RARE • 2% OF USERS
+                      </span>
+                      <h4 className="text-lg font-bold mt-2">Lucas is a visionary</h4>
+                      <p className="text-xs text-purple-200">Creative, Introspective, Persuasive</p>
+                      <p className="text-[10px] text-slate-300 mt-2 leading-relaxed">
+                        Visionaries are all about creating their own artistic empire. They enjoy independent, unstructured spaces where they can be creative.
+                      </p>
+                    </div>
+
+                    {/* Personality Report Book */}
+                    <div className="absolute right-2 sm:right-6 top-0 z-10 w-48 h-60 rounded-xl bg-amber-900/70 border border-amber-500/40 p-4 text-amber-100 flex flex-col justify-between shadow-xl">
+                      <span className="text-[9px] font-mono tracking-widest uppercase">PERSONALITY REPORT</span>
+                      <div className="w-16 h-16 rounded-full border border-amber-500/40 mx-auto flex items-center justify-center">
+                        <div className="w-8 h-8 rotate-45 border border-amber-400" />
+                      </div>
+                      <span className="text-[9px] font-mono text-center">TryYourCareers</span>
+                    </div>
+
+                    {/* Trait Report Book */}
+                    <div className="absolute right-10 bottom-2 z-30 w-44 h-56 rounded-xl bg-teal-900/90 border border-teal-400/40 p-4 text-teal-100 shadow-2xl flex flex-col justify-between">
+                      <span className="text-[9px] font-mono tracking-widest uppercase">TRAIT REPORT</span>
+                      <div className="flex items-end gap-1 h-16 justify-center">
+                        <div className="w-2 h-10 bg-teal-400/60 rounded-t" />
+                        <div className="w-2 h-14 bg-teal-400 rounded-t" />
+                        <div className="w-2 h-8 bg-teal-400/40 rounded-t" />
+                        <div className="w-2 h-12 bg-teal-400/80 rounded-t" />
+                      </div>
+                      <span className="text-[9px] font-mono">sokanu fit engine</span>
+                    </div>
+
+                    {/* Highlight Speech Bubble */}
+                    <div className="absolute -bottom-6 right-0 z-40 bg-teal-950/90 border border-teal-500/40 p-3 rounded-2xl max-w-xs text-left text-[11px] text-teal-200 shadow-2xl">
+                      <p className="font-bold text-white">You value ability utilization, feeling of achievement, and opportunities for advancement.</p>
+                      <span className="text-[9px] text-teal-400 underline block mt-1">Learn about your must-haves →</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── STEP 03 GRAPHIC (Explore the world of school & work) ───────────── */}
+                {activeStep === 2 && (
+                  <div className="w-full max-w-lg relative min-h-[320px] flex items-center justify-center">
+                    {/* Degree Card 1 */}
+                    <div className="absolute top-0 left-4 z-10 bg-white text-slate-900 p-3 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3">
+                      <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=100&auto=format&fit=crop&q=80" alt="Degree" className="w-12 h-10 rounded-lg object-cover" />
+                      <div className="text-left">
+                        <p className="text-xs font-bold">Architect Degree</p>
+                        <p className="text-amber-500 text-[10px]">⭐⭐⭐⭐⭐</p>
+                      </div>
+                    </div>
+
+                    {/* Degree Card 2 */}
+                    <div className="absolute top-14 left-0 z-20 bg-white text-slate-900 p-3 rounded-2xl shadow-2xl border border-slate-200 flex items-center gap-3">
+                      <img src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=100&auto=format&fit=crop&q=80" alt="Career" className="w-12 h-10 rounded-lg object-cover" />
+                      <div className="text-left">
+                        <p className="text-xs font-bold">Dental Hygienist</p>
+                        <p className="text-amber-500 text-[10px]">⭐⭐⭐⭐⭐</p>
+                      </div>
+                    </div>
+
+                    {/* Avg Tuition Pill */}
+                    <div className="absolute top-16 right-20 z-20 bg-amber-900/90 text-amber-200 px-3 py-1.5 rounded-xl text-left border border-amber-500/30 shadow-lg">
+                      <span className="text-[9px] block font-mono">Avg Tuition</span>
+                      <span className="text-xs font-bold">$8k/year</span>
+                    </div>
+
+                    {/* Salary & Metrics Floating Card */}
+                    <div className="absolute bottom-0 right-0 z-30 w-72 bg-white text-slate-900 p-4 rounded-2xl shadow-2xl border border-slate-200 text-left">
+                      <div className="flex items-center justify-between border-b pb-2 mb-3">
+                        <span className="text-xs font-bold text-slate-900">Filter by average salary</span>
+                        <span className="text-[10px] text-slate-400">The avg salary is $56k/yr</span>
+                      </div>
+                      <div className="flex items-end gap-1 h-12 justify-center mb-2">
+                        {[20, 35, 45, 60, 80, 100, 70, 50, 90, 40, 30, 15].map((h, i) => (
+                          <div key={i} style={{ height: `${h}%` }} className="w-2 bg-purple-500/70 rounded-t" />
+                        ))}
+                      </div>
+                      <div className="flex justify-between items-center text-[10px] text-slate-400 pt-2 border-t">
+                        <span className="px-2 py-1 bg-slate-100 rounded font-bold text-slate-700">$30,000</span>
+                        <span>—</span>
+                        <span className="px-2 py-1 bg-slate-100 rounded font-bold text-slate-700">$300,000</span>
+                      </div>
+                    </div>
+
+                    {/* Stats pills */}
+                    <div className="absolute top-36 left-2 z-30 bg-purple-600 text-white px-3 py-1.5 rounded-xl text-left shadow-lg">
+                      <span className="text-[9px] block">Avg Salary</span>
+                      <span className="text-xs font-bold">$94k</span>
+                    </div>
+
+                    <div className="absolute bottom-8 left-16 z-30 bg-amber-500 text-white px-3 py-1.5 rounded-xl text-left shadow-lg">
+                      <span className="text-[9px] block">Growth</span>
+                      <span className="text-xs font-bold">↑10%</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── STEP 04 GRAPHIC (Align with experts & trial sandboxes) ─────────── */}
+                {activeStep === 3 && (
+                  <div className="w-full max-w-lg space-y-4 text-left">
+                    <div className={`p-4 rounded-2xl border shadow-2xl flex items-start gap-4 ${isDark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
+                      }`}>
+                      <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80" alt="Mentor" className="w-11 h-11 rounded-full object-cover shrink-0 border border-emerald-400" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold">Ananya Sharma</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 font-bold border border-emerald-500/30">
+                            Lead UX Architect @ Razorpay
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
+                          "Hands-on trial tasks in the Stride sandbox gave our junior candidates 10x more confidence during technical interviews than plain resume claims!"
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className={`p-3.5 rounded-xl border ${isDark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-md"
+                        }`}>
+                        <span className="text-[10px] text-slate-400 uppercase font-bold block">Career Hubs</span>
+                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">128 Active Mentors</span>
+                      </div>
+                      <div className={`p-3.5 rounded-xl border ${isDark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-md"
+                        }`}>
+                        <span className="text-[10px] text-slate-400 uppercase font-bold block">Sandbox Tasks</span>
+                        <span className="text-sm font-bold text-amber-600 dark:text-amber-400">50+ Micro-Simulations</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
         </div>
       </div>
     </div>
