@@ -11,80 +11,77 @@ export default function CommunityInfo({ community, onBack }) {
   if (!community) return null;
 
   return (
-    <div className="flex flex-col h-full bg-[#f5f7fa]">
+    <div className="flex flex-col h-full bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] font-sans">
 
       {/* Header */}
-      <header className="shrink-0 flex items-center gap-3 bg-white border-b border-slate-200 px-4 py-3 shadow-sm">
+      <header className="shrink-0 flex items-center gap-3 bg-white/90 backdrop-blur-md border-b border-[#D3E3F5] px-4 py-3 sm:px-6 shadow-xs">
         <button
           onClick={onBack}
-          className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-slate-100 transition"
+          className="h-9 w-9 flex items-center justify-center rounded-full border border-[#D3E3F5] bg-[#F0F6FC] hover:bg-white text-slate-700 transition shadow-2xs cursor-pointer"
         >
-          <ArrowLeft size={20} className="text-slate-700" />
+          <ArrowLeft size={16} />
         </button>
 
-        <h2 className="text-base font-semibold text-slate-800">
+        <h2 className="font-serif text-base font-bold text-[#0b1a36]">
           Community Info
         </h2>
       </header>
 
       {/* Community information */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
 
         {/* Profile section */}
-        <div className="bg-white px-4 py-8 flex flex-col items-center border-b border-slate-200">
-
-          <div className="h-24 w-24 rounded-full bg-[#eff6ff] border border-[#c6d9f7] flex items-center justify-center text-4xl shadow-sm">
+        <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 sm:p-8 flex flex-col items-center text-center shadow-xs">
+          <div className="h-24 w-24 rounded-3xl bg-[#F0F6FC] border border-[#D3E3F5] flex items-center justify-center text-4xl shadow-2xs">
             {community.career_icon || "💬"}
           </div>
 
-          <h1 className="mt-4 text-xl font-bold text-[#173b72] text-center">
+          <h1 className="mt-4 font-serif text-xl sm:text-2xl font-bold text-[#0b1a36]">
             {community.name}
           </h1>
 
-          <p className="mt-1 text-sm text-slate-500">
-            {community.member_count || 0} members
+          <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {(community.member_count || 0).toLocaleString()} members
           </p>
         </div>
 
         {/* Members */}
-        <div className="mt-2 bg-white border-y border-slate-200">
-
+        <div className="rounded-3xl border border-[#D3E3F5] bg-white shadow-xs overflow-hidden">
           <button
-            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition text-left"
+            type="button"
+            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[#F0F6FC] transition text-left cursor-pointer"
           >
-            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
-              <Users size={19} className="text-blue-600" />
+            <div className="h-10 w-10 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-[#1E88E5] shadow-2xs">
+              <Users size={18} />
             </div>
 
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-slate-800">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-bold text-slate-900">
                 Members
               </p>
-
-              <p className="text-xs text-slate-500 mt-0.5">
-                {community.member_count || 0} members
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {(community.member_count || 0).toLocaleString()} members enrolled
               </p>
             </div>
           </button>
-
         </div>
 
         {/* Media / Links / Docs */}
-        <div className="mt-2 bg-white border-y border-slate-200">
-
+        <div className="rounded-3xl border border-[#D3E3F5] bg-white shadow-xs overflow-hidden divide-y divide-[#D3E3F5]">
           <button
-            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition text-left"
+            type="button"
+            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[#F0F6FC] transition text-left cursor-pointer"
           >
-            <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center">
-              <Image size={19} className="text-purple-600" />
+            <div className="h-10 w-10 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-[#7c3aed] shadow-2xs">
+              <Image size={18} />
             </div>
 
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-slate-800">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-bold text-slate-900">
                 Media, links and docs
               </p>
-
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
                 Photos, videos, files and shared content
               </p>
             </div>
@@ -92,18 +89,18 @@ export default function CommunityInfo({ community, onBack }) {
 
           {/* Links */}
           <button
-            className="w-full flex items-center gap-4 px-5 py-4 border-t border-slate-100 hover:bg-slate-50 transition text-left"
+            type="button"
+            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[#F0F6FC] transition text-left cursor-pointer"
           >
-            <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
-              <Link2 size={19} className="text-green-600" />
+            <div className="h-10 w-10 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shadow-2xs">
+              <Link2 size={18} />
             </div>
 
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-slate-800">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-bold text-slate-900">
                 Links
               </p>
-
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
                 Shared links in this community
               </p>
             </div>
@@ -111,49 +108,46 @@ export default function CommunityInfo({ community, onBack }) {
 
           {/* Documents */}
           <button
-            className="w-full flex items-center gap-4 px-5 py-4 border-t border-slate-100 hover:bg-slate-50 transition text-left"
+            type="button"
+            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[#F0F6FC] transition text-left cursor-pointer"
           >
-            <div className="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center">
-              <FileText size={19} className="text-orange-600" />
+            <div className="h-10 w-10 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shadow-2xs">
+              <FileText size={18} />
             </div>
 
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-slate-800">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-bold text-slate-900">
                 Documents
               </p>
-
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
                 Files shared by community members
               </p>
             </div>
           </button>
-
         </div>
 
         {/* Active Members */}
-        <div className="mt-2 bg-white border-y border-slate-200">
-
+        <div className="rounded-3xl border border-[#D3E3F5] bg-white shadow-xs overflow-hidden">
           <button
-            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition text-left"
+            type="button"
+            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[#F0F6FC] transition text-left cursor-pointer"
           >
-            <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center">
-              <UserCheck size={19} className="text-emerald-600" />
+            <div className="h-10 w-10 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shadow-2xs">
+              <UserCheck size={18} />
             </div>
 
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-slate-800">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-bold text-slate-900">
                 Active members
               </p>
-
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-[11px] text-slate-500 mt-0.5">
                 Members currently active
               </p>
             </div>
           </button>
-
         </div>
 
-        <div className="h-8" />
+        <div className="h-4" />
       </div>
     </div>
   );

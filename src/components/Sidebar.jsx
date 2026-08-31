@@ -62,22 +62,20 @@ export default function Sidebar({
     <div className="sidebar-inner flex h-full flex-col">
       {/* Logo / Brand */}
       <div className={`sidebar-brand flex h-20 items-center justify-between gap-3 px-4 border-b ${
-        isDark ? "border-slate-800" : "border-slate-400"
+        isDark ? "border-slate-800" : "border-[#d7e0ee]"
       }`}>
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <img
-            src="/favicon.ico"
-            alt="Company Logo"
-            className="h-7 w-7 shrink-0 object-contain"
-          />
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#1e5fe8] to-[#0d3b96] text-sm font-bold text-white shadow-sm">
+            C
+          </div>
           {!isCollapsed && (
             <motion.div 
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
               className="min-w-0"
             >
-              <p className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-slate-900"}`}>
-                TryYourCareers
+              <p className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-[#0d1d36]"}`}>
+                Clear Careers
               </p>
             </motion.div>
           )}
@@ -117,7 +115,7 @@ export default function Sidebar({
                 isCollapsed ? "justify-center px-0" : "px-3"
               } ${
                 isActive
-                  ? "bg-[#FAF2DB] text-slate-900 shadow-sm"
+                  ? "bg-[#edf3ff] text-[#0d1d36] shadow-sm ring-1 ring-[#d9e5ff]"
                   : isLaunchingSoon
                   ? "text-slate-650 hover:bg-slate-900/5 hover:text-slate-900"
                   : "text-slate-600 hover:bg-slate-900/5 hover:text-slate-900"
@@ -155,10 +153,10 @@ export default function Sidebar({
       </motion.nav>
 
       {/* Bottom Section */}
-      <div className={`mt-auto border-t px-3 py-4 ${isDark ? "border-slate-800" : "border-slate-400"}`}>
+      <div className={`mt-auto border-t px-3 py-4 ${isDark ? "border-slate-800" : "border-[#d7e0ee]"}`}>
         {/* User Section */}
         {user ? (
-          <div className={`flex items-center gap-3 rounded-xl border border-slate-300 bg-[#FAF2DB]/60 py-2.5 shadow-sm ${isCollapsed ? "justify-center px-2" : "px-3"}`}>
+          <div className={`flex items-center gap-3 rounded-xl border border-[#dbe6f8] bg-[#f4f8ff]/80 py-2.5 shadow-sm ${isCollapsed ? "justify-center px-2" : "px-3"}`}>
             {/* Avatar — clickable for profile */}
             <button
               type="button"
@@ -236,10 +234,10 @@ export default function Sidebar({
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className={`cc-sidebar hidden lg:flex lg:flex-col lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:z-40 border-r border-slate-400 transition-all duration-350 ease-in-out ${
+      <aside className={`cc-sidebar hidden lg:flex lg:flex-col lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:z-40 border-r border-[#d7e0ee] transition-all duration-350 ease-in-out ${
         isCollapsed ? "lg:w-[80px]" : "lg:w-[260px]"
       } ${
-        isDark ? "bg-slate-950" : "bg-[#FAF6EC]"
+        isDark ? "bg-slate-950" : "bg-white"
       }`}>
         {sidebarContent}
       </aside>
@@ -261,7 +259,7 @@ export default function Sidebar({
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className={`fixed inset-y-0 left-0 z-[70] flex w-[280px] flex-col lg:hidden border-r border-slate-400 ${
-                isDark ? "bg-slate-950" : "bg-[#FAF6EC]"
+                isDark ? "bg-slate-950" : "bg-white"
               }`}
             >
               {/* Close button */}

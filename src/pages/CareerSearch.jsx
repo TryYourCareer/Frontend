@@ -207,7 +207,7 @@ export default function CareerSearch() {
 
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-4 sm:px-6 py-8">
+    <section className="min-h-screen bg-[#dfeaf7] px-4 sm:px-6 py-8">
       <div className="mx-auto max-w-5xl space-y-6">
 
         {/* Header */}

@@ -21,7 +21,6 @@ export default function Landing({
   searchQuery = "",
   onSearchChange,
 }) {
-
   const [careers] = useState(
     (careersData || [])
       .map((item) => ({
@@ -33,7 +32,13 @@ export default function Landing({
   const isDark = theme === "dark";
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 flex flex-col ${isDark ? "bg-[#0f172a]" : "bg-[#FAF6EC]"}`}>
+    <div
+      className={`min-h-screen transition-colors duration-300 flex flex-col font-sans ${
+        isDark
+          ? "bg-[#0f172a]"
+          : "bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]"
+      }`}
+    >
       {/* Separated Sticky Top Navbar */}
       <LandingNavbar
         isDark={isDark}

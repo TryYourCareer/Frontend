@@ -486,9 +486,9 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
   );
 
   return (
-    <div className="min-h-screen bg-[#FAF6EC] text-[#0b1a36]">
+    <div className="min-h-screen bg-[#dfeaf7] text-[#0b1d36]">
       {/* Header */}
-      <header className="border-b border-[#0b1a36]/5 bg-[#FAF6EC]/85 backdrop-blur-md sticky top-0 z-20 transition-all">
+      <header className="border-b border-[#d7e0ee] bg-[#edf3fb]/85 backdrop-blur-md sticky top-0 z-20 transition-all">
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <button

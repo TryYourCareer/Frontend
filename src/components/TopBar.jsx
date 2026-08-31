@@ -36,7 +36,7 @@ export default function TopBar({
     <header
       className={`cc-topbar h-20 sticky top-0 z-30 flex items-center justify-between gap-3 border-b px-4 py-2.5 sm:px-6 backdrop-blur-xl ${isDark
         ? "border-slate-800/80 bg-slate-950/90"
-        : "border-slate-400 bg-[#FAF6EC]/95"
+        : "border-[#d7e0ee] bg-white"
         }`}
     >
       {/* Left: Mobile hamburger + sidebar toggle */}
@@ -82,7 +82,7 @@ export default function TopBar({
           placeholder="Search careers..."
           className={`w-full rounded-xl border py-2 pl-10 pr-4 text-sm font-medium outline-none transition ${isDark
             ? "border-slate-700 bg-slate-900/80 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15"
-            : "border-slate-900/5 bg-white text-[#0b1a36] placeholder:text-slate-400 focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-stone-200/50"
+            : "border-[#d9e6fb] bg-white text-[#0d1d36] placeholder:text-slate-400 focus:border-[#1a5ad8] focus:bg-white focus:ring-2 focus:ring-[#dfeafe]"
             }`}
         />
 
@@ -166,7 +166,7 @@ export default function TopBar({
           <button
             type="button"
             onClick={onOpenAuth}
-            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:opacity-90 transition"
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#d9e6fb] bg-white px-4 py-2 text-xs font-bold text-[#0d1d36] shadow-sm hover:bg-[#f4f8ff] transition"
           >
             Login / Sign-up
           </button>

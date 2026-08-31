@@ -7,6 +7,32 @@
 :root {
   --cc-font-body: "Plus Jakarta Sans", "Segoe UI", sans-serif;
   --cc-font-display: "Sora", "Plus Jakarta Sans", "Segoe UI", sans-serif;
+
+  /* Global Diagonal Gradient Palette */
+  --cc-bg-from: #f4f8fd;
+  --cc-bg-via: #edf3fb;
+  --cc-bg-to: #dfeaf7;
+
+  /* Card Surfaces & Accents */
+  --cc-surface: #ffffff;
+  --cc-surface-soft: #f0f6fc;
+  --cc-panel: #f7fafd;
+  --cc-card: #ffffff;
+  --cc-border: #d3e3f5;
+  --cc-border-soft: #e2edf9;
+  
+  /* Text & Brand Accents */
+  --cc-text: #0b1a36;
+  --cc-text-soft: #475569;
+  --cc-primary: #1e88e5;
+  --cc-primary-strong: #0b1a36;
+  --cc-primary-soft: #eaf2fa;
+  
+  /* Badges & Status */
+  --cc-secondary: #f4dca7;
+  --cc-secondary-strong: #edc876;
+  --cc-accent: #f1a75c;
+  --cc-success: #10b981;
 }
 
 * {
@@ -18,11 +44,13 @@ html {
 }
 
 body {
-  background-color: #dbe3f0;
+  background: linear-gradient(135deg, var(--cc-bg-from) 0%, var(--cc-bg-via) 50%, var(--cc-bg-to) 100%);
+  background-attachment: fixed;
   font-family: var(--cc-font-body);
-  color: #142447;
+  color: var(--cc-text);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  min-height: 100vh;
 }
 
 .cc-display {
@@ -33,7 +61,7 @@ body {
   font-family: var(--cc-font-body);
 }
 
-/* Custom scrollbar */
+/* ── Custom App Scrollbar ─────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -49,39 +77,44 @@ body {
   background: #93afd8;
 }
 
-/* Smooth transitions everywhere */
-button, a, input, textarea {
+/* ── Smooth Interactive Transitions ───────────────────────────────── */
+button, a, input, textarea, select {
   transition-property: color, background-color, border-color, box-shadow, transform, opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
 
-/* Glass card utility */
-.cc-glass {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+/* ── Universal Card Surface Utility ───────────────────────────────── */
+.cc-card-surface {
+  background: #ffffff;
+  border: 1px solid var(--cc-border);
+  border-radius: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(11, 26, 54, 0.04);
 }
 
-/* Gradient text */
+/* ── Gradient Text ────────────────────────────────────────────────── */
 .cc-gradient-text {
-  background: linear-gradient(90deg, #2f67e3 0%, #3867e7 45%, #5b5be8 100%);
+  background: linear-gradient(90deg, #0b1a36 0%, #1e88e5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Fade-in keyframe */
+/* ── Animations ───────────────────────────────────────────────────── */
 @keyframes cc-fadein {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(8px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 .cc-fadein {
-  animation: cc-fadein 0.4s ease both;
+  animation: cc-fadein 0.3s ease both;
 }
 
-/* Pulse dot */
 @keyframes cc-pulse-dot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
@@ -90,10 +123,10 @@ button, a, input, textarea {
   animation: cc-pulse-dot 1.6s infinite;
 }
 
-/* ── Sidebar ─────────────────────────────────────────── */
+/* ── Sidebar Styling ──────────────────────────────────────────────── */
 .cc-sidebar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(148,163,184,0.15) transparent;
+  scrollbar-color: rgba(148, 163, 184, 0.15) transparent;
 }
 .cc-sidebar::-webkit-scrollbar {
   width: 4px;
@@ -102,19 +135,18 @@ button, a, input, textarea {
   background: transparent;
 }
 .cc-sidebar::-webkit-scrollbar-thumb {
-  background: rgba(148,163,184,0.15);
+  background: rgba(148, 163, 184, 0.15);
   border-radius: 99px;
 }
 .cc-sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(148,163,184,0.3);
+  background: rgba(148, 163, 184, 0.3);
 }
 
-/* Sidebar nav item — relative for the active indicator bar */
 .sidebar-nav-item {
   position: relative;
 }
 
-/* Smooth page transition when sidebar opens/closes */
+/* ── Layout Transitions ───────────────────────────────────────────── */
 .cc-app-layout {
   transition: background-color 0.3s ease;
 }

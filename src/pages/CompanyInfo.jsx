@@ -52,7 +52,7 @@ export default function CompanyInfo() {
   ];
 
   return (
-    <div className="min-h-screen transition-colors duration-300 flex flex-col bg-[#FAF6EC] text-[#0b1a36]">
+    <div className="min-h-screen transition-colors duration-300 flex flex-col bg-[#dfeaf7] text-[#0b1a36]">
       {/* Landing Navbar */}
       <LandingNavbar isDark={isDark} />
 

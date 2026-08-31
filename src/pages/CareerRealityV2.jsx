@@ -118,18 +118,18 @@ export default function CareerRealityV2({ onBack }) {
   }
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-10">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-8 sm:px-10 lg:px-12 font-sans">
       <div className="mx-auto max-w-6xl space-y-8">
-        <div className="flex flex-col gap-5 md:px-8">
+        <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-3">
-              <span className="inline-flex items-center rounded-full border border-slate-800 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-800">
+            <div className="space-y-2">
+              <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#1E88E5]">
                 Assessment Completed
               </span>
-              <h1 className="font-serif text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl">
+              <h1 className="font-serif text-3xl font-bold leading-tight tracking-tight text-[#0b1a36] sm:text-4xl">
                 Your Career Match Results
               </h1>
-              <p className="max-w-2xl text-sm leading-relaxed text-slate-600">
+              <p className="max-w-2xl text-xs leading-relaxed text-slate-600 sm:text-sm">
                 We've analyzed your skills and aspirations. Here are the top professional paths where you're destined to thrive.
               </p>
             </div>
@@ -137,15 +137,16 @@ export default function CareerRealityV2({ onBack }) {
               <button
                 type="button"
                 onClick={onBack}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-800 shadow-xs transition hover:bg-slate-50"
               >
-                <ArrowLeft size={16} />
+                <ArrowLeft size={14} />
                 Back
               </button>
             )}
           </div>
         </div>
 
+        {/* Career Cards Grid */}
         <div className="grid gap-4 sm:grid-cols-2">
           {Object.entries(CAREER_TEMPLATES).map(([key, template]) => {
             const isSelected = selectedCareerKey === key;
@@ -153,32 +154,41 @@ export default function CareerRealityV2({ onBack }) {
               <div
                 key={key}
                 onClick={() => setSelectedCareerKey(key)}
-                className={`group flex flex-col justify-between rounded-3xl border p-5 cursor-pointer transition-all duration-300 ${
+                className={`group flex flex-col justify-between rounded-3xl border p-6 cursor-pointer transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 ${
                   isSelected
-                    ? "border-slate-800 bg-[#FAF2DB]/80 shadow-sm"
-                    : "border-slate-300 bg-white hover:border-slate-400 hover:shadow-sm"
+                    ? "border-[#1E88E5]/40 bg-[#edf3fb] shadow-sm ring-2 ring-[#1E88E5]/20"
+                    : "border-[#D3E3F5] bg-white shadow-xs"
                 }`}
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                    <span className="rounded-full border border-[#D3E3F5] bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
                       {template.subtitle}
                     </span>
-                    <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-800">
+                    <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
                       {template.matchPercentage}% Match
                     </span>
                   </div>
-                  <h4 className="text-base font-bold text-slate-900">{template.title}</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <h4 className="font-serif text-xl font-bold text-slate-900 transition group-hover:text-[#0b1a36]">
+                    {template.title}
+                  </h4>
+                  <p className="text-xs leading-relaxed text-slate-600">
+                    {template.description}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
                     {template.skillTags.map((tag) => (
-                      <span key={tag} className="rounded-full border border-slate-200 bg-white/80 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
+                      <span
+                        key={tag}
+                        className="rounded-full border border-sky-100 bg-[#EAF2FA] px-2.5 py-0.5 text-[10px] font-bold text-[#1E88E5]"
+                      >
                         {tag}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
+                {/* Action Buttons */}
+                <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
                   <button
                     type="button"
                     onClick={(e) => {
@@ -186,7 +196,7 @@ export default function CareerRealityV2({ onBack }) {
                       setSelectedCareerKey(key);
                       setActivePage("realityDetail");
                     }}
-                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#0b1a36] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#122b59]"
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#0b1a36] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#122b59]"
                   >
                     <BookOpen size={13} />
                     Explore Career
@@ -198,7 +208,7 @@ export default function CareerRealityV2({ onBack }) {
                       setSelectedCareerKey(key);
                       navigate(`/roadmap?career=${key}`);
                     }}
-                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-800 transition hover:bg-slate-50"
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-800 shadow-xs transition hover:bg-slate-50"
                   >
                     <ArrowRight size={13} />
                     Roadmap
@@ -209,25 +219,26 @@ export default function CareerRealityV2({ onBack }) {
           })}
         </div>
 
+        {/* Detailed Stats Section */}
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-3xl border border-slate-300 bg-white p-5">
+          <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">Core Strengths</p>
-                <h3 className="mt-2 font-serif text-lg font-bold text-slate-900">Core Strengths</h3>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Core Strengths</p>
+                <h3 className="mt-1 font-serif text-lg font-bold text-slate-900">Skill Breakdown</h3>
               </div>
-              <span className="rounded-full bg-[#FAF2DB] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#0b1a36]">
-                {career.strengths[0].percent}%
+              <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#1E88E5]">
+                {career.strengths[0].percent}% Top
               </span>
             </div>
-            <div className="mt-6 space-y-5">
+            <div className="mt-6 space-y-4">
               {career.strengths.map((strength) => (
                 <div key={strength.label}>
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-xs font-semibold text-slate-800">{strength.label}</p>
-                    <span className="text-xs font-semibold text-slate-500">{strength.percent}%</span>
+                    <span className="text-xs font-bold text-slate-500">{strength.percent}%</span>
                   </div>
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#edf3fb]">
                     <div className="h-full rounded-full bg-[#0b1a36]" style={{ width: `${strength.percent}%` }} />
                   </div>
                 </div>
@@ -235,13 +246,13 @@ export default function CareerRealityV2({ onBack }) {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-300 bg-white p-5">
+          <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">Analytic Reports</p>
-                <h3 className="mt-2 font-serif text-lg font-bold text-slate-900">Analytic Reports</h3>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Analytic Reports</p>
+                <h3 className="mt-1 font-serif text-lg font-bold text-slate-900">Available Insights</h3>
               </div>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-800">
+              <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-700">
                 3 reports
               </span>
             </div>
@@ -249,17 +260,20 @@ export default function CareerRealityV2({ onBack }) {
               {career.reports.map((report) => {
                 const Icon = report.icon;
                 return (
-                  <div key={report.label} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                  <div
+                    key={report.label}
+                    className="flex items-center justify-between rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] px-3.5 py-2.5"
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-800 shadow-sm">
+                      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-[#D3E3F5] bg-white text-[#1E88E5] shadow-xs">
                         <Icon size={15} />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-slate-900">{report.label}</p>
+                        <p className="text-xs font-bold text-slate-900">{report.label}</p>
                         <p className="text-[10px] text-slate-500">Download or view your insights</p>
                       </div>
                     </div>
-                    <button className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-200 text-slate-800 transition hover:bg-slate-300">
+                    <button className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-2xs transition hover:bg-slate-50">
                       <Download size={14} />
                     </button>
                   </div>
@@ -269,22 +283,23 @@ export default function CareerRealityV2({ onBack }) {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-800 bg-[#0b1a36] p-5 text-white sm:p-6">
+        {/* Roadmap Footer Banner */}
+        <div className="rounded-3xl border border-[#0b1a36] bg-[#0b1a36] p-6 text-white shadow-md sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-400">Roadmap</p>
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-sky-400">Roadmap</p>
               <h3 className="font-serif text-2xl font-bold tracking-tight text-white">{career.roadmapTitle}</h3>
               <p className="max-w-2xl text-xs leading-relaxed text-[#dce4ff]">{career.roadmapDescription}</p>
             </div>
             <div className="flex flex-col gap-2.5 sm:flex-row">
               <button
                 onClick={() => navigate(`/roadmap?career=${selectedCareerKey}`)}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-bold text-[#0b1a36] transition hover:bg-slate-50"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#0b1a36] shadow-sm transition hover:bg-slate-50"
               >
                 <ArrowRight size={14} />
                 View Full Roadmap
               </button>
-              <button className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/20">
+              <button className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-white/20">
                 <DownloadCloud size={14} />
                 Download Report
               </button>

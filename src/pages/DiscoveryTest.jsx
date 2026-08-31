@@ -128,7 +128,7 @@ export default function DiscoveryTest() {
 
   if (status === "error") {
     return (
-      <div className="min-h-screen px-6 py-10 text-center">
+      <div className="min-h-screen bg-white px-6 py-10 text-center">
         <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold">
           <ArrowLeft size={16} /> Back
         </button>
@@ -140,8 +140,8 @@ export default function DiscoveryTest() {
 
   if (status === "starting session" || status === "loading questions") {
     return (
-      <div className="min-h-screen px-6 py-10 text-center">
-        <div className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
+      <div className="min-h-screen bg-white px-6 py-10 text-center">
+        <div className="inline-flex items-center gap-3 rounded-2xl border border-[#d7e0ee] bg-white px-6 py-5 shadow-sm">
           <Loader2 className="animate-spin" size={24} />
           <span className="text-base font-semibold">Preparing your discovery session...</span>
         </div>
@@ -151,7 +151,7 @@ export default function DiscoveryTest() {
 
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen px-6 py-10 text-center">
+      <div className="min-h-screen bg-white px-6 py-10 text-center">
         <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold">
           <ArrowLeft size={16} /> Back
         </button>
@@ -162,8 +162,8 @@ export default function DiscoveryTest() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-8">
-      <div className="mx-auto max-w-4xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-lg">
+    <div className="min-h-screen bg-white px-4 py-8 sm:px-8">
+      <div className="mx-auto max-w-4xl rounded-[28px] border border-[#d7e0ee] bg-white p-6 shadow-lg">
         <div className="mb-6 flex items-center justify-between gap-4">
           <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
             <ArrowLeft size={16} /> Back
@@ -173,7 +173,7 @@ export default function DiscoveryTest() {
             <p className="text-sm font-semibold text-slate-600">{testSessionId || "—"}</p>
           </div>
         </div>
-        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-6">
+        <div className="rounded-[24px] border border-[#d7e0ee] bg-[#edf3fb] p-6">
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Discovery Question</p>

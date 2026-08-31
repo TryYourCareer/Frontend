@@ -2,9 +2,9 @@
  * ChatWindow — real-time chat UI for a single community.
  *
  * Props:
- *   community     CommunityOut
- *   currentUserId string
- *   onBack        () => void   (mobile back button)
+ * community     CommunityOut
+ * currentUserId string
+ * onBack        () => void   (mobile back button)
  */
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Loader2, Send, Paperclip } from "lucide-react";
@@ -137,13 +137,12 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
         attachment_type: uploadedAttachment?.type || null,
         attachment_name: uploadedAttachment?.name || null,
       });
-      // Realtime will push the new message via the subscription
     } catch (err) {
       setSendError(err.message || "Failed to send message.");
       if (currentFile) {
         setSelectedFile(currentFile);
       } else {
-        setText(content); // restore
+        setText(content);
       }
       if (currentReplyTo) {
         setReplyTo(currentReplyTo);
@@ -205,31 +204,31 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
 
   if (!community) {
     return (
-      <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">
+      <div className="flex flex-1 items-center justify-center text-slate-400 text-xs sm:text-sm font-sans">
         Select a community to start chatting
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden font-sans">
       {/* Header */}
-      <header className="shrink-0 z-10 flex items-center justify-between border-b border-[#d7e6fb] bg-white/80 backdrop-blur-md px-4 py-3 shadow-sm">
+      <header className="shrink-0 z-10 flex items-center justify-between border-b border-[#D3E3F5] bg-white/90 backdrop-blur-md px-4 py-3 sm:px-6 shadow-xs">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setShowInfoPanel(true)}>
           <button
             onClick={onBack}
-            className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#c6d9f7] bg-white text-[#28569e] hover:bg-[#eff6ff] transition"
+            className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#D3E3F5] bg-white text-slate-700 hover:bg-[#F0F6FC] transition shadow-2xs"
           >
             <ArrowLeft size={15} />
           </button>
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#eff6ff] text-lg border border-[#bcd2f3]">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#F0F6FC] text-lg border border-[#D3E3F5] shadow-2xs">
             {community.career_icon || "💬"}
           </div>
           <div>
-            <h3 className="text-xs font-bold text-[#173b72] leading-none">
+            <h3 className="font-serif text-sm font-bold text-[#0b1a36] leading-tight">
               {community.name}
             </h3>
-            <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
+            <p className="mt-0.5 flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               {(community.member_count || 0).toLocaleString()} members
             </p>
@@ -239,11 +238,11 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
 
       {/* Load more */}
       {hasMore && !loading && (
-        <div className="shrink-0 flex justify-center py-2 bg-[#eff6ff]/30">
+        <div className="shrink-0 flex justify-center py-2 bg-[#F0F6FC]/70 border-b border-[#D3E3F5]">
           <button
             onClick={loadMore}
             disabled={loadingMore}
-            className="text-[11px] font-semibold text-[#173b72] hover:underline flex items-center gap-1"
+            className="text-[11px] font-bold text-[#1E88E5] hover:underline flex items-center gap-1"
           >
             {loadingMore ? <Loader2 size={12} className="animate-spin" /> : null}
             Load older messages
@@ -251,30 +250,29 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
         </div>
       )}
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto min-h-0 p-4 space-y-3 relative">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
-
+      {/* Messages Viewport */}
+      <div className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-6 space-y-3 relative bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
         {loading && (
           <div className="flex justify-center items-center h-full">
-            <Loader2 size={20} className="animate-spin text-slate-400" />
+            <Loader2 size={20} className="animate-spin text-[#1E88E5]" />
           </div>
         )}
 
         {error && !loading && (
           <div className="flex justify-center">
-            <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-xl border border-red-200">
+            <p className="text-xs text-red-600 bg-red-50 px-3.5 py-2 rounded-2xl border border-red-200 shadow-2xs">
               {error}
             </p>
           </div>
         )}
 
         {!loading && !error && messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
-            <span className="text-4xl">💬</span>
-            <p className="text-sm font-semibold text-slate-500">No messages yet</p>
-            <p className="text-xs text-slate-400">Be the first to say something!</p>
+          <div className="flex flex-col items-center justify-center h-full gap-2.5 text-center">
+            <div className="grid h-14 w-14 place-items-center rounded-3xl bg-white border border-[#D3E3F5] shadow-xs text-2xl">
+              💬
+            </div>
+            <p className="font-serif text-sm font-bold text-[#0b1a36]">No messages yet</p>
+            <p className="text-xs text-slate-500">Be the first to say something in the community!</p>
           </div>
         )}
 
@@ -293,11 +291,11 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
 
       {/* Edit mode banner */}
       {editingId && (
-        <div className="shrink-0 mx-4 mb-2 p-2.5 bg-blue-50 rounded-xl border border-blue-200 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-bold text-blue-700">Editing message</p>
+        <div className="shrink-0 mx-4 mb-2 p-3 bg-sky-50 rounded-2xl border border-sky-200 flex items-center justify-between gap-3 shadow-xs">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#1E88E5]">Editing message</p>
             <input
-              className="mt-1 w-full text-xs bg-transparent outline-none text-slate-800"
+              className="mt-1 w-full text-xs bg-transparent outline-none text-slate-800 font-medium"
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
               onKeyDown={(e) => {
@@ -307,16 +305,16 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
               autoFocus
             />
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1.5 shrink-0">
             <button
               onClick={handleEditSubmit}
-              className="px-2.5 py-1 bg-blue-600 text-white text-[10px] rounded-full hover:bg-blue-700"
+              className="px-3 py-1 bg-[#0b1a36] hover:bg-[#122b59] text-white text-[10px] font-bold rounded-full transition shadow-2xs"
             >
               Save
             </button>
             <button
               onClick={() => { setEditingId(null); setEditText(""); }}
-              className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] rounded-full hover:bg-slate-200"
+              className="px-3 py-1 bg-white border border-slate-300 text-slate-700 text-[10px] font-bold rounded-full hover:bg-slate-50 transition shadow-2xs"
             >
               Cancel
             </button>
@@ -326,19 +324,19 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
 
       {/* Reply banner */}
       {replyTo && (
-        <div className="shrink-0 mx-4 mb-2 p-2.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3 animate-fade-in z-10">
+        <div className="shrink-0 mx-4 mb-2 p-3 bg-white border border-[#D3E3F5] rounded-2xl flex items-center justify-between gap-3 shadow-xs animate-fade-in z-10">
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold text-slate-500">
-              Replying to <span className="text-[#173b72]">@{replyTo.user_name || "User"}</span>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Replying to <span className="text-[#0b1a36]">@{replyTo.user_name || "User"}</span>
             </p>
-            <p className="text-xs text-slate-600 truncate mt-0.5">
+            <p className="text-xs text-slate-600 truncate mt-0.5 font-medium">
               {replyTo.content ? replyTo.content.replace(/^↳ Replying to @[^:]+:[^\n]+\n\n/, "") : (replyTo.attachment_url ? `[${replyTo.attachment_type || "Attachment"}]` : "")}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setReplyTo(null)}
-            className="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded-lg hover:bg-red-50 transition shrink-0"
+            className="text-xs font-bold text-red-600 hover:text-red-700 px-2.5 py-1 rounded-full hover:bg-red-50 transition shrink-0"
           >
             Cancel
           </button>
@@ -347,33 +345,33 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
 
       {/* Send error */}
       {sendError && (
-        <p className="shrink-0 text-center text-[10px] text-red-500 px-4 pb-1">{sendError}</p>
+        <p className="shrink-0 text-center text-[10px] font-semibold text-red-600 px-4 pb-1">{sendError}</p>
       )}
 
       {/* Selected file preview */}
       {selectedFile && (
-        <div className="shrink-0 mx-4 mb-2 p-2 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3 animate-fade-in z-10">
+        <div className="shrink-0 mx-4 mb-2 p-2.5 bg-white border border-[#D3E3F5] rounded-2xl flex items-center justify-between gap-3 shadow-xs animate-fade-in z-10">
           <div className="flex items-center gap-3 min-w-0">
             {selectedFile.type === "image" && selectedFile.previewUrl ? (
               <img
                 src={selectedFile.previewUrl}
                 alt="Upload preview"
-                className="h-10 w-10 object-cover rounded-lg border border-slate-200"
+                className="h-10 w-10 object-cover rounded-xl border border-[#D3E3F5]"
               />
             ) : (
-              <div className="h-10 w-10 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center text-lg shrink-0">
+              <div className="h-10 w-10 rounded-xl border border-[#D3E3F5] bg-[#F0F6FC] flex items-center justify-center text-lg shrink-0">
                 {selectedFile.type === "video" ? "🎥" : selectedFile.type === "pdf" ? "📄" : "📁"}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-[#173b72] truncate">{selectedFile.name}</p>
-              <p className="text-[9px] text-slate-400 capitalize">{selectedFile.type}</p>
+              <p className="text-xs font-bold text-[#0b1a36] truncate">{selectedFile.name}</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{selectedFile.type}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleCancelFile}
-            className="text-xs text-red-500 hover:text-red-700 px-2.5 py-1 rounded-lg hover:bg-red-50 transition shrink-0"
+            className="text-xs font-bold text-red-600 hover:text-red-700 px-2.5 py-1 rounded-full hover:bg-red-50 transition shrink-0"
           >
             Cancel
           </button>
@@ -381,7 +379,7 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
       )}
 
       {/* Input bar */}
-      <footer className="shrink-0 z-10 bg-white border-t border-slate-200 p-3 flex items-center gap-2">
+      <footer className="shrink-0 z-10 bg-white border-t border-[#D3E3F5] p-3 sm:px-6 flex items-center gap-2">
         <input
           ref={fileInputRef}
           type="file"
@@ -393,7 +391,7 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
           type="button"
           onClick={handleAttachmentClick}
           disabled={sending || !!editingId}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 shadow-sm transition disabled:opacity-40"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#D3E3F5] bg-[#F0F6FC] hover:bg-white text-slate-500 hover:text-slate-800 shadow-2xs transition disabled:opacity-40"
         >
           <Paperclip size={14} />
         </button>
@@ -405,23 +403,25 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
           disabled={!!editingId}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !editingId && handleSend()}
-          className="flex-1 px-3.5 py-2.5 rounded-full border border-slate-300 bg-slate-50 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-slate-400 focus:bg-white transition disabled:opacity-40"
+          className="flex-1 px-4 py-2.5 rounded-full border border-[#D3E3F5] bg-[#F0F6FC] text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-slate-400 focus:bg-white transition disabled:opacity-40 shadow-2xs"
         />
         <button
           type="button"
           onClick={handleSend}
           disabled={sending || !!editingId || (!text.trim() && !selectedFile)}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white shadow-sm transition disabled:opacity-40"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white shadow-xs transition disabled:opacity-40"
         >
-          {sending
-            ? <Loader2 size={14} className="animate-spin" />
-            : <Send size={14} />
-          }
+          {sending ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <Send size={14} />
+          )}
         </button>
       </footer>
+
       {showInfoPanel && (
-        <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-sm" onClick={() => setShowInfoPanel(false)}>
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-xs" onClick={() => setShowInfoPanel(false)}>
+          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl overflow-y-auto border-l border-[#D3E3F5]" onClick={(e) => e.stopPropagation()}>
             <CommunityInfo community={community} onBack={() => setShowInfoPanel(false)} />
           </div>
         </div>

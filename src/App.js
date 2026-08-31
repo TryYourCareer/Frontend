@@ -21,39 +21,36 @@ import StrideStage from "./pages/StrideStage";
 import CompanyInfo from "./pages/CompanyInfo";
 import SupportInfo from "./pages/SupportInfo";
 
-
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import careersData from "./data/clearcareers_data.json";
 
-
-
 function AppLoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-[#FAF6EC] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] flex flex-col font-sans">
       {/* Nav skeleton */}
-      <div className="h-14 bg-white border-b border-[#e2d9c8] flex items-center px-6 gap-4 animate-pulse">
-        <div className="h-7 w-28 rounded-lg bg-[#e8dfc8]" />
+      <div className="h-14 bg-white border-b border-[#D3E3F5] flex items-center px-6 gap-4 animate-pulse">
+        <div className="h-7 w-28 rounded-lg bg-[#edf3fb]" />
         <div className="flex-1" />
-        <div className="h-7 w-20 rounded-full bg-[#e8dfc8]" />
-        <div className="h-7 w-7 rounded-full bg-[#e8dfc8]" />
+        <div className="h-7 w-20 rounded-full bg-[#edf3fb]" />
+        <div className="h-7 w-7 rounded-full bg-[#edf3fb]" />
       </div>
       {/* Content skeleton */}
       <div className="flex-1 px-6 py-10 mx-auto w-full max-w-6xl space-y-8 animate-pulse">
         <div className="space-y-3">
-          <div className="h-4 w-24 rounded-full bg-[#e8dfc8]" />
-          <div className="h-8 w-64 rounded-xl bg-[#e8dfc8]" />
-          <div className="h-3 w-80 rounded-full bg-[#e8dfc8]" />
+          <div className="h-4 w-24 rounded-full bg-[#edf3fb]" />
+          <div className="h-8 w-64 rounded-xl bg-[#edf3fb]" />
+          <div className="h-3 w-80 rounded-full bg-[#edf3fb]" />
         </div>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 rounded-2xl bg-[#f0e9d8] border border-[#e8dfc8]" />
+            <div key={i} className="h-28 rounded-3xl bg-white border border-[#D3E3F5] shadow-xs" />
           ))}
         </div>
         <div className="grid gap-6 sm:grid-cols-2">
-          <div className="h-44 rounded-2xl bg-[#f0e9d8] border border-[#e8dfc8]" />
-          <div className="h-44 rounded-2xl bg-[#f0e9d8] border border-[#e8dfc8]" />
+          <div className="h-44 rounded-3xl bg-white border border-[#D3E3F5] shadow-xs" />
+          <div className="h-44 rounded-3xl bg-white border border-[#D3E3F5] shadow-xs" />
         </div>
-        <div className="h-48 rounded-2xl bg-[#f0e9d8] border border-[#e8dfc8]" />
+        <div className="h-48 rounded-3xl bg-white border border-[#D3E3F5] shadow-xs" />
       </div>
     </div>
   );
@@ -100,7 +97,6 @@ function AppShell({ children }) {
       .slice(0, 8);
   }, [careers, careerSearchQuery]);
 
-
   const handleNavigate = (action) => {
     const map = {
       landing: "/",
@@ -129,7 +125,7 @@ function AppShell({ children }) {
 
   const isDark = theme === "dark";
   return (
-    <div className={`cc-app-layout min-h-screen ${isDark ? "bg-[#0f172a]" : "bg-[#f1f5f9]"}`}>
+    <div className={`cc-app-layout min-h-screen ${isDark ? "bg-[#0f172a]" : "bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]"}`}>
       <AppLayout
         activePage={activePage}
         onNavigate={handleNavigate}
@@ -186,8 +182,6 @@ function AppRoutes() {
         <Route path="/company/:tabId" element={<CompanyInfo />} />
         <Route path="/support/:tabId" element={<SupportInfo />} />
         <Route path="*" element={<Navigate to="/" replace />} />
-
-
       </Routes>
 
       {/* Login modal overlay */}

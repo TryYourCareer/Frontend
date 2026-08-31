@@ -68,7 +68,7 @@ export default function CareerDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF6EC] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#dfeaf7] flex items-center justify-center p-6">
         <div className="animate-pulse flex flex-col items-center space-y-4">
           <div className="h-12 w-12 rounded-full bg-[#e8dfc8]" />
           <div className="h-6 w-48 rounded bg-[#e8dfc8]" />
@@ -80,7 +80,7 @@ export default function CareerDetails() {
 
   if (!career) {
     return (
-      <div className="min-h-screen bg-[#FAF6EC] px-4 py-12 flex flex-col items-center justify-center text-center">
+      <div className="min-h-screen bg-[#dfeaf7] px-4 py-12 flex flex-col items-center justify-center text-center">
         <AlertCircle size={48} className="text-red-500 mb-4" />
         <h1 className="text-2xl font-serif font-bold mb-2" style={{ color: LOGO_DARK }}>
           Career Not Found
@@ -108,7 +108,7 @@ export default function CareerDetails() {
   const certs = (career["Key Certifications"] || "").split(",").map(c => c.trim()).filter(Boolean);
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-4 sm:px-6 py-8 text-slate-800 text-left">
+    <section className="min-h-screen bg-[#dfeaf7] px-4 sm:px-6 py-8 text-slate-800 text-left">
       <div className="mx-auto max-w-4xl space-y-8">
         {/* Navigation & Action Header */}
         <div className="flex items-center gap-4">
