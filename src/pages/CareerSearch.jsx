@@ -70,7 +70,7 @@ function CareerCard({ career }) {
   const navigate = useNavigate();
   const demand = career["Demand Level"] || "";
   const demandColor = DEMAND_COLOR[demand] || "#94a3b8";
-  const cluster = career["Cluster"] || "";
+  const sector = career["Sector"] || career["Cluster"] || "";
   const entryPay = career["Entry Salary (LPA)"] || "—";
   const seniorPay = career["Senior Salary (LPA)"] || "—";
   const growth = career["Growth Rate"] || "—";
@@ -93,7 +93,7 @@ function CareerCard({ career }) {
               className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
               style={{ color: LOGO_BLUE, borderColor: `${LOGO_BLUE}30`, backgroundColor: `${LOGO_BLUE}10` }}
             >
-              {cluster}
+              {sector}
             </span>
             <span
               className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"

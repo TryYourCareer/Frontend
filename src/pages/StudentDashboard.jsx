@@ -1,5 +1,6 @@
 import { ClipboardList, CheckCircle2, Zap, Flame, TrendingUp, Sparkles, ArrowRight, BarChart3, Target, Play, User, BookOpen, Briefcase, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { getUserProfile } from "../services/users";
 
@@ -168,6 +169,7 @@ const radarColors = [LOGO_BLUE, LOGO_TAN, LOGO_MID, LOGO_BLUE, LOGO_TAN, LOGO_MI
 
 /* ── Main Component ──────────────────────────────────────────────────────── */
 export default function StudentDashboard() {
+  const navigate = useNavigate();
   const { loading, profile: authProfile } = useAuth();
   const [userData, setUserData] = useState(null);
   const [fetchingUser, setFetchingUser] = useState(false);
@@ -217,11 +219,20 @@ export default function StudentDashboard() {
           <p className="text-xs text-slate-500">You're making great progress on your career discovery journey.</p>
 
           {/* Profile info pills */}
-          <div className="flex flex-wrap gap-2 mt-1">
-            <InfoPill icon={<User size={11} />} label={fullName} />
-            {email !== "—" && <InfoPill icon={<Mail size={11} />} label={email} />}
-            {education !== "—" && <InfoPill icon={<BookOpen size={11} />} label={education} />}
-            {interest !== "—" && <InfoPill icon={<Briefcase size={11} />} label={interest} />}
+          <div className="flex flex-wrap items-center justify-between gap-3 mt-1">
+            <div className="flex flex-wrap gap-2">
+              <InfoPill icon={<User size={11} />} label={fullName} />
+              {email !== "—" && <InfoPill icon={<Mail size={11} />} label={email} />}
+              {education !== "—" && <InfoPill icon={<BookOpen size={11} />} label={education} />}
+              {interest !== "—" && <InfoPill icon={<Briefcase size={11} />} label={interest} />}
+            </div>
+            <button
+              onClick={() => navigate("/assessment")}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#7B4A28] hover:bg-[#633a1f] text-white text-xs font-bold rounded-xl shadow-sm transition shrink-0"
+            >
+              <Sparkles size={14} />
+              <span>View Career Fit Diagnostic</span>
+            </button>
           </div>
         </div>
 

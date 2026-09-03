@@ -20,6 +20,8 @@ import TrialMission from "./pages/TrialMission";
 import StrideStage from "./pages/StrideStage";
 import CompanyInfo from "./pages/CompanyInfo";
 import SupportInfo from "./pages/SupportInfo";
+import CareerReport from "./pages/CareerReport";
+
 
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -181,6 +183,7 @@ function AppRoutes() {
         <Route path="/roadmap" element={<ProtectedRoute><AppShell><Roadmap /></AppShell></ProtectedRoute>} />
         <Route path="/career-search" element={<ProtectedRoute><AppShell><CareerSearch /></AppShell></ProtectedRoute>} />
         <Route path="/career-details/:careerName" element={<CareerDetails />} />
+        <Route path="/career-report/:sessionId" element={<ProtectedRoute requireRegistration><AppShell><CareerReport /></AppShell></ProtectedRoute>} />
         <Route path="/trial-mission" element={<ProtectedRoute><AppShell><TrialMission /></AppShell></ProtectedRoute>} />
         <Route path="/stride-journey/:stageId" element={<AppShell><StrideStage /></AppShell>} />
         <Route path="/company/:tabId" element={<CompanyInfo />} />
@@ -208,3 +211,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+

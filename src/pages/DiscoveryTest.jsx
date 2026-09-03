@@ -110,6 +110,7 @@ export default function DiscoveryTest() {
         await Promise.all(savesRef.current.values());
         await submitTestSession(testSessionId);
         setStatus("completed");
+        navigate(`/career-report/${testSessionId}`);
       } catch (err) {
         setError(err.message || "Failed to save all answers or submit test.");
       } finally {
@@ -173,30 +174,63 @@ export default function DiscoveryTest() {
             <p className="text-sm font-semibold text-slate-600">{testSessionId || "—"}</p>
           </div>
         </div>
-        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-6">
+        <div key={currentIndex} className="rounded-[24px] border border-slate-200 bg-slate-50 p-6 animate-question-slide">
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Discovery Question</p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">{currentQuestion.question_text}</h2>
+              <span className="text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                {currentIndex < 10 ? "Part 1: Behavioral Scenario" : "Part 2: Qualitative Reflection"}
+              </span>
+              <h2 className="mt-3 text-xl sm:text-2xl font-semibold text-slate-900 leading-snug">{currentQuestion.question_text}</h2>
             </div>
-            <div className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm">
+            <div className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm shrink-0">
               {currentIndex + 1}/{totalQuestions}
             </div>
           </div>
-          <div className="space-y-3">
-            {currentQuestion.options.map((option) => {
-              const isSelected = selectedAnswer === option.option_id;
-              return (
-                <button
-                  key={option.option_id}
-                  onClick={() => handleAnswer(option.option_id)}
-                  className={`w-full rounded-2xl border px-5 py-4 text-left transition ${isSelected ? "border-blue-500 bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300"}`}
-                >
-                  <p className="font-semibold text-slate-900">{option.option_text}</p>
-                </button>
-              );
-            })}
-          </div>
+
+          {currentQuestion.question_type === "open_text" ? (
+            <div className="space-y-2">
+              <textarea
+                value={selectedAnswer || ""}
+                onChange={(e) => handleAnswer(e.target.value)}
+                placeholder="Type your reflection answer here (3–5 sentences recommended)..."
+                rows={5}
+                className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition resize-none"
+              />
+              <div className="flex items-center justify-between text-xs text-slate-450 px-1">
+                <span>Reflections help customize your qualitative career match insights.</span>
+                <span>{(selectedAnswer || "").length} characters</span>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {currentQuestion.options?.map((option) => {
+                const isSelected = selectedAnswer === option.option_id;
+                return (
+                  <button
+                    key={option.option_id}
+                    onClick={() => handleAnswer(option.option_id)}
+                    className={`w-full rounded-2xl border px-5 py-4 text-left transition flex items-center gap-3.5 group cursor-pointer ${
+                      isSelected
+                        ? "border-blue-600 bg-blue-50/90 text-slate-900 font-semibold shadow-sm"
+                        : "border-slate-200 bg-white hover:border-slate-300 text-slate-800"
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                        isSelected
+                          ? "border-blue-600 bg-blue-600"
+                          : "border-slate-300 bg-white group-hover:border-slate-400"
+                      }`}
+                    >
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                    </div>
+                    <p className="text-sm font-semibold text-slate-900 flex-1">{option.option_text}</p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
           <div className="mt-6 flex items-center justify-between gap-3">
             <button
@@ -210,7 +244,7 @@ export default function DiscoveryTest() {
             <button
               type="button"
               onClick={handleNext}
-              disabled={!selectedAnswer || isSubmitting}
+              disabled={(!selectedAnswer && currentQuestion.question_type !== "open_text") || isSubmitting}
               className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Saving..." : currentIndex === totalQuestions - 1 ? "Submit Test" : "Next Question"}
