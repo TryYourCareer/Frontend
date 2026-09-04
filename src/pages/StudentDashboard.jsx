@@ -4,33 +4,28 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { getUserProfile } from "../services/users";
 
-// ── Logo-extracted palette ─────────────────────────────────────────────────
-const LOGO_BLUE   = "#5B7EC9";
-const LOGO_DARK   = "#3D1F08";
-const LOGO_MID    = "#7B4A28";
-const LOGO_TAN    = "#B8712E";
-
+// ── Harmonious Light Pastel Multi-Color Palette ─────────────────────────────
 const dashboardData = {
   userName: "Jane",
   stats: [
-    { label: "Assessments",    value: "3/3",          icon: ClipboardList, bg: `bg-[#EEF2FB]`,  iconColor: LOGO_BLUE,  textColor: LOGO_BLUE  },
-    { label: "Missions Done",  value: "12 Completed", icon: CheckCircle2,  bg: `bg-[#FBF0E8]`,  iconColor: LOGO_TAN,   textColor: LOGO_TAN   },
-    { label: "Skills Unlocked",value: "8 Active",     icon: Zap,           bg: `bg-[#F3E8DF]`,  iconColor: LOGO_MID,   textColor: LOGO_MID   },
-    { label: "Streak",         value: "5 Days",       icon: Flame,         bg: `bg-[#F0EAE2]`,  iconColor: LOGO_DARK,  textColor: LOGO_DARK  },
+    { label: "Assessments",    value: "3/3",          icon: ClipboardList, bg: "bg-sky-50",     border: "border-sky-200",     iconColor: "#1E88E5",  textColor: "#0b1a36"  },
+    { label: "Missions Done",  value: "12 Completed", icon: CheckCircle2,  bg: "bg-emerald-50", border: "border-emerald-200", iconColor: "#059669",  textColor: "#065f46"  },
+    { label: "Skills Unlocked",value: "8 Active",     icon: Zap,           bg: "bg-purple-50",  border: "border-purple-200",  iconColor: "#7c3aed",  textColor: "#5b21b6"  },
+    { label: "Streak",         value: "5 Days",       icon: Flame,         bg: "bg-amber-50",   border: "border-amber-200",   iconColor: "#d97706",  textColor: "#92400e"  },
   ],
   compatibility: [
-    { label: "Software Engineering", value: 92, color: LOGO_BLUE },
-    { label: "UX Design",            value: 78, color: LOGO_MID  },
-    { label: "Product Management",   value: 65, color: LOGO_TAN  },
+    { label: "Software Engineering", value: 92, color: "#1E88E5" },
+    { label: "UX Design",            value: 78, color: "#7c3aed" },
+    { label: "Product Management",   value: 65, color: "#059669" },
   ],
   skillProfile: {
     labels: ["Problem Solving", "Creativity", "Communication", "Technical", "Leadership", "Adaptability"],
     values:  [85, 74, 78, 88, 68, 81],
   },
   missions: [
-    { title: "Frontend Fixer",   subtitle: "Software Engineer · Today",     score: "85%", accent: LOGO_BLUE },
-    { title: "Wireframe Wizard", subtitle: "UX Designer · Yesterday",       score: "92%", accent: LOGO_MID  },
-    { title: "Sprint Planning",  subtitle: "Product Manager · 2 days ago",  score: "—",   accent: LOGO_TAN  },
+    { title: "Frontend Fixer",   subtitle: "Software Engineer · Today",     score: "85%", accent: "#1E88E5" },
+    { title: "Wireframe Wizard", subtitle: "UX Designer · Yesterday",       score: "92%", accent: "#7c3aed" },
+    { title: "Sprint Planning",  subtitle: "Product Manager · 2 days ago",  score: "—",   accent: "#059669" },
   ],
   recommendations: [
     "Complete Data Science Mission",
@@ -40,16 +35,16 @@ const dashboardData = {
 
 /* ── Skeleton helpers ────────────────────────────────────────────────────── */
 function Bone({ className = "", style }) {
-  return <div className={`animate-pulse rounded-xl bg-[#e8dfc8] ${className}`} style={style} />;
+  return <div className={`animate-pulse rounded-xl bg-[#D3E3F5]/60 ${className}`} style={style} />;
 }
 
 function DashboardSkeleton() {
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-6 py-10 text-slate-800">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800">
       <div className="mx-auto max-w-6xl space-y-8">
 
         {/* Header skeleton */}
-        <div className="flex flex-col gap-3 border-b border-[#e2d9c8] pb-6">
+        <div className="flex flex-col gap-3 border-b border-[#D3E3F5] pb-6">
           <Bone className="h-5 w-28 rounded-full" />
           <Bone className="h-8 w-64" />
           <Bone className="h-3 w-72 rounded-full" />
@@ -62,19 +57,19 @@ function DashboardSkeleton() {
             {/* Stat cards */}
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="min-h-[118px] rounded-2xl border border-[#e8dfc8] bg-[#f0e9d8] p-4 flex flex-col justify-between animate-pulse">
+                <div key={i} className="min-h-[118px] rounded-3xl border border-[#D3E3F5] bg-white p-4 flex flex-col justify-between animate-pulse">
                   <div className="flex justify-between">
-                    <Bone className="h-2.5 w-16 rounded-full bg-[#ddd0b8]" />
-                    <Bone className="h-7 w-7 rounded-lg bg-[#ddd0b8]" />
+                    <Bone className="h-2.5 w-16 rounded-full bg-[#D3E3F5]" />
+                    <Bone className="h-7 w-7 rounded-2xl bg-[#D3E3F5]" />
                   </div>
-                  <Bone className="h-6 w-24 bg-[#ddd0b8]" />
+                  <Bone className="h-6 w-24 bg-[#D3E3F5]" />
                 </div>
               ))}
             </div>
 
             {/* Metrics row */}
             <div className="grid gap-6 sm:grid-cols-2">
-              <div className="rounded-2xl border border-[#e2d9c8] bg-white p-5 space-y-4 shadow-sm">
+              <div className="rounded-3xl border border-[#D3E3F5] bg-white p-5 space-y-4 shadow-xs">
                 <div className="flex items-center justify-between">
                   <Bone className="h-3 w-32 rounded-full" />
                   <Bone className="h-4 w-10 rounded-full" />
@@ -89,22 +84,22 @@ function DashboardSkeleton() {
                   </div>
                 ))}
               </div>
-              <div className="rounded-2xl border border-[#e2d9c8] bg-white p-5 shadow-sm space-y-3">
+              <div className="rounded-3xl border border-[#D3E3F5] bg-white p-5 shadow-xs space-y-3">
                 <Bone className="h-3 w-24 rounded-full" />
-                <Bone className="h-40 w-full rounded-xl" />
+                <Bone className="h-40 w-full rounded-2xl" />
               </div>
             </div>
 
             {/* Missions skeleton */}
-            <div className="rounded-2xl border border-[#e2d9c8] bg-white p-5 shadow-sm space-y-4">
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-5 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
                 <Bone className="h-3 w-36 rounded-full" />
                 <Bone className="h-6 w-16 rounded-lg" />
               </div>
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between rounded-xl border border-slate-100 bg-[#FAF6EC]/40 p-3">
+                <div key={i} className="flex items-center justify-between rounded-2xl border border-[#D3E3F5]/60 bg-[#F0F6FC] p-3">
                   <div className="flex items-center gap-3">
-                    <Bone className="h-8 w-8 rounded-lg flex-shrink-0" />
+                    <Bone className="h-8 w-8 rounded-2xl flex-shrink-0" />
                     <div className="space-y-1.5">
                       <Bone className="h-3 w-28 rounded-full" />
                       <Bone className="h-2.5 w-36 rounded-full" />
@@ -118,16 +113,16 @@ function DashboardSkeleton() {
 
           {/* Sidebar skeleton */}
           <aside className="space-y-6">
-            <div className="rounded-2xl border border-[#e2d9c8] bg-white p-5 shadow-sm space-y-4">
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-5 shadow-xs space-y-4">
               <Bone className="h-3 w-36 rounded-full" />
               {[...Array(2)].map((_, i) => (
-                <Bone key={i} className="h-10 w-full rounded-xl" />
+                <Bone key={i} className="h-10 w-full rounded-2xl" />
               ))}
-              <Bone className="h-9 w-full rounded-xl" />
+              <Bone className="h-9 w-full rounded-2xl" />
             </div>
-            <div className="rounded-2xl border border-[#e2d9c8] bg-white p-5 shadow-sm space-y-4">
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-5 shadow-xs space-y-4">
               <Bone className="h-3 w-24 rounded-full" />
-              <Bone className="h-28 w-full rounded-xl" />
+              <Bone className="h-28 w-full rounded-2xl" />
             </div>
           </aside>
         </div>
@@ -141,10 +136,10 @@ function CompatBar({ label, value, color }) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs text-slate-600">
-        <span className="font-medium">{label}</span>
+        <span className="font-semibold">{label}</span>
         <span className="font-bold" style={{ color }}>{value}%</span>
       </div>
-      <div className="h-1.5 rounded-full bg-slate-100">
+      <div className="h-2 rounded-full bg-[#F0F6FC]">
         <div className="h-full rounded-full transition-all" style={{ width: `${value}%`, backgroundColor: color }} />
       </div>
     </div>
@@ -158,14 +153,14 @@ function RadarDot({ angle, radius, label, color }) {
   return (
     <g>
       <circle cx={x} cy={y} r="2.8" fill={color} />
-      <text x={x} y={y - 6} textAnchor="middle" fontSize="4.5" fontWeight="bold" fill="#4B3F35" dominantBaseline="middle">
+      <text x={x} y={y - 6} textAnchor="middle" fontSize="4.5" fontWeight="bold" fill="#0b1a36" dominantBaseline="middle">
         {label}
       </text>
     </g>
   );
 }
 
-const radarColors = [LOGO_BLUE, LOGO_TAN, LOGO_MID, LOGO_BLUE, LOGO_TAN, LOGO_MID];
+const radarColors = ["#1E88E5", "#7c3aed", "#059669", "#1E88E5", "#7c3aed", "#059669"];
 
 /* ── Main Component ──────────────────────────────────────────────────────── */
 export default function StudentDashboard() {
@@ -202,18 +197,17 @@ export default function StudentDashboard() {
   const gender    = userData?.gender || "—";
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-6 py-10 text-slate-800 text-left">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800 text-left">
       <div className="mx-auto max-w-6xl space-y-8">
 
         {/* Header */}
-        <div className="flex flex-col gap-3 border-b border-slate-200 pb-6">
+        <div className="flex flex-col gap-3 border-b border-[#D3E3F5] pb-6">
           <span
-            className="inline-flex w-fit items-center rounded-full px-3 py-0.5 text-[9px] font-black tracking-widest uppercase border"
-            style={{ borderColor: LOGO_BLUE, color: LOGO_BLUE, backgroundColor: "#EEF2FB" }}
+            className="inline-flex w-fit items-center rounded-full px-3.5 py-1 text-[10px] font-bold tracking-widest uppercase border border-sky-200 bg-sky-50 text-[#1E88E5]"
           >
             STUDENT PORTAL
           </span>
-          <h1 className="text-3xl font-serif font-bold leading-tight" style={{ color: LOGO_DARK }}>
+          <h1 className="text-3xl font-serif font-bold leading-tight text-[#0b1a36]">
             Welcome back, {firstName} 👋
           </h1>
           <p className="text-xs text-slate-500">You're making great progress on your career discovery journey.</p>
@@ -228,9 +222,9 @@ export default function StudentDashboard() {
             </div>
             <button
               onClick={() => navigate("/assessment")}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#7B4A28] hover:bg-[#633a1f] text-white text-xs font-bold rounded-xl shadow-sm transition shrink-0"
+              className="flex items-center gap-1.5 px-5 py-2.5 bg-[#0b1a36] hover:bg-[#122b59] text-white text-xs font-bold rounded-full shadow-xs transition shrink-0 cursor-pointer"
             >
-              <Sparkles size={14} />
+              <Sparkles size={14} className="text-[#1E88E5]" />
               <span>View Career Fit Diagnostic</span>
             </button>
           </div>
@@ -249,17 +243,17 @@ export default function StudentDashboard() {
                 return (
                   <div
                     key={stat.label}
-                    className={`${stat.bg} rounded-2xl p-4 flex flex-col justify-between min-h-[118px] border border-white/60 shadow-sm`}
+                    className={`${stat.bg} rounded-3xl p-5 flex flex-col justify-between min-h-[128px] border ${stat.border} shadow-2xs hover:shadow-xs transition`}
                   >
                     <div className="flex justify-between items-start">
-                      <span className="text-[9px] font-bold uppercase tracking-wider opacity-60" style={{ color: stat.textColor }}>
+                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: stat.textColor }}>
                         {stat.label}
                       </span>
-                      <div className="grid h-7 w-7 place-items-center rounded-lg bg-white/70">
-                        <Icon size={14} style={{ color: stat.iconColor }} />
+                      <div className="grid h-8 w-8 place-items-center rounded-2xl bg-white shadow-2xs border border-white">
+                        <Icon size={15} style={{ color: stat.iconColor }} />
                       </div>
                     </div>
-                    <p className="mt-4 text-xl font-serif font-bold" style={{ color: stat.textColor }}>
+                    <p className="mt-4 text-2xl font-serif font-bold" style={{ color: stat.textColor }}>
                       {stat.value}
                     </p>
                   </div>
@@ -271,19 +265,18 @@ export default function StudentDashboard() {
             <div className="grid gap-6 sm:grid-cols-2">
 
               {/* Compatibility */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: LOGO_DARK }}>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0b1a36]">
                     Dynamic Compatibility
                   </h3>
                   <span
-                    className="rounded-full px-2 py-0.5 text-[9px] font-bold"
-                    style={{ backgroundColor: "#EEF2FB", color: LOGO_BLUE }}
+                    className="rounded-full px-2.5 py-0.5 text-[10px] font-bold border border-sky-200 bg-sky-50 text-[#1E88E5]"
                   >
                     Live
                   </span>
                 </div>
-                <div className="mt-5 space-y-3.5">
+                <div className="mt-5 space-y-4">
                   {compatibility.map((item) => (
                     <CompatBar key={item.label} {...item} />
                   ))}
@@ -291,18 +284,18 @@ export default function StudentDashboard() {
               </div>
 
               {/* Skill Radar */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: LOGO_DARK }}>
+              <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#0b1a36]">
                   Skill Profile
                 </h3>
                 <div className="mt-4 flex items-center justify-center">
                   <svg viewBox="0 0 100 100" className="h-44 w-full">
-                    <polygon points="50,5 85,30 85,70 50,95 15,70 15,30" fill="#FAF6EC" stroke="#e2e8f0" strokeWidth="0.8" />
+                    <polygon points="50,5 85,30 85,70 50,95 15,70 15,30" fill="#F0F6FC" stroke="#D3E3F5" strokeWidth="0.8" />
                     <polygon
                       points="50,17 78,36 74,66 50,83 23,66 22,36"
-                      fill={LOGO_BLUE}
+                      fill="#1E88E5"
                       opacity="0.12"
-                      stroke={LOGO_BLUE}
+                      stroke="#1E88E5"
                       strokeWidth="1"
                     />
                     {dashboardData.skillProfile.labels.map((label, index) => {
@@ -317,41 +310,39 @@ export default function StudentDashboard() {
             </div>
 
             {/* Trial Missions */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs">
               <div className="flex items-center justify-between gap-4">
-                <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider" style={{ color: LOGO_DARK }}>
-                  <Target size={12} style={{ color: LOGO_BLUE }} />
+                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0b1a36]">
+                  <Target size={14} className="text-[#1E88E5]" />
                   Recent Trial Missions
                 </h3>
                 <button
-                  className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold transition hover:opacity-80"
-                  style={{ backgroundColor: "#EEF2FB", color: LOGO_BLUE }}
+                  className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition hover:opacity-80 border border-sky-200 bg-sky-50 text-[#1E88E5] cursor-pointer"
                 >
                   View All <ArrowRight size={12} />
                 </button>
               </div>
-              <div className="mt-4 space-y-3">
+              <div className="mt-5 space-y-3">
                 {missions.map((mission) => (
-                  <div key={mission.title} className="rounded-xl border border-slate-100 bg-[#FAF6EC]/40 p-3 hover:bg-[#FAF6EC]/80 transition">
+                  <div key={mission.title} className="rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-4 hover:bg-[#EAF2FA] transition">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <div
-                          className="grid h-8 w-8 shrink-0 place-items-center rounded-lg"
-                          style={{ backgroundColor: `${mission.accent}18` }}
+                          className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-white shadow-2xs border border-sky-100"
                         >
-                          <Play size={12} style={{ color: mission.accent }} className="ml-0.5" />
+                          <Play size={13} style={{ color: mission.accent }} className="ml-0.5" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-slate-800">{mission.title}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">{mission.subtitle}</p>
+                          <p className="text-xs sm:text-sm font-bold text-slate-800">{mission.title}</p>
+                          <p className="text-[11px] text-slate-500 mt-0.5">{mission.subtitle}</p>
                         </div>
                       </div>
                       <div
-                        className="rounded-md px-3 py-1.5 text-xs font-bold"
+                        className="rounded-full px-3 py-1 text-xs font-bold border border-[#D3E3F5] bg-white shadow-2xs"
                         style={
                           mission.score === "—"
-                            ? { backgroundColor: "#f1f5f9", color: "#94a3b8" }
-                            : { backgroundColor: `${mission.accent}15`, color: mission.accent }
+                            ? { color: "#94a3b8" }
+                            : { color: mission.accent }
                         }
                       >
                         {mission.score}
@@ -367,38 +358,36 @@ export default function StudentDashboard() {
           <aside className="space-y-6">
 
             {/* User Profile Card */}
-            <div className="rounded-2xl border border-[#e2d9c8] bg-white p-5 shadow-sm space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: LOGO_DARK }}>Your Profile</h3>
-              <div className="space-y-2.5 text-xs text-slate-600">
-                <ProfileRow icon={<User size={12} />} label="Name" value={fullName} />
-                <ProfileRow icon={<BookOpen size={12} />} label="Education" value={education} />
-                <ProfileRow icon={<Briefcase size={12} />} label="Interest" value={interest} />
-                {gender !== "—" && <ProfileRow icon={<User size={12} />} label="Gender" value={gender} />}
-                {email !== "—" && <ProfileRow icon={<Mail size={12} />} label="Email" value={email} />}
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#0b1a36]">Your Profile</h3>
+              <div className="space-y-3 text-xs text-slate-600">
+                <ProfileRow icon={<User size={13} />} label="Name" value={fullName} />
+                <ProfileRow icon={<BookOpen size={13} />} label="Education" value={education} />
+                <ProfileRow icon={<Briefcase size={13} />} label="Interest" value={interest} />
+                {gender !== "—" && <ProfileRow icon={<User size={13} />} label="Gender" value={gender} />}
+                {email !== "—" && <ProfileRow icon={<Mail size={13} />} label="Email" value={email} />}
               </div>
             </div>
 
             {/* Next Steps */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider" style={{ color: LOGO_DARK }}>
-                <BarChart3 size={12} style={{ color: LOGO_TAN }} />
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-4">
+              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0b1a36]">
+                <BarChart3 size={14} className="text-[#1E88E5]" />
                 Recommended Next Steps
               </h3>
-              <ul className="mt-4 space-y-2.5 text-xs text-slate-600">
+              <ul className="space-y-2.5 text-xs text-slate-600">
                 {recommendations.map((item) => (
                   <li
                     key={item}
-                    className="flex items-start gap-2.5 rounded-xl px-3 py-2.5 border"
-                    style={{ backgroundColor: "#FBF0E8", borderColor: "#f0d8c4" }}
+                    className="flex items-start gap-2.5 rounded-2xl px-4 py-3 border border-sky-200 bg-sky-50 shadow-2xs"
                   >
-                    <CheckCircle2 size={13} className="mt-0.5 shrink-0" style={{ color: LOGO_TAN }} />
-                    <span>{item}</span>
+                    <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[#1E88E5]" />
+                    <span className="font-semibold text-slate-700">{item}</span>
                   </li>
                 ))}
               </ul>
               <button
-                className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition hover:opacity-90"
-                style={{ backgroundColor: LOGO_DARK }}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-xs font-bold text-white transition hover:bg-[#122b59] bg-[#0b1a36] shadow-xs cursor-pointer"
               >
                 <Play size={12} className="ml-0.5" />
                 Start Next Mission
@@ -406,22 +395,21 @@ export default function StudentDashboard() {
             </div>
 
             {/* AI Insights */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider" style={{ color: LOGO_DARK }}>
-                  <Sparkles size={12} style={{ color: LOGO_BLUE }} />
+                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0b1a36]">
+                  <Sparkles size={14} className="text-[#1E88E5]" />
                   AI Insights
                 </h3>
-                <button className="flex items-center gap-1 text-[10px] font-bold transition hover:opacity-70" style={{ color: LOGO_BLUE }}>
-                  Generate <TrendingUp size={11} />
+                <button className="flex items-center gap-1 text-xs font-bold transition hover:underline text-[#1E88E5] cursor-pointer">
+                  Generate <TrendingUp size={12} />
                 </button>
               </div>
               <div
-                className="mt-4 rounded-xl border border-dashed p-5 text-center text-xs text-slate-500"
-                style={{ backgroundColor: "#EEF2FB30", borderColor: `${LOGO_BLUE}40` }}
+                className="rounded-2xl border border-dashed border-[#D3E3F5] bg-[#F0F6FC] p-6 text-center text-xs text-slate-500 shadow-2xs"
               >
-                <Sparkles size={20} className="mx-auto mb-2.5" style={{ color: `${LOGO_BLUE}80` }} />
-                <p className="font-bold" style={{ color: LOGO_DARK }}>No Insights Yet</p>
+                <Sparkles size={22} className="mx-auto mb-2 text-[#1E88E5]" />
+                <p className="font-bold text-[#0b1a36]">No Insights Yet</p>
                 <p className="mt-1">Click the button above to generate personalized insights.</p>
               </div>
             </div>
@@ -436,8 +424,8 @@ export default function StudentDashboard() {
 /* ── Small helper sub-components ─────────────────────────────────────────── */
 function InfoPill({ icon, label }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e2d9c8] bg-white px-3 py-1 text-[11px] font-medium text-slate-600">
-      <span style={{ color: LOGO_MID }}>{icon}</span>
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D3E3F5] bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs">
+      <span className="text-[#1E88E5]">{icon}</span>
       {label}
     </span>
   );
@@ -446,10 +434,10 @@ function InfoPill({ icon, label }) {
 function ProfileRow({ icon, label, value }) {
   return (
     <div className="flex items-start gap-2.5">
-      <span className="mt-0.5 shrink-0" style={{ color: LOGO_MID }}>{icon}</span>
+      <span className="mt-0.5 shrink-0 text-[#1E88E5]">{icon}</span>
       <div className="min-w-0">
         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
-        <p className="font-medium text-slate-700 truncate">{value}</p>
+        <p className="font-semibold text-slate-700 truncate">{value}</p>
       </div>
     </div>
   );

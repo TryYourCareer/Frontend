@@ -44,7 +44,7 @@ export default function LandingNavbar({ isDark }) {
     <nav className={`sticky top-0 z-50 w-full transition-colors duration-300 border-b ${
       isDark 
         ? "bg-slate-900/90 border-slate-800 text-slate-100" 
-        : "bg-[#FAF6EC]/90 border-slate-900/5 text-[#0b1a36]"
+        : "bg-white/95 border-[#D3E3F5] text-[#0b1a36]"
     } backdrop-blur-md`}>
       <div className="flex flex-col md:flex-row md:items-center justify-between px-4 py-3.5 md:px-6 md:py-5 max-w-6xl mx-auto w-full gap-3 md:gap-4">
         
@@ -69,7 +69,7 @@ export default function LandingNavbar({ isDark }) {
           <div className="md:hidden">
             <button
               onClick={() => authUser ? navigate("/dashboard") : setIsLoginOpen(true)}
-              className="rounded-lg bg-[#F3E3B6] hover:bg-[#ebd08b] text-slate-900 font-bold px-3 py-2 text-xs shadow-sm transition"
+              className="rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold px-4 py-2 text-xs shadow-2xs transition cursor-pointer"
             >
               {authUser ? "Dashboard" : "Find career"}
             </button>
@@ -79,8 +79,8 @@ export default function LandingNavbar({ isDark }) {
         {/* Search Bar centered */}
         <div className={`relative w-full md:flex-1 md:max-w-md transition-all duration-300 ${searchFocused ? "md:max-w-lg" : ""}`}>
           <Search
-            className={`pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${
-              isDark ? "text-slate-500" : "text-[#94a3b8]"
+            className={`pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 ${
+              isDark ? "text-slate-500" : "text-[#1E88E5]"
             }`}
           />
           <input
@@ -92,10 +92,10 @@ export default function LandingNavbar({ isDark }) {
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
             placeholder="Search careers..."
-            className={`w-full rounded-xl border py-2 pl-10 pr-4 text-xs sm:text-sm font-medium outline-none transition ${
+            className={`w-full rounded-full border py-2.5 pl-10 pr-4 text-xs sm:text-sm font-medium outline-none transition shadow-2xs ${
               isDark
                 ? "border-slate-700 bg-slate-900/80 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15"
-                : "border-slate-900/10 bg-white text-[#0b1a36] placeholder:text-slate-400 focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-stone-200/50"
+                : "border-[#D3E3F5] bg-white text-[#0b1a36] placeholder:text-slate-400 focus:border-[#1E88E5] focus:bg-white focus:ring-2 focus:ring-sky-100"
             }`}
           />
 
@@ -107,33 +107,33 @@ export default function LandingNavbar({ isDark }) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 8, scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 200, damping: 18 }}
-                className={`absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-xl border shadow-xl ${
+                className={`absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-2xl border shadow-xl ${
                   isDark
                     ? "border-slate-700 bg-slate-900"
-                    : "border-[#e2e8f0] bg-white shadow-[0_12px_32px_rgba(0,0,0,0.1)]"
+                    : "border-[#D3E3F5] bg-white shadow-[0_12px_32px_rgba(11,26,54,0.08)]"
                 }`}
               >
                 {clusterResults.length > 0 ? (
-                  <ul className="max-h-52 overflow-y-auto py-1">
+                  <ul className="max-h-52 overflow-y-auto py-1.5">
                     {clusterResults.map((clusterName) => (
                       <li key={clusterName}>
                         <button
                           type="button"
                           onMouseDown={() => handleSelectCluster(clusterName)}
-                          className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold transition ${
+                          className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs sm:text-sm font-semibold transition cursor-pointer ${
                             isDark
                               ? "text-slate-200 hover:bg-slate-800"
-                              : "text-[#334155] hover:bg-[#f1f5f9]"
+                              : "text-slate-700 hover:bg-[#F0F6FC]"
                           }`}
                         >
-                          <Search className={`h-3 w-3 shrink-0 ${isDark ? "text-cyan-400" : "text-[#3b82f6]"}`} />
+                          <Search className={`h-3.5 w-3.5 shrink-0 ${isDark ? "text-cyan-400" : "text-[#1E88E5]"}`} />
                           {clusterName}
                         </button>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className={`px-4 py-3 text-sm ${isDark ? "text-slate-400" : "text-[#64748b]"}`}>
+                  <p className={`px-4 py-3 text-xs sm:text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     No matching clusters found.
                   </p>
                 )}
@@ -147,14 +147,14 @@ export default function LandingNavbar({ isDark }) {
           {authUser ? (
             <button
               onClick={() => navigate("/dashboard")}
-              className="rounded-md bg-[#F3E3B6] hover:bg-[#ebd08b] text-slate-900 font-bold px-5 py-2.5 text-sm shadow-sm transition"
+              className="rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold px-5 py-2.5 text-xs shadow-xs transition cursor-pointer"
             >
               Go to Dashboard
             </button>
           ) : (
             <button
               onClick={() => setIsLoginOpen(true)}
-              className="rounded-md bg-[#F3E3B6] hover:bg-[#ebd08b] text-slate-900 font-bold px-5 py-2.5 text-sm shadow-sm transition"
+              className="rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold px-5 py-2.5 text-xs shadow-xs transition cursor-pointer"
             >
               Find a career
             </button>

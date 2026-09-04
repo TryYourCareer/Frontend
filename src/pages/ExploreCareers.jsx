@@ -24,42 +24,42 @@ async function fetchWithTimeout(url, timeoutMs) {
 }
 
 const cardColors = [
-  "from-[#e9f6ff] via-[#dff0ff] to-[#d8e9ff]",
-  "from-[#efeafe] via-[#e6dcff] to-[#ddd2ff]",
-  "from-[#e8f9f1] via-[#dcf4ea] to-[#d2ede4]",
-  "from-[#fff2e5] via-[#ffe9d8] to-[#ffdfcb]",
-  "from-[#ffeff4] via-[#ffe3ec] to-[#ffd8e4]",
-  "from-[#f2f7e6] via-[#e8f2d6] to-[#deebc6]",
-  "from-[#e7f7f7] via-[#d9efef] to-[#cde6e6]",
-  "from-[#f9f0ff] via-[#f0e3ff] to-[#e8d6ff]",
-  "from-[#edf5ff] via-[#e3efff] to-[#d9e8ff]",
-  "from-[#fff6e8] via-[#ffeed8] to-[#ffe4c6]",
+  "from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]",
+  "from-[#f0f4fd] via-[#e8effc] to-[#dbe7f9]",
+  "from-[#f2f7fc] via-[#e9f2fa] to-[#dceaf7]",
+  "from-[#f5f9fe] via-[#edf5fc] to-[#e0effb]",
+  "from-[#eef5fc] via-[#e4effa] to-[#d6e7f7]",
+  "from-[#f1f6fd] via-[#e7f0fb] to-[#dbe8f8]",
+  "from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]",
+  "from-[#f0f4fd] via-[#e8effc] to-[#dbe7f9]",
+  "from-[#f2f7fc] via-[#e9f2fa] to-[#dceaf7]",
+  "from-[#f5f9fe] via-[#edf5fc] to-[#e0effb]",
 ];
 
 const hoverColors = [
-  "hover:shadow-blue-200/50",
-  "hover:shadow-purple-200/50",
-  "hover:shadow-emerald-200/50",
-  "hover:shadow-orange-200/50",
-  "hover:shadow-pink-200/50",
-  "hover:shadow-lime-200/50",
-  "hover:shadow-cyan-200/50",
-  "hover:shadow-violet-200/50",
-  "hover:shadow-indigo-200/50",
-  "hover:shadow-amber-200/50",
+  "hover:shadow-blue-200/40",
+  "hover:shadow-sky-200/40",
+  "hover:shadow-indigo-200/40",
+  "hover:shadow-blue-200/40",
+  "hover:shadow-cyan-200/40",
+  "hover:shadow-sky-200/40",
+  "hover:shadow-blue-200/40",
+  "hover:shadow-indigo-200/40",
+  "hover:shadow-sky-200/40",
+  "hover:shadow-blue-200/40",
 ];
 
 const borderColors = [
-  "border-blue-100 bg-[#e9f6ff]/30 text-blue-700",
-  "border-purple-100 bg-[#efeafe]/30 text-purple-700",
-  "border-emerald-100 bg-[#e8f9f1]/30 text-emerald-700",
-  "border-orange-100 bg-[#fff2e5]/30 text-orange-700",
-  "border-pink-100 bg-[#ffeff4]/30 text-pink-700",
-  "border-lime-100 bg-[#f2f7e6]/30 text-lime-700",
-  "border-cyan-100 bg-[#e7f7f7]/30 text-cyan-700",
-  "border-violet-100 bg-[#f9f0ff]/30 text-violet-700",
-  "border-indigo-100 bg-[#edf5ff]/30 text-indigo-700",
-  "border-amber-100 bg-[#fff6e8]/30 text-amber-700",
+  "border-[#D3E3F5] bg-sky-50 text-[#1E88E5]",
+  "border-[#D3E3F5] bg-blue-50 text-[#1E88E5]",
+  "border-[#D3E3F5] bg-indigo-50 text-indigo-700",
+  "border-[#D3E3F5] bg-sky-50 text-[#1E88E5]",
+  "border-[#D3E3F5] bg-cyan-50 text-cyan-700",
+  "border-[#D3E3F5] bg-blue-50 text-[#1E88E5]",
+  "border-[#D3E3F5] bg-sky-50 text-[#1E88E5]",
+  "border-[#D3E3F5] bg-indigo-50 text-indigo-700",
+  "border-[#D3E3F5] bg-blue-50 text-[#1E88E5]",
+  "border-[#D3E3F5] bg-sky-50 text-[#1E88E5]",
 ];
 
 function sortByClusterNumber(a, b) {
@@ -95,7 +95,6 @@ function collectTopItems(items, limit = 3) {
     .slice(0, limit)
     .map(([key]) => key);
 }
-
 
 export default function ExploreCareers({ onBack, initialSearch = "", selectedClusterId, onClusterSelected }) {
   const navigate = useNavigate();
@@ -249,7 +248,6 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
     };
   }, []);
 
-  // Compute cluster details dynamically (career count, averages)
   const enrichedClusters = useMemo(() => {
     const countMap = careers.reduce((acc, career) => {
       acc[career.clusterId] = (acc[career.clusterId] || 0) + 1;
@@ -280,7 +278,6 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
     });
   }, [clusters, careers]);
 
-  // Handle Autoselected cluster via props
   useEffect(() => {
     if (!hasAutoSelected.current && selectedClusterId && !loading && clusters.length > 0) {
       const clusterNum = selectedClusterId.toLowerCase().replace(/[^\d]/g, "");
@@ -295,11 +292,9 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
     }
   }, [selectedClusterId, loading, clusters, onClusterSelected]);
 
-  // Filtering and Sorting logic for Careers
   const filteredCareers = useMemo(() => {
     let result = [...careers];
 
-    // 1. Filter by Search Query
     const search = globalSearch.trim().toLowerCase();
     if (search) {
       result = result.filter(
@@ -312,7 +307,6 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
       );
     }
 
-    // 2. Filter by Cluster
     if (filterClusterId !== "all") {
       result = result.filter((c) => {
         const cNum = String(c.clusterId).toLowerCase().replace(/[^\d]/g, "");
@@ -321,20 +315,16 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
       });
     }
 
-    // 3. Filter by Demand Level
     if (filterDemand.length > 0) {
       result = result.filter((c) => filterDemand.includes(c.demand));
     }
 
-    // 4. Filter by AI Impact
     if (filterAiImpact !== "all") {
       result = result.filter((c) => String(c.aiImpact).toLowerCase() === filterAiImpact.toLowerCase());
     }
 
-    // 5. Filter by Salary Range
     if (filterSalary !== "all") {
       result = result.filter((c) => {
-        // Average Entry Salary Range
         const val = parseNumberFromText(c.entrySalary);
         if (val === null) return false;
         if (filterSalary === "low") return val < 5;
@@ -344,7 +334,6 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
       });
     }
 
-    // 6. Sort Results
     if (sortBy === "name") {
       result.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortBy === "salary-desc") {
@@ -368,14 +357,12 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
     return result;
   }, [careers, globalSearch, filterClusterId, filterDemand, filterAiImpact, filterSalary, sortBy]);
 
-  // Toggle Demand selection
   const handleDemandToggle = (demand) => {
     setFilterDemand((prev) => 
       prev.includes(demand) ? prev.filter((d) => d !== demand) : [...prev, demand]
     );
   };
 
-  // Reset all filters
   const resetFilters = () => {
     setGlobalSearch("");
     setFilterClusterId("all");
@@ -391,12 +378,12 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
     <>
       {/* Sorting option */}
       <div>
-        <label className="text-xs font-bold tracking-wider text-slate-400 block mb-2">SORT BY</label>
+        <label className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-2">SORT BY</label>
         <div className="relative">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-[#0b1a36] focus:border-slate-400 focus:outline-none appearance-none font-sans"
+            className="w-full bg-[#F0F6FC] border border-[#D3E3F5] rounded-2xl px-3 py-2 text-xs font-semibold text-[#0b1a36] focus:border-slate-400 focus:bg-white focus:outline-none appearance-none font-sans cursor-pointer shadow-2xs"
           >
             <option value="name">Alphabetical (A - Z)</option>
             <option value="salary-desc">Entry Salary (High to Low)</option>
@@ -410,8 +397,8 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
 
       {/* Demand Level Filter */}
       <div>
-        <label className="text-xs font-bold tracking-wider text-slate-400 block mb-2">DEMAND LEVEL</label>
-        <div className="flex flex-col gap-2">
+        <label className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-2">DEMAND LEVEL</label>
+        <div className="flex flex-col gap-1.5">
           {["Very High", "High", "Medium", "Low"].map((level) => {
             const isChecked = filterDemand.includes(level);
             return (
@@ -419,14 +406,14 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                 key={level}
                 type="button"
                 onClick={() => handleDemandToggle(level)}
-                className={`flex items-center justify-between text-xs font-semibold px-3 py-2 rounded-xl border text-left transition-all font-sans cursor-pointer ${
+                className={`flex items-center justify-between text-xs font-semibold px-3 py-2 rounded-2xl border text-left transition-all font-sans cursor-pointer shadow-2xs ${
                   isChecked 
-                    ? "bg-slate-900 border-slate-900 text-white shadow-sm" 
-                    : "bg-slate-50 border-slate-200 hover:bg-slate-100/60 text-[#0b1a36]"
+                    ? "bg-[#0b1a36] border-[#0b1a36] text-white" 
+                    : "bg-[#F0F6FC] border-[#D3E3F5] hover:bg-white text-[#0b1a36]"
                 }`}
               >
                 <span>{level}</span>
-                {isChecked && <Check className="h-3 w-3" />}
+                {isChecked && <Check className="h-3 w-3 text-white" />}
               </button>
             );
           })}
@@ -435,17 +422,17 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
 
       {/* AI Impact Filter */}
       <div>
-        <label className="text-xs font-bold tracking-wider text-slate-400 block mb-2">AI IMPACT</label>
-        <div className="grid grid-cols-3 gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 font-sans">
+        <label className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-2">AI IMPACT</label>
+        <div className="grid grid-cols-3 gap-1 bg-[#F0F6FC] p-1 rounded-2xl border border-[#D3E3F5] font-sans">
           {["all", "Low", "High"].map((opt) => (
             <button
               key={opt}
               type="button"
               onClick={() => setFilterAiImpact(opt)}
-              className={`text-center py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`text-center py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 filterAiImpact === opt 
-                  ? "bg-white text-slate-900 shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-white text-[#0b1a36] shadow-2xs" 
+                  : "text-slate-500 hover:text-slate-800"
               }`}
             >
               {opt === "all" ? "All" : opt}
@@ -456,8 +443,8 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
 
       {/* Salary Bracket Filter */}
       <div>
-        <label className="text-xs font-bold tracking-wider text-slate-400 block mb-2">ENTRY SALARY</label>
-        <div className="flex flex-col gap-2 font-sans">
+        <label className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-2">ENTRY SALARY</label>
+        <div className="flex flex-col gap-1.5 font-sans">
           {[
             { id: "all", label: "Any Salary" },
             { id: "low", label: "Starter (< 5 LPA)" },
@@ -468,14 +455,14 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
               key={opt.id}
               type="button"
               onClick={() => setFilterSalary(opt.id)}
-              className={`flex items-center gap-2.5 text-xs font-semibold px-3 py-2 rounded-xl text-left border transition-all cursor-pointer ${
+              className={`flex items-center gap-2.5 text-xs font-semibold px-3 py-2 rounded-2xl text-left border transition-all cursor-pointer shadow-2xs ${
                 filterSalary === opt.id 
-                  ? "bg-slate-900 border-slate-900 text-white shadow-sm" 
-                  : "bg-slate-50 border-slate-200 hover:bg-slate-100/60 text-[#0b1a36]"
+                  ? "bg-[#0b1a36] border-[#0b1a36] text-white" 
+                  : "bg-[#F0F6FC] border-[#D3E3F5] hover:bg-white text-[#0b1a36]"
               }`}
             >
               <span className={`w-2 h-2 rounded-full ${
-                filterSalary === opt.id ? "bg-amber-400" : "bg-slate-300"
+                filterSalary === opt.id ? "bg-[#1E88E5]" : "bg-slate-300"
               }`} />
               {opt.label}
             </button>
@@ -486,37 +473,37 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
   );
 
   return (
-    <div className="min-h-screen bg-[#FAF6EC] text-[#0b1a36]">
+    <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36] font-sans">
       {/* Header */}
-      <header className="border-b border-[#0b1a36]/5 bg-[#FAF6EC]/85 backdrop-blur-md sticky top-0 z-20 transition-all">
-        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
+      <header className="border-b border-[#D3E3F5] bg-white/85 backdrop-blur-md sticky top-0 z-20 transition-all">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="text-left">
             <button
               onClick={handleBack}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-full border border-[#D3E3F5] bg-white px-4 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50 shadow-2xs cursor-pointer"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back
             </button>
-            <h1 className="text-3xl font-extrabold tracking-tight mt-2 text-[#0b1a36]">Explore Careers</h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight mt-2 text-[#0b1a36]">Explore Careers</h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
               Test-drive different options and find your perfect path using real-world validation.
             </p>
           </div>
           
-          {/* Main search bar next to title on wide viewports */}
+          {/* Main search bar */}
           <div className="relative w-full max-w-md md:w-80">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
               placeholder="Search careers, skills, industries..."
-              className="w-full rounded-full border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-[#0b1a36] focus:border-slate-500 focus:outline-none shadow-sm transition"
+              className="w-full rounded-full border border-[#D3E3F5] bg-[#F0F6FC] py-2.5 pl-10 pr-4 text-xs sm:text-sm text-[#0b1a36] placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none shadow-2xs transition"
             />
             {globalSearch && (
               <button 
                 onClick={() => setGlobalSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -527,23 +514,23 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Interactive Cluster Selector Cards */}
-        <section className="mb-10">
+        <section className="mb-10 text-left">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              <Compass className="h-5 w-5 text-amber-500" />
+            <h2 className="font-serif text-lg font-bold flex items-center gap-2 text-[#0b1a36]">
+              <Compass className="h-5 w-5 text-[#1E88E5]" />
               Filter by Career Cluster
             </h2>
             {filterClusterId !== "all" && (
               <button 
                 onClick={() => setFilterClusterId("all")}
-                className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1"
+                className="text-xs font-bold text-[#1E88E5] hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <RefreshCw className="h-3 w-3" /> Clear selection
               </button>
             )}
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
             {enrichedClusters.map((cluster, index) => {
               const isSelected = filterClusterId === cluster.id;
               
@@ -553,26 +540,26 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                   whileHover={{ y: -3 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setFilterClusterId(isSelected ? "all" : cluster.id)}
-                  className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${cardColors[index % cardColors.length]} p-4 text-left shadow-sm border transition-all ${
+                  className={`relative overflow-hidden rounded-3xl bg-white p-4 text-left shadow-xs border transition-all cursor-pointer ${
                     isSelected 
-                      ? "ring-2 ring-amber-500 border-transparent shadow-md" 
-                      : "border-slate-200/60 hover:shadow-md"
+                      ? "ring-2 ring-[#0b1a36] border-transparent shadow-md" 
+                      : "border-[#D3E3F5] hover:border-slate-300 hover:shadow-md"
                   }`}
                 >
-                  <span className="text-[10px] font-bold opacity-60 block tracking-wider">
+                  <span className="text-[10px] font-bold text-slate-400 block tracking-wider uppercase">
                     {cluster.id}
                   </span>
-                  <h3 className="font-extrabold text-sm leading-snug mt-1 text-[#0b1a36] line-clamp-1">
+                  <h3 className="font-serif font-bold text-sm leading-snug mt-1 text-[#0b1a36] line-clamp-1">
                     {cluster.name}
                   </h3>
                   
-                  <div className="mt-3 flex items-center justify-between text-[11px] font-medium opacity-85">
+                  <div className="mt-3 flex items-center justify-between text-[10px] font-semibold text-slate-500">
                     <span>{cluster.count} options</span>
-                    <span className="font-bold">{cluster.demandMix} Demand</span>
+                    <span className="text-[#1E88E5]">{cluster.demandMix} Demand</span>
                   </div>
 
                   {isSelected && (
-                    <div className="absolute top-2 right-2 bg-amber-500 text-white rounded-full p-0.5">
+                    <div className="absolute top-3 right-3 bg-[#0b1a36] text-white rounded-full p-0.5 shadow-2xs">
                       <Check className="h-3 w-3" />
                     </div>
                   )}
@@ -583,16 +570,16 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
         </section>
 
         {/* Mobile Filters Toggle Button */}
-        <div className="flex lg:hidden items-center justify-between mb-4 w-full px-2">
+        <div className="flex lg:hidden items-center justify-between mb-4 w-full px-1">
           <button
             type="button"
             onClick={() => setShowMobileFilters(true)}
-            className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-sm w-full justify-center transition hover:bg-slate-50 cursor-pointer"
+            className="flex items-center gap-2 rounded-full border border-[#D3E3F5] bg-white px-4 py-2.5 text-xs font-bold text-[#0b1a36] shadow-xs w-full justify-center transition hover:bg-slate-50 cursor-pointer"
           >
-            <SlidersHorizontal className="h-4 w-4 text-amber-500" />
+            <SlidersHorizontal className="h-4 w-4 text-[#1E88E5]" />
             Filters & Sorting
             {(filterClusterId !== "all" || filterDemand.length > 0 || filterAiImpact !== "all" || filterSalary !== "all") && (
-              <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-amber-500 text-white rounded-full font-bold">
+              <span className="ml-1 px-2 py-0.5 text-[9px] bg-[#0b1a36] text-white rounded-full font-bold">
                 Active
               </span>
             )}
@@ -608,7 +595,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-40 bg-[#0b1a36]/40 backdrop-blur-sm lg:hidden"
+                className="fixed inset-0 z-40 bg-[#0b1a36]/40 backdrop-blur-xs lg:hidden"
                 onClick={() => setShowMobileFilters(false)}
               />
               {/* Drawer Panel */}
@@ -617,38 +604,37 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="fixed inset-y-0 left-0 z-50 w-[280px] bg-white p-6 shadow-2xl overflow-y-auto flex flex-col justify-between lg:hidden text-left"
+                className="fixed inset-y-0 left-0 z-50 w-[280px] bg-white p-6 shadow-2xl overflow-y-auto flex flex-col justify-between lg:hidden text-left border-r border-[#D3E3F5]"
               >
                 <div>
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                    <span className="font-extrabold text-sm tracking-wide flex items-center gap-2 text-slate-800">
-                      <SlidersHorizontal className="h-4 w-4" /> FILTERS
+                  <div className="flex items-center justify-between pb-4 border-b border-[#D3E3F5]">
+                    <span className="font-bold text-xs tracking-wider flex items-center gap-2 text-[#0b1a36]">
+                      <SlidersHorizontal className="h-4 w-4 text-[#1E88E5]" /> FILTERS
                     </span>
                     <button
                       type="button"
                       onClick={() => setShowMobileFilters(false)}
-                      className="rounded-lg border border-slate-200 p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
+                      className="rounded-full border border-[#D3E3F5] p-1.5 text-slate-400 hover:text-slate-700 cursor-pointer"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
-                  {/* Filter Content */}
                   <div className="space-y-6 mt-6">
                     {filterContent}
                   </div>
                 </div>
-                <div className="mt-8 pt-4 border-t border-slate-100 flex gap-2">
+                <div className="mt-8 pt-4 border-t border-[#D3E3F5] flex gap-2">
                   <button
                     type="button"
                     onClick={() => { resetFilters(); setShowMobileFilters(false); }}
-                    className="flex-1 text-center py-2.5 text-xs font-bold bg-slate-50 hover:bg-slate-100 rounded-xl transition border border-slate-200 text-slate-700 cursor-pointer"
+                    className="flex-1 text-center py-2.5 text-xs font-bold bg-[#F0F6FC] hover:bg-white rounded-full transition border border-[#D3E3F5] text-slate-700 cursor-pointer"
                   >
                     Reset
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowMobileFilters(false)}
-                    className="flex-1 text-center py-2.5 text-xs font-bold bg-slate-900 text-white rounded-xl transition border border-transparent hover:bg-slate-800 cursor-pointer"
+                    className="flex-1 text-center py-2.5 text-xs font-bold bg-[#0b1a36] text-white rounded-full transition hover:bg-[#122b59] cursor-pointer shadow-xs"
                   >
                     Apply
                   </button>
@@ -659,64 +645,55 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
         </AnimatePresence>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start w-full">
-          {/* Desktop Filters Sidebar (lg screens only) */}
-          <aside className="hidden lg:block w-64 shrink-0 bg-white/70 backdrop-blur-md border border-[#0b1a36]/5 rounded-3xl p-5 shadow-sm sticky top-28 z-10 text-left">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <span className="font-extrabold text-sm tracking-wide flex items-center gap-2 text-slate-800">
-                <SlidersHorizontal className="h-4 w-4" /> FILTERS
+          {/* Desktop Filters Sidebar */}
+          <aside className="hidden lg:block w-64 shrink-0 bg-white/90 backdrop-blur-md border border-[#D3E3F5] rounded-3xl p-5 shadow-xs sticky top-24 z-10 text-left">
+            <div className="flex items-center justify-between pb-4 border-b border-[#D3E3F5]">
+              <span className="font-bold text-xs tracking-wider flex items-center gap-2 text-[#0b1a36]">
+                <SlidersHorizontal className="h-4 w-4 text-[#1E88E5]" /> FILTERS
               </span>
               {(filterClusterId !== "all" || filterDemand.length > 0 || filterAiImpact !== "all" || filterSalary !== "all") && (
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="text-xs font-bold text-amber-600 hover:text-[#0b1a36] transition cursor-pointer"
+                  className="text-xs font-bold text-[#1E88E5] hover:underline transition cursor-pointer"
                 >
                   Reset All
                 </button>
               )}
             </div>
-            <div className="space-y-6 mt-6">
+            <div className="space-y-6 mt-5">
               {filterContent}
             </div>
           </aside>
 
           {/* Careers Main Grid */}
-          <section className="flex-1 w-full">
+          <section className="flex-1 w-full text-left">
             {loading && (
               <div className="flex flex-col items-center justify-center py-20 space-y-3">
-                <div className="h-8 w-8 rounded-full border-4 border-slate-300 border-t-amber-500 animate-spin" />
-                <p className="text-sm font-bold text-slate-500">Loading careers database...</p>
+                <div className="h-8 w-8 rounded-full border-4 border-slate-200 border-t-[#1E88E5] animate-spin" />
+                <p className="text-xs sm:text-sm font-bold text-slate-500">Loading careers database...</p>
               </div>
             )}
             
             {error && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-red-700">
+              <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-center text-red-700 shadow-xs">
                 <ShieldAlert className="h-8 w-8 mx-auto mb-2 text-red-500" />
                 <h3 className="font-bold">Error Loading Data</h3>
-                <p className="text-sm mt-1">{error}</p>
+                <p className="text-xs sm:text-sm mt-1">{error}</p>
               </div>
             )}
 
             {!loading && !error && (
               <>
-                <div className="flex items-center justify-between mb-6">
-                  <p className="text-xs sm:text-sm font-bold text-slate-500">
-                    Showing <span className="text-[#0b1a36]">{filteredCareers.length}</span> careers matching criteria
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-500">
+                    Showing <span className="text-[#0b1a36] font-bold">{filteredCareers.length}</span> careers matching criteria
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                   <AnimatePresence>
                     {filteredCareers.map((career) => {
-                      // Lookup cluster index to set corresponding border/color
-                      const clusterIndex = enrichedClusters.findIndex(c => {
-                        const careerCNum = String(career.clusterId).replace(/\D/g, "");
-                        const clusterCNum = String(c.id).replace(/\D/g, "");
-                        return careerCNum === clusterCNum;
-                      });
-
-                      const colorIdx = clusterIndex !== -1 ? clusterIndex : 0;
-                      
                       return (
                         <motion.article
                           key={career.id}
@@ -725,12 +702,12 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.25 }}
-                          className={`rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 ${hoverColors[colorIdx]}`}
+                          className="rounded-3xl border border-[#D3E3F5] bg-white p-5 shadow-xs hover:border-slate-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5"
                         >
                           <div>
                             {/* Card Top */}
                             <div className="flex items-start justify-between gap-3">
-                              <span className={`text-[10px] font-bold tracking-wider uppercase border px-2 py-0.5 rounded-full ${borderColors[colorIdx]}`}>
+                              <span className="text-[10px] font-bold tracking-wider uppercase border border-sky-200 bg-sky-50 text-[#1E88E5] px-2.5 py-0.5 rounded-full">
                                 {career.clusterId || "Cluster"}
                               </span>
                               <span className="text-xs font-bold text-slate-400">
@@ -739,27 +716,27 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                             </div>
 
                             {/* Title & One-line */}
-                            <h3 className="text-base font-extrabold text-[#0b1a36] mt-3 line-clamp-1">
+                            <h3 className="font-serif text-base font-bold text-[#0b1a36] mt-3 line-clamp-1">
                               {career.name}
                             </h3>
-                            <p className="text-xs text-slate-500 mt-1 line-clamp-2 min-h-[32px]">
+                            <p className="text-xs text-slate-500 mt-1 line-clamp-2 min-h-[32px] leading-relaxed">
                               {career.summary}
                             </p>
 
                             {/* Tech and salary metrics */}
                             <div className="mt-4 grid grid-cols-2 gap-2 text-[11px] font-bold">
-                              <div className="flex items-center gap-1.5 bg-slate-50 rounded-lg p-2 border border-slate-100">
-                                <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
+                              <div className="flex items-center gap-2 bg-[#F0F6FC] rounded-2xl p-2.5 border border-[#D3E3F5]">
+                                <DollarSign className="h-3.5 w-3.5 text-[#d97706]" />
                                 <div>
-                                  <span className="text-[9px] text-slate-400 block font-semibold leading-none">ENTRY SALARY</span>
-                                  <span className="text-[#0b1a36] leading-none mt-0.5 block">{career.entrySalary || "NA"}</span>
+                                  <span className="text-[9px] text-slate-400 block font-bold leading-none uppercase">ENTRY SALARY</span>
+                                  <span className="text-[#0b1a36] leading-none mt-1 block">{career.entrySalary || "NA"}</span>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1.5 bg-slate-50 rounded-lg p-2 border border-slate-100">
-                                <Zap className="h-3.5 w-3.5 text-amber-500" />
+                              <div className="flex items-center gap-2 bg-[#F0F6FC] rounded-2xl p-2.5 border border-[#D3E3F5]">
+                                <Zap className="h-3.5 w-3.5 text-[#1E88E5]" />
                                 <div>
-                                  <span className="text-[9px] text-slate-400 block font-semibold leading-none">DEMAND</span>
-                                  <span className="text-[#0b1a36] leading-none mt-0.5 block">{career.demand || "NA"}</span>
+                                  <span className="text-[9px] text-slate-400 block font-bold leading-none uppercase">DEMAND</span>
+                                  <span className="text-[#0b1a36] leading-none mt-1 block">{career.demand || "NA"}</span>
                                 </div>
                               </div>
                             </div>
@@ -767,14 +744,14 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                             {/* Core skills preview */}
                             <div className="mt-4">
                               <span className="text-[9px] font-bold tracking-wider text-slate-400 block uppercase">CORE SKILLS</span>
-                              <div className="flex flex-wrap gap-1 mt-1.5">
+                              <div className="flex flex-wrap gap-1.5 mt-1.5">
                                 {String(career.coreSkills || "")
                                   .split(",")
                                   .slice(0, 3)
                                   .map((skill, i) => (
                                     <span 
                                       key={i} 
-                                      className="text-[10px] font-semibold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md truncate max-w-[100px]"
+                                      className="text-[10px] font-semibold bg-[#F0F6FC] text-slate-700 px-2.5 py-0.5 rounded-full border border-[#D3E3F5] truncate max-w-[110px]"
                                     >
                                       {skill.trim()}
                                     </span>
@@ -790,16 +767,16 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                           </div>
 
                           {/* Card bottom actions */}
-                          <div className="mt-6 pt-4 border-t border-slate-100 flex gap-2">
+                          <div className="mt-5 pt-4 border-t border-[#D3E3F5] flex gap-2">
                             <button
                               onClick={() => setQuickViewCareer(career)}
-                              className="flex-1 text-center py-2 text-xs font-bold bg-slate-50 hover:bg-slate-100/80 rounded-xl transition border border-slate-200 text-slate-700"
+                              className="flex-1 text-center py-2 text-xs font-bold bg-[#F0F6FC] hover:bg-white rounded-full transition border border-[#D3E3F5] text-slate-700 shadow-2xs cursor-pointer"
                             >
                               Quick View
                             </button>
                             <button
                               onClick={() => navigate(`/career-details/${encodeURIComponent(career.name)}`)}
-                              className="flex-1 text-center py-2 text-xs font-bold bg-[#FAF2DB] hover:bg-[#ebd08b] rounded-xl transition border border-transparent text-[#0b1a36]"
+                              className="flex-1 text-center py-2 text-xs font-bold bg-[#0b1a36] hover:bg-[#122b59] rounded-full transition border border-transparent text-white shadow-xs cursor-pointer"
                             >
                               Full Roadmap
                             </button>
@@ -811,15 +788,15 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                 </div>
 
                 {filteredCareers.length === 0 && (
-                  <div className="rounded-3xl border border-dashed border-slate-300 bg-white/50 p-12 text-center text-slate-500 max-w-lg mx-auto mt-10">
+                  <div className="rounded-3xl border border-dashed border-[#D3E3F5] bg-white/70 p-12 text-center text-slate-500 max-w-lg mx-auto mt-10 shadow-xs">
                     <Briefcase className="h-10 w-10 mx-auto text-slate-400 mb-2" />
-                    <h3 className="font-extrabold text-[#0b1a36]">No Matching Careers</h3>
+                    <h3 className="font-serif font-bold text-[#0b1a36]">No Matching Careers</h3>
                     <p className="text-xs sm:text-sm mt-1 leading-relaxed">
                       We couldn't find any career options matching your selected search query or filters. Try resetting the filters or broadening your search parameters.
                     </p>
                     <button
                       onClick={resetFilters}
-                      className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 text-xs font-bold transition shadow-sm"
+                      className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white px-5 py-2 text-xs font-bold transition shadow-xs cursor-pointer"
                     >
                       Reset All Filters
                     </button>
@@ -840,7 +817,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-[#0b1a36]/30 backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-[#0b1a36]/40 backdrop-blur-xs"
               onClick={() => setQuickViewCareer(null)}
             />
 
@@ -850,20 +827,20 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 140, damping: 22 }}
-              className="fixed right-0 top-0 z-50 h-full w-full max-w-2xl overflow-y-auto bg-white shadow-2xl border-l border-slate-200/50 flex flex-col justify-between"
+              className="fixed right-0 top-0 z-50 h-full w-full max-w-2xl overflow-y-auto bg-white shadow-2xl border-l border-[#D3E3F5] flex flex-col justify-between"
             >
               <div>
                 {/* Header */}
-                <div className="sticky top-0 z-10 border-b border-slate-100 bg-slate-50 px-6 py-5 flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-bold bg-amber-500/10 text-amber-700 px-2 py-0.5 rounded-full tracking-wider border border-amber-100">
+                <div className="sticky top-0 z-10 border-b border-[#D3E3F5] bg-white/90 backdrop-blur-md px-6 py-5 flex items-center justify-between">
+                  <div className="text-left">
+                    <span className="text-[10px] font-bold bg-sky-50 text-[#1E88E5] px-2.5 py-0.5 rounded-full tracking-wider border border-sky-200 uppercase">
                       {quickViewCareer.clusterId}
                     </span>
-                    <h2 className="text-xl font-extrabold text-[#0b1a36] mt-1">{quickViewCareer.name}</h2>
+                    <h2 className="font-serif text-xl font-bold text-[#0b1a36] mt-1">{quickViewCareer.name}</h2>
                   </div>
                   <button
                     onClick={() => setQuickViewCareer(null)}
-                    className="rounded-xl border border-slate-200 p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                    className="rounded-full border border-[#D3E3F5] p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -873,43 +850,43 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                 <div className="space-y-6 px-6 py-6 text-left">
                   {/* One-Liner Description */}
                   <div>
-                    <h4 className="text-xs font-bold tracking-wider text-slate-400 block uppercase mb-1">ONE-LINE SUMMARY</h4>
-                    <p className="text-base text-slate-700 leading-relaxed font-medium">
+                    <h4 className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-1">ONE-LINE SUMMARY</h4>
+                    <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-medium">
                       {quickViewCareer.summary}
                     </p>
                   </div>
 
                   {/* What they do details */}
                   <div>
-                    <h4 className="text-xs font-bold tracking-wider text-slate-400 block uppercase mb-1">WHAT THEY DO</h4>
-                    <p className="text-sm text-slate-600 leading-relaxed">
+                    <h4 className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-1">WHAT THEY DO</h4>
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                       {quickViewCareer.whatTheyDo}
                     </p>
                   </div>
 
                   {/* High level metrics dashboard */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#F0F6FC] p-4 rounded-3xl border border-[#D3E3F5] shadow-2xs">
                     <div className="text-center">
-                      <span className="text-[9px] text-slate-400 block font-bold leading-none">DEMAND LEVEL</span>
-                      <span className="text-[#0b1a36] text-xs font-extrabold mt-1 block">{quickViewCareer.demand}</span>
+                      <span className="text-[9px] text-slate-400 block font-bold leading-none uppercase">DEMAND LEVEL</span>
+                      <span className="text-[#0b1a36] text-xs font-bold mt-1.5 block">{quickViewCareer.demand}</span>
                     </div>
                     <div className="text-center">
-                      <span className="text-[9px] text-slate-400 block font-bold leading-none">GROWTH RATE</span>
-                      <span className="text-[#0b1a36] text-xs font-extrabold mt-1 block">{quickViewCareer.growthRate}</span>
+                      <span className="text-[9px] text-slate-400 block font-bold leading-none uppercase">GROWTH RATE</span>
+                      <span className="text-[#0b1a36] text-xs font-bold mt-1.5 block">{quickViewCareer.growthRate}</span>
                     </div>
                     <div className="text-center">
-                      <span className="text-[9px] text-slate-400 block font-bold leading-none">AI IMPACT</span>
-                      <span className="text-[#0b1a36] text-xs font-extrabold mt-1 block">{quickViewCareer.aiImpact}</span>
+                      <span className="text-[9px] text-slate-400 block font-bold leading-none uppercase">AI IMPACT</span>
+                      <span className="text-[#0b1a36] text-xs font-bold mt-1.5 block">{quickViewCareer.aiImpact}</span>
                     </div>
                     <div className="text-center">
-                      <span className="text-[9px] text-slate-400 block font-bold leading-none">WORK-LIFE</span>
-                      <span className="text-[#0b1a36] text-xs font-extrabold mt-1 block">{quickViewCareer.workLifeBalance}</span>
+                      <span className="text-[9px] text-slate-400 block font-bold leading-none uppercase">WORK-LIFE</span>
+                      <span className="text-[#0b1a36] text-xs font-bold mt-1.5 block">{quickViewCareer.workLifeBalance}</span>
                     </div>
                   </div>
 
                   {/* Salary Bracket grid */}
                   <div>
-                    <h4 className="text-xs font-bold tracking-wider text-slate-400 block uppercase mb-2">SALARY PATHWAY (LPA)</h4>
+                    <h4 className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-2">SALARY PATHWAY (LPA)</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {[
                         { title: "Entry", val: quickViewCareer.entrySalary },
@@ -917,34 +894,34 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                         { title: "Senior", val: quickViewCareer.seniorSalary },
                         { title: "Top Earnings", val: quickViewCareer.topEarnings },
                       ].map((sal) => (
-                        <div key={sal.title} className="bg-slate-50/50 p-3 rounded-xl border border-slate-100 text-center">
+                        <div key={sal.title} className="bg-[#F0F6FC] p-3 rounded-2xl border border-[#D3E3F5] text-center shadow-2xs">
                           <span className="text-[9px] text-slate-400 block font-bold leading-none uppercase">{sal.title}</span>
-                          <span className="text-[#0b1a36] text-xs font-extrabold mt-1.5 block">{sal.val || "NA"}</span>
+                          <span className="text-[#0b1a36] text-xs font-bold mt-1.5 block">{sal.val || "NA"}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Verdict and scores */}
-                  <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-5">
-                    <h4 className="text-xs font-bold tracking-wider text-amber-700 block uppercase mb-1 flex items-center gap-1.5">
-                      <Award className="h-4 w-4" /> STRIDE VERDICT & SCORES
+                  <div className="bg-[#F0F6FC] border border-[#D3E3F5] rounded-3xl p-5 shadow-xs">
+                    <h4 className="text-xs font-bold tracking-wider text-[#1E88E5] block uppercase mb-1 flex items-center gap-1.5">
+                      <Award className="h-4 w-4 text-[#1E88E5]" /> STRIDE VERDICT & SCORES
                     </h4>
-                    <p className="text-sm text-slate-700 leading-relaxed font-semibold italic mt-1">
+                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-semibold italic mt-1">
                       "{quickViewCareer.verdict}"
                     </p>
                     <div className="grid grid-cols-3 gap-2 mt-4 text-center">
-                      <div className="bg-white px-2 py-2.5 rounded-xl border border-amber-500/5">
+                      <div className="bg-white px-2 py-2.5 rounded-2xl border border-[#D3E3F5] shadow-2xs">
                         <span className="text-[9px] text-slate-400 block font-bold uppercase">Money</span>
-                        <span className="text-[#0b1a36] text-sm font-extrabold mt-1.5 block">{quickViewCareer.moneyScore}/10</span>
+                        <span className="text-[#0b1a36] text-sm font-bold mt-1.5 block">{quickViewCareer.moneyScore}/10</span>
                       </div>
-                      <div className="bg-white px-2 py-2.5 rounded-xl border border-amber-500/5">
+                      <div className="bg-white px-2 py-2.5 rounded-2xl border border-[#D3E3F5] shadow-2xs">
                         <span className="text-[9px] text-slate-400 block font-bold uppercase">Growth</span>
-                        <span className="text-[#0b1a36] text-sm font-extrabold mt-1.5 block">{quickViewCareer.growthScore}/10</span>
+                        <span className="text-[#0b1a36] text-sm font-bold mt-1.5 block">{quickViewCareer.growthScore}/10</span>
                       </div>
-                      <div className="bg-white px-2 py-2.5 rounded-xl border border-amber-500/5">
+                      <div className="bg-white px-2 py-2.5 rounded-2xl border border-[#D3E3F5] shadow-2xs">
                         <span className="text-[9px] text-slate-400 block font-bold uppercase">Stability</span>
-                        <span className="text-[#0b1a36] text-sm font-extrabold mt-1.5 block">{quickViewCareer.stabilityScore}/10</span>
+                        <span className="text-[#0b1a36] text-sm font-bold mt-1.5 block">{quickViewCareer.stabilityScore}/10</span>
                       </div>
                     </div>
                   </div>
@@ -952,13 +929,13 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                   {/* Industries & Skills lists */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="text-xs font-bold tracking-wider text-slate-400 block uppercase mb-1.5">INDUSTRIES</h4>
+                      <h4 className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-1.5">INDUSTRIES</h4>
                       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
                         {quickViewCareer.industries}
                       </p>
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold tracking-wider text-slate-400 block uppercase mb-1.5">CORE SKILLS</h4>
+                      <h4 className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-1.5">CORE SKILLS</h4>
                       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
                         {quickViewCareer.coreSkills}
                       </p>
@@ -968,7 +945,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                   {/* Certifications and Entry Path */}
                   <div className="space-y-4 pt-2">
                     <div>
-                      <h4 className="text-xs font-bold tracking-wider text-slate-400 block uppercase mb-1 flex items-center gap-1.5">
+                      <h4 className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-1 flex items-center gap-1.5">
                         <ShieldCheck className="h-4 w-4 text-emerald-600" /> CERTIFICATIONS
                       </h4>
                       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
@@ -976,8 +953,8 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                       </p>
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold tracking-wider text-slate-400 block uppercase mb-1 flex items-center gap-1.5">
-                        <Brain className="h-4 w-4 text-purple-600" /> ENTRY PATH
+                      <h4 className="text-[10px] font-bold tracking-wider text-slate-400 block uppercase mb-1 flex items-center gap-1.5">
+                        <Brain className="h-4 w-4 text-[#1E88E5]" /> ENTRY PATH
                       </h4>
                       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
                         {quickViewCareer.entryPath || "No standard entry path documented."}
@@ -987,11 +964,11 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
 
                   {/* Who should choose vs avoid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 text-slate-700">
+                    <div className="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 text-slate-700 shadow-2xs">
                       <span className="text-[10px] font-bold text-emerald-800 tracking-wider block uppercase mb-1">WHO SHOULD CHOOSE</span>
                       <p className="text-xs leading-relaxed font-medium">{quickViewCareer.whoShouldChoose}</p>
                     </div>
-                    <div className="bg-red-50/30 p-4 rounded-xl border border-red-100 text-slate-700">
+                    <div className="bg-red-50/70 p-4 rounded-2xl border border-red-200 text-slate-700 shadow-2xs">
                       <span className="text-[10px] font-bold text-red-800 tracking-wider block uppercase mb-1">WHO SHOULD AVOID</span>
                       <p className="text-xs leading-relaxed font-medium">{quickViewCareer.whoShouldAvoid}</p>
                     </div>
@@ -1000,10 +977,10 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
               </div>
 
               {/* Action footer */}
-              <div className="sticky bottom-0 bg-slate-50 border-t border-slate-100 px-6 py-4 flex gap-3">
+              <div className="sticky bottom-0 bg-white border-t border-[#D3E3F5] px-6 py-4 flex gap-3 shadow-md">
                 <button
                   onClick={() => setQuickViewCareer(null)}
-                  className="flex-1 text-center py-3 text-xs font-bold bg-white hover:bg-slate-50 rounded-xl transition border border-slate-200 text-slate-700"
+                  className="flex-1 text-center py-3 text-xs font-bold bg-[#F0F6FC] hover:bg-slate-100 rounded-full transition border border-[#D3E3F5] text-slate-700 shadow-2xs cursor-pointer"
                 >
                   Close Quick View
                 </button>
@@ -1013,7 +990,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                     setQuickViewCareer(null);
                     navigate(`/career-details/${encodeURIComponent(name)}`);
                   }}
-                  className="flex-1 text-center py-3 text-xs font-bold bg-[#FAF2DB] hover:bg-[#ebd08b] rounded-xl transition border border-transparent text-[#0b1a36] shadow-sm"
+                  className="flex-1 text-center py-3 text-xs font-bold bg-[#0b1a36] hover:bg-[#122b59] rounded-full transition border border-transparent text-white shadow-xs cursor-pointer"
                 >
                   View Full Career Roadmap
                 </button>

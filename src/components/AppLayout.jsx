@@ -23,7 +23,7 @@ export default function AppLayout({
   const isDark = theme === "dark";
 
   return (
-    <div className={`cc-app-layout h-screen overflow-hidden ${isDark ? "bg-[#0f172a]" : "bg-[#f1f5f9]"}`}>
+    <div className={`cc-app-layout h-screen overflow-hidden ${isDark ? "bg-[#0f172a]" : "bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]"}`}>
       {/* Sidebar */}
       <Sidebar
         activePage={activePage}
