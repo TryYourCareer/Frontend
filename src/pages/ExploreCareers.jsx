@@ -23,45 +23,6 @@ async function fetchWithTimeout(url, timeoutMs) {
   }
 }
 
-const cardColors = [
-  "from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]",
-  "from-[#f0f4fd] via-[#e8effc] to-[#dbe7f9]",
-  "from-[#f2f7fc] via-[#e9f2fa] to-[#dceaf7]",
-  "from-[#f5f9fe] via-[#edf5fc] to-[#e0effb]",
-  "from-[#eef5fc] via-[#e4effa] to-[#d6e7f7]",
-  "from-[#f1f6fd] via-[#e7f0fb] to-[#dbe8f8]",
-  "from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]",
-  "from-[#f0f4fd] via-[#e8effc] to-[#dbe7f9]",
-  "from-[#f2f7fc] via-[#e9f2fa] to-[#dceaf7]",
-  "from-[#f5f9fe] via-[#edf5fc] to-[#e0effb]",
-];
-
-const hoverColors = [
-  "hover:shadow-blue-200/40",
-  "hover:shadow-sky-200/40",
-  "hover:shadow-indigo-200/40",
-  "hover:shadow-blue-200/40",
-  "hover:shadow-cyan-200/40",
-  "hover:shadow-sky-200/40",
-  "hover:shadow-blue-200/40",
-  "hover:shadow-indigo-200/40",
-  "hover:shadow-sky-200/40",
-  "hover:shadow-blue-200/40",
-];
-
-const borderColors = [
-  "border-[#D3E3F5] bg-sky-50 text-[#1E88E5]",
-  "border-[#D3E3F5] bg-blue-50 text-[#1E88E5]",
-  "border-[#D3E3F5] bg-indigo-50 text-indigo-700",
-  "border-[#D3E3F5] bg-sky-50 text-[#1E88E5]",
-  "border-[#D3E3F5] bg-cyan-50 text-cyan-700",
-  "border-[#D3E3F5] bg-blue-50 text-[#1E88E5]",
-  "border-[#D3E3F5] bg-sky-50 text-[#1E88E5]",
-  "border-[#D3E3F5] bg-indigo-50 text-indigo-700",
-  "border-[#D3E3F5] bg-blue-50 text-[#1E88E5]",
-  "border-[#D3E3F5] bg-sky-50 text-[#1E88E5]",
-];
-
 function sortByClusterNumber(a, b) {
   const aNum = Number(String(a.cluster_id || a.id).replace(/\D/g, ""));
   const bNum = Number(String(b.cluster_id || b.id).replace(/\D/g, ""));
@@ -531,7 +492,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-            {enrichedClusters.map((cluster, index) => {
+            {enrichedClusters.map((cluster) => {
               const isSelected = filterClusterId === cluster.id;
               
               return (
