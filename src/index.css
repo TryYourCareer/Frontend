@@ -81,6 +81,21 @@ button, a, input, textarea {
   animation: cc-fadein 0.4s ease both;
 }
 
+/* Question transition keyframes */
+@keyframes questionSlideFade {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-question-slide {
+  animation: questionSlideFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Pulse dot */
 @keyframes cc-pulse-dot {
   0%, 100% { opacity: 1; }
