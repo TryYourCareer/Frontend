@@ -36,7 +36,7 @@ export default function TopBar({
     <header
       className={`cc-topbar h-20 sticky top-0 z-30 flex items-center justify-between gap-3 border-b px-4 py-2.5 sm:px-6 backdrop-blur-xl ${isDark
         ? "border-slate-800/80 bg-slate-950/90"
-        : "border-slate-400 bg-[#FAF6EC]/95"
+        : "border-[#D3E3F5] bg-white/95"
         }`}
     >
       {/* Left: Mobile hamburger + sidebar toggle */}
@@ -44,9 +44,9 @@ export default function TopBar({
         <button
           type="button"
           onClick={onToggleMobileSidebar}
-          className={`rounded-lg p-2 transition lg:hidden ${isDark
+          className={`rounded-xl p-2 transition lg:hidden cursor-pointer ${isDark
             ? "text-slate-400 hover:bg-slate-800 hover:text-white"
-            : "text-slate-650 hover:bg-slate-900/5 hover:text-slate-900"
+            : "text-slate-650 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
             }`}
           aria-label="Toggle sidebar"
         >
@@ -56,7 +56,7 @@ export default function TopBar({
         {/* Collapse toggle for desktop — visible as a subtle chevron */}
         {/* <button
           type="button"
-          className={`hidden lg:flex items-center justify-center rounded-lg p-1.5 transition ${isDark
+          className={`hidden lg:flex items-center justify-center rounded-xl p-1.5 transition ${isDark
             ? "text-slate-500 hover:bg-slate-800 hover:text-slate-300"
             : "text-slate-400 hover:bg-slate-900/5 hover:text-slate-800"
             }`}
@@ -70,7 +70,7 @@ export default function TopBar({
       <div className={`relative flex-1 max-w-md transition-all duration-300 ${searchFocused ? "max-w-lg" : ""
         }`}>
         <Search
-          className={`pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${isDark ? "text-slate-500" : "text-[#94a3b8]"
+          className={`pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 ${isDark ? "text-slate-500" : "text-[#1E88E5]"
             }`}
         />
         <input
@@ -80,9 +80,9 @@ export default function TopBar({
           onFocus={() => setSearchFocused(true)}
           onBlur={() => setSearchFocused(false)}
           placeholder="Search careers..."
-          className={`w-full rounded-xl border py-2 pl-10 pr-4 text-sm font-medium outline-none transition ${isDark
+          className={`w-full rounded-full border py-2.5 pl-10 pr-4 text-sm font-medium outline-none transition shadow-2xs ${isDark
             ? "border-slate-700 bg-slate-900/80 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/15"
-            : "border-slate-900/5 bg-white text-[#0b1a36] placeholder:text-slate-400 focus:border-slate-800 focus:bg-white focus:ring-2 focus:ring-stone-200/50"
+            : "border-[#D3E3F5] bg-[#F0F6FC] text-[#0b1a36] placeholder:text-slate-400 focus:border-[#1E88E5] focus:bg-white focus:ring-2 focus:ring-sky-100"
             }`}
         />
 
@@ -94,31 +94,31 @@ export default function TopBar({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 200, damping: 18 }}
-              className={`absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-xl border shadow-xl ${isDark
+              className={`absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-2xl border shadow-xl ${isDark
                 ? "border-slate-700 bg-slate-900"
-                : "border-[#e2e8f0] bg-white shadow-[0_12px_32px_rgba(0,0,0,0.1)]"
+                : "border-[#D3E3F5] bg-white shadow-[0_12px_32px_rgba(11,26,54,0.08)]"
                 }`}
             >
               {clusterResults.length > 0 ? (
-                <ul className="max-h-52 overflow-y-auto py-1">
+                <ul className="max-h-52 overflow-y-auto py-1.5">
                   {clusterResults.map((clusterName) => (
                     <li key={clusterName}>
                       <button
                         type="button"
                         onMouseDown={() => onSelectCluster?.(clusterName)}
-                        className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold transition ${isDark
+                        className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs sm:text-sm font-semibold transition cursor-pointer ${isDark
                           ? "text-slate-200 hover:bg-slate-800"
-                          : "text-[#334155] hover:bg-[#f1f5f9]"
+                          : "text-slate-700 hover:bg-[#F0F6FC]"
                           }`}
                       >
-                        <Search className={`h-3 w-3 shrink-0 ${isDark ? "text-cyan-400" : "text-[#3b82f6]"}`} />
+                        <Search className={`h-3.5 w-3.5 shrink-0 ${isDark ? "text-cyan-400" : "text-[#1E88E5]"}`} />
                         {clusterName}
                       </button>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className={`px-4 py-3 text-sm ${isDark ? "text-slate-400" : "text-[#64748b]"}`}>
+                <p className={`px-4 py-3 text-xs sm:text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   No matching clusters found.
                 </p>
               )}
@@ -133,9 +133,9 @@ export default function TopBar({
         {/* Notification bell */}
         <button
           type="button"
-          className={`relative rounded-lg p-2 transition ${isDark
+          className={`relative rounded-xl p-2 transition cursor-pointer ${isDark
             ? "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-            : "text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#334155]"
+            : "text-slate-600 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
             }`}
           aria-label="Notifications"
         >
@@ -147,17 +147,17 @@ export default function TopBar({
           <button
             type="button"
             onClick={onOpenProfile}
-            className={`hidden sm:flex items-center gap-2.5 rounded-full p-0.5 transition hover:scale-105`}
+            className={`hidden sm:flex items-center gap-2.5 rounded-full p-0.5 transition hover:scale-105 cursor-pointer`}
             aria-label="Open profile"
           >
             {avatarUrl ? (
               <img
                 src={avatarUrl}
                 alt="User Profile"
-                className="h-8 w-8 rounded-full object-cover border border-slate-200"
+                className="h-8 w-8 rounded-full object-cover border border-[#D3E3F5]"
               />
             ) : (
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white border border-slate-200 shadow-sm shrink-0">
+              <div className="h-8 w-8 rounded-full bg-[#1E88E5] flex items-center justify-center text-xs font-bold text-white border border-[#D3E3F5] shadow-2xs shrink-0">
                 {initial}
               </div>
             )}
@@ -166,7 +166,7 @@ export default function TopBar({
           <button
             type="button"
             onClick={onOpenAuth}
-            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:opacity-90 transition"
+            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#0b1a36] hover:bg-[#122b59] px-5 py-2.5 text-xs font-bold text-white shadow-xs transition cursor-pointer"
           >
             Login / Sign-up
           </button>

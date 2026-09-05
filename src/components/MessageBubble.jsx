@@ -2,22 +2,22 @@
  * MessageBubble — single chat message bubble.
  *
  * Props:
- *   message     MessageOut
- *   currentUserId  string
- *   onEdit      (messageId: string) => void
- *   onDelete    (messageId: string) => void
+ *  message        MessageOut
+ *  currentUserId  string
+ *  onEdit       (messageId: string) => void
+ *  onDelete     (messageId: string) => void
  */
 import { useState } from "react";
 import { MoreVertical, Edit2, Trash2, Check, CornerUpLeft, Download } from "lucide-react";
 
 const INITIALS_COLORS = [
-  "from-[#ff9a9e] to-[#fecfef]",
-  "from-[#a1c4fd] to-[#c2e9fb]",
-  "from-[#84fab0] to-[#8fd3f4]",
-  "from-[#fda085] to-[#f6d365]",
-  "from-[#a6c0fe] to-[#f68084]",
-  "from-[#cfd9df] to-[#e2ebf0]",
-  "from-[#e2ebf0] to-[#cfd9df]",
+  "from-sky-300 to-blue-400",
+  "from-indigo-200 to-sky-300",
+  "from-emerald-200 to-teal-300",
+  "from-amber-200 to-orange-300",
+  "from-purple-200 to-indigo-300",
+  "from-slate-200 to-sky-200",
+  "from-sky-200 to-slate-200",
 ];
 
 function colorForUser(userId) {
@@ -62,7 +62,7 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
     return (
       <div className={`flex max-w-[80%] ${isSelf ? "ml-auto justify-end" : ""}`}>
         <div
-          className={`rounded-2xl border px-3.5 py-2 text-[11px] italic text-slate-500 bg-slate-100 border-slate-200 ${
+          className={`rounded-2xl border px-3.5 py-2 text-[11px] italic text-slate-500 bg-slate-50 border-[#D3E3F5] shadow-2xs ${
             isSelf ? "text-right" : "text-left"
           }`}
         >
@@ -77,7 +77,7 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
       {/* Avatar */}
       {!isSelf && (
         <div
-          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-to-br ${gradColor} text-[10px] font-bold text-slate-900 border border-white shadow-sm`}
+          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-to-br ${gradColor} text-[10px] font-bold text-[#0b1a36] border border-white shadow-2xs`}
         >
           {initials}
         </div>
@@ -86,19 +86,21 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
       {/* Bubble */}
       <div className={`relative ${isSelf ? "ml-auto text-right" : "text-left"}`}>
         <div
-          className={`rounded-2xl px-3.5 py-2.5 text-xs shadow-sm ${
+          className={`rounded-3xl px-4 py-3 text-xs shadow-2xs ${
             isSelf
-              ? "bg-[#dcf8c6] border border-[#c6e2b3] text-[#173b72] rounded-br-none text-right"
-              : "bg-white text-slate-800 rounded-bl-none border border-slate-200 text-left"
+              ? "bg-[#1E88E5] text-white border border-[#1E88E5] rounded-br-none text-right"
+              : "bg-white text-slate-800 rounded-bl-none border border-[#D3E3F5] text-left"
           }`}
         >
           {!isSelf && (
-            <p className="text-[9px] font-bold text-slate-400 mb-0.5">
+            <p className="text-[9px] font-bold text-[#1E88E5] mb-1">
               {displayName}
             </p>
           )}
           {replyInfo && (
-            <div className="mb-1.5 px-2 py-1 bg-black/5 rounded-lg border-l-2 border-slate-400 text-[10px] text-slate-500 max-w-full truncate">
+            <div className={`mb-2 px-2.5 py-1.5 rounded-xl border-l-2 text-[10px] max-w-full truncate ${
+              isSelf ? "bg-black/10 border-white/60 text-sky-100" : "bg-[#F0F6FC] border-[#1E88E5] text-slate-600"
+            }`}>
               <span className="font-bold">@{replyInfo.user}</span>: {replyInfo.text}
             </div>
           )}
@@ -107,7 +109,9 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
           )}
 
           {message.attachment_url && (
-            <div className="mt-2 rounded-xl overflow-hidden border border-slate-100 bg-black/5 max-w-[280px]">
+            <div className={`mt-2.5 rounded-2xl overflow-hidden border max-w-[280px] ${
+              isSelf ? "border-white/20 bg-black/10" : "border-[#D3E3F5] bg-[#F0F6FC]"
+            }`}>
               {message.attachment_type === "image" && (
                 <a
                   href={message.attachment_url}
@@ -118,7 +122,7 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
                   <img
                     src={message.attachment_url}
                     alt={message.attachment_name || "Attachment"}
-                    className="max-h-48 object-cover w-full rounded-xl"
+                    className="max-h-48 object-cover w-full rounded-2xl"
                   />
                 </a>
               )}
@@ -126,7 +130,7 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
                 <video
                   src={message.attachment_url}
                   controls
-                  className="max-h-48 w-full rounded-xl bg-black"
+                  className="max-h-48 w-full rounded-2xl bg-black"
                 />
               )}
               {(message.attachment_type === "pdf" || message.attachment_type === "file") && (
@@ -134,22 +138,26 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
                   href={message.attachment_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 p-2.5 text-[11px] font-semibold text-[#173b72] hover:bg-slate-50 transition"
+                  className={`flex items-center gap-2.5 p-3 text-[11px] font-semibold transition ${
+                    isSelf ? "text-white hover:bg-black/10" : "text-[#0b1a36] hover:bg-[#EAF2FA]"
+                  }`}
                 >
                   <span className="text-lg">{message.attachment_type === "pdf" ? "📄" : "📁"}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-slate-700">{message.attachment_name || "Download Attachment"}</p>
-                    <p className="text-[9px] text-slate-400 capitalize">{message.attachment_type}</p>
+                    <p className={`truncate ${isSelf ? "text-white" : "text-slate-800"}`}>{message.attachment_name || "Download Attachment"}</p>
+                    <p className={`text-[9px] capitalize ${isSelf ? "text-sky-200" : "text-slate-400"}`}>{message.attachment_type}</p>
                   </div>
                 </a>
               )}
             </div>
           )}
 
-          <div className="mt-1 flex items-center justify-end gap-1 text-[8px] opacity-50">
+          <div className={`mt-1.5 flex items-center justify-end gap-1 text-[9px] ${
+            isSelf ? "text-sky-100" : "text-slate-400"
+          }`}>
             <span>{formatTime(message.created_at)}</span>
             {message.edited_at && <span className="italic">(edited)</span>}
-            {isSelf && <Check size={8} />}
+            {isSelf && <Check size={10} className="text-sky-100" />}
           </div>
         </div>
 
@@ -158,20 +166,20 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
           <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="p-1 rounded-full bg-white border border-slate-200 shadow-sm text-slate-500 hover:text-slate-800"
+              className="p-1.5 rounded-full bg-white border border-[#D3E3F5] shadow-xs text-slate-500 hover:text-slate-800 cursor-pointer"
             >
-              <MoreVertical size={11} />
+              <MoreVertical size={12} />
             </button>
             {menuOpen && (
               <div
-                className="absolute right-0 top-6 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-30 min-w-[110px]"
+                className="absolute right-0 top-7 bg-white border border-[#D3E3F5] rounded-2xl shadow-xl py-1.5 z-30 min-w-[140px]"
                 onMouseLeave={() => setMenuOpen(false)}
               >
                 <button
                   onClick={() => { setMenuOpen(false); onReply?.(message); }}
-                  className="flex items-center gap-2 px-3 py-1.5 w-full text-left text-[11px] text-slate-700 hover:bg-slate-50"
+                  className="flex items-center gap-2 px-3.5 py-2 w-full text-left text-xs font-medium text-slate-700 hover:bg-[#F0F6FC] cursor-pointer"
                 >
-                  <CornerUpLeft size={11} /> Reply
+                  <CornerUpLeft size={13} className="text-[#1E88E5]" /> Reply
                 </button>
 
                 {message.attachment_url && (
@@ -187,9 +195,9 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
                       link.click();
                       document.body.removeChild(link);
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 w-full text-left text-[11px] text-slate-700 hover:bg-slate-50"
+                    className="flex items-center gap-2 px-3.5 py-2 w-full text-left text-xs font-medium text-slate-700 hover:bg-[#F0F6FC] cursor-pointer"
                   >
-                    <Download size={11} /> Download
+                    <Download size={13} className="text-[#1E88E5]" /> Download
                   </button>
                 )}
 
@@ -198,22 +206,22 @@ export default function MessageBubble({ message, currentUserId, onEdit, onDelete
                     {!message.attachment_url && (
                       <button
                         onClick={() => { setMenuOpen(false); onEdit?.(message.id); }}
-                        className="flex items-center gap-2 px-3 py-1.5 w-full text-left text-[11px] text-slate-700 hover:bg-slate-50"
+                        className="flex items-center gap-2 px-3.5 py-2 w-full text-left text-xs font-medium text-slate-700 hover:bg-[#F0F6FC] cursor-pointer"
                       >
-                        <Edit2 size={11} /> Edit
+                        <Edit2 size={13} className="text-[#1E88E5]" /> Edit
                       </button>
                     )}
                     <button
                       onClick={() => { setMenuOpen(false); onDelete?.(message.id, "me"); }}
-                      className="flex items-center gap-2 px-3 py-1.5 w-full text-left text-[11px] text-slate-700 hover:bg-slate-50 border-t border-slate-100"
+                      className="flex items-center gap-2 px-3.5 py-2 w-full text-left text-xs font-medium text-slate-700 hover:bg-[#F0F6FC] border-t border-[#D3E3F5] cursor-pointer"
                     >
-                      <Trash2 size={11} /> Delete for me
+                      <Trash2 size={13} className="text-slate-500" /> Delete for me
                     </button>
                     <button
                       onClick={() => { setMenuOpen(false); onDelete?.(message.id, "everyone"); }}
-                      className="flex items-center gap-2 px-3 py-1.5 w-full text-left text-[11px] text-red-500 hover:bg-red-50"
+                      className="flex items-center gap-2 px-3.5 py-2 w-full text-left text-xs font-medium text-red-500 hover:bg-red-50 cursor-pointer"
                     >
-                      <Trash2 size={11} /> Delete for everyone
+                      <Trash2 size={13} className="text-red-500" /> Delete for everyone
                     </button>
                   </>
                 )}

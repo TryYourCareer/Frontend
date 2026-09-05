@@ -214,19 +214,19 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 z-10 flex items-center justify-between border-b border-[#d7e6fb] bg-white/80 backdrop-blur-md px-4 py-3 shadow-sm">
+      <header className="shrink-0 z-10 flex items-center justify-between border-b border-[#D3E3F5] bg-white/80 backdrop-blur-md px-4 py-3 shadow-2xs">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setShowInfoPanel(true)}>
           <button
             onClick={onBack}
-            className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#c6d9f7] bg-white text-[#28569e] hover:bg-[#eff6ff] transition"
+            className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#D3E3F5] bg-white text-[#0b1a36] hover:bg-[#F0F6FC] transition cursor-pointer"
           >
             <ArrowLeft size={15} />
           </button>
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#eff6ff] text-lg border border-[#bcd2f3]">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#F0F6FC] text-lg border border-[#D3E3F5]">
             {community.career_icon || "💬"}
           </div>
           <div>
-            <h3 className="text-xs font-bold text-[#173b72] leading-none">
+            <h3 className="text-xs font-bold text-[#0b1a36] leading-none">
               {community.name}
             </h3>
             <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
@@ -239,11 +239,11 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
 
       {/* Load more */}
       {hasMore && !loading && (
-        <div className="shrink-0 flex justify-center py-2 bg-[#eff6ff]/30">
+        <div className="shrink-0 flex justify-center py-2 bg-[#F0F6FC]/50">
           <button
             onClick={loadMore}
             disabled={loadingMore}
-            className="text-[11px] font-semibold text-[#173b72] hover:underline flex items-center gap-1"
+            className="text-[11px] font-semibold text-[#1E88E5] hover:underline flex items-center gap-1 cursor-pointer"
           >
             {loadingMore ? <Loader2 size={12} className="animate-spin" /> : null}
             Load older messages
@@ -293,9 +293,9 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
 
       {/* Edit mode banner */}
       {editingId && (
-        <div className="shrink-0 mx-4 mb-2 p-2.5 bg-blue-50 rounded-xl border border-blue-200 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-bold text-blue-700">Editing message</p>
+        <div className="shrink-0 mx-4 mb-2 p-2.5 bg-sky-50 rounded-2xl border border-sky-200 flex items-center justify-between gap-3 shadow-2xs">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-[#1E88E5]">Editing message</p>
             <input
               className="mt-1 w-full text-xs bg-transparent outline-none text-slate-800"
               value={editText}
@@ -303,20 +303,20 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleEditSubmit();
                 if (e.key === "Escape") { setEditingId(null); setEditText(""); }
-              }}
+            }}
               autoFocus
             />
           </div>
           <div className="flex gap-1">
             <button
               onClick={handleEditSubmit}
-              className="px-2.5 py-1 bg-blue-600 text-white text-[10px] rounded-full hover:bg-blue-700"
+              className="px-3 py-1 bg-[#1E88E5] text-white text-[10px] font-bold rounded-full hover:bg-blue-600 cursor-pointer"
             >
               Save
             </button>
             <button
               onClick={() => { setEditingId(null); setEditText(""); }}
-              className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] rounded-full hover:bg-slate-200"
+              className="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full hover:bg-slate-200 cursor-pointer"
             >
               Cancel
             </button>
@@ -326,10 +326,10 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
 
       {/* Reply banner */}
       {replyTo && (
-        <div className="shrink-0 mx-4 mb-2 p-2.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3 animate-fade-in z-10">
+        <div className="shrink-0 mx-4 mb-2 p-2.5 bg-[#F0F6FC] border border-[#D3E3F5] rounded-2xl flex items-center justify-between gap-3 animate-fade-in z-10 shadow-2xs">
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold text-slate-500">
-              Replying to <span className="text-[#173b72]">@{replyTo.user_name || "User"}</span>
+              Replying to <span className="text-[#1E88E5]">@{replyTo.user_name || "User"}</span>
             </p>
             <p className="text-xs text-slate-600 truncate mt-0.5">
               {replyTo.content ? replyTo.content.replace(/^↳ Replying to @[^:]+:[^\n]+\n\n/, "") : (replyTo.attachment_url ? `[${replyTo.attachment_type || "Attachment"}]` : "")}
@@ -338,7 +338,7 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
           <button
             type="button"
             onClick={() => setReplyTo(null)}
-            className="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded-lg hover:bg-red-50 transition shrink-0"
+            className="text-xs text-red-500 hover:text-red-700 px-2.5 py-1 rounded-xl hover:bg-red-50 transition shrink-0 cursor-pointer"
           >
             Cancel
           </button>
@@ -352,28 +352,28 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
 
       {/* Selected file preview */}
       {selectedFile && (
-        <div className="shrink-0 mx-4 mb-2 p-2 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3 animate-fade-in z-10">
+        <div className="shrink-0 mx-4 mb-2 p-2.5 bg-[#F0F6FC] border border-[#D3E3F5] rounded-2xl flex items-center justify-between gap-3 animate-fade-in z-10 shadow-2xs">
           <div className="flex items-center gap-3 min-w-0">
             {selectedFile.type === "image" && selectedFile.previewUrl ? (
               <img
                 src={selectedFile.previewUrl}
                 alt="Upload preview"
-                className="h-10 w-10 object-cover rounded-lg border border-slate-200"
+                className="h-10 w-10 object-cover rounded-xl border border-[#D3E3F5]"
               />
             ) : (
-              <div className="h-10 w-10 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center text-lg shrink-0">
+              <div className="h-10 w-10 rounded-xl border border-[#D3E3F5] bg-white flex items-center justify-center text-lg shrink-0 shadow-2xs">
                 {selectedFile.type === "video" ? "🎥" : selectedFile.type === "pdf" ? "📄" : "📁"}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-[#173b72] truncate">{selectedFile.name}</p>
+              <p className="text-xs font-bold text-[#0b1a36] truncate">{selectedFile.name}</p>
               <p className="text-[9px] text-slate-400 capitalize">{selectedFile.type}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleCancelFile}
-            className="text-xs text-red-500 hover:text-red-700 px-2.5 py-1 rounded-lg hover:bg-red-50 transition shrink-0"
+            className="text-xs text-red-500 hover:text-red-700 px-2.5 py-1 rounded-xl hover:bg-red-50 transition shrink-0 cursor-pointer"
           >
             Cancel
           </button>
@@ -381,7 +381,7 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
       )}
 
       {/* Input bar */}
-      <footer className="shrink-0 z-10 bg-white border-t border-slate-200 p-3 flex items-center gap-2">
+      <footer className="shrink-0 z-10 bg-white border-t border-[#D3E3F5] p-3.5 flex items-center gap-2.5 shadow-xs">
         <input
           ref={fileInputRef}
           type="file"
@@ -393,9 +393,9 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
           type="button"
           onClick={handleAttachmentClick}
           disabled={sending || !!editingId}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 shadow-sm transition disabled:opacity-40"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#D3E3F5] bg-[#F0F6FC] hover:bg-[#EAF2FA] text-slate-600 shadow-2xs transition disabled:opacity-40 cursor-pointer"
         >
-          <Paperclip size={14} />
+          <Paperclip size={14} className="text-[#1E88E5]" />
         </button>
         <input
           ref={inputRef}
@@ -405,13 +405,13 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
           disabled={!!editingId}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !editingId && handleSend()}
-          className="flex-1 px-3.5 py-2.5 rounded-full border border-slate-300 bg-slate-50 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-slate-400 focus:bg-white transition disabled:opacity-40"
+          className="flex-1 px-4 py-2.5 rounded-full border border-[#D3E3F5] bg-[#F0F6FC] text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-[#1E88E5] focus:bg-white transition disabled:opacity-40 shadow-2xs"
         />
         <button
           type="button"
           onClick={handleSend}
           disabled={sending || !!editingId || (!text.trim() && !selectedFile)}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white shadow-sm transition disabled:opacity-40"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white shadow-xs transition disabled:opacity-40 cursor-pointer"
         >
           {sending
             ? <Loader2 size={14} className="animate-spin" />

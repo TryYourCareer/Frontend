@@ -51,7 +51,7 @@ export default function OAuthCallback() {
   }, [navigate, params, setTokenState, setUser]);
 
   return (
-    <div className="min-h-screen bg-[#FAF6EC] grid place-items-center">
+    <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] grid place-items-center">
       {error ? (
         <div className="text-center space-y-3">
           <p className="text-sm font-bold text-red-600">{error}</p>
@@ -59,7 +59,7 @@ export default function OAuthCallback() {
         </div>
       ) : (
         <div className="text-center space-y-4">
-          <div className="mx-auto h-12 w-12 rounded-full border-4 border-[#5B7EC9] border-t-transparent animate-spin" />
+          <div className="mx-auto h-12 w-12 rounded-full border-4 border-[#1E88E5] border-t-transparent animate-spin" />
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Signing you in...</p>
         </div>
       )}
