@@ -203,10 +203,10 @@ const AIML_ROLES_DATA = {
 };
 
 const FILTER_TABS = [
-  { key: "all", label: " All Roles" },
-  { key: "entry", label: " Entry Level" },
-  { key: "mid_senior", label: " Mid/Senior Level" },
-  { key: "leadership", label: " Executive & Leadership" },
+  { key: "all", label: "All Roles" },
+  { key: "entry", label: "Entry Level" },
+  { key: "mid_senior", label: "Mid/Senior Level" },
+  { key: "leadership", label: "Executive & Leadership" },
 ];
 
 export default function CareerReality({ onBack }) {
@@ -248,11 +248,14 @@ export default function CareerReality({ onBack }) {
   }
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-10">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 sm:px-6 lg:px-10 font-sans text-left">
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <h1 className="font-serif text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            <span className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-0.5 text-[10px] font-bold tracking-[0.2em] uppercase text-[#1E88E5]">
+              Specialization Track
+            </span>
+            <h1 className="font-serif text-3xl font-bold tracking-tight text-[#0b1a36] sm:text-4xl">
               AI / ML Career Cluster
             </h1>
             <p className="max-w-3xl text-xs leading-relaxed text-slate-600 sm:text-sm">
@@ -265,7 +268,7 @@ export default function CareerReality({ onBack }) {
           {onBack && (
             <button
               onClick={onBack}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm transition hover:bg-slate-50"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-xs transition hover:bg-slate-50 cursor-pointer"
             >
               <ArrowLeft size={16} />
             </button>
@@ -279,9 +282,9 @@ export default function CareerReality({ onBack }) {
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              className={`rounded-full px-4 py-2 text-xs font-bold transition ${
+              className={`rounded-full px-4 py-2 text-xs font-bold transition shadow-2xs cursor-pointer ${
                 activeTab === tab.key
-                  ? "bg-[#0b1a36] text-white shadow-sm"
+                  ? "bg-[#0b1a36] text-white"
                   : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
               }`}
             >
@@ -299,21 +302,21 @@ export default function CareerReality({ onBack }) {
               <div
                 key={role.key}
                 onClick={() => handleOpenRoleDetail(role.key)}
-                className="group flex flex-col items-start justify-between gap-4 rounded-2xl border border-slate-300 bg-white p-5 cursor-pointer transition-all duration-200 hover:border-slate-800 hover:shadow-md sm:flex-row sm:items-center"
+                className="group flex flex-col items-start justify-between gap-4 rounded-3xl border border-[#D3E3F5] bg-white p-5 cursor-pointer transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 shadow-xs sm:flex-row sm:items-center"
               >
                 <div className="flex items-start gap-4">
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-slate-200 bg-[#FAF2DB] text-slate-900 shadow-sm">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] text-[#1E88E5] shadow-2xs transition group-hover:bg-[#EAF2FA]">
                     <IconComponent size={20} />
                   </div>
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base font-bold text-slate-900 transition group-hover:text-[#0b1a36]">
+                      <h3 className="font-serif text-base font-bold text-slate-900 transition group-hover:text-[#0b1a36]">
                         {role.title}
                       </h3>
-                      <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">
+                      <span className="rounded-full border border-slate-200 bg-[#F0F6FC] px-2.5 py-0.5 text-[10px] font-bold text-slate-600">
                         {role.category}
                       </span>
-                      <span className="rounded-full border border-slate-300 bg-[#FAF2DB] px-2.5 py-0.5 text-[10px] font-bold text-slate-900">
+                      <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-[10px] font-bold text-[#1E88E5]">
                         {role.salary}
                       </span>
                     </div>
@@ -324,13 +327,13 @@ export default function CareerReality({ onBack }) {
                 </div>
 
                 <div className="flex items-center gap-3 self-end shrink-0 sm:self-center">
-                  <span className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">
+                  <span className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 shadow-2xs">
                     {role.matchScore}% Match
                   </span>
                   <button
                     type="button"
                     aria-label="View role details"
-                    className="grid h-10 w-10 place-items-center rounded-full bg-[#0b1a36] text-white transition-transform group-hover:scale-105 group-hover:bg-[#122b59]"
+                    className="grid h-10 w-10 place-items-center rounded-full bg-[#0b1a36] text-white transition-all group-hover:bg-[#122b59] shadow-xs cursor-pointer"
                   >
                     <ArrowRight size={16} />
                   </button>

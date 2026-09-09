@@ -1,3 +1,22 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Allow: /explore-careers
+Allow: /career-details/*
+Allow: /career-search
+Allow: /insights-feed
+Allow: /discovery-test
+Allow: /roadmap
+Allow: /company/*
+Allow: /support/*
+
+# Block private user dashboards, authentication, and API endpoints
+Disallow: /oauth/
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /register
+Disallow: /trial-mission
+Disallow: /stride-journey/
+
+# Sitemap location
+Sitemap: https://tryyourcareer.com/sitemap.xml

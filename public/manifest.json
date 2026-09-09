@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "TryCareers",
+  "name": "Try Your Careers - AI Career Guidance Platform",
+  "description": "Discover your ideal career path with AI-driven assessments, salary insights, and interactive industry roadmaps.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -18,8 +19,9 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "categories": ["education", "productivity", "career"]
 }

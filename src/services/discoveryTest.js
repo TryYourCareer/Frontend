@@ -95,3 +95,50 @@ export async function submitTestSession(testSessionId) {
 
   return parseJsonResponse(response);
 }
+
+export async function triggerMatchAnalysis(testSessionId) {
+  const response = await fetch(`${BACKEND_BASE_URL}/match-engine/${testSessionId}/analyze`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response));
+  }
+
+  return parseJsonResponse(response);
+}
+
+export async function getCareerFitReport(testSessionId) {
+  const response = await fetch(`${BACKEND_BASE_URL}/match-engine/${testSessionId}/report`);
+  if (!response.ok) {
+    throw new Error(await parseApiError(response));
+  }
+
+  return parseJsonResponse(response);
+}
+
+export async function getDimensionVector(testSessionId) {
+  const response = await fetch(`${BACKEND_BASE_URL}/match-engine/${testSessionId}/vector`);
+  if (!response.ok) {
+    throw new Error(await parseApiError(response));
+  }
+
+  return parseJsonResponse(response);
+}
+
+export async function saveOnboardingProfile(profileData) {
+  const response = await fetch(`${BACKEND_BASE_URL}/discovery-test/onboarding-profile`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(profileData),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response));
+  }
+
+  return parseJsonResponse(response);
+}
+

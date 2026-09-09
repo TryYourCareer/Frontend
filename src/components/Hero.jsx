@@ -38,9 +38,9 @@ const STAGES_DATA = {
     time: "~5 minutes",
     cta: "Start Discovery Test",
     path: "/assessment",
-    gradient: "from-amber-400 to-orange-500",
-    shadow: "shadow-amber-500/20",
-    themeColor: "amber",
+    gradient: "from-sky-400 to-[#1E88E5]",
+    shadow: "shadow-sky-500/20",
+    themeColor: "sky",
     highlights: [
       "No preparation needed — just honest answers",
       "Matches you with top 3 career clusters",
@@ -56,7 +56,7 @@ const STAGES_DATA = {
     time: "~10 minutes",
     cta: "Explore Careers & Salaries",
     path: "/explore-careers",
-    gradient: "from-blue-400 to-indigo-500",
+    gradient: "from-[#1E88E5] to-[#0b1a36]",
     shadow: "shadow-blue-500/20",
     themeColor: "blue",
     highlights: [
@@ -74,9 +74,9 @@ const STAGES_DATA = {
     time: "~15 minutes",
     cta: "Launch Trial Sandbox",
     path: "/trial-mission",
-    gradient: "from-violet-400 to-purple-500",
-    shadow: "shadow-violet-500/20",
-    themeColor: "violet",
+    gradient: "from-sky-400 to-[#1E88E5]",
+    shadow: "shadow-sky-500/20",
+    themeColor: "sky",
     highlights: [
       "Hands-on interactive workspace simulation",
       "Designed for complete beginners to test skills",
@@ -92,9 +92,9 @@ const STAGES_DATA = {
     time: "Ongoing community access",
     cta: "Enter Career Hubs",
     path: "/career-hubs",
-    gradient: "from-emerald-400 to-teal-500",
-    shadow: "shadow-emerald-500/20",
-    themeColor: "emerald",
+    gradient: "from-[#1E88E5] to-[#0b1a36]",
+    shadow: "shadow-blue-500/20",
+    themeColor: "blue",
     highlights: [
       "Access professional QA forums and group chats",
       "Network with potential career mentors",
@@ -197,61 +197,61 @@ function AbstractCareerTestLoop({ isDark }) {
               className="w-full flex flex-col items-center justify-center space-y-4 py-4"
             >
               <div className="flex flex-wrap justify-center gap-2.5 max-w-xs">
-                {/* Interests - Amber/Gold */}
+                {/* Interests - Sky Blue */}
                 <motion.span
                   variants={wordPopVariant}
                   initial="hidden"
                   animate="show"
                   custom={0}
-                  className="px-5 py-2.5 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 shadow-sm"
+                  className="px-5 py-2.5 rounded-full text-xs font-bold bg-sky-50 dark:bg-sky-500/20 text-[#1E88E5] dark:text-sky-300 border border-sky-200 dark:border-sky-500/40 shadow-2xs"
                 >
                   Interests
                 </motion.span>
 
-                {/* Personality - Primary Blue */}
+                {/* Personality - Primary Navy */}
                 <motion.span
                   variants={wordPopVariant}
                   initial="hidden"
                   animate="show"
                   custom={1}
-                  className="px-5 py-2.5 rounded-full text-xs font-bold bg-blue-100 dark:bg-blue-500/20 text-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-500/40 shadow-sm"
+                  className="px-5 py-2.5 rounded-full text-xs font-bold bg-[#F0F6FC] dark:bg-blue-500/20 text-[#0b1a36] dark:text-blue-300 border border-[#D3E3F5] dark:border-blue-500/40 shadow-2xs"
                 >
                   Personality
                 </motion.span>
               </div>
 
               <div className="flex flex-wrap justify-center gap-2.5 max-w-xs">
-                {/* Can't stands - Rose */}
+                {/* Can't stands - Soft neutral */}
                 <motion.span
                   variants={wordPopVariant}
                   initial="hidden"
                   animate="show"
                   custom={2}
-                  className="px-4 py-2 rounded-full text-xs font-medium bg-rose-100 dark:bg-rose-500/20 text-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30"
+                  className="px-4 py-2 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
                 >
                   Can't stands
                 </motion.span>
 
-                {/* Ideal work environment - Purple */}
+                {/* Ideal work environment - Deep Navy */}
                 <motion.span
                   variants={wordPopVariant}
                   initial="hidden"
                   animate="show"
                   custom={3}
-                  className="px-6 py-3 rounded-full text-xs font-extrabold bg-purple-100 dark:bg-purple-500/25 text-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-500/40 shadow-md"
+                  className="px-6 py-3 rounded-full text-xs font-extrabold bg-[#0b1a36] text-white border border-[#0b1a36] shadow-md"
                 >
                   Ideal work environment
                 </motion.span>
               </div>
 
               <div className="flex justify-center">
-                {/* Skills preferences - Emerald */}
+                {/* Skills preferences - Accent Blue */}
                 <motion.span
                   variants={wordPopVariant}
                   initial="hidden"
                   animate="show"
                   custom={4}
-                  className="px-5 py-2.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 shadow-sm"
+                  className="px-5 py-2.5 rounded-full text-xs font-bold bg-sky-100 dark:bg-emerald-500/20 text-[#1E88E5] dark:text-emerald-300 border border-sky-200 dark:border-emerald-500/30 shadow-2xs"
                 >
                   Skills preferences
                 </motion.span>
@@ -259,7 +259,7 @@ function AbstractCareerTestLoop({ isDark }) {
             </motion.div>
           )}
 
-          {/* ── STEP 2: Vibrant Yellow Circle Forming & Words Populating One by One ── */}
+          {/* ── STEP 2: Vibrant Blue Circle Forming & Words Populating One by One ── */}
           {activeStep === 1 && (
             <motion.div
               key="step2"
@@ -274,13 +274,13 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial={{ scale: 0.3, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.7, type: "spring", stiffness: 100, damping: 15 }}
-                className="w-44 h-44 rounded-full bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 text-[#0B1A36] flex flex-col items-center justify-center font-bold text-center shadow-xl border-4 border-amber-100 dark:border-amber-400/50 z-10 relative"
+                className="w-44 h-44 rounded-full bg-gradient-to-tr from-[#1E88E5] via-sky-400 to-[#0b1a36] text-white flex flex-col items-center justify-center font-bold text-center shadow-xl border-4 border-sky-100 dark:border-sky-400/50 z-10 relative"
               >
                 <motion.span
                   initial={{ opacity: 0, scale: 0.5 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.35, duration: 0.4 }}
-                  className="text-3xl font-black tracking-tight text-[#0B1A36]"
+                  className="text-3xl font-black tracking-tight text-white"
                 >
                   94%
                 </motion.span>
@@ -288,7 +288,7 @@ function AbstractCareerTestLoop({ isDark }) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5, duration: 0.4 }}
-                  className="text-[10px] font-extrabold uppercase tracking-wider text-amber-950"
+                  className="text-[10px] font-extrabold uppercase tracking-wider text-sky-100"
                 >
                   Attributes Fit
                 </motion.span>
@@ -300,7 +300,7 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={1}
-                className="absolute top-0 left-1 z-20 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md border border-slate-200 dark:border-slate-800"
+                className="absolute top-0 left-1 z-20 bg-white dark:bg-slate-900 text-[#0b1a36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-xs border border-[#D3E3F5] dark:border-slate-800"
               >
                 Analytical 92%
               </motion.div>
@@ -310,7 +310,7 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={2}
-                className="absolute top-1 right-1 z-20 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md border border-slate-200 dark:border-slate-800"
+                className="absolute top-1 right-1 z-20 bg-white dark:bg-slate-900 text-[#0b1a36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-xs border border-[#D3E3F5] dark:border-slate-800"
               >
                 Creative Fit 98%
               </motion.div>
@@ -320,7 +320,7 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={3}
-                className="absolute bottom-2 left-2 z-20 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md border border-slate-200 dark:border-slate-800"
+                className="absolute bottom-2 left-2 z-20 bg-white dark:bg-slate-900 text-[#0b1a36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-xs border border-[#D3E3F5] dark:border-slate-800"
               >
                 Leadership 88%
               </motion.div>
@@ -330,7 +330,7 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={4}
-                className="absolute bottom-1 right-2 z-20 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md border border-slate-200 dark:border-slate-800"
+                className="absolute bottom-1 right-2 z-20 bg-white dark:bg-slate-900 text-[#0b1a36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-xs border border-[#D3E3F5] dark:border-slate-800"
               >
                 Strategic 95%
               </motion.div>
@@ -340,7 +340,7 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={5}
-                className="absolute top-20 -left-4 z-20 bg-blue-50 dark:bg-blue-900/40 text-blue-900 dark:text-blue-200 text-[9px] font-extrabold px-2.5 py-1 rounded-full shadow border border-blue-200 dark:border-blue-800"
+                className="absolute top-20 -left-4 z-20 bg-sky-50 dark:bg-blue-900/40 text-[#1E88E5] dark:text-blue-200 text-[9px] font-extrabold px-2.5 py-1 rounded-full shadow-2xs border border-sky-200 dark:border-blue-800"
               >
                 Problem Solver
               </motion.div>
@@ -357,12 +357,12 @@ function AbstractCareerTestLoop({ isDark }) {
               transition={{ duration: 0.4 }}
               className="relative w-full flex items-center justify-center py-4"
             >
-              {/* Left Circle: YOUR SKILLS (Yellow Circle) */}
+              {/* Left Circle: YOUR SKILLS (Sky Circle) */}
               <motion.div
                 initial={{ x: -40, opacity: 0, scale: 0.7 }}
                 animate={{ x: 0, opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
-                className="w-38 h-38 sm:w-44 sm:h-44 rounded-full bg-amber-400/40 dark:bg-amber-400/30 border-2 border-amber-400/80 flex items-center justify-center text-[11px] font-black text-amber-950 dark:text-amber-200 uppercase tracking-wider -mr-8 shadow-lg backdrop-blur-xs"
+                className="w-38 h-38 sm:w-44 sm:h-44 rounded-full bg-sky-400/30 dark:bg-sky-400/30 border-2 border-[#1E88E5]/80 flex items-center justify-center text-[11px] font-black text-[#0b1a36] dark:text-sky-200 uppercase tracking-wider -mr-8 shadow-lg backdrop-blur-xs"
               >
                 <motion.span
                   variants={wordPopVariant}
@@ -374,12 +374,12 @@ function AbstractCareerTestLoop({ isDark }) {
                 </motion.span>
               </motion.div>
 
-              {/* Right Circle: MARKET DEMAND (Purple Circle) */}
+              {/* Right Circle: MARKET DEMAND (Navy Circle) */}
               <motion.div
                 initial={{ x: 40, opacity: 0, scale: 0.7 }}
                 animate={{ x: 0, opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, type: "spring", stiffness: 100, delay: 0.15 }}
-                className="w-38 h-38 sm:w-44 sm:h-44 rounded-full bg-purple-400/35 dark:bg-purple-500/25 border-2 border-purple-400/80 flex items-center justify-center text-[11px] font-black text-purple-950 dark:text-purple-200 uppercase tracking-wider -ml-8 shadow-lg backdrop-blur-xs"
+                className="w-38 h-38 sm:w-44 sm:h-44 rounded-full bg-[#0b1a36]/25 dark:bg-purple-500/25 border-2 border-[#0b1a36]/80 flex items-center justify-center text-[11px] font-black text-[#0b1a36] dark:text-purple-200 uppercase tracking-wider -ml-8 shadow-lg backdrop-blur-xs"
               >
                 <motion.span
                   variants={wordPopVariant}
@@ -397,7 +397,7 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={3}
-                className="absolute top-0 left-0 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-xl shadow-md border border-slate-200 dark:border-slate-800"
+                className="absolute top-0 left-0 bg-white dark:bg-slate-900 text-[#0b1a36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-xl shadow-xs border border-[#D3E3F5] dark:border-slate-800"
               >
                 Data Scientist ⭐⭐⭐⭐
               </motion.div>
@@ -407,7 +407,7 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={4}
-                className="absolute bottom-0 right-0 bg-white dark:bg-slate-900 text-[#0B1A36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-xl shadow-md border border-slate-200 dark:border-slate-800"
+                className="absolute bottom-0 right-0 bg-white dark:bg-slate-900 text-[#0b1a36] dark:text-slate-100 text-[10px] font-bold px-3 py-1.5 rounded-xl shadow-xs border border-[#D3E3F5] dark:border-slate-800"
               >
                 Product Manager ⭐⭐⭐⭐
               </motion.div>
@@ -425,14 +425,14 @@ function AbstractCareerTestLoop({ isDark }) {
               className="relative w-full flex items-center justify-center py-2 h-full"
             >
               {/* Concentric orbit line */}
-              <div className="absolute inset-1 rounded-full border border-slate-300 dark:border-slate-800 opacity-50 pointer-events-none" />
+              <div className="absolute inset-1 rounded-full border border-[#D3E3F5] dark:border-slate-800 opacity-50 pointer-events-none" />
 
               {/* Left Circle: YOUR SKILLS */}
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-yellow-400/75 via-amber-400/50 to-amber-300/40 border border-amber-400/80 flex flex-col items-center justify-center text-[10px] font-extrabold text-amber-950 dark:text-amber-200 uppercase tracking-widest -mr-9 shadow-xl"
+                className="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-sky-400/50 via-[#1E88E5]/30 to-sky-200/20 border border-[#1E88E5]/80 flex flex-col items-center justify-center text-[10px] font-extrabold text-[#0b1a36] dark:text-sky-200 uppercase tracking-widest -mr-9 shadow-xl"
               >
                 <span className="mt-8">YOUR SKILLS</span>
               </motion.div>
@@ -442,7 +442,7 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-purple-400/45 via-purple-300/35 to-indigo-300/30 border border-purple-400/80 flex flex-col items-center justify-center text-[10px] font-extrabold text-purple-950 dark:text-purple-200 uppercase tracking-widest -ml-9 shadow-xl"
+                className="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-[#0b1a36]/40 via-[#0b1a36]/30 to-blue-900/20 border border-[#0b1a36]/80 flex flex-col items-center justify-center text-[10px] font-extrabold text-[#0b1a36] dark:text-purple-200 uppercase tracking-widest -ml-9 shadow-xl"
               >
                 <span className="mt-8">MARKET DEMAND</span>
               </motion.div>
@@ -454,7 +454,7 @@ function AbstractCareerTestLoop({ isDark }) {
                 transition={{ delay: 0.25, duration: 0.5, type: "spring", stiffness: 120 }}
                 className="absolute z-20 text-center pointer-events-none"
               >
-                <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#0B1A36] dark:text-white drop-shadow-md leading-tight">
+                <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36] dark:text-white drop-shadow-md leading-tight">
                   You're a<br />Visionary!
                 </h3>
               </motion.div>
@@ -465,9 +465,9 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={1}
-                className="absolute top-0 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+                className="absolute top-0 z-30 bg-white/95 dark:bg-slate-900/95 border border-[#D3E3F5] dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-xs text-[10px]"
               >
-                <p className="font-bold text-[#0B1A36] dark:text-white">Museum Curator</p>
+                <p className="font-bold text-[#0b1a36] dark:text-white">Museum Curator</p>
                 <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐⭐</p>
               </motion.div>
 
@@ -476,9 +476,9 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={2}
-                className="absolute top-10 left-0 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+                className="absolute top-10 left-0 z-30 bg-white/95 dark:bg-slate-900/95 border border-[#D3E3F5] dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-xs text-[10px]"
               >
-                <p className="font-bold text-[#0B1A36] dark:text-white">Archaeology</p>
+                <p className="font-bold text-[#0b1a36] dark:text-white">Archaeology</p>
                 <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐⭐</p>
               </motion.div>
 
@@ -487,9 +487,9 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={3}
-                className="absolute bottom-6 left-1 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+                className="absolute bottom-6 left-1 z-30 bg-white/95 dark:bg-slate-900/95 border border-[#D3E3F5] dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-xs text-[10px]"
               >
-                <p className="font-bold text-[#0B1A36] dark:text-white">Design Thinker</p>
+                <p className="font-bold text-[#0b1a36] dark:text-white">Design Thinker</p>
                 <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐☆</p>
               </motion.div>
 
@@ -498,9 +498,9 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={4}
-                className="absolute -bottom-2 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+                className="absolute -bottom-2 z-30 bg-white/95 dark:bg-slate-900/95 border border-[#D3E3F5] dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-xs text-[10px]"
               >
-                <p className="font-bold text-[#0B1A36] dark:text-white">User Experience Designer</p>
+                <p className="font-bold text-[#0b1a36] dark:text-white">User Experience Designer</p>
                 <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐⭐</p>
               </motion.div>
 
@@ -509,9 +509,9 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={5}
-                className="absolute top-12 right-8 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+                className="absolute top-12 right-8 z-30 bg-white/95 dark:bg-slate-900/95 border border-[#D3E3F5] dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-xs text-[10px]"
               >
-                <p className="font-bold text-[#0B1A36] dark:text-white">Architect</p>
+                <p className="font-bold text-[#0b1a36] dark:text-white">Architect</p>
                 <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐⭐</p>
               </motion.div>
 
@@ -520,9 +520,9 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={6}
-                className="absolute top-3 right-0 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+                className="absolute top-3 right-0 z-30 bg-white/95 dark:bg-slate-900/95 border border-[#D3E3F5] dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-xs text-[10px]"
               >
-                <p className="font-bold text-[#0B1A36] dark:text-white">Engineering</p>
+                <p className="font-bold text-[#0b1a36] dark:text-white">Engineering</p>
                 <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐⭐</p>
               </motion.div>
 
@@ -531,12 +531,11 @@ function AbstractCareerTestLoop({ isDark }) {
                 initial="hidden"
                 animate="show"
                 custom={7}
-                className="absolute bottom-8 right-1 z-30 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-lg text-[10px]"
+                className="absolute bottom-8 right-1 z-30 bg-white/95 dark:bg-slate-900/95 border border-[#D3E3F5] dark:border-slate-800 rounded-xl px-2.5 py-1 text-left shadow-xs text-[10px]"
               >
-                <p className="font-bold text-[#0B1A36] dark:text-white">Product Manager</p>
+                <p className="font-bold text-[#0b1a36] dark:text-white">Product Manager</p>
                 <p className="text-amber-500 text-[8px]">⭐⭐⭐⭐☆</p>
               </motion.div>
-
             </motion.div>
           )}
 
@@ -567,7 +566,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
   return (
     <div className={`relative px-6 py-16 md:py-24 transition-colors duration-300 ${isDark
         ? "bg-gradient-to-br from-[#0b0f19] via-[#0f172a] to-[#0b0f19] text-slate-100"
-      : "bg-[#FAF8F5] text-[#0b1a36]"
+        : "bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36]"
       }`}>
       {/* Background decoration or grid lines */}
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
@@ -585,11 +584,11 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
             <motion.div
               variants={fadeUp}
               className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wider uppercase ${isDark
-                  ? "border-blue-500/30 bg-blue-500/10 text-blue-300"
-                : "border-blue-200/70 bg-blue-50/80 text-[#2563eb]"
+                  ? "border-sky-500/30 bg-sky-500/10 text-sky-300"
+                  : "border-sky-200 bg-sky-50 text-[#1E88E5]"
                 }`}
             >
-              <span className="h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
+              <span className="h-2 w-2 rounded-full bg-[#1E88E5] animate-pulse"></span>
               THE FUTURE OF CAREER DISCOVERY
             </motion.div>
 
@@ -601,7 +600,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
             >
               Stop guessing <br className="hidden sm:inline" />
               your future. <br />
-              <span className="text-blue-600 dark:text-blue-400">Experience it.</span>
+              <span className="text-[#1E88E5] dark:text-sky-400">Experience it.</span>
             </motion.h1>
 
             {/* Description */}
@@ -621,7 +620,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
               <button
                 type="button"
                 onClick={onStartDiscovery}
-                className="group inline-flex items-center justify-center gap-2 bg-[#2B59C3] hover:bg-blue-700 active:scale-95 text-white font-bold rounded-full px-6 py-3.5 shadow-md shadow-blue-500/20 transition-all duration-200 text-xs sm:text-sm cursor-pointer"
+                className="group inline-flex items-center justify-center gap-2 bg-[#0b1a36] hover:bg-[#122b59] active:scale-95 text-white font-bold rounded-full px-6 py-3.5 shadow-xs transition-all duration-200 text-xs sm:text-sm cursor-pointer"
               >
                 <span>Get Start Now </span>
                 <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
@@ -632,7 +631,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
                 onClick={onExploreCareers}
                 className={`inline-flex items-center justify-center gap-2 border font-bold rounded-full px-6 py-3.5 transition-all duration-200 text-xs sm:text-sm active:scale-95 cursor-pointer ${isDark
                     ? "border-slate-800 bg-slate-900/50 hover:bg-slate-800 text-slate-200"
-                    : "border-slate-200/80 bg-white/60 hover:bg-slate-50 text-[#0b1a36]"
+                    : "border-[#D3E3F5] bg-white hover:bg-[#F0F6FC] text-[#0b1a36]"
                   }`}
               >
                 <span>Explore Careers</span>
@@ -644,7 +643,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
               variants={fadeUp}
               className="pt-5 w-full text-left mt-1"
             >
-              <h4 className="text-[11px] font-black tracking-widest uppercase text-amber-500 dark:text-amber-400 mb-3.5">
+              <h4 className="text-[11px] font-black tracking-widest uppercase text-[#1E88E5] dark:text-sky-400 mb-3.5">
                 BY THE NUMBERS
               </h4>
 
@@ -664,9 +663,9 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
                   </p>
                 </div>
 
-                {/* Metric 2: Questions Answered */}
+                {/* Metric 2: Trusted Users */}
                 <div>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-[#2563eb] dark:text-blue-400 tracking-tight">
+                  <p className="text-2xl sm:text-3xl font-extrabold text-[#1E88E5] dark:text-sky-400 tracking-tight">
                     500 K
                   </p>
                   <p className="text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-400 mt-0.5">
@@ -674,9 +673,9 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
                   </p>
                 </div>
 
-                {/* Metric 3: Degrees & Careers */}
+                {/* Metric 3: Careers */}
                 <div>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-[#7c3aed] dark:text-purple-400 tracking-tight">
+                  <p className="text-2xl sm:text-3xl font-extrabold text-purple-600 dark:text-purple-400 tracking-tight">
                     1500+
                   </p>
                   <p className="text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-400 mt-0.5">
@@ -684,9 +683,9 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
                   </p>
                 </div>
 
-                {/* Metric 4: Personality Traits */}
+                {/* Metric 4: Hubs */}
                 <div>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-[#059669] dark:text-emerald-400 tracking-tight">
+                  <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">
                     140+
                   </p>
                   <p className="text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-400 mt-0.5">
@@ -714,7 +713,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.6 }}
-          className={`mt-16 flex flex-col items-center gap-1.5 mx-auto text-[10px] font-bold tracking-widest uppercase ${isDark ? "text-slate-600 hover:text-slate-400" : "text-[#99adc7] hover:text-[#4f6283]"} transition`}
+          className={`mt-16 flex flex-col items-center gap-1.5 mx-auto text-[10px] font-bold tracking-widest uppercase cursor-pointer ${isDark ? "text-slate-600 hover:text-slate-400" : "text-[#1E88E5] hover:text-[#0b1a36]"} transition`}
         >
           <span>Explore Stages</span>
           <motion.div
@@ -759,11 +758,11 @@ function EcosystemSection({ isDark }) {
   ];
 
   return (
-    <div className={`py-24 px-6 ${isDark ? "bg-slate-950" : "bg-[#FAF8F5]"} text-left`}>
+    <div className={`py-24 px-6 ${isDark ? "bg-slate-950" : "bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]"} text-left`}>
       <div className="mx-auto max-w-6xl">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className={`text-4xl sm:text-5xl font-serif font-light tracking-normal ${isDark ? "text-white" : "text-[#1d1d1f]"
+          <h2 className={`text-4xl sm:text-5xl font-serif font-light tracking-normal ${isDark ? "text-white" : "text-[#0b1a36]"
             }`}>
             For every career stage
           </h2>
@@ -788,9 +787,9 @@ function EcosystemSection({ isDark }) {
                 show: { opacity: 1, y: 0, transition: { duration: 0.4 } }
               }}
               whileHover={{ y: -4 }}
-              className={`group flex flex-col sm:flex-row rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border ${isDark
+              className={`group flex flex-col sm:flex-row rounded-3xl overflow-hidden shadow-2xs hover:shadow-md transition-all duration-300 border ${isDark
                 ? "bg-[#141923] border-slate-800/80 text-slate-100"
-                : "bg-white border-slate-200/80 text-slate-900"
+                : "bg-white border-[#D3E3F5] text-slate-900"
                 }`}
             >
               {/* Image Container */}
@@ -804,11 +803,11 @@ function EcosystemSection({ isDark }) {
 
               {/* Text Content */}
               <div className="w-full sm:w-[58%] p-6 sm:p-7 flex flex-col justify-center text-left">
-                <h3 className={`text-xl sm:text-2xl font-serif font-normal leading-tight mb-3 ${isDark ? "text-white" : "text-[#222222]"
+                <h3 className={`text-xl sm:text-2xl font-serif font-normal leading-tight mb-3 ${isDark ? "text-white" : "text-[#0b1a36]"
                   }`}>
                   {stage.title}
                 </h3>
-                <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? "text-slate-400" : "text-[#666666]"
+                <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? "text-slate-400" : "text-slate-600"
                   }`}>
                   {stage.desc}
                 </p>
@@ -871,16 +870,16 @@ function TestimonialSlider({ isDark }) {
   };
 
   return (
-    <div className={`py-16 md:py-24 border-t transition-colors duration-300 ${isDark ? "bg-[#0b0f19] border-slate-800 text-slate-100" : "bg-[#FAF8F5] border-slate-200/80 text-[#0b1a36]"
+    <div className={`py-16 md:py-24 border-t transition-colors duration-300 ${isDark ? "bg-[#0b0f19] border-slate-800 text-slate-100" : "bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] border-[#D3E3F5] text-[#0b1a36]"
       }`}>
       <div className="mx-auto max-w-6xl px-6 sm:px-8 text-left">
 
         {/* Header Tag */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
           <div>
-            <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wider uppercase ${isDark ? "border-amber-500/30 bg-amber-500/10 text-amber-300" : "border-amber-200 bg-amber-50 text-amber-900"
+            <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wider uppercase ${isDark ? "border-sky-500/30 bg-sky-500/10 text-sky-300" : "border-sky-200 bg-sky-50 text-[#1E88E5]"
               }`}>
-              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="h-2 w-2 rounded-full bg-[#1E88E5] animate-pulse" />
               STUDENT TESTIMONIALS
             </span>
             <h2 className={`mt-3 text-3xl sm:text-4xl font-serif font-extrabold tracking-tight ${isDark ? "text-white" : "text-[#0b1a36]"
@@ -897,7 +896,7 @@ function TestimonialSlider({ isDark }) {
               aria-label="Previous Testimonial"
               className={`p-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer ${isDark
                 ? "bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200"
-                : "bg-white border-slate-200 hover:bg-slate-50 text-[#0b1a36] shadow-sm"
+                : "bg-white border-[#D3E3F5] hover:bg-[#F0F6FC] text-[#0b1a36] shadow-2xs"
                 }`}
             >
               <ArrowLeft size={18} />
@@ -909,7 +908,7 @@ function TestimonialSlider({ isDark }) {
                 <button
                   key={idx}
                   onClick={() => setCurr(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 ${curr === idx ? "w-6 bg-blue-600" : "w-2 bg-slate-300 dark:bg-slate-700"
+                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${curr === idx ? "w-6 bg-[#1E88E5]" : "w-2 bg-slate-300 dark:bg-slate-700"
                     }`}
                 />
               ))}
@@ -921,7 +920,7 @@ function TestimonialSlider({ isDark }) {
               aria-label="Next Testimonial"
               className={`p-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer ${isDark
                 ? "bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200"
-                : "bg-white border-slate-200 hover:bg-slate-50 text-[#0b1a36] shadow-sm"
+                : "bg-white border-[#D3E3F5] hover:bg-[#F0F6FC] text-[#0b1a36] shadow-2xs"
                 }`}
             >
               <ArrowRight size={18} />
@@ -939,31 +938,31 @@ function TestimonialSlider({ isDark }) {
             transition={{ duration: 0.4 }}
             className={`grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch rounded-3xl p-6 sm:p-10 border ${isDark
               ? "bg-[#111827]/90 border-slate-800/80 shadow-2xl shadow-slate-950/60"
-              : "bg-white border-slate-200/80 shadow-xl shadow-slate-200/40"
+              : "bg-white border-[#D3E3F5] shadow-xs"
               }`}
           >
             {/* Left Column: Reviewer Photo & Trust Badge */}
             <div className="lg:col-span-4 flex flex-col justify-between items-center sm:items-start gap-6">
-              <div className="relative w-full max-w-[260px] sm:max-w-none aspect-square rounded-2xl overflow-hidden shadow-lg border border-slate-100 dark:border-slate-800">
+              <div className="relative w-full max-w-[260px] sm:max-w-none aspect-square rounded-3xl overflow-hidden shadow-sm border border-[#D3E3F5] dark:border-slate-800">
                 <img
                   src={active.image}
                   alt={active.name}
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
-                <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-full border border-slate-200 dark:border-slate-800 text-[10px] font-bold text-amber-500 flex items-center gap-1 shadow-sm">
+                <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-full border border-[#D3E3F5] dark:border-slate-800 text-[10px] font-bold text-amber-500 flex items-center gap-1 shadow-2xs">
                   <span>⭐⭐⭐⭐⭐</span>
                 </div>
               </div>
 
               {/* Verified Student Pill */}
-              <div className={`w-full p-4 rounded-2xl border ${isDark ? "bg-slate-900/70 border-slate-800" : "bg-[#FAF8F5] border-slate-100"
+              <div className={`w-full p-4 rounded-2xl border ${isDark ? "bg-slate-900/70 border-slate-800" : "bg-[#F0F6FC] border-[#D3E3F5]"
                 }`}>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
                   <span className="text-xs font-bold tracking-tight">Verified Graduate Match</span>
                 </div>
                 <p className={`text-[11px] mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                  Matched with <span className="font-semibold text-blue-600 dark:text-blue-400">{active.tag}</span>
+                  Matched with <span className="font-semibold text-[#1E88E5] dark:text-sky-400">{active.tag}</span>
                 </p>
               </div>
             </div>
@@ -978,7 +977,7 @@ function TestimonialSlider({ isDark }) {
                 </p>
               </div>
 
-              <div className="pt-6 border-t border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="pt-6 border-t border-[#D3E3F5] dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h4 className={`text-lg font-bold ${isDark ? "text-white" : "text-[#0b1a36]"}`}>
                     {active.name}
@@ -993,7 +992,7 @@ function TestimonialSlider({ isDark }) {
                   onClick={handleNext}
                   className={`flex items-center gap-3 rounded-2xl p-2.5 px-3.5 border transition-all duration-200 text-left active:scale-95 cursor-pointer ${isDark
                     ? "bg-slate-900/80 border-slate-800 hover:bg-slate-800"
-                    : "bg-[#FAF8F5] border-slate-200/70 hover:bg-slate-100"
+                    : "bg-[#F0F6FC] border-[#D3E3F5] hover:bg-sky-50"
                     }`}
                 >
                   <img src={next.image} alt={next.name} className="w-9 h-9 rounded-xl object-cover" />
@@ -1050,7 +1049,7 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
         if (onStartDiscovery) onStartDiscovery();
         else navigate("/assessment");
       },
-      gradient: "from-amber-400 to-orange-500"
+      gradient: "from-sky-400 to-[#1E88E5]"
     },
     {
       id: "archetype",
@@ -1064,7 +1063,7 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
         if (onStartDiscovery) onStartDiscovery();
         else navigate("/assessment");
       },
-      gradient: "from-blue-400 to-indigo-500"
+      gradient: "from-[#1E88E5] to-[#0b1a36]"
     },
     {
       id: "explore",
@@ -1078,7 +1077,7 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
         if (onExploreCareers) onExploreCareers();
         else navigate("/explore-careers");
       },
-      gradient: "from-violet-400 to-purple-500"
+      gradient: "from-sky-400 to-[#1E88E5]"
     },
     {
       id: "align",
@@ -1089,7 +1088,7 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
       badge: "Stage 04: Practical Sandboxes & Hubs",
       ctaText: "Launch Sandboxes & Hubs",
       ctaAction: () => navigate("/career-hubs"),
-      gradient: "from-emerald-400 to-teal-500"
+      gradient: "from-[#1E88E5] to-[#0b1a36]"
     }
   ];
 
@@ -1097,7 +1096,7 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
     <div
       id="journey-section"
       ref={sectionRef}
-      className={`relative min-h-[320vh] ${isDark ? "bg-[#10141d] text-slate-100" : "bg-[#FAF8F5] text-slate-900"
+      className={`relative min-h-[320vh] ${isDark ? "bg-[#10141d] text-slate-100" : "bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-slate-900"
         } scroll-mt-6 transition-colors duration-300`}
     >
       {/* Sticky Fullscreen Container */}
@@ -1105,16 +1104,16 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
         <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center h-full max-h-[88vh]">
 
           {/* ── Far Left Rotated "How it works" Title Bar & Indicator ────────────── */}
-          <div className={`hidden xl:flex lg:col-span-1 flex-col items-center justify-center h-full pr-4 border-r ${isDark ? "border-slate-800" : "border-slate-300/80"
+          <div className={`hidden xl:flex lg:col-span-1 flex-col items-center justify-center h-full pr-4 border-r ${isDark ? "border-slate-800" : "border-[#D3E3F5]"
             }`}>
             <span className={`text-xs font-bold uppercase tracking-[0.25em] -rotate-90 whitespace-nowrap origin-center my-12 ${isDark ? "text-slate-500" : "text-slate-600 font-extrabold"
               }`}>
               How it works
             </span>
-            <div className={`w-1 flex-1 rounded-full relative my-4 overflow-hidden ${isDark ? "bg-slate-800" : "bg-slate-300"
+            <div className={`w-1 flex-1 rounded-full relative my-4 overflow-hidden ${isDark ? "bg-slate-800" : "bg-[#D3E3F5]"
               }`}>
               <motion.div
-                className="w-full bg-amber-500 rounded-full"
+                className="w-full bg-[#1E88E5] rounded-full"
                 animate={{
                   height: `${((activeStep + 1) / 4) * 100}%`
                 }}
@@ -1144,18 +1143,18 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                         className="space-y-3"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-amber-500 uppercase tracking-widest">
+                          <span className="text-sm font-black text-[#1E88E5] uppercase tracking-widest">
                             {step.num}
                           </span>
-                          <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${isDark
+                          <span className={`text-xs px-3 py-1 rounded-full font-bold border ${isDark
                             ? "bg-slate-800 text-slate-300 border-slate-700"
-                            : "bg-white text-slate-700 border-slate-300 shadow-sm"
+                            : "bg-white text-slate-700 border-[#D3E3F5] shadow-2xs"
                             }`}>
                             {step.badge}
                           </span>
                         </div>
 
-                        <h3 className={`text-2xl sm:text-3xl md:text-4xl font-serif font-light leading-tight ${isDark ? "text-white" : "text-[#1d1d1f]"
+                        <h3 className={`text-2xl sm:text-3xl md:text-4xl font-serif font-light leading-tight ${isDark ? "text-white" : "text-[#0b1a36]"
                           }`}>
                           {step.title}
                         </h3>
@@ -1168,7 +1167,7 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                         <div className="pt-2 flex flex-wrap items-center gap-3">
                           <button
                             onClick={step.ctaAction}
-                            className={`px-5 py-2.5 rounded-xl text-xs font-bold text-slate-900 bg-gradient-to-r ${step.gradient} shadow-lg hover:opacity-95 active:scale-95 transition-all flex items-center gap-2`}
+                            className={`px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r ${step.gradient} shadow-xs hover:opacity-95 active:scale-95 transition-all flex items-center gap-2 cursor-pointer`}
                           >
                             <span>{step.ctaText}</span>
                             <ArrowRight size={14} />
@@ -1176,9 +1175,9 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
 
                           <button
                             onClick={() => onOpenModal(step.id)}
-                            className={`px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-colors flex items-center gap-1 ${isDark
+                            className={`px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-colors flex items-center gap-1 cursor-pointer ${isDark
                               ? "text-slate-300 border-slate-700 hover:bg-slate-800"
-                              : "text-slate-700 border-slate-300 bg-white hover:bg-slate-100 shadow-sm"
+                              : "text-slate-700 border-[#D3E3F5] bg-white hover:bg-[#F0F6FC] shadow-2xs"
                               }`}
                           >
                             <span>Blueprint</span>
@@ -1219,17 +1218,17 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                 {activeStep === 0 && (
                   <div className="w-full max-w-xl flex flex-col sm:flex-row items-center gap-6">
                     {/* Mobile Phone Mockup */}
-                    <div className={`w-full sm:w-72 border rounded-3xl p-4 shadow-2xl space-y-4 text-left ${isDark ? "bg-[#121315] border-slate-800" : "bg-white border-slate-200 shadow-slate-300/50"
+                    <div className={`w-full sm:w-72 border rounded-3xl p-4 shadow-xl space-y-4 text-left ${isDark ? "bg-[#121315] border-slate-800" : "bg-white border-[#D3E3F5] shadow-slate-300/50"
                       }`}>
-                      <div className={`flex items-center justify-between pb-2 border-b text-[10px] font-mono ${isDark ? "border-slate-800 text-slate-400" : "border-slate-200 text-slate-500"
+                      <div className={`flex items-center justify-between pb-2 border-b text-[10px] font-mono ${isDark ? "border-slate-800 text-slate-400" : "border-[#D3E3F5] text-slate-500"
                         }`}>
                         <span>≡ TryYourCareers</span>
-                        <span className={`px-2 py-0.5 rounded font-bold ${isDark ? "bg-white/10 text-white" : "bg-slate-900 text-white"
+                        <span className={`px-2 py-0.5 rounded font-bold ${isDark ? "bg-white/10 text-white" : "bg-[#0b1a36] text-white"
                           }`}>Save progress</span>
                       </div>
                       <div className="space-y-1">
                         <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold block">Would you like to...</span>
-                        <p className={`text-xs font-bold ${isDark ? "text-white" : "text-slate-900"}`}>Direct the making of a movie</p>
+                        <p className={`text-xs font-bold ${isDark ? "text-white" : "text-[#0b1a36]"}`}>Direct the making of a movie</p>
                       </div>
 
                       <div className="space-y-2 text-xs">
@@ -1242,14 +1241,14 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                         ].map((opt) => (
                           <div
                             key={opt.num}
-                            className={`p-2.5 rounded-xl border flex items-center gap-2 transition-all ${opt.active
-                              ? "bg-amber-500/20 border-amber-500 text-amber-800 dark:text-amber-300 font-bold"
+                            className={`p-2.5 rounded-2xl border flex items-center gap-2 transition-all ${opt.active
+                              ? "bg-sky-50 border-[#1E88E5] text-[#1E88E5] dark:text-sky-300 font-bold shadow-2xs"
                               : isDark
                                 ? "bg-slate-900 border-slate-800 text-slate-400"
-                                : "bg-slate-50 border-slate-200 text-slate-700"
+                                : "bg-[#F0F6FC] border-[#D3E3F5] text-slate-700"
                               }`}
                           >
-                            <span className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] ${isDark ? "border-slate-700" : "border-slate-300"
+                            <span className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] ${isDark ? "border-slate-700" : "border-[#D3E3F5]"
                               }`}>
                               {opt.num}
                             </span>
@@ -1261,7 +1260,7 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                       <div className="pt-2 text-center text-[10px] text-slate-500">
                         Skip question
                       </div>
-                      <div className={`pt-1 border-t flex items-center justify-between text-[9px] font-mono ${isDark ? "border-slate-800 text-slate-400" : "border-slate-200 text-slate-500"
+                      <div className={`pt-1 border-t flex items-center justify-between text-[9px] font-mono ${isDark ? "border-slate-800 text-slate-400" : "border-[#D3E3F5] text-slate-500"
                         }`}>
                         <span>UP NEXT: Personality archetype</span>
                         <span>~ 3 MINS</span>
@@ -1269,7 +1268,7 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                     </div>
 
                     {/* Right Timeline Checklist */}
-                    <div className={`hidden sm:flex flex-col space-y-4 text-left border-l pl-4 py-2 ${isDark ? "border-slate-800" : "border-slate-300"
+                    <div className={`hidden sm:flex flex-col space-y-4 text-left border-l pl-4 py-2 ${isDark ? "border-slate-800" : "border-[#D3E3F5]"
                       }`}>
                       {[
                         { label: "Start", done: true },
@@ -1281,11 +1280,11 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                         <div key={i} className="space-y-1">
                           <div className="flex items-center gap-2 text-xs font-bold">
                             {item.done ? (
-                              <div className="w-5 h-5 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center text-[10px]">✓</div>
+                              <div className="w-5 h-5 rounded-full bg-[#0b1a36] text-white dark:bg-white dark:text-slate-900 flex items-center justify-center text-[10px]">✓</div>
                             ) : (
                               <div className="w-5 h-5 rounded-full bg-slate-400 dark:bg-white border-2 border-slate-400 dark:border-white" />
                             )}
-                            <span className={item.active ? isDark ? "text-white text-sm" : "text-slate-900 text-sm font-extrabold" : isDark ? "text-slate-400" : "text-slate-500"}>{item.label}</span>
+                            <span className={item.active ? isDark ? "text-white text-sm" : "text-[#0b1a36] text-sm font-extrabold" : isDark ? "text-slate-400" : "text-slate-500"}>{item.label}</span>
                           </div>
                           {item.details && (
                             <div className="pl-7 space-y-1 text-[10px] text-slate-500 dark:text-slate-400">
@@ -1305,28 +1304,28 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                 {activeStep === 1 && (
                   <div className="w-full max-w-lg relative min-h-[320px] flex items-center justify-center">
                     {/* Visionary Card */}
-                    <div className="absolute -top-4 -left-2 sm:left-4 z-20 w-64 p-4 rounded-2xl bg-gradient-to-br from-purple-900/90 to-slate-900 border border-purple-500/30 text-white shadow-2xl text-left">
-                      <span className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded bg-purple-500/30 text-purple-300">
+                    <div className="absolute -top-4 -left-2 sm:left-4 z-20 w-64 p-4 rounded-3xl bg-gradient-to-br from-[#0b1a36]/90 to-slate-900 border border-[#1E88E5]/30 text-white shadow-xl text-left">
+                      <span className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded bg-sky-500/30 text-sky-300">
                         SUPER RARE • 2% OF USERS
                       </span>
                       <h4 className="text-lg font-bold mt-2">Lucas is a visionary</h4>
-                      <p className="text-xs text-purple-200">Creative, Introspective, Persuasive</p>
+                      <p className="text-xs text-sky-200">Creative, Introspective, Persuasive</p>
                       <p className="text-[10px] text-slate-300 mt-2 leading-relaxed">
                         Visionaries are all about creating their own artistic empire. They enjoy independent, unstructured spaces where they can be creative.
                       </p>
                     </div>
 
                     {/* Personality Report Book */}
-                    <div className="absolute right-2 sm:right-6 top-0 z-10 w-48 h-60 rounded-xl bg-amber-900/70 border border-amber-500/40 p-4 text-amber-100 flex flex-col justify-between shadow-xl">
+                    <div className="absolute right-2 sm:right-6 top-0 z-10 w-48 h-60 rounded-3xl bg-sky-900/70 border border-sky-500/40 p-4 text-sky-100 flex flex-col justify-between shadow-lg">
                       <span className="text-[9px] font-mono tracking-widest uppercase">PERSONALITY REPORT</span>
-                      <div className="w-16 h-16 rounded-full border border-amber-500/40 mx-auto flex items-center justify-center">
-                        <div className="w-8 h-8 rotate-45 border border-amber-400" />
+                      <div className="w-16 h-16 rounded-full border border-sky-500/40 mx-auto flex items-center justify-center">
+                        <div className="w-8 h-8 rotate-45 border border-sky-400" />
                       </div>
                       <span className="text-[9px] font-mono text-center">TryYourCareers</span>
                     </div>
 
                     {/* Trait Report Book */}
-                    <div className="absolute right-10 bottom-2 z-30 w-44 h-56 rounded-xl bg-teal-900/90 border border-teal-400/40 p-4 text-teal-100 shadow-2xl flex flex-col justify-between">
+                    <div className="absolute right-10 bottom-2 z-30 w-44 h-56 rounded-3xl bg-teal-900/90 border border-teal-400/40 p-4 text-teal-100 shadow-xl flex flex-col justify-between">
                       <span className="text-[9px] font-mono tracking-widest uppercase">TRAIT REPORT</span>
                       <div className="flex items-end gap-1 h-16 justify-center">
                         <div className="w-2 h-10 bg-teal-400/60 rounded-t" />
@@ -1338,9 +1337,9 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                     </div>
 
                     {/* Highlight Speech Bubble */}
-                    <div className="absolute -bottom-6 right-0 z-40 bg-teal-950/90 border border-teal-500/40 p-3 rounded-2xl max-w-xs text-left text-[11px] text-teal-200 shadow-2xl">
+                    <div className="absolute -bottom-6 right-0 z-40 bg-slate-900 border border-[#D3E3F5] p-3 rounded-2xl max-w-xs text-left text-[11px] text-slate-200 shadow-xl">
                       <p className="font-bold text-white">You value ability utilization, feeling of achievement, and opportunities for advancement.</p>
-                      <span className="text-[9px] text-teal-400 underline block mt-1">Learn about your must-haves →</span>
+                      <span className="text-[9px] text-[#1E88E5] underline block mt-1">Learn about your must-haves →</span>
                     </div>
                   </div>
                 )}
@@ -1349,8 +1348,8 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                 {activeStep === 2 && (
                   <div className="w-full max-w-lg relative min-h-[320px] flex items-center justify-center">
                     {/* Degree Card 1 */}
-                    <div className="absolute top-0 left-4 z-10 bg-white text-slate-900 p-3 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3">
-                      <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=100&auto=format&fit=crop&q=80" alt="Degree" className="w-12 h-10 rounded-lg object-cover" />
+                    <div className="absolute top-0 left-4 z-10 bg-white text-slate-900 p-3 rounded-2xl shadow-sm border border-[#D3E3F5] flex items-center gap-3">
+                      <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=100&auto=format&fit=crop&q=80" alt="Degree" className="w-12 h-10 rounded-xl object-cover" />
                       <div className="text-left">
                         <p className="text-xs font-bold">Architect Degree</p>
                         <p className="text-amber-500 text-[10px]">⭐⭐⭐⭐⭐</p>
@@ -1358,8 +1357,8 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                     </div>
 
                     {/* Degree Card 2 */}
-                    <div className="absolute top-14 left-0 z-20 bg-white text-slate-900 p-3 rounded-2xl shadow-2xl border border-slate-200 flex items-center gap-3">
-                      <img src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=100&auto=format&fit=crop&q=80" alt="Career" className="w-12 h-10 rounded-lg object-cover" />
+                    <div className="absolute top-14 left-0 z-20 bg-white text-slate-900 p-3 rounded-2xl shadow-md border border-[#D3E3F5] flex items-center gap-3">
+                      <img src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=100&auto=format&fit=crop&q=80" alt="Career" className="w-12 h-10 rounded-xl object-cover" />
                       <div className="text-left">
                         <p className="text-xs font-bold">Dental Hygienist</p>
                         <p className="text-amber-500 text-[10px]">⭐⭐⭐⭐⭐</p>
@@ -1367,36 +1366,36 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                     </div>
 
                     {/* Avg Tuition Pill */}
-                    <div className="absolute top-16 right-20 z-20 bg-amber-900/90 text-amber-200 px-3 py-1.5 rounded-xl text-left border border-amber-500/30 shadow-lg">
+                    <div className="absolute top-16 right-20 z-20 bg-[#0b1a36] text-white px-3 py-1.5 rounded-2xl text-left border border-sky-200 shadow-sm">
                       <span className="text-[9px] block font-mono">Avg Tuition</span>
                       <span className="text-xs font-bold">$8k/year</span>
                     </div>
 
                     {/* Salary & Metrics Floating Card */}
-                    <div className="absolute bottom-0 right-0 z-30 w-72 bg-white text-slate-900 p-4 rounded-2xl shadow-2xl border border-slate-200 text-left">
-                      <div className="flex items-center justify-between border-b pb-2 mb-3">
+                    <div className="absolute bottom-0 right-0 z-30 w-72 bg-white text-slate-900 p-4 rounded-3xl shadow-md border border-[#D3E3F5] text-left">
+                      <div className="flex items-center justify-between border-b pb-2 mb-3 border-[#D3E3F5]">
                         <span className="text-xs font-bold text-slate-900">Filter by average salary</span>
                         <span className="text-[10px] text-slate-400">The avg salary is $56k/yr</span>
                       </div>
                       <div className="flex items-end gap-1 h-12 justify-center mb-2">
                         {[20, 35, 45, 60, 80, 100, 70, 50, 90, 40, 30, 15].map((h, i) => (
-                          <div key={i} style={{ height: `${h}%` }} className="w-2 bg-purple-500/70 rounded-t" />
+                          <div key={i} style={{ height: `${h}%` }} className="w-2 bg-[#1E88E5]/70 rounded-t" />
                         ))}
                       </div>
-                      <div className="flex justify-between items-center text-[10px] text-slate-400 pt-2 border-t">
-                        <span className="px-2 py-1 bg-slate-100 rounded font-bold text-slate-700">$30,000</span>
+                      <div className="flex justify-between items-center text-[10px] text-slate-400 pt-2 border-t border-[#D3E3F5]">
+                        <span className="px-2 py-1 bg-[#F0F6FC] rounded-md font-bold text-slate-700">$30,000</span>
                         <span>—</span>
-                        <span className="px-2 py-1 bg-slate-100 rounded font-bold text-slate-700">$300,000</span>
+                        <span className="px-2 py-1 bg-[#F0F6FC] rounded-md font-bold text-slate-700">$300,000</span>
                       </div>
                     </div>
 
                     {/* Stats pills */}
-                    <div className="absolute top-36 left-2 z-30 bg-purple-600 text-white px-3 py-1.5 rounded-xl text-left shadow-lg">
+                    <div className="absolute top-36 left-2 z-30 bg-[#1E88E5] text-white px-3.5 py-1.5 rounded-2xl text-left shadow-xs">
                       <span className="text-[9px] block">Avg Salary</span>
                       <span className="text-xs font-bold">$94k</span>
                     </div>
 
-                    <div className="absolute bottom-8 left-16 z-30 bg-amber-500 text-white px-3 py-1.5 rounded-xl text-left shadow-lg">
+                    <div className="absolute bottom-8 left-16 z-30 bg-emerald-600 text-white px-3.5 py-1.5 rounded-2xl text-left shadow-xs">
                       <span className="text-[9px] block">Growth</span>
                       <span className="text-xs font-bold">↑10%</span>
                     </div>
@@ -1406,13 +1405,13 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                 {/* ── STEP 04 GRAPHIC (Align with experts & trial sandboxes) ─────────── */}
                 {activeStep === 3 && (
                   <div className="w-full max-w-lg space-y-4 text-left">
-                    <div className={`p-4 rounded-2xl border shadow-2xl flex items-start gap-4 ${isDark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900"
+                    <div className={`p-4 rounded-3xl border shadow-md flex items-start gap-4 ${isDark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-[#D3E3F5] text-slate-900"
                       }`}>
                       <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80" alt="Mentor" className="w-11 h-11 rounded-full object-cover shrink-0 border border-emerald-400" />
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold">Ananya Sharma</span>
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 font-bold border border-emerald-500/30">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
                             Lead UX Architect @ Razorpay
                           </span>
                         </div>
@@ -1423,15 +1422,15 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
-                      <div className={`p-3.5 rounded-xl border ${isDark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-md"
+                      <div className={`p-3.5 rounded-2xl border ${isDark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-[#D3E3F5] text-slate-900 shadow-2xs"
                         }`}>
                         <span className="text-[10px] text-slate-400 uppercase font-bold block">Career Hubs</span>
-                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">128 Active Mentors</span>
+                        <span className="text-sm font-bold text-[#1E88E5]">128 Active Mentors</span>
                       </div>
-                      <div className={`p-3.5 rounded-xl border ${isDark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-slate-200 text-slate-900 shadow-md"
+                      <div className={`p-3.5 rounded-2xl border ${isDark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-[#D3E3F5] text-slate-900 shadow-2xs"
                         }`}>
                         <span className="text-[10px] text-slate-400 uppercase font-bold block">Sandbox Tasks</span>
-                        <span className="text-sm font-bold text-amber-600 dark:text-amber-400">50+ Micro-Simulations</span>
+                        <span className="text-sm font-bold text-amber-600">50+ Micro-Simulations</span>
                       </div>
                     </div>
                   </div>
@@ -1477,17 +1476,17 @@ function StrideStageModal({ stageId, onClose, isDark }) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className={`relative w-full max-w-5xl rounded-3xl border shadow-2xl p-5 sm:p-8 md:p-10 flex flex-col gap-4 sm:gap-6 transition-colors duration-300 ${
+        className={`relative w-full max-w-5xl rounded-3xl border shadow-xl p-5 sm:p-8 md:p-10 flex flex-col gap-4 sm:gap-6 transition-colors duration-300 ${
           isDark 
             ? "bg-[#181d2a] border-slate-800 text-slate-100" 
-            : "bg-white border-slate-200 text-slate-850"
+            : "bg-white border-[#D3E3F5] text-[#0b1a36]"
         }`}
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className={`absolute top-4 right-4 text-slate-400 transition p-2 rounded-xl ${
-            isDark ? "hover:text-slate-200 hover:bg-slate-800" : "hover:text-slate-650 hover:bg-slate-100"
+          className={`absolute top-4 right-4 text-slate-400 transition p-2 rounded-xl cursor-pointer ${
+            isDark ? "hover:text-slate-200 hover:bg-slate-800" : "hover:text-slate-700 hover:bg-[#F0F6FC]"
           }`}
         >
           <X size={20} />
@@ -1495,13 +1494,13 @@ function StrideStageModal({ stageId, onClose, isDark }) {
 
         {/* Stepper Navigation inside Modal */}
         <div className={`flex flex-wrap items-center justify-center gap-2 pb-6 border-b pr-8 sm:pr-0 transition-colors ${
-          isDark ? "border-slate-850" : "border-slate-200"
+          isDark ? "border-slate-850" : "border-[#D3E3F5]"
         }`}>
           {[
-            { id: "discover", title: "Stage 01: Discover", icon: Sparkles, gradient: "from-amber-400 to-orange-500" },
-            { id: "explore", title: "Stage 02: Explore", icon: TrendingUp, gradient: "from-blue-400 to-indigo-500" },
-            { id: "experience", title: "Stage 03: Experience", icon: Terminal, gradient: "from-violet-400 to-purple-500" },
-            { id: "align", title: "Stage 04: Align", icon: Users, gradient: "from-emerald-400 to-teal-500" }
+            { id: "discover", title: "Stage 01: Discover", icon: Sparkles, gradient: "from-sky-400 to-[#1E88E5]" },
+            { id: "explore", title: "Stage 02: Explore", icon: TrendingUp, gradient: "from-[#1E88E5] to-[#0b1a36]" },
+            { id: "experience", title: "Stage 03: Experience", icon: Terminal, gradient: "from-sky-400 to-[#1E88E5]" },
+            { id: "align", title: "Stage 04: Align", icon: Users, gradient: "from-[#1E88E5] to-[#0b1a36]" }
           ].map((item) => {
             const isCurrent = item.id === stage.id;
             const Icon = item.icon;
@@ -1509,15 +1508,15 @@ function StrideStageModal({ stageId, onClose, isDark }) {
               <button
                 key={item.id}
                 onClick={() => setActiveStageId(item.id)}
-                className={`flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border text-[11px] sm:text-xs font-bold transition-all shadow-sm ${
+                className={`flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-full border text-[11px] sm:text-xs font-bold transition-all shadow-2xs cursor-pointer ${
                   isCurrent
                     ? `bg-gradient-to-br ${item.gradient} text-white border-transparent`
                     : isDark
                     ? "bg-[#11151f] border-slate-800/80 text-slate-400 hover:bg-slate-800/50"
-                    : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                    : "bg-[#F0F6FC] border-[#D3E3F5] text-slate-650 hover:bg-[#EAF2FA]"
                 }`}
               >
-                <Icon size={12} className={isCurrent ? "text-white" : "text-slate-400"} />
+                <Icon size={12} className={isCurrent ? "text-white" : "text-[#1E88E5]"} />
                 <span>{item.title}</span>
               </button>
             );
@@ -1528,12 +1527,12 @@ function StrideStageModal({ stageId, onClose, isDark }) {
         {!token && (
           <div className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors ${
             isDark 
-              ? "bg-amber-500/10 border-amber-500/20 text-amber-305" 
-              : "bg-amber-50/70 border-amber-200 text-amber-900"
+              ? "bg-amber-500/10 border-amber-500/20 text-amber-350" 
+              : "bg-sky-50 border-sky-200 text-[#0b1a36]"
           }`}>
             <div className="flex items-center gap-3 text-left">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-700"
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                isDark ? "bg-amber-500/20 text-amber-400" : "bg-sky-100 text-[#1E88E5]"
               }`}>
                 <Sparkles size={20} />
               </div>
@@ -1547,7 +1546,7 @@ function StrideStageModal({ stageId, onClose, isDark }) {
                 onClose();
                 setIsLoginOpen(true);
               }}
-              className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all shrink-0 active:scale-95"
+              className="bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold text-xs px-4 py-2.5 rounded-full shadow-2xs transition-all shrink-0 active:scale-95 cursor-pointer"
             >
               Sign Up Free
             </button>
@@ -1570,12 +1569,12 @@ function StrideStageModal({ stageId, onClose, isDark }) {
 
             <div className="space-y-2">
               <h3 className={`text-2xl sm:text-3xl font-black font-serif tracking-tight leading-tight ${
-                isDark ? "text-white" : "text-slate-900"
+                isDark ? "text-white" : "text-[#0b1a36]"
               }`}>
                 {stage.title}
               </h3>
               <p className={`text-sm sm:text-base font-bold ${
-                isDark ? "text-amber-450" : "text-[#7B4A28]"
+                isDark ? "text-sky-400" : "text-[#1E88E5]"
               }`}>
                 {stage.subtitle}
               </p>
@@ -1593,7 +1592,7 @@ function StrideStageModal({ stageId, onClose, isDark }) {
                 {stage.highlights.map((highlight, index) => (
                   <li key={index} className="flex items-start gap-2.5 text-xs font-semibold">
                     <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-emerald-500" />
-                    <span className={isDark ? "text-slate-350" : "text-slate-650"}>{highlight}</span>
+                    <span className={isDark ? "text-slate-350" : "text-slate-700"}>{highlight}</span>
                   </li>
                 ))}
               </ul>
@@ -1602,7 +1601,7 @@ function StrideStageModal({ stageId, onClose, isDark }) {
             <div className="pt-2">
               <button
                 onClick={handleAction}
-                className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs sm:text-sm font-bold text-white bg-gradient-to-br ${stage.gradient} ${stage.shadow} hover:opacity-90 active:scale-95 transition-all shadow-md`}
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-3 text-xs sm:text-sm font-bold text-white bg-gradient-to-br ${stage.gradient} ${stage.shadow} hover:opacity-90 active:scale-95 transition-all shadow-xs cursor-pointer`}
               >
                 <span>{activeStageId === "align" ? "Finish Tour" : "Understand"}</span>
                 <ArrowRight size={13} className="shrink-0" />
@@ -1613,8 +1612,8 @@ function StrideStageModal({ stageId, onClose, isDark }) {
           {/* Right Column: Visual Mockup */}
           <div className="md:col-span-5 flex justify-center w-full mt-4 md:mt-0">
             {demoCompleted && !token ? (
-              <div className={`rounded-2xl border p-6 shadow-xl max-w-full sm:max-w-sm w-full text-center space-y-4 animate-scale-in transition-colors ${
-                isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-850"
+              <div className={`rounded-3xl border p-6 shadow-xs max-w-full sm:max-w-sm w-full text-center space-y-4 animate-scale-in transition-colors ${
+                isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-white border-[#D3E3F5] text-[#0b1a36]"
               }`}>
                 <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
                   <CheckCircle2 size={24} />
@@ -1628,7 +1627,7 @@ function StrideStageModal({ stageId, onClose, isDark }) {
                     onClose();
                     setIsLoginOpen(true);
                   }}
-                  className={`w-full py-2.5 rounded-xl font-bold text-xs text-white bg-gradient-to-br ${stage.gradient} ${stage.shadow} hover:opacity-90 transition active:scale-95`}
+                  className={`w-full py-2.5 rounded-full font-bold text-xs text-white bg-gradient-to-br ${stage.gradient} ${stage.shadow} hover:opacity-90 transition active:scale-95 cursor-pointer`}
                 >
                   Create Free Account
                 </button>
@@ -1699,22 +1698,22 @@ function InteractiveQuiz({ onComplete, isDark }) {
   };
 
   return (
-    <div className={`p-6 shadow-xl w-full max-w-full sm:max-w-sm space-y-4 text-left rounded-2xl border transition-colors duration-300 ${
-      isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-800"
+    <div className={`p-6 shadow-xs w-full max-w-full sm:max-w-sm space-y-4 text-left rounded-3xl border transition-colors duration-300 ${
+      isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-white border-[#D3E3F5] text-slate-800"
     }`}>
       <div className={`flex items-center justify-between border-b pb-3 transition-colors ${
-        isDark ? "border-slate-800" : "border-slate-150"
+        isDark ? "border-slate-800" : "border-[#D3E3F5]"
       }`}>
         <span className={`text-[10px] font-bold uppercase ${isDark ? "text-slate-400" : "text-slate-500"}`}>
           Demo Question {qIdx + 1} of 3
         </span>
         <span className={`h-1.5 w-16 rounded-full relative overflow-hidden ${
-          isDark ? "bg-slate-800" : "bg-slate-100"
+          isDark ? "bg-slate-800" : "bg-[#F0F6FC]"
         }`}>
-          <span className="absolute left-0 top-0 bottom-0 bg-amber-500 transition-all duration-300" style={{ width: `${((qIdx + 1) / 3) * 100}%` }} />
+          <span className="absolute left-0 top-0 bottom-0 bg-[#1E88E5] transition-all duration-300" style={{ width: `${((qIdx + 1) / 3) * 100}%` }} />
         </span>
       </div>
-      <p className="text-sm font-bold">
+      <p className="text-sm font-bold text-[#0b1a36] dark:text-slate-100">
         "{questions[qIdx].text}"
       </p>
       <div className="space-y-2">
@@ -1722,10 +1721,10 @@ function InteractiveQuiz({ onComplete, isDark }) {
           <button
             key={i}
             onClick={handleSelect}
-            className={`w-full text-left p-3 rounded-xl border text-xs font-semibold transition-all ${
+            className={`w-full text-left p-3 rounded-2xl border text-xs font-semibold transition-all cursor-pointer ${
               isDark
-                ? "border-slate-800 text-slate-300 hover:bg-amber-955/20 hover:border-amber-500/50"
-                : "border-slate-150 text-slate-650 hover:bg-amber-50/50 hover:border-amber-400"
+                ? "border-slate-800 text-slate-300 hover:bg-sky-950/20 hover:border-sky-500/50"
+                : "border-[#D3E3F5] text-slate-700 hover:bg-sky-50 hover:border-sky-300"
             }`}
           >
             {ans}
@@ -1747,7 +1746,7 @@ function InteractiveExplore({ isDark }) {
       peakVal: 80,
       ai: "Moderate (32%)",
       stability: "Very High (9.2)",
-      color: "bg-blue-500"
+      color: "bg-[#1E88E5]"
     },
     design: {
       name: "UX Designer",
@@ -1774,22 +1773,22 @@ function InteractiveExplore({ isDark }) {
   const info = careersInfo[selected];
 
   return (
-    <div className={`p-6 shadow-xl w-full max-w-full sm:max-w-sm space-y-4 text-left rounded-2xl border transition-colors duration-300 ${
-      isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-800"
+    <div className={`p-6 shadow-xs w-full max-w-full sm:max-w-sm space-y-4 text-left rounded-3xl border transition-colors duration-300 ${
+      isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-white border-[#D3E3F5] text-slate-800"
     }`}>
       <div className={`flex gap-1.5 border-b pb-3 overflow-x-auto transition-colors ${
-        isDark ? "border-slate-800" : "border-slate-150"
+        isDark ? "border-slate-800" : "border-[#D3E3F5]"
       }`}>
         {Object.keys(careersInfo).map((k) => (
           <button
             key={k}
             onClick={() => setSelected(k)}
-            className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition ${
+            className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase transition cursor-pointer ${
               selected === k
-                ? "bg-blue-600 text-white shadow-sm"
+                ? "bg-[#0b1a36] text-white shadow-2xs"
                 : isDark
                 ? "bg-slate-800 text-slate-400 hover:bg-slate-750"
-                : "bg-slate-50 text-slate-500 hover:bg-slate-100"
+                : "bg-[#F0F6FC] text-slate-600 hover:bg-slate-100"
             }`}
           >
             {careersInfo[k].name.split(" ")[0]}
@@ -1798,47 +1797,47 @@ function InteractiveExplore({ isDark }) {
       </div>
 
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-xl bg-sky-50 text-[#1E88E5] border border-sky-200 flex items-center justify-center">
           <TrendingUp size={16} />
         </div>
         <div>
-          <h4 className="text-sm font-bold">{info.name}</h4>
+          <h4 className="text-sm font-bold text-[#0b1a36] dark:text-slate-100">{info.name}</h4>
           <p className="text-[10px] text-slate-400">Salary Band (LPA)</p>
         </div>
       </div>
 
       <div className="space-y-3 pt-1">
         <div className="space-y-1">
-          <div className={`flex justify-between text-[10px] font-bold ${isDark ? "text-slate-400" : "text-slate-550"}`}>
+          <div className={`flex justify-between text-[10px] font-bold ${isDark ? "text-slate-400" : "text-slate-600"}`}>
             <span>Entry Level</span>
             <span>{info.entry}</span>
           </div>
-          <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? "bg-slate-800" : "bg-slate-100"}`}>
+          <div className={`h-2 rounded-full overflow-hidden ${isDark ? "bg-slate-800" : "bg-[#F0F6FC]"}`}>
             <div className={`h-full ${info.color} rounded-full`} style={{ width: `${info.entryVal}%` }} />
           </div>
         </div>
         <div className="space-y-1">
-          <div className={`flex justify-between text-[10px] font-bold ${isDark ? "text-slate-400" : "text-slate-550"}`}>
+          <div className={`flex justify-between text-[10px] font-bold ${isDark ? "text-slate-400" : "text-slate-600"}`}>
             <span>Peak Pay (10+ Yrs)</span>
             <span>{info.peak}</span>
           </div>
-          <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? "bg-slate-800" : "bg-slate-100"}`}>
+          <div className={`h-2 rounded-full overflow-hidden ${isDark ? "bg-slate-800" : "bg-[#F0F6FC]"}`}>
             <div className={`h-full ${info.color} rounded-full`} style={{ width: `${info.peakVal}%` }} />
           </div>
         </div>
       </div>
 
       <div className={`grid grid-cols-2 gap-3 pt-2 border-t transition-colors ${
-        isDark ? "border-slate-800" : "border-slate-150"
+        isDark ? "border-slate-800" : "border-[#D3E3F5]"
       }`}>
-        <div className={`p-2.5 rounded-xl border text-center transition-colors ${
-          isDark ? "bg-slate-850 border-slate-800/80" : "bg-slate-50 border-slate-150"
+        <div className={`p-2.5 rounded-2xl border text-center transition-colors shadow-2xs ${
+          isDark ? "bg-slate-850 border-slate-800/80" : "bg-[#F0F6FC] border-[#D3E3F5]"
         }`}>
           <p className="text-[9px] font-bold text-slate-400">AI automation</p>
           <p className="text-xs font-black text-amber-600 dark:text-amber-400">{info.ai}</p>
         </div>
-        <div className={`p-2.5 rounded-xl border text-center transition-colors ${
-          isDark ? "bg-slate-850 border-slate-800/80" : "bg-slate-50 border-slate-150"
+        <div className={`p-2.5 rounded-2xl border text-center transition-colors shadow-2xs ${
+          isDark ? "bg-slate-850 border-slate-800/80" : "bg-[#F0F6FC] border-[#D3E3F5]"
         }`}>
           <p className="text-[9px] font-bold text-slate-400">Stability</p>
           <p className="text-xs font-black text-emerald-600 dark:text-emerald-400">{info.stability}</p>
@@ -1860,59 +1859,55 @@ function InteractiveExperience({ onComplete, isDark }) {
   };
 
   return (
-    <div className={`p-5 shadow-xl w-full max-w-full sm:max-w-sm space-y-3.5 text-left font-mono rounded-2xl border transition-colors duration-300 ${
+    <div className={`p-5 shadow-xs w-full max-w-full sm:max-w-sm space-y-3.5 text-left font-mono rounded-3xl border transition-colors duration-300 ${
       isDark
         ? "bg-[#1e1e24] border-slate-800 text-slate-300"
-        : "bg-slate-50 border-slate-200 text-slate-800"
+        : "bg-slate-900 border-slate-800 text-slate-200"
     }`}>
       <div className={`flex items-center justify-between border-b pb-2 transition-colors ${
-        isDark ? "border-slate-800" : "border-slate-200"
+        isDark ? "border-slate-800" : "border-slate-800"
       }`}>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
           <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
           <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
         </div>
-        <span className="text-[9px] font-bold text-slate-405 uppercase">app.py</span>
+        <span className="text-[9px] font-bold text-slate-400 uppercase">app.py</span>
       </div>
-      <div className={`text-[10px] space-y-1 font-mono transition-colors duration-300 ${
-        isDark ? "text-slate-300" : "text-slate-700"
-      }`}>
+      <div className="text-[10px] space-y-1 font-mono text-slate-300">
         <p>
-          <span className={isDark ? "text-[#f92672]" : "text-[#d73a49] font-bold"}>def</span>{" "}
-          <span className={isDark ? "text-[#a6e22e]" : "text-[#6f42c1]"}>calculate_bonus</span>(salary):
+          <span className="text-[#f92672]">def</span>{" "}
+          <span className="text-[#a6e22e]">calculate_bonus</span>(salary):
         </p>
         <p className="pl-4 text-slate-500 italic"># TODO: Fix return value logic</p>
         <p className="pl-4">
-          <span className={isDark ? "text-[#f92672]" : "text-[#d73a49] font-bold"}>if</span> salary &gt;{" "}
-          <span className={isDark ? "text-[#ae81ff]" : "text-[#005cc5]"}>100000</span>:
+          <span className="text-[#f92672]">if</span> salary &gt;{" "}
+          <span className="text-[#ae81ff]">100000</span>:
         </p>
         <p className="pl-8">
-          <span className={isDark ? "text-[#f92672]" : "text-[#d73a49] font-bold"}>return</span> salary *{" "}
-          <span className="text-emerald-500 font-bold">0.15</span>{" "}
+          <span className="text-[#f92672]">return</span> salary *{" "}
+          <span className="text-emerald-400 font-bold">0.15</span>{" "}
           <span className="text-slate-500 italic"># fixed from 0.05</span>
         </p>
         <p className="pl-4">
-          <span className={isDark ? "text-[#f92672]" : "text-[#d73a49] font-bold"}>return</span> salary *{" "}
-          <span className={isDark ? "text-[#ae81ff]" : "text-[#005cc5]"}>0.08</span>
+          <span className="text-[#f92672]">return</span> salary *{" "}
+          <span className="text-[#ae81ff]">0.08</span>
         </p>
       </div>
-      <div className={`flex justify-between items-center pt-2 border-t text-[10px] transition-colors ${
-        isDark ? "border-slate-800" : "border-slate-200"
-      }`}>
+      <div className={`flex justify-between items-center pt-2 border-t text-[10px] transition-colors border-slate-800`}>
         {status === "idle" && <span className="text-slate-500">Ready to test</span>}
         {status === "running" && (
-          <span className="text-amber-500 flex items-center gap-1.5 animate-pulse">
+          <span className="text-amber-400 flex items-center gap-1.5 animate-pulse">
             <Loader2 size={11} className="animate-spin" />
             Testing...
           </span>
         )}
-        {status === "success" && <span className="text-emerald-500 font-bold">✓ All 3 Tests Passed!</span>}
+        {status === "success" && <span className="text-emerald-400 font-bold">✓ All 3 Tests Passed!</span>}
         
         <button
           onClick={handleRun}
           disabled={status === "running" || status === "success"}
-          className="bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-3 py-1.5 rounded-lg text-[9px] uppercase font-sans transition disabled:opacity-50"
+          className="bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-3 py-1.5 rounded-xl text-[9px] uppercase font-sans transition disabled:opacity-50 cursor-pointer"
         >
           {status === "success" ? "Completed" : "Run Tests"}
         </button>
@@ -1938,18 +1933,18 @@ function InteractiveAlign({ onComplete, isDark }) {
   };
 
   return (
-    <div className={`p-5 shadow-xl w-full max-w-full sm:max-w-sm space-y-3.5 text-left rounded-2xl border transition-colors duration-300 ${
-      isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-800"
+    <div className={`p-6 shadow-xs w-full max-w-full sm:max-w-sm space-y-3.5 text-left rounded-3xl border transition-colors duration-300 ${
+      isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-white border-[#D3E3F5] text-slate-800"
     }`}>
       <div className={`flex items-center justify-between border-b pb-2 transition-colors ${
-        isDark ? "border-slate-800" : "border-slate-150"
+        isDark ? "border-slate-800" : "border-[#D3E3F5]"
       }`}>
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-[#10B981]">●</span>
-          <span className="text-xs font-bold">#software-eng-hub</span>
+          <span className="text-xs font-bold text-[#0b1a36] dark:text-slate-100">#software-eng-hub</span>
         </div>
-        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold transition-colors ${
-          isDark ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-500"
+        <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold transition-colors ${
+          isDark ? "bg-slate-800 text-slate-400" : "bg-[#F0F6FC] text-slate-600 border border-[#D3E3F5]"
         }`}>
           42 Active
         </span>
@@ -1958,17 +1953,17 @@ function InteractiveAlign({ onComplete, isDark }) {
         {chat.map((msg, i) => (
           <div key={i} className="space-y-0.5">
             <div className="flex justify-between text-slate-400">
-              <span className={`font-bold ${msg.isUser ? "text-blue-500" : isDark ? "text-slate-300" : "text-slate-700"}`}>{msg.sender}</span>
+              <span className={`font-bold ${msg.isUser ? "text-[#1E88E5]" : isDark ? "text-slate-300" : "text-slate-700"}`}>{msg.sender}</span>
               <span>{msg.time}</span>
             </div>
-            <p className={`p-2 rounded-xl transition-colors ${
+            <p className={`p-2.5 rounded-2xl transition-colors ${
               msg.isUser
                 ? isDark
                   ? "bg-blue-950/30 text-blue-200 border border-blue-900/30"
-                  : "bg-blue-50 text-blue-800 border border-blue-100"
+                  : "bg-sky-50 text-[#0b1a36] border border-sky-200"
                 : isDark
                 ? "bg-slate-850 text-slate-350"
-                : "bg-slate-50 text-slate-600"
+                : "bg-[#F0F6FC] text-slate-700 border border-[#D3E3F5]"
             }`}>
               {msg.text}
             </p>
@@ -1982,19 +1977,19 @@ function InteractiveAlign({ onComplete, isDark }) {
         )}
       </div>
       <div className={`pt-2 border-t space-y-1.5 transition-colors ${
-        isDark ? "border-slate-800" : "border-slate-150"
+        isDark ? "border-slate-800" : "border-[#D3E3F5]"
       }`}>
         <p className={`text-[9px] font-bold uppercase ${isDark ? "text-slate-400" : "text-slate-500"}`}>
           Ask a demo question:
         </p>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1.5">
           <button
             onClick={() => handleAsk("What is the daily work-life balance like?", "Honestly, it depends on project deadlines, but on average it's very manageable! We work 9-5 and rarely work weekends.")}
             disabled={isTyping || chat.length > 2}
-            className={`text-[9.5px] text-left px-2 py-1.5 rounded-lg border transition disabled:opacity-50 truncate ${
+            className={`text-[9.5px] text-left px-3 py-2 rounded-xl border transition disabled:opacity-50 truncate cursor-pointer ${
               isDark
                 ? "border-slate-800 text-slate-400 hover:bg-emerald-950/20 hover:text-emerald-400"
-                : "border-slate-150 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+                : "border-[#D3E3F5] bg-[#F0F6FC] text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200"
             }`}
           >
             "What is the daily work-life balance like?"
@@ -2002,7 +1997,11 @@ function InteractiveAlign({ onComplete, isDark }) {
           <button
             onClick={() => handleAsk("Which skills are most critical at entry level?", "Mastering basic debugging, version control (Git), and being eager to learn are far more important than knowing 10 frameworks.")}
             disabled={isTyping || chat.length > 2}
-            className="text-[9.5px] text-left px-2 py-1.5 rounded-lg border border-slate-150 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-slate-655 hover:text-emerald-700 transition disabled:opacity-50 truncate"
+            className={`text-[9.5px] text-left px-3 py-2 rounded-xl border transition disabled:opacity-50 truncate cursor-pointer ${
+              isDark
+                ? "border-slate-800 text-slate-400 hover:bg-emerald-950/20 hover:text-emerald-400"
+                : "border-[#D3E3F5] bg-[#F0F6FC] text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200"
+            }`}
           >
             "Which skills are most critical at entry level?"
           </button>

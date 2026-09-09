@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -6,28 +6,32 @@ import {
   Activity,
   ShieldCheck,
   Download,
-  DownloadCloud,
   BookOpen,
+  Sparkles,
+  Star,
 } from "lucide-react";
 import CareerReality from "./CareerReality";
 import { useNavigate } from "react-router-dom";
+import { getCareerFitReport } from "../services/discoveryTest";
 
-const CAREER_TEMPLATES = {
-  aiEngineer: {
+const CAREER_TEMPLATES = [
+  {
+    key: "aiEngineer",
     title: "AI / ML Engineer",
     subtitle: "Artificial Intelligence",
     category: "Technology",
     description:
       "Your analytical precision and love for patterns make you a natural fit for translating complex data into strategic business insights.",
     matchPercentage: 95,
+    starRating: 5.0,
     skillTags: ["Machine Learning", "Python & SQL", "Data Pipeline", "Mathematics"],
     strengths: [
-      { label: "Analytical Thinking", percent: 95 },
-      { label: "Logical Reasoning", percent: 84 },
-      { label: "Problem Solving", percent: 79 },
+      { label: "Technical Aptitude", percent: 95 },
+      { label: "Investigative Aptitude", percent: 84 },
+      { label: "Leadership Aptitude", percent: 79 },
     ],
     reports: [
-      { label: "Personality Profile", icon: BarChart3 },
+      { label: "6D Personality Profile", icon: BarChart3 },
       { label: "Interest Assessment", icon: Activity },
       { label: "Aptitude Report", icon: ShieldCheck },
     ],
@@ -35,21 +39,23 @@ const CAREER_TEMPLATES = {
     roadmapDescription:
       "Every match comes with a curated learning path, mentorship opportunities, and industry certifications to get you started.",
   },
-  businessAnalyst: {
+  {
+    key: "businessAnalyst",
     title: "Business Analyst",
     subtitle: "Business Intelligence",
     category: "Business & Development",
     description:
       "Your logical reasoning and stakeholder skills make you ideal for turning business challenges into data-backed decisions.",
     matchPercentage: 92,
+    starRating: 4.8,
     skillTags: ["Analytical Thinking", "Business Strategy", "Dashboarding"],
     strengths: [
-      { label: "Analytical Thinking", percent: 95 },
-      { label: "Logical Reasoning", percent: 88 },
-      { label: "Problem Solving", percent: 83 },
+      { label: "Entrepreneurial Aptitude", percent: 92 },
+      { label: "Investigative Aptitude", percent: 88 },
+      { label: "Leadership Aptitude", percent: 83 },
     ],
     reports: [
-      { label: "Personality Profile", icon: BarChart3 },
+      { label: "6D Personality Profile", icon: BarChart3 },
       { label: "Interest Assessment", icon: Activity },
       { label: "Aptitude Report", icon: ShieldCheck },
     ],
@@ -57,21 +63,23 @@ const CAREER_TEMPLATES = {
     roadmapDescription:
       "Every match comes with a curated learning path, mentorship opportunities, and industry certifications to get you started.",
   },
-  uiUxDesigner: {
+  {
+    key: "uiUxDesigner",
     title: "UI/UX Designer",
     subtitle: "Design Leadership",
     category: "Creative Product",
     description:
       "Your empathy for users and visual problem-solving make you a strong candidate for creating intuitive, delightful digital experiences.",
     matchPercentage: 88,
+    starRating: 4.5,
     skillTags: ["User Research", "Wireframing", "Interaction Design"],
     strengths: [
-      { label: "Analytical Thinking", percent: 95 },
-      { label: "Logical Reasoning", percent: 82 },
-      { label: "Problem Solving", percent: 80 },
+      { label: "Creative Aptitude", percent: 94 },
+      { label: "Social Aptitude", percent: 82 },
+      { label: "Technical Aptitude", percent: 75 },
     ],
     reports: [
-      { label: "Personality Profile", icon: BarChart3 },
+      { label: "6D Personality Profile", icon: BarChart3 },
       { label: "Interest Assessment", icon: Activity },
       { label: "Aptitude Report", icon: ShieldCheck },
     ],
@@ -79,21 +87,23 @@ const CAREER_TEMPLATES = {
     roadmapDescription:
       "Every match comes with a curated learning path, mentorship opportunities, and industry certifications to get you started.",
   },
-  cyberSecurityAnalyst: {
+  {
+    key: "cyberSecurityAnalyst",
     title: "Cyber Security Analyst",
     subtitle: "Security & Risk",
     category: "Security",
     description:
       "Your attention to detail and risk-focused mindset make you a natural fit for defending systems and analyzing threats.",
     matchPercentage: 90,
+    starRating: 4.7,
     skillTags: ["Threat Detection", "Risk Analysis", "Incident Response"],
     strengths: [
-      { label: "Analytical Thinking", percent: 95 },
-      { label: "Logical Reasoning", percent: 89 },
-      { label: "Problem Solving", percent: 84 },
+      { label: "Technical Aptitude", percent: 95 },
+      { label: "Investigative Aptitude", percent: 89 },
+      { label: "Leadership Aptitude", percent: 84 },
     ],
     reports: [
-      { label: "Personality Profile", icon: BarChart3 },
+      { label: "6D Personality Profile", icon: BarChart3 },
       { label: "Interest Assessment", icon: Activity },
       { label: "Aptitude Report", icon: ShieldCheck },
     ],
@@ -101,43 +111,97 @@ const CAREER_TEMPLATES = {
     roadmapDescription:
       "Every match comes with a curated learning path, mentorship opportunities, and industry certifications to get you started.",
   },
-};
+];
 
 export default function CareerRealityV2({ onBack }) {
   const navigate = useNavigate();
   const [activePage, setActivePage] = useState("results");
-  const [selectedCareerKey, setSelectedCareerKey] = useState("aiEngineer");
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [reportData, setReportData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const career = useMemo(
-    () => CAREER_TEMPLATES[selectedCareerKey] || CAREER_TEMPLATES.aiEngineer,
-    [selectedCareerKey]
-  );
+  useEffect(() => {
+    async function loadDynamicReport() {
+      const sessionId = localStorage.getItem("latest_test_session_id");
+      if (!sessionId) return;
+      try {
+        setLoading(true);
+        const data = await getCareerFitReport(sessionId);
+        if (data && data.top_matches && data.top_matches.length > 0) {
+          setReportData(data);
+        }
+      } catch (err) {
+        console.warn("Unable to fetch career fit report for reality check:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadDynamicReport();
+  }, []);
+
+  const dynamicMatches = useMemo(() => {
+    if (!reportData || !reportData.top_matches || reportData.top_matches.length === 0) {
+      return CAREER_TEMPLATES;
+    }
+
+    const vector = reportData.dimension_vector || {};
+    const strengthsFromVector = Object.entries(vector)
+      .map(([dim, val]) => ({
+        label: dim.charAt(0).toUpperCase() + dim.slice(1) + " Aptitude",
+        percent: Math.round((val || 0.5) * 100),
+      }))
+      .sort((a, b) => b.percent - a.percent);
+
+    return reportData.top_matches.map((m, idx) => ({
+      key: `match-${idx}`,
+      title: m.career_name,
+      subtitle: m.sector || m.cluster,
+      category: m.sector || m.cluster,
+      description: m.why_it_fits,
+      matchPercentage: m.similarity_score,
+      starRating: m.star_rating,
+      skillTags: m.key_skills && m.key_skills.length > 0 ? m.key_skills : ["Problem Solving", "Domain Analysis"],
+      strengths: strengthsFromVector.slice(0, 3),
+      reports: [
+        { label: "6D Personality Fit", icon: BarChart3 },
+        { label: "RIASEC Vector Assessment", icon: Activity },
+        { label: "Stage 2 Reflection Insights", icon: ShieldCheck },
+      ],
+      roadmapTitle: `Want to see your detailed roadmap for ${m.career_name}?`,
+      roadmapDescription: m.why_it_fits,
+    }));
+  }, [reportData]);
+
+  const activeCareer = dynamicMatches[selectedIndex] || dynamicMatches[0];
 
   if (activePage === "realityDetail") {
     return <CareerReality onBack={() => setActivePage("results")} />;
   }
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-10">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 sm:px-6 lg:px-10 text-left font-sans">
       <div className="mx-auto max-w-6xl space-y-8">
-        <div className="flex flex-col gap-5 md:px-8">
+        <div className="flex flex-col gap-5 md:px-2">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-3">
-              <span className="inline-flex items-center rounded-full border border-slate-800 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-800">
-                Assessment Completed
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-[#1E88E5]">
+                <Sparkles size={14} className="text-[#1E88E5]" />
+                {reportData ? "Dynamic Assessment Matches" : "Career Reality Check"}
               </span>
-              <h1 className="font-serif text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl">
-                Your Career Match Results
+              <h1 className="font-serif text-3xl font-bold leading-tight tracking-tight text-[#0b1a36] sm:text-4xl">
+                Your Suggested Career Paths
               </h1>
-              <p className="max-w-2xl text-sm leading-relaxed text-slate-600">
-                We've analyzed your skills and aspirations. Here are the top professional paths where you're destined to thrive.
+              <p className="max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-600">
+                {reportData
+                  ? "Based on your 6D RIASEC vector and Stage 2 reflection assessment, here are your top recommended career trajectories."
+                  : "Explore real-world career trajectories, core skill requirements, and practical roadmaps to guide your career decisions."}
               </p>
             </div>
             {onBack && (
               <button
                 type="button"
                 onClick={onBack}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-xs transition hover:bg-slate-50 cursor-pointer"
               >
                 <ArrowLeft size={16} />
                 Back
@@ -146,32 +210,56 @@ export default function CareerRealityV2({ onBack }) {
           </div>
         </div>
 
+        {!reportData && !loading && (
+          <div className="rounded-3xl border border-sky-200 bg-white p-5 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+            <div className="space-y-1">
+              <p className="text-xs font-bold text-[#0b1a36] uppercase tracking-wider">Unlock Personalized Match Scores</p>
+              <p className="text-xs text-slate-600">Take the 15-minute Discovery Assessment to generate your dynamic 6D RIASEC career fit scores.</p>
+            </div>
+            <button
+              onClick={() => navigate("/assessment")}
+              className="px-5 py-2.5 bg-[#0b1a36] hover:bg-[#122b59] text-white text-xs font-bold rounded-full transition shadow-xs cursor-pointer"
+            >
+              Take Discovery Test
+            </button>
+          </div>
+        )}
+
         <div className="grid gap-4 sm:grid-cols-2">
-          {Object.entries(CAREER_TEMPLATES).map(([key, template]) => {
-            const isSelected = selectedCareerKey === key;
+          {dynamicMatches.map((item, idx) => {
+            const isSelected = selectedIndex === idx;
             return (
               <div
-                key={key}
-                onClick={() => setSelectedCareerKey(key)}
+                key={item.key || idx}
+                onClick={() => setSelectedIndex(idx)}
                 className={`group flex flex-col justify-between rounded-3xl border p-5 cursor-pointer transition-all duration-300 ${
                   isSelected
-                    ? "border-slate-800 bg-[#FAF2DB]/80 shadow-sm"
-                    : "border-slate-300 bg-white hover:border-slate-400 hover:shadow-sm"
+                    ? "border-[#1E88E5] bg-[#F0F6FC] shadow-xs"
+                    : "border-[#D3E3F5] bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
                 }`}
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600">
-                      {template.subtitle}
+                    <span className="rounded-full border border-[#D3E3F5] bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                      {item.subtitle}
                     </span>
-                    <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-800">
-                      {template.matchPercentage}% Match
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {item.starRating && (
+                        <div className="flex items-center text-amber-500 text-xs font-bold">
+                          <Star size={12} className="fill-amber-400 text-amber-400 mr-0.5" />
+                          <span>{item.starRating}</span>
+                        </div>
+                      )}
+                      <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-800">
+                        {item.matchPercentage}% Match
+                      </span>
+                    </div>
                   </div>
-                  <h4 className="text-base font-bold text-slate-900">{template.title}</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {template.skillTags.map((tag) => (
-                      <span key={tag} className="rounded-full border border-slate-200 bg-white/80 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
+                  <h4 className="font-serif text-base font-bold text-[#0b1a36]">{item.title}</h4>
+                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{item.description}</p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {item.skillTags.map((tag) => (
+                      <span key={tag} className="rounded-full border border-[#D3E3F5] bg-[#F0F6FC] px-2.5 py-1 text-[10px] font-semibold text-slate-700">
                         {tag}
                       </span>
                     ))}
@@ -183,22 +271,22 @@ export default function CareerRealityV2({ onBack }) {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedCareerKey(key);
-                      setActivePage("realityDetail");
+                      setSelectedIndex(idx);
+                      navigate(`/career-details/${encodeURIComponent(item.title)}`);
                     }}
-                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#0b1a36] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#122b59]"
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#0b1a36] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#122b59] shadow-xs cursor-pointer"
                   >
                     <BookOpen size={13} />
-                    Explore Career
+                    Explore Reality
                   </button>
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedCareerKey(key);
-                      navigate(`/roadmap?career=${key}`);
+                      setSelectedIndex(idx);
+                      navigate(`/roadmap?career=${encodeURIComponent(item.title)}`);
                     }}
-                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-800 transition hover:bg-slate-50"
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-800 transition hover:bg-slate-50 shadow-2xs cursor-pointer"
                   >
                     <ArrowRight size={13} />
                     Roadmap
@@ -210,56 +298,62 @@ export default function CareerRealityV2({ onBack }) {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-3xl border border-slate-300 bg-white p-5">
+          <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">Core Strengths</p>
-                <h3 className="mt-2 font-serif text-lg font-bold text-slate-900">Core Strengths</h3>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Selected Role Strengths</p>
+                <h3 className="mt-1 font-serif text-lg font-bold text-[#0b1a36]">{activeCareer.title}</h3>
               </div>
-              <span className="rounded-full bg-[#FAF2DB] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#0b1a36]">
-                {career.strengths[0].percent}%
+              <span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#1E88E5]">
+                {activeCareer.strengths[0]?.percent || 90}% Aptitude
               </span>
             </div>
-            <div className="mt-6 space-y-5">
-              {career.strengths.map((strength) => (
-                <div key={strength.label}>
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs font-semibold text-slate-800">{strength.label}</p>
-                    <span className="text-xs font-semibold text-slate-500">{strength.percent}%</span>
+            <div className="mt-6 space-y-4">
+              {activeCareer.strengths.map((strength) => (
+                <div key={strength.label} className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <p className="font-semibold text-slate-700">{strength.label}</p>
+                    <span className="font-bold text-[#0b1a36]">{strength.percent}%</span>
                   </div>
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                    <div className="h-full rounded-full bg-[#0b1a36]" style={{ width: `${strength.percent}%` }} />
+                  <div className="h-1.5 overflow-hidden rounded-full bg-[#edf3fb]">
+                    <div className="h-full rounded-full bg-[#1E88E5] transition-all duration-300" style={{ width: `${strength.percent}%` }} />
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-300 bg-white p-5">
+          <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">Analytic Reports</p>
-                <h3 className="mt-2 font-serif text-lg font-bold text-slate-900">Analytic Reports</h3>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Analytic Reports</p>
+                <h3 className="mt-1 font-serif text-lg font-bold text-[#0b1a36]">Diagnostic Reports</h3>
               </div>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-800">
+              <span className="rounded-full border border-[#D3E3F5] bg-[#F0F6FC] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">
                 3 reports
               </span>
             </div>
             <div className="mt-6 space-y-3">
-              {career.reports.map((report) => {
-                const Icon = report.icon;
+              {activeCareer.reports.map((rep) => {
+                const Icon = rep.icon;
                 return (
-                  <div key={report.label} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                  <div key={rep.label} className="flex items-center justify-between rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] px-4 py-3 shadow-2xs">
                     <div className="flex items-center gap-3">
-                      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-800 shadow-sm">
-                        <Icon size={15} />
+                      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-[#D3E3F5] bg-white text-[#1E88E5] shadow-2xs">
+                        <Icon size={16} />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-slate-900">{report.label}</p>
+                        <p className="text-xs font-bold text-[#0b1a36]">{rep.label}</p>
                         <p className="text-[10px] text-slate-500">Download or view your insights</p>
                       </div>
                     </div>
-                    <button className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-200 text-slate-800 transition hover:bg-slate-300">
+                    <button
+                      onClick={() => {
+                        const sid = localStorage.getItem("latest_test_session_id");
+                        if (sid) navigate(`/career-report/${sid}`);
+                      }}
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white border border-[#D3E3F5] text-slate-700 transition hover:bg-slate-50 shadow-2xs cursor-pointer"
+                    >
                       <Download size={14} />
                     </button>
                   </div>
@@ -269,24 +363,20 @@ export default function CareerRealityV2({ onBack }) {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-800 bg-[#0b1a36] p-5 text-white sm:p-6">
+        <div className="rounded-3xl border border-[#0b1a36] bg-[#0b1a36] p-6 text-white sm:p-8 shadow-xs">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-400">Roadmap</p>
-              <h3 className="font-serif text-2xl font-bold tracking-tight text-white">{career.roadmapTitle}</h3>
-              <p className="max-w-2xl text-xs leading-relaxed text-[#dce4ff]">{career.roadmapDescription}</p>
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#1E88E5]">Action Roadmap</p>
+              <h3 className="font-serif text-2xl font-bold tracking-tight text-white">{activeCareer.roadmapTitle}</h3>
+              <p className="max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-300">{activeCareer.roadmapDescription}</p>
             </div>
             <div className="flex flex-col gap-2.5 sm:flex-row">
               <button
-                onClick={() => navigate(`/roadmap?career=${selectedCareerKey}`)}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-bold text-[#0b1a36] transition hover:bg-slate-50"
+                onClick={() => navigate(`/roadmap?career=${encodeURIComponent(activeCareer.title)}`)}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#0b1a36] transition hover:bg-slate-100 shadow-xs cursor-pointer"
               >
                 <ArrowRight size={14} />
                 View Full Roadmap
-              </button>
-              <button className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/20">
-                <DownloadCloud size={14} />
-                Download Report
               </button>
             </div>
           </div>

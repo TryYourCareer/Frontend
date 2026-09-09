@@ -62,7 +62,7 @@ export default function Sidebar({
     <div className="sidebar-inner flex h-full flex-col">
       {/* Logo / Brand */}
       <div className={`sidebar-brand flex h-20 items-center justify-between gap-3 px-4 border-b ${
-        isDark ? "border-slate-800" : "border-slate-400"
+        isDark ? "border-slate-800" : "border-[#D3E3F5]"
       }`}>
         <div className="flex items-center gap-2.5 overflow-hidden">
           <img
@@ -76,7 +76,7 @@ export default function Sidebar({
               animate={{ opacity: 1, width: "auto" }}
               className="min-w-0"
             >
-              <p className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-slate-900"}`}>
+              <p className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-[#0b1a36]"}`}>
                 TryYourCareers
               </p>
             </motion.div>
@@ -88,7 +88,7 @@ export default function Sidebar({
           <button
             type="button"
             onClick={onToggleCollapse}
-            className={`hidden lg:grid h-7 w-7 place-items-center rounded-lg text-slate-500 hover:text-slate-950 hover:bg-slate-900/5 transition-colors shrink-0`}
+            className={`hidden lg:grid h-7 w-7 place-items-center rounded-xl text-slate-500 hover:text-[#0b1a36] hover:bg-[#F0F6FC] transition-colors shrink-0 cursor-pointer`}
             title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
           >
             {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
@@ -113,31 +113,31 @@ export default function Sidebar({
               whileTap={{ scale: 0.97 }}
               onClick={() => handleNav(action)}
               title={isCollapsed ? (isLaunchingSoon ? `${label} (Launching Soon)` : label) : undefined}
-              className={`sidebar-nav-item group flex w-full items-center gap-3 rounded-xl py-2.5 text-left text-sm font-semibold transition-all duration-200 ${
-                isCollapsed ? "justify-center px-0" : "px-3"
+              className={`sidebar-nav-item group flex w-full items-center gap-3 rounded-2xl py-2.5 text-left text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                isCollapsed ? "justify-center px-0" : "px-3.5"
               } ${
                 isActive
-                  ? "bg-[#FAF2DB] text-slate-900 shadow-sm"
+                  ? "bg-[#0b1a36] text-white shadow-xs"
                   : isLaunchingSoon
-                  ? "text-slate-650 hover:bg-slate-900/5 hover:text-slate-900"
-                  : "text-slate-600 hover:bg-slate-900/5 hover:text-slate-900"
+                  ? "text-slate-650 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
+                  : "text-slate-650 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
               }`}
             >
               {/* Active indicator bar */}
               <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-r-full transition-all duration-200 ${
-                isActive ? "bg-slate-900 opacity-100" : "opacity-0"
+                isActive ? "bg-[#1E88E5] opacity-100" : "opacity-0"
               }`} />
               <Icon
                 size={17}
                 className={`shrink-0 transition-colors ${
-                  isActive ? "text-slate-900" : isLaunchingSoon ? "text-amber-600 group-hover:text-amber-700" : "text-slate-500 group-hover:text-slate-800"
+                  isActive ? "text-white" : isLaunchingSoon ? "text-[#1E88E5] group-hover:text-[#1E88E5]" : "text-slate-400 group-hover:text-[#1E88E5]"
                 }`}
               />
               {!isCollapsed && (
                 <div className="flex items-center justify-between w-full min-w-0">
                   <span className="truncate">{label}</span>
                   {isLaunchingSoon && (
-                    <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full ml-auto border border-amber-200 shrink-0">
+                    <span className="text-[10px] bg-sky-50 text-[#1E88E5] font-bold px-2.5 py-0.5 rounded-full ml-auto border border-sky-200 shrink-0">
                       Soon
                     </span>
                   )}
@@ -145,8 +145,8 @@ export default function Sidebar({
               )}
               {isCollapsed && isLaunchingSoon && (
                 <div className="absolute top-1 right-1 flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#1E88E5]"></span>
                 </div>
               )}
             </motion.button>
@@ -155,25 +155,25 @@ export default function Sidebar({
       </motion.nav>
 
       {/* Bottom Section */}
-      <div className={`mt-auto border-t px-3 py-4 ${isDark ? "border-slate-800" : "border-slate-400"}`}>
+      <div className={`mt-auto border-t px-3 py-4 ${isDark ? "border-slate-800" : "border-[#D3E3F5]"}`}>
         {/* User Section */}
         {user ? (
-          <div className={`flex items-center gap-3 rounded-xl border border-slate-300 bg-[#FAF2DB]/60 py-2.5 shadow-sm ${isCollapsed ? "justify-center px-2" : "px-3"}`}>
+          <div className={`flex items-center gap-3 rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] py-2.5 shadow-2xs ${isCollapsed ? "justify-center px-2" : "px-3"}`}>
             {/* Avatar — clickable for profile */}
             <button
               type="button"
               onClick={() => { onOpenProfile?.(); onCloseMobile?.(); }}
               title={isCollapsed ? displayName : undefined}
-              className="shrink-0 focus:outline-none"
+              className="shrink-0 focus:outline-none cursor-pointer"
             >
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
                   alt="User Profile"
-                  className="h-8 w-8 rounded-full object-cover border border-slate-300"
+                  className="h-8 w-8 rounded-full object-cover border border-[#D3E3F5]"
                 />
               ) : (
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white border border-slate-300 shadow-sm shrink-0">
+                <div className="h-8 w-8 rounded-full bg-[#1E88E5] flex items-center justify-center text-xs font-bold text-white border border-[#D3E3F5] shadow-2xs shrink-0">
                   {initial}
                 </div>
               )}
@@ -184,10 +184,10 @@ export default function Sidebar({
               <button
                 type="button"
                 onClick={() => { onOpenProfile?.(); onCloseMobile?.(); }}
-                className="min-w-0 flex-1 text-left focus:outline-none"
+                className="min-w-0 flex-1 text-left focus:outline-none cursor-pointer"
               >
-                <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
-                <div className="flex items-center gap-1 mt-0.5">
+                <p className="text-xs font-bold text-[#0b1a36] truncate">{displayName}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 cc-pulse-dot" />
                   <p className="text-[10px] text-slate-500">Online</p>
                 </div>
@@ -200,7 +200,7 @@ export default function Sidebar({
                 type="button"
                 onClick={() => { onLogout?.(); onCloseMobile?.(); }}
                 title="Logout"
-                className="shrink-0 grid h-7 w-7 place-items-center rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600 transition"
+                className="shrink-0 grid h-7 w-7 place-items-center rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-600 transition cursor-pointer"
               >
                 <LogOut size={15} />
               </button>
@@ -212,7 +212,7 @@ export default function Sidebar({
                 type="button"
                 onClick={() => { onLogout?.(); onCloseMobile?.(); }}
                 title="Logout"
-                className="shrink-0 grid h-7 w-7 place-items-center rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600 transition"
+                className="shrink-0 grid h-7 w-7 place-items-center rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-600 transition cursor-pointer"
               >
                 <LogOut size={15} />
               </button>
@@ -223,7 +223,7 @@ export default function Sidebar({
             type="button"
             onClick={() => { onOpenAuth?.(); onCloseMobile?.(); }}
             title={isCollapsed ? "Login / Sign-up" : undefined}
-            className={`flex w-full items-center justify-center gap-2 rounded-xl bg-[#0b1a36] hover:bg-[#122b59] py-2.5 text-sm font-bold text-white shadow-sm transition ${isCollapsed ? "px-0 w-10 h-10 mx-auto" : "px-4"}`}
+            className={`flex w-full items-center justify-center gap-2 rounded-full bg-[#0b1a36] hover:bg-[#122b59] py-2.5 text-xs font-bold text-white shadow-xs transition cursor-pointer ${isCollapsed ? "px-0 w-10 h-10 mx-auto" : "px-4"}`}
           >
             <LogIn size={15} className="shrink-0" />
             {!isCollapsed && <span>Login / Sign-up</span>}
@@ -236,10 +236,10 @@ export default function Sidebar({
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className={`cc-sidebar hidden lg:flex lg:flex-col lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:z-40 border-r border-slate-400 transition-all duration-350 ease-in-out ${
+      <aside className={`cc-sidebar hidden lg:flex lg:flex-col lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:z-40 border-r border-[#D3E3F5] transition-all duration-350 ease-in-out ${
         isCollapsed ? "lg:w-[80px]" : "lg:w-[260px]"
       } ${
-        isDark ? "bg-slate-950" : "bg-[#FAF6EC]"
+        isDark ? "bg-slate-950" : "bg-white"
       }`}>
         {sidebarContent}
       </aside>
@@ -260,15 +260,15 @@ export default function Sidebar({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className={`fixed inset-y-0 left-0 z-[70] flex w-[280px] flex-col lg:hidden border-r border-slate-400 ${
-                isDark ? "bg-slate-950" : "bg-[#FAF6EC]"
+              className={`fixed inset-y-0 left-0 z-[70] flex w-[280px] flex-col lg:hidden border-r border-[#D3E3F5] ${
+                isDark ? "bg-slate-950" : "bg-white"
               }`}
             >
               {/* Close button */}
               <button
                 type="button"
                 onClick={onCloseMobile}
-                className="absolute right-3 top-4 rounded-lg p-1.5 text-slate-400 transition hover:bg-white/10 hover:text-white z-10"
+                className="absolute right-3 top-4 rounded-xl p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 z-10 cursor-pointer"
                 aria-label="Close sidebar"
               >
                 <X size={20} />

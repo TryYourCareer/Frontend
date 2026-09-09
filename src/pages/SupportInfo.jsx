@@ -51,7 +51,7 @@ export default function SupportInfo() {
   };
 
   return (
-    <div className="min-h-screen transition-colors duration-300 flex flex-col bg-[#FAF6EC] text-[#0b1a36]">
+    <div className="min-h-screen transition-colors duration-300 flex flex-col bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36]">
       {/* Landing Navbar */}
       <LandingNavbar isDark={isDark} />
 
@@ -60,10 +60,10 @@ export default function SupportInfo() {
           
           {/* Header Hero Banner */}
           <div className="text-center space-y-4 max-w-2xl mx-auto pt-4">
-            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider bg-[#7B4A28]/10 text-[#7B4A28] px-3 py-1 rounded-full border border-[#7B4A28]/20">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-sky-50 text-[#1E88E5] px-3.5 py-1 rounded-full border border-sky-200">
               Support Center
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-serif tracking-tight leading-tight text-slate-900">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight leading-tight text-[#0b1a36]">
               We are here to help
             </h1>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
@@ -72,7 +72,7 @@ export default function SupportInfo() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center justify-center gap-1.5 sm:gap-3 border-b border-slate-200/60 pb-4 overflow-x-auto whitespace-nowrap scrollbar-none w-full max-w-2xl mx-auto">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-3 border-b border-[#D3E3F5] pb-4 overflow-x-auto whitespace-nowrap scrollbar-none w-full max-w-2xl mx-auto">
             {[
               { id: "help", label: "Help Center", icon: HelpCircle },
               { id: "contact", label: "Contact Support", icon: MessageSquare },
@@ -85,13 +85,13 @@ export default function SupportInfo() {
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition shadow-sm border shrink-0 ${
+                  className={`flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-bold transition shadow-xs border shrink-0 cursor-pointer ${
                     isActive
-                      ? "bg-[#7B4A28] text-white border-transparent"
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                      ? "bg-[#0b1a36] text-white border-transparent"
+                      : "bg-white border-[#D3E3F5] text-slate-650 hover:bg-[#F0F6FC]"
                   }`}
                 >
-                  <Icon size={14} />
+                  <Icon size={14} className={isActive ? "text-white" : "text-[#1E88E5]"} />
                   <span>{tab.label}</span>
                 </button>
               );
@@ -99,13 +99,13 @@ export default function SupportInfo() {
           </div>
 
           {/* Tab Content Section */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 md:p-10 shadow-xl text-left">
+          <div className="bg-white rounded-3xl border border-[#D3E3F5] p-6 sm:p-8 md:p-10 shadow-xs text-left">
             
             {/* 1. Help Center Tab */}
             {activeTab === "help" && (
               <div className="space-y-6 animate-fade-in">
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black font-serif text-slate-900">Frequently Asked Questions</h2>
+                  <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Frequently Asked Questions</h2>
                   <p className="text-sm text-slate-500">Quick answers to common questions about TryYourCareers dashboards, sandboxes, and cohort placements.</p>
                 </div>
 
@@ -113,11 +113,11 @@ export default function SupportInfo() {
                   {faqs.map((faq, i) => (
                     <div 
                       key={i} 
-                      className="border border-slate-200 rounded-2xl bg-slate-50 overflow-hidden"
+                      className="border border-[#D3E3F5] rounded-2xl bg-[#F0F6FC] overflow-hidden shadow-2xs"
                     >
                       <button
                         onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                        className="w-full text-left px-5 py-4 flex items-center justify-between font-bold text-xs sm:text-sm text-slate-800"
+                        className="w-full text-left px-5 py-4 flex items-center justify-between font-bold text-xs sm:text-sm text-[#0b1a36] cursor-pointer"
                       >
                         <span>{faq.q}</span>
                         <ChevronDown 
@@ -126,7 +126,7 @@ export default function SupportInfo() {
                         />
                       </button>
                       {expandedFaq === i && (
-                        <div className="px-5 pb-4 pt-1 border-t border-slate-200/40 text-xs sm:text-sm text-slate-600 leading-relaxed animate-fade-in">
+                        <div className="px-5 pb-4 pt-1 border-t border-[#D3E3F5] text-xs sm:text-sm text-slate-600 leading-relaxed animate-fade-in bg-white">
                           {faq.a}
                         </div>
                       )}
@@ -142,22 +142,22 @@ export default function SupportInfo() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   {/* Contact form */}
                   <div className="lg:col-span-7 space-y-4">
-                    <h2 className="text-2xl font-black font-serif text-slate-900">Submit a Ticket</h2>
+                    <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Submit a Ticket</h2>
                     <p className="text-xs sm:text-sm text-slate-500">Can't find what you're looking for? Leave a message and we'll reply shortly.</p>
 
                     {contactSubmitted ? (
                       <div className="bg-emerald-500/10 text-emerald-800 p-6 rounded-2xl border border-emerald-500/20 space-y-3 animate-scale-in">
                         <div className="flex items-center gap-3">
-                          <CheckCircle2 size={20} className="text-emerald-550" />
+                          <CheckCircle2 size={20} className="text-emerald-600" />
                           <h4 className="text-sm font-bold">Ticket Submitted Successfully!</h4>
                         </div>
-                        <p className="text-xs text-slate-550 leading-relaxed pl-8">
-                          Your Support Ticket ID is <span className="font-bold font-mono text-[#7B4A28]">{ticketId}</span>. A confirmation has been sent to your email. Our team will review the issue and follow up within 2 hours.
+                        <p className="text-xs text-slate-600 leading-relaxed pl-8">
+                          Your Support Ticket ID is <span className="font-bold font-mono text-[#1E88E5]">{ticketId}</span>. A confirmation has been sent to your email. Our team will review the issue and follow up within 2 hours.
                         </p>
                         <div className="pl-8 pt-2">
                           <button
                             onClick={() => setContactSubmitted(false)}
-                            className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-[10px] px-4 py-2 rounded-xl transition"
+                            className="bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold text-[10px] px-4 py-2 rounded-full transition cursor-pointer shadow-2xs"
                           >
                             Submit Another Ticket
                           </button>
@@ -170,18 +170,18 @@ export default function SupportInfo() {
                             required
                             type="text" 
                             placeholder="Your Name" 
-                            className="p-3 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-amber-400 text-slate-805"
+                            className="p-3 rounded-xl border border-[#D3E3F5] bg-white text-xs sm:text-sm focus:outline-none focus:border-slate-400 text-slate-800 shadow-2xs"
                           />
                           <input 
                             required
                             type="email" 
                             placeholder="Email Address" 
-                            className="p-3 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-amber-400 text-slate-805"
+                            className="p-3 rounded-xl border border-[#D3E3F5] bg-white text-xs sm:text-sm focus:outline-none focus:border-slate-400 text-slate-800 shadow-2xs"
                           />
                         </div>
                         <select 
                           required
-                          className="w-full p-3 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-amber-400 text-slate-700"
+                          className="w-full p-3 rounded-xl border border-[#D3E3F5] bg-white text-xs sm:text-sm focus:outline-none focus:border-slate-400 text-slate-700 shadow-2xs"
                         >
                           <option value="">Select Category</option>
                           <option value="tech">Technical Issue / Sandboxes</option>
@@ -193,13 +193,13 @@ export default function SupportInfo() {
                           required
                           rows="4" 
                           placeholder="Write your issue in detail..." 
-                          className="w-full p-3 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-amber-400 text-slate-805"
+                          className="w-full p-3 rounded-xl border border-[#D3E3F5] bg-white text-xs sm:text-sm focus:outline-none focus:border-slate-400 text-slate-800 shadow-2xs"
                         />
                         <div className="flex justify-end">
                           <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="bg-[#7B4A28] hover:bg-[#643b20] text-white font-bold text-xs px-5 py-3 rounded-xl transition flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                            className="bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold text-xs px-5 py-3 rounded-full transition flex items-center gap-1.5 active:scale-95 disabled:opacity-50 cursor-pointer shadow-xs"
                           >
                             {isSubmitting ? (
                               <>
@@ -219,25 +219,25 @@ export default function SupportInfo() {
                   </div>
 
                   {/* Office Info card */}
-                  <div className="lg:col-span-5 p-6 rounded-2xl bg-[#FAF6EC]/40 border border-slate-200/70 space-y-4">
-                    <h3 className="text-sm font-black uppercase text-[#7B4A28]">Office Info</h3>
+                  <div className="lg:col-span-5 p-6 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] space-y-4 shadow-2xs">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E88E5]">Office Info</h3>
                     <div className="space-y-4 pt-2">
                       <div className="flex items-start gap-3">
-                        <Mail size={16} className="text-[#7B4A28] mt-0.5" />
+                        <Mail size={16} className="text-[#1E88E5] mt-0.5" />
                         <div>
                           <p className="text-xs font-bold text-slate-800">Email Address</p>
                           <p className="text-xs text-slate-500">support@tryyourcareers.com</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Phone size={16} className="text-[#7B4A28] mt-0.5" />
+                        <Phone size={16} className="text-[#1E88E5] mt-0.5" />
                         <div>
                           <p className="text-xs font-bold text-slate-800">Helpline Phone</p>
                           <p className="text-xs text-slate-500">+91 98765 43210 (9 AM - 6 PM)</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <MapPin size={16} className="text-[#7B4A28] mt-0.5" />
+                        <MapPin size={16} className="text-[#1E88E5] mt-0.5" />
                         <div>
                           <p className="text-xs font-bold text-slate-800">Headquarters</p>
                           <p className="text-xs text-slate-500 leading-relaxed">
@@ -254,7 +254,7 @@ export default function SupportInfo() {
             {/* 3. Privacy Policy Tab */}
             {activeTab === "privacy" && (
               <div className="space-y-6 animate-fade-in text-xs sm:text-sm leading-relaxed text-slate-600 max-w-4xl">
-                <h2 className="text-2xl font-black font-serif text-slate-900 mb-4">Privacy Policy</h2>
+                <h2 className="text-2xl font-serif font-bold text-[#0b1a36] mb-4">Privacy Policy</h2>
                 <p className="font-bold text-slate-500 mb-6">Last Updated: August 2026</p>
                 
                 <div className="space-y-4">
@@ -279,7 +279,7 @@ export default function SupportInfo() {
             {/* 4. Terms of Service Tab */}
             {activeTab === "terms" && (
               <div className="space-y-6 animate-fade-in text-xs sm:text-sm leading-relaxed text-slate-600 max-w-4xl">
-                <h2 className="text-2xl font-black font-serif text-slate-900 mb-4">Terms of Service</h2>
+                <h2 className="text-2xl font-serif font-bold text-[#0b1a36] mb-4">Terms of Service</h2>
                 <p className="font-bold text-slate-500 mb-6">Last Updated: August 2026</p>
                 
                 <div className="space-y-4">

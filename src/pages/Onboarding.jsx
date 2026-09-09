@@ -151,23 +151,23 @@ export default function Onboarding({ onBack, onContinue }) {
   };
 
   return (
-    <section className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#e0f2fe_0%,_#f1f5f9_40%,_#e2e8f0_100%)] px-4 py-8 sm:px-6 lg:px-8 flex items-center justify-center">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-2xl">
-        <div className="overflow-hidden rounded-[32px] border border-[#d6e2f5] bg-white/90 shadow-[0_25px_60px_rgba(15,35,80,0.08)] backdrop-blur-xl">
-          <div className="border-b border-[#e2edf9] bg-[#f8faff] px-6 py-5 sm:px-8 flex items-center justify-between">
+        <div className="overflow-hidden rounded-[32px] border border-[#D3E3F5] bg-white shadow-[0_25px_60px_rgba(11,26,54,0.06)] backdrop-blur-xl">
+          <div className="border-b border-[#D3E3F5] bg-[#F0F6FC] px-6 py-5 sm:px-8 flex items-center justify-between">
             <button
               onClick={() => {
                 if (stage === "phone-otp" || stage === "registration") setStage("auth");
                 else onBack?.();
               }}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#b8cbf7] bg-[#edf3ff] px-4 py-2 text-sm font-bold text-[#234b9f] transition hover:bg-[#e0ebff] hover:-translate-y-0.5"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#D3E3F5] bg-white px-4 py-2 text-sm font-bold text-[#0b1a36] transition hover:bg-[#F0F6FC] hover:-translate-y-0.5"
             >
               <ChevronLeft size={16} />
               Back
             </button>
             <div className="flex items-center gap-2">
-              <span className={`h-2.5 w-2.5 rounded-full ${stage !== "registration" ? "bg-[#3b82f6]" : "bg-[#c8d8ee]"}`} />
-              <span className={`h-2.5 w-2.5 rounded-full ${stage === "registration" ? "bg-[#3b82f6]" : "bg-[#c8d8ee]"}`} />
+              <span className={`h-2.5 w-2.5 rounded-full ${stage !== "registration" ? "bg-[#1E88E5]" : "bg-[#D3E3F5]"}`} />
+              <span className={`h-2.5 w-2.5 rounded-full ${stage === "registration" ? "bg-[#1E88E5]" : "bg-[#D3E3F5]"}`} />
             </div>
           </div>
 
@@ -175,32 +175,32 @@ export default function Onboarding({ onBack, onContinue }) {
             {stage === "auth" && (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#e3ebf8] text-[#2d63df]">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#EAF2FA] text-[#1E88E5]">
                     <Shield size={28} />
                   </div>
-                  <h2 className="text-2xl font-black tracking-tight text-[#0f2140] sm:text-3xl">Secure Onboarding</h2>
-                  <p className="text-sm text-[#5f7194]">Choose an authentication method to start your career discovery path.</p>
+                  <h2 className="text-2xl font-black tracking-tight text-[#0b1a36] sm:text-3xl">Secure Onboarding</h2>
+                  <p className="text-sm text-slate-500">Choose an authentication method to start your career discovery path.</p>
                 </div>
 
                 <form onSubmit={handleSendOtp} className="space-y-3">
-                  <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-1.5">Phone Authentication</label>
+                  <label className="block text-xs font-extrabold uppercase tracking-widest text-[#0b1a36] mb-1.5">Phone Authentication</label>
                   <div className="flex gap-2">
-                    <div className="flex items-center gap-1.5 rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] px-3 py-3.5 text-slate-600 select-none">
+                    <div className="flex items-center gap-1.5 rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] px-3 py-3.5 text-slate-600 select-none">
                       <span className="text-sm font-bold">+91</span>
                     </div>
                     <div className="relative flex-1">
-                      <Phone size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8b9bb8]" />
+                      <Phone size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                         placeholder="Enter 10-digit mobile number"
                         disabled={authLoading}
-                        className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-[#90a2c0] focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                        className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:border-[#1E88E5] focus:ring-2 focus:ring-sky-100 outline-none transition"
                       />
                     </div>
                   </div>
-                  <button type="submit" disabled={authLoading || phone.length < 10} className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white disabled:opacity-50">
+                  <button type="submit" disabled={authLoading || phone.length < 10} className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#0b1a36] hover:bg-[#122b59] py-3.5 text-base font-bold text-white disabled:opacity-50">
                     {authLoading ? <Loader2 size={18} className="animate-spin" /> : "Send Verification OTP"}
                   </button>
                 </form>
@@ -210,16 +210,16 @@ export default function Onboarding({ onBack, onContinue }) {
             {stage === "phone-otp" && (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#e6fffa] text-[#0f766e]">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
                     <Shield size={28} />
                   </div>
-                  <h2 className="text-2xl font-black tracking-tight text-[#0f2140] sm:text-3xl">Verify Your Number</h2>
-                  <p className="text-sm text-[#5f7194]">Enter the 6-digit confirmation code sent to <strong>+91 {phone}</strong>.</p>
+                  <h2 className="text-2xl font-black tracking-tight text-[#0b1a36] sm:text-3xl">Verify Your Number</h2>
+                  <p className="text-sm text-slate-500">Enter the 6-digit confirmation code sent to <strong>+91 {phone}</strong>.</p>
                 </div>
 
                 <form onSubmit={handleVerifyOtp} className="space-y-6">
-                  <div className="rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] p-6 space-y-4">
-                    <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d]">Enter OTP Code</label>
+                  <div className="rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-6 space-y-4">
+                    <label className="block text-xs font-extrabold uppercase tracking-widest text-[#0b1a36]">Enter OTP Code</label>
                     <div className="flex justify-between gap-2 max-w-sm mx-auto">
                       {otp.map((digit, idx) => (
                         <input
@@ -230,13 +230,13 @@ export default function Onboarding({ onBack, onContinue }) {
                           value={digit}
                           onChange={(e) => handleOtpChange(idx, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                          className="w-12 h-14 text-center text-xl font-bold rounded-xl border border-[#c4d7f5] bg-white text-[#1e3b70] focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                          className="w-12 h-14 text-center text-xl font-bold rounded-xl border border-[#D3E3F5] bg-white text-[#0b1a36] focus:border-[#1E88E5] focus:ring-2 focus:ring-sky-100 outline-none transition"
                         />
                       ))}
                     </div>
                   </div>
 
-                  <button type="submit" disabled={authLoading} className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white">
+                  <button type="submit" disabled={authLoading} className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#0b1a36] hover:bg-[#122b59] py-3.5 text-base font-bold text-white">
                     {authLoading ? <Loader2 size={18} className="animate-spin" /> : "Verify & Continue"}
                   </button>
                 </form>
@@ -246,55 +246,55 @@ export default function Onboarding({ onBack, onContinue }) {
             {stage === "registration" && (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#f5f3ff] text-[#6d28d9]">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-purple-50 text-purple-600">
                     <User size={28} />
                   </div>
-                  <h2 className="text-2xl font-black tracking-tight text-[#0f2140] sm:text-3xl">Complete Profile</h2>
-                  <p className="text-sm text-[#5f7194]">Please provide your details to personalize your discovery path.</p>
+                  <h2 className="text-2xl font-black tracking-tight text-[#0b1a36] sm:text-3xl">Complete Profile</h2>
+                  <p className="text-sm text-slate-500">Please provide your details to personalize your discovery path.</p>
                 </div>
 
                 <form onSubmit={handleRegisterSubmit} className="space-y-5">
                   <div>
-                    <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-1.5">Full Name</label>
+                    <label className="block text-xs font-extrabold uppercase tracking-widest text-[#0b1a36] mb-1.5">Full Name</label>
                     <input
                       type="text"
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Rahul Sharma"
-                      className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3.5 px-4 text-sm font-semibold text-slate-800 placeholder:text-[#90a2c0] focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                      className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] py-3.5 px-4 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:border-[#1E88E5] focus:ring-2 focus:ring-sky-100 outline-none transition"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-12">
                     <div className="sm:col-span-4">
-                      <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-1.5">Date of Birth</label>
+                      <label className="block text-xs font-extrabold uppercase tracking-widest text-[#0b1a36] mb-1.5">Date of Birth</label>
                       <input
                         type="date"
                         required
                         value={dateOfBirth}
                         onChange={(e) => setDateOfBirth(e.target.value)}
-                        className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3 px-4 text-sm font-semibold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                        className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] py-3 px-4 text-sm font-semibold text-slate-800 focus:border-[#1E88E5] focus:ring-2 focus:ring-sky-100 outline-none transition"
                       />
                     </div>
                     <div className="sm:col-span-4">
-                      <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-1.5">Currently Pursuing</label>
+                      <label className="block text-xs font-extrabold uppercase tracking-widest text-[#0b1a36] mb-1.5">Currently Pursuing</label>
                       <input
                         type="text"
                         required
                         value={currentlyPursuing}
                         onChange={(e) => setCurrentlyPursuing(e.target.value)}
                         placeholder="e.g. Class 12 / B.Tech"
-                        className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3 px-4 text-sm font-semibold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                        className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] py-3 px-4 text-sm font-semibold text-slate-800 focus:border-[#1E88E5] focus:ring-2 focus:ring-sky-100 outline-none transition"
                       />
                     </div>
                     <div className="sm:col-span-4">
-                      <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-1.5">Gender</label>
+                      <label className="block text-xs font-extrabold uppercase tracking-widest text-[#0b1a36] mb-1.5">Gender</label>
                       <select
                         value={gender}
                         required
                         onChange={(e) => setGender(e.target.value)}
-                        className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3 px-4 text-sm font-semibold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                        className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] py-3 px-4 text-sm font-semibold text-slate-800 focus:border-[#1E88E5] focus:ring-2 focus:ring-sky-100 outline-none transition"
                       >
                         <option value="">Select gender</option>
                         <option value="Male">Male</option>
@@ -306,12 +306,12 @@ export default function Onboarding({ onBack, onContinue }) {
                   </div>
 
                   <div className="relative">
-                    <label className="block text-xs font-extrabold uppercase tracking-widest text-[#2f436d] mb-2">Area of Interest</label>
+                    <label className="block text-xs font-extrabold uppercase tracking-widest text-[#0b1a36] mb-2">Area of Interest</label>
                     <select
                       value={areaOfInterest}
                       required
                       onChange={(e) => setAreaOfInterest(e.target.value)}
-                      className="w-full rounded-2xl border border-[#cbd9f4] bg-[#f7fafe] py-3 px-4 pr-10 text-sm font-semibold text-slate-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition appearance-none"
+                      className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] py-3 px-4 pr-10 text-sm font-semibold text-slate-800 focus:border-[#1E88E5] focus:ring-2 focus:ring-sky-100 outline-none transition appearance-none"
                     >
                       <option value="">Select area of interest</option>
                       {shortcuts.map((item) => (
@@ -319,10 +319,10 @@ export default function Onboarding({ onBack, onContinue }) {
                       ))}
                       <option value="Other">Other</option>
                     </select>
-                    <ChevronDown size={18} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8b9bb8]" />
+                    <ChevronDown size={18} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   </div>
 
-                  <button type="submit" disabled={registrationLoading} className="w-full mt-4 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
+                  <button type="submit" disabled={registrationLoading} className="w-full mt-4 flex items-center justify-center gap-2 rounded-2xl bg-[#0b1a36] hover:bg-[#122b59] py-3.5 text-base font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
                     {registrationLoading ? <Loader2 size={18} className="animate-spin" /> : <><span>Submit & Start Assessment</span><ChevronRight size={18} /></>}
                   </button>
                 </form>

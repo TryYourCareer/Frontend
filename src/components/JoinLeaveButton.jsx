@@ -2,9 +2,9 @@
  * JoinLeaveButton — optimistic join/leave toggle for a community.
  *
  * Props:
- *   communityId   string
- *   isMember      boolean
- *   onToggle      (isMember: boolean) => void   called after success
+ * communityId     string
+ * isMember        boolean
+ * onToggle        (isMember: boolean) => void   called after success
  */
 import { useState } from "react";
 import api from "../lib/api";
@@ -46,10 +46,10 @@ export default function JoinLeaveButton({ communityId, isMember, onToggle }) {
         onClick={handleClick}
         disabled={busy}
         className={`
-          inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold
-          transition-all duration-200 shadow-sm select-none
+          inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold
+          transition-all duration-200 shadow-2xs select-none
           ${optimistic
-            ? "bg-[#0b1a36] text-white hover:bg-[#1a2d50] border border-transparent"
+            ? "bg-[#0b1a36] text-white hover:bg-[#122b59] border border-transparent"
             : "bg-white text-[#0b1a36] border border-[#0b1a36] hover:bg-[#0b1a36] hover:text-white"
           }
           ${busy ? "opacity-60 cursor-wait" : "cursor-pointer"}

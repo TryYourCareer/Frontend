@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Login from "./components/Login";
@@ -20,6 +20,8 @@ import TrialMission from "./pages/TrialMission";
 import StrideStage from "./pages/StrideStage";
 import CompanyInfo from "./pages/CompanyInfo";
 import SupportInfo from "./pages/SupportInfo";
+import CareerReport from "./pages/CareerReport";
+
 
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -162,6 +164,20 @@ function AppShell({ children }) {
 function AppRoutes() {
   const { token, isRegistered, loading, profile, isLoginOpen, setIsLoginOpen } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // If Supabase redirects directly to root "/" with tokens or code, forward to /oauth/callback
+    const hash = window.location.hash || "";
+    const search = window.location.search || "";
+    if (
+      (hash && (hash.includes("access_token=") || hash.includes("error="))) ||
+      (search && (search.includes("code=") || search.includes("error=")))
+    ) {
+      if (window.location.pathname !== "/oauth/callback") {
+        navigate(`/oauth/callback${search}${hash}`, { replace: true });
+      }
+    }
+  }, [navigate]);
   return (
     <>
       <Routes>
@@ -181,6 +197,7 @@ function AppRoutes() {
         <Route path="/roadmap" element={<ProtectedRoute><AppShell><Roadmap /></AppShell></ProtectedRoute>} />
         <Route path="/career-search" element={<ProtectedRoute><AppShell><CareerSearch /></AppShell></ProtectedRoute>} />
         <Route path="/career-details/:careerName" element={<CareerDetails />} />
+        <Route path="/career-report/:sessionId" element={<ProtectedRoute requireRegistration><AppShell><CareerReport /></AppShell></ProtectedRoute>} />
         <Route path="/trial-mission" element={<ProtectedRoute><AppShell><TrialMission /></AppShell></ProtectedRoute>} />
         <Route path="/stride-journey/:stageId" element={<AppShell><StrideStage /></AppShell>} />
         <Route path="/company/:tabId" element={<CompanyInfo />} />
@@ -208,3 +225,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+

@@ -39,7 +39,7 @@ function formatDateToYYYYMMDD(dateVal) {
       const month = String(dateVal.getMonth() + 1).padStart(2, "0");
       const day = String(dateVal.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
-    }
+  }
 
     if (typeof dateVal === "string") {
       const match = dateVal.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -103,21 +103,21 @@ export default function Profile({ profile, onRestart, onSave }) {
   /* ── Skeleton while profile loads ── */
   if (!profile) {
     return (
-      <section className="min-h-screen bg-[#FAF6EC] px-6 py-10 text-slate-800">
+      <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800">
         <div className="mx-auto max-w-5xl space-y-8 animate-pulse">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-6">
+          <div className="flex items-center justify-between border-b border-[#D3E3F5] pb-6">
             <div className="space-y-2">
-              <div className="h-3 w-24 rounded-full bg-[#e8dfc8]" />
-              <div className="h-7 w-56 rounded-xl bg-[#e8dfc8]" />
+              <div className="h-3 w-24 rounded-full bg-slate-200" />
+              <div className="h-7 w-56 rounded-xl bg-slate-200" />
             </div>
-            <div className="h-9 w-28 rounded-full bg-[#e8dfc8]" />
+            <div className="h-9 w-28 rounded-full bg-slate-200" />
           </div>
-          <div className="h-24 w-24 rounded-full bg-[#e8dfc8]" />
+          <div className="h-24 w-24 rounded-full bg-slate-200" />
           <div className="grid gap-6 md:grid-cols-2">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-2">
-                <div className="h-2.5 w-20 rounded-full bg-[#e8dfc8]" />
-                <div className="h-11 w-full rounded-xl bg-[#e8dfc8]" />
+                <div className="h-2.5 w-20 rounded-full bg-slate-200" />
+                <div className="h-11 w-full rounded-xl bg-slate-200" />
               </div>
             ))}
           </div>
@@ -179,23 +179,23 @@ export default function Profile({ profile, onRestart, onSave }) {
   };
 
   const inputClass =
-    "w-full rounded-xl border border-[#e2d9c8] bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#5B7EC9] focus:ring-2 focus:ring-[#5B7EC9]/20 placeholder:text-slate-400";
+    "w-full rounded-xl border border-[#D3E3F5] bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#1E88E5] focus:ring-2 focus:ring-[#1E88E5]/20 placeholder:text-slate-400";
 
-  const labelClass = "text-xs font-bold text-[#7B4A28] uppercase tracking-wider";
+  const labelClass = "text-xs font-bold text-[#0b1a36] uppercase tracking-wider";
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-6 py-10 text-slate-800 text-left">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800 text-left">
       <form onSubmit={handleSubmit} className="mx-auto max-w-5xl space-y-10">
 
         {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#e2d9c8] pb-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#D3E3F5] pb-6">
           <div className="flex items-center gap-4">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-widest text-[#7B4A28]/60">Account</span>
-              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#3D1F08]">Personal Information</h1>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[#1E88E5]">Account</span>
+              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36]">Personal Information</h1>
             </div>
             {authLoading && (
-              <span className="flex items-center gap-1.5 text-xs text-[#5B7EC9] font-semibold">
+              <span className="flex items-center gap-1.5 text-xs text-[#1E88E5] font-semibold">
                 <Loader2 size={13} className="animate-spin" />
                 Saving...
               </span>
@@ -209,7 +209,7 @@ export default function Profile({ profile, onRestart, onSave }) {
           <button
             type="submit"
             disabled={authLoading}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#5B7EC9] hover:bg-[#4a6db8] px-5 py-2.5 text-xs font-bold text-white transition disabled:opacity-60 shadow-md shadow-[#5B7EC9]/20"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#0b1a36] hover:bg-[#122b59] px-5 py-2.5 text-xs font-bold text-white transition disabled:opacity-60 shadow-md shadow-[#0b1a36]/10"
           >
             {authLoading ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
             Save Changes
@@ -219,7 +219,7 @@ export default function Profile({ profile, onRestart, onSave }) {
         {/* Avatar */}
         <div className="flex justify-start">
           <div className="relative group cursor-pointer">
-            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#e2d9c8] shadow-md flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#D3E3F5] shadow-md flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
@@ -230,10 +230,10 @@ export default function Profile({ profile, onRestart, onSave }) {
                 <span className="text-3xl font-bold text-white uppercase">{initial}</span>
               )}
             </div>
-            <div className="absolute inset-0 bg-[#3D1F08]/40 rounded-full opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
+            <div className="absolute inset-0 bg-[#0b1a36]/40 rounded-full opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
               <Camera size={18} />
             </div>
-            <div className="absolute bottom-0 right-0 bg-[#5B7EC9] text-white p-1.5 rounded-full border-2 border-[#FAF6EC] shadow-sm">
+            <div className="absolute bottom-0 right-0 bg-[#1E88E5] text-white p-1.5 rounded-full border-2 border-white shadow-sm">
               <Camera size={11} />
             </div>
           </div>
@@ -274,11 +274,11 @@ export default function Profile({ profile, onRestart, onSave }) {
             </FormField>
 
             <FormField label="Phone Number" className={labelClass}>
-              <div className="flex rounded-xl border border-[#e2d9c8] overflow-hidden focus-within:ring-2 focus-within:ring-[#5B7EC9]/20 focus-within:border-[#5B7EC9] bg-white">
+              <div className="flex rounded-xl border border-[#D3E3F5] overflow-hidden focus-within:ring-2 focus-within:ring-[#1E88E5]/20 focus-within:border-[#1E88E5] bg-white">
                 <select
                   value={form.phoneCode}
                   onChange={handleChange("phoneCode")}
-                  className="bg-transparent pl-4 pr-2 py-3 text-sm text-slate-600 outline-none border-r border-[#e2d9c8]"
+                  className="bg-transparent pl-4 pr-2 py-3 text-sm text-slate-600 outline-none border-r border-[#D3E3F5]"
                 >
                   <option value="+91">+91 (IN)</option>
                   <option value="+1">+1 (US)</option>
@@ -413,9 +413,9 @@ export default function Profile({ profile, onRestart, onSave }) {
         )}
 
         {/* ── Logout Section ── */}
-        <div className="border-t border-[#e2d9c8] pt-8 space-y-4">
-          <h2 className="text-base font-serif font-bold text-[#3D1F08]">Logout</h2>
-          <div className="flex items-start gap-3 rounded-xl bg-white p-4 border border-[#e2d9c8] text-xs text-slate-600 shadow-sm">
+        <div className="border-t border-[#D3E3F5] pt-8 space-y-4">
+          <h2 className="text-base font-serif font-bold text-[#0b1a36]">Logout</h2>
+          <div className="flex items-start gap-3 rounded-xl bg-white p-4 border border-[#D3E3F5] text-xs text-slate-600 shadow-sm">
             <AlertCircle size={15} className="mt-0.5 shrink-0 text-slate-400" />
             <p>
               Sign out of your session on this device. You can log back in at any time to access your data.
@@ -424,7 +424,7 @@ export default function Profile({ profile, onRestart, onSave }) {
           <button
             type="button"
             onClick={() => logout()}
-            className="rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 px-5 py-2.5 text-xs font-bold transition bg-white shadow-sm flex items-center gap-1.5"
+            className="rounded-xl border border-[#D3E3F5] text-slate-700 hover:bg-[#F0F6FC] hover:text-[#0b1a36] px-5 py-2.5 text-xs font-bold transition bg-white shadow-sm flex items-center gap-1.5"
           >
             <LogOut size={13} />
             <span>Log out</span>
@@ -439,8 +439,8 @@ export default function Profile({ profile, onRestart, onSave }) {
 function SectionHeading({ title }) {
   return (
     <div className="flex items-center gap-3">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-[#7B4A28]/70">{title}</h2>
-      <div className="flex-1 h-px bg-[#e2d9c8]" />
+      <h2 className="text-xs font-bold uppercase tracking-widest text-[#1E88E5]">{title}</h2>
+      <div className="flex-1 h-px bg-[#D3E3F5]" />
     </div>
   );
 }
@@ -448,7 +448,7 @@ function SectionHeading({ title }) {
 function FormField({ label, children, className }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className={className || "text-xs font-bold text-[#7B4A28] uppercase tracking-wider"}>
+      <label className={className || "text-xs font-bold text-[#0b1a36] uppercase tracking-wider"}>
         {label}
       </label>
       {children}
