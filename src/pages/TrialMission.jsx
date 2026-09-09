@@ -35,6 +35,45 @@ export function formatDimensionKey(key) {
     .trim();
 }
 
+export function deriveInvestigationPhaseId(config) {
+  if (!config) return "investigate";
+  const phases = config.phases;
+  if (Array.isArray(phases)) {
+    const invPhase = phases.find(
+      (p) =>
+        (typeof p === "object" &&
+          p !== null &&
+          (p.type === "investigation" ||
+            p.phase_type === "investigation" ||
+            p.category === "investigation" ||
+            p.id === "investigate" ||
+            p.id === "investigation")) ||
+        (typeof p === "string" &&
+          (p === "investigate" || p === "investigation" || p === "investigation_phase"))
+    );
+    if (invPhase) {
+      return typeof invPhase === "string" ? invPhase : invPhase.id || "investigate";
+    }
+    if (phases.length > 0) {
+      const first = phases[0];
+      return typeof first === "string" ? first : first?.id || "investigate";
+    }
+  } else if (phases && typeof phases === "object") {
+    const key = Object.keys(phases).find(
+      (k) =>
+        k === "investigate" ||
+        k === "investigation" ||
+        phases[k]?.type === "investigation" ||
+        phases[k]?.phase_type === "investigation"
+    );
+    if (key) return key;
+  }
+  if (config.investigation?.phase_id) {
+    return config.investigation.phase_id;
+  }
+  return "investigate";
+}
+
 export default function TrialMission() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -42,6 +81,7 @@ export default function TrialMission() {
 
   // Get Ready state
   const [isReadyChecked, setIsReadyChecked] = useState(false);
+  const [briefingDismissed, setBriefingDismissed] = useState(false);
 
   // Findings form state
   const [showFindingForm, setShowFindingForm] = useState(false);
@@ -188,14 +228,36 @@ export default function TrialMission() {
     allowedActions.find((a) => a === "transition:PHASE_ACTIVE" || a === "PHASE_ACTIVE") ||
     "PHASE_ACTIVE";
 
+  // Extract configuration
+  const config = session?.mission_configuration || {};
+  const role = config.role || {};
+  const manager = role.manager || {};
+  const briefing = config.briefing || {};
+  const objective = config.objective || {};
+  const resources = Array.isArray(config.resources) ? config.resources : [];
+  const investigationConfig = config.investigation || {};
+  const completionRules = investigationConfig.completion || {};
+  const requiredFindingsCount = completionRules.required_findings || 1;
+  const requiredResourceAccess = completionRules.required_resource_access || [];
+
+  // Derive configured investigation phase ID from session.mission_configuration
+  const investigationPhaseId = deriveInvestigationPhaseId(config);
+
   // Check current server stage
   const isCreatedStage = session?.state === "SESSION_CREATED";
+  const isInvestigationPhase =
+    Boolean(session?.current_phase) &&
+    session.current_phase === investigationPhaseId;
   const isBriefingStage =
     session?.state === "PHASE_ACTIVE" &&
-    (session?.current_phase === "initial" || session?.current_phase === "briefing");
+    isInvestigationPhase &&
+    !briefingDismissed &&
+    findings.length === 0 &&
+    !workingNotes;
   const isInvestigationStage =
-    session?.current_phase === "investigate" ||
-    session?.current_phase === "investigation";
+    session?.state === "PHASE_ACTIVE" &&
+    isInvestigationPhase &&
+    (briefingDismissed || findings.length > 0 || Boolean(workingNotes));
   const isRecommendationStage =
     session?.current_phase === "recommend" ||
     session?.current_phase === "decision";
@@ -213,17 +275,6 @@ export default function TrialMission() {
   const isCompletedStage =
     session?.state === "SESSION_COMPLETED" ||
     session?.state === "COMPLETED";
-
-  const config = session?.mission_configuration || {};
-  const role = config.role || {};
-  const manager = role.manager || {};
-  const briefing = config.briefing || {};
-  const objective = config.objective || {};
-  const resources = Array.isArray(config.resources) ? config.resources : [];
-  const investigationConfig = config.investigation || {};
-  const completionRules = investigationConfig.completion || {};
-  const requiredFindingsCount = completionRules.required_findings || 1;
-  const requiredResourceAccess = completionRules.required_resource_access || [];
 
   const outputStatus = outputData?.status || "draft";
   const isMemoFinalised = outputStatus === "finalised" || outputStatus === "submitted";
@@ -736,19 +787,10 @@ export default function TrialMission() {
               <div className="pt-4 border-t border-slate-100 flex items-center justify-end">
                 <button
                   type="button"
-                  disabled={actionLoading}
-                  onClick={() => handleTransition("PHASE_ACTIVE")}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#633B20] disabled:opacity-50"
+                  onClick={() => setBriefingDismissed(true)}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#633B20]"
                 >
-                  {actionLoading ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" /> Entering Investigation...
-                    </>
-                  ) : (
-                    <>
-                      Start investigating <Rocket size={16} />
-                    </>
-                  )}
+                  Start investigating <Rocket size={16} />
                 </button>
               </div>
             </div>
@@ -1076,7 +1118,7 @@ export default function TrialMission() {
                   <div className="pt-3 border-t border-slate-100">
                     <button
                       type="button"
-                      disabled={actionLoading}
+                      disabled={actionLoading || !isInvestigationPhase}
                       onClick={handleCompleteInvestigation}
                       className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-4 py-3 text-xs font-bold text-white shadow-sm transition hover:bg-[#633B20] disabled:opacity-50"
                     >

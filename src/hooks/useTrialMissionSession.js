@@ -137,7 +137,41 @@ export function useTrialMissionSession(initialSessionId = null) {
     try {
       const data = await getMissionSession(sessionId);
       setSession(data);
-      if (data?.current_phase === "investigate" || data?.current_phase === "investigation") {
+      const config = data?.mission_configuration || {};
+      const phases = config.phases;
+      let invPhaseId = "investigate";
+      if (Array.isArray(phases)) {
+        const inv = phases.find(
+          (p) =>
+            (typeof p === "object" &&
+              p !== null &&
+              (p.type === "investigation" ||
+                p.phase_type === "investigation" ||
+                p.category === "investigation" ||
+                p.id === "investigate" ||
+                p.id === "investigation")) ||
+            (typeof p === "string" && (p === "investigate" || p === "investigation"))
+        );
+        if (inv) {
+          invPhaseId = typeof inv === "string" ? inv : inv.id || "investigate";
+        } else if (phases.length > 0) {
+          const first = phases[0];
+          invPhaseId = typeof first === "string" ? first : first?.id || "investigate";
+        }
+      } else if (phases && typeof phases === "object") {
+        const key = Object.keys(phases).find(
+          (k) =>
+            k === "investigate" ||
+            k === "investigation" ||
+            phases[k]?.type === "investigation" ||
+            phases[k]?.phase_type === "investigation"
+        );
+        if (key) invPhaseId = key;
+      } else if (config.investigation?.phase_id) {
+        invPhaseId = config.investigation.phase_id;
+      }
+
+      if (data?.current_phase && data.current_phase === invPhaseId) {
         await loadWorkspaceData(sessionId);
       } else if (data?.current_phase === "deliver" || data?.current_phase === "output" || data?.current_phase === "memo") {
         await handleLoadOutput(sessionId);
@@ -171,13 +205,17 @@ export function useTrialMissionSession(initialSessionId = null) {
 
   const handleTransition = useCallback(async (actionOrState) => {
     if (!session?.id) return;
+    let target = actionOrState;
+    if (typeof target === "string" && target.startsWith("transition:")) {
+      target = target.replace("transition:", "");
+    }
+    const targetState = typeof target === "object" && target !== null ? target.target_state : target;
+    if (typeof targetState === "string" && session?.state === targetState) {
+      return session;
+    }
     setActionLoading(true);
     setError(null);
     try {
-      let target = actionOrState;
-      if (typeof target === "string" && target.startsWith("transition:")) {
-        target = target.replace("transition:", "");
-      }
       const payload = typeof target === "string" ? { target_state: target } : target;
       const updated = await transitionSession(session.id, payload);
       setSession(updated);
@@ -191,7 +229,7 @@ export function useTrialMissionSession(initialSessionId = null) {
     } finally {
       setActionLoading(false);
     }
-  }, [session?.id, loadWorkspaceData]);
+  }, [session, loadWorkspaceData]);
 
   const handleAccessResource = useCallback(async (resourceId) => {
     if (!session?.id || !resourceId) return;
@@ -234,6 +272,45 @@ export function useTrialMissionSession(initialSessionId = null) {
 
   const handleCompleteInvestigation = useCallback(async () => {
     if (!session?.id) return;
+    const config = session?.mission_configuration || {};
+    const phases = config.phases;
+    let invPhaseId = "investigate";
+    if (Array.isArray(phases)) {
+      const inv = phases.find(
+        (p) =>
+          (typeof p === "object" &&
+            p !== null &&
+            (p.type === "investigation" ||
+              p.phase_type === "investigation" ||
+              p.category === "investigation" ||
+              p.id === "investigate" ||
+              p.id === "investigation")) ||
+          (typeof p === "string" && (p === "investigate" || p === "investigation"))
+      );
+      if (inv) {
+        invPhaseId = typeof inv === "string" ? inv : inv.id || "investigate";
+      } else if (phases.length > 0) {
+        const first = phases[0];
+        invPhaseId = typeof first === "string" ? first : first?.id || "investigate";
+      }
+    } else if (phases && typeof phases === "object") {
+      const key = Object.keys(phases).find(
+        (k) =>
+          k === "investigate" ||
+          k === "investigation" ||
+          phases[k]?.type === "investigation" ||
+          phases[k]?.phase_type === "investigation"
+      );
+      if (key) invPhaseId = key;
+    } else if (config.investigation?.phase_id) {
+      invPhaseId = config.investigation.phase_id;
+    }
+
+    if (!session?.current_phase || session.current_phase !== invPhaseId) {
+      setError("Cannot complete investigation: session is not in the investigation phase.");
+      return;
+    }
+
     setActionLoading(true);
     setError(null);
     try {
@@ -246,7 +323,7 @@ export function useTrialMissionSession(initialSessionId = null) {
     } finally {
       setActionLoading(false);
     }
-  }, [session?.id]);
+  }, [session]);
 
   const handleSubmitDecision = useCallback(async (payload) => {
     if (!session?.id) return;
