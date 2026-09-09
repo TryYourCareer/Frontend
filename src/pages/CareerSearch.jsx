@@ -4,6 +4,7 @@ import {
   Search, ArrowLeft, TrendingUp, Briefcase,
   DollarSign, BarChart3, Zap, Star, ChevronRight
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 
 const LOGO_BLUE = "#5B7EC9";
@@ -208,6 +209,12 @@ export default function CareerSearch() {
 
   return (
     <section className="min-h-screen bg-[#FAF6EC] px-4 sm:px-6 py-8">
+      <SEO
+        title={query ? `Search: "${query}" Careers` : "Search 100+ Careers & Job Roles"}
+        description={query ? `Explore job paths, salaries, and roadmaps matching "${query}" on Try Your Careers.` : "Search across 100+ high-growth careers, industries, and skill requirements."}
+        keywords="career search, job explorer, find careers by skill, tech jobs salary"
+        url={`/career-search${query ? `?q=${encodeURIComponent(query)}` : ""}`}
+      />
       <div className="mx-auto max-w-5xl space-y-6">
 
         {/* Header */}

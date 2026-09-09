@@ -3,6 +3,7 @@ import Hero from "../components/Hero";
 import careersData from "../data/clearcareers_data.json";
 import LandingNavbar from "../components/LandingNavbar";
 import LandingFooter from "../components/LandingFooter";
+import SEO from "../components/SEO";
 
 export default function Landing({
   onStartDiscovery,
@@ -34,6 +35,12 @@ export default function Landing({
 
   return (
     <div className={`min-h-screen transition-colors duration-300 flex flex-col ${isDark ? "bg-[#0f172a]" : "bg-[#FAF6EC]"}`}>
+      <SEO
+        title="AI-Powered Career Guidance & Exploration Platform"
+        description="Discover your ideal career path with AI-driven assessments, salary insights, interactive industry roadmaps, and real-world career reality checks."
+        keywords="career guidance, career discovery, AI career test, job roadmaps, tech careers"
+        url="/"
+      />
       {/* Separated Sticky Top Navbar */}
       <LandingNavbar
         isDark={isDark}

@@ -3,6 +3,7 @@ import { Search, Filter, Clock, ExternalLink, Tag } from "lucide-react";
 
 import { isFirebaseReady, getDocuments } from "../utils/supabaseStorage";
 import BACKEND_BASE_URL from "../API/BaseURL";
+import SEO from "../components/SEO";
 
 const API_BASE_URL = BACKEND_BASE_URL;
 const CATEGORY_TABS = ["All", "Opportunity", "Skill Trend", "News", "Success Story"];
@@ -181,6 +182,12 @@ export default function InsightsFeed({ onBack }) {
 
   return (
     <section className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-10">
+      <SEO
+        title="Daily Career Insights & Tech Opportunities"
+        description="Stay ahead with curated internship opportunities, in-demand skill trends, student scholarships, and technology industry news."
+        keywords="career insights, tech internships, student scholarships, tech trends, job market news"
+        url="/insights-feed"
+      />
       <div className="mx-auto max-w-6xl space-y-6">
 
         {/* Title Header */}

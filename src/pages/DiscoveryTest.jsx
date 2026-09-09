@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { startTestSession, getTestQuestions, submitQuestionAnswer, submitTestSession, getTestProgress } from "../services/discoveryTest";
 import { useAuth } from "../contexts/AuthContext";
+import SEO from "../components/SEO";
 
 export default function DiscoveryTest() {
   const { profile, loading } = useAuth();
@@ -164,6 +165,12 @@ export default function DiscoveryTest() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-8">
+      <SEO
+        title="AI Career Assessment & Discovery Test"
+        description="Take the AI career discovery assessment to analyze your natural aptitude, cognitive preferences, and find your top career matches."
+        keywords="career discovery test, aptitude test, personality career match, AI career assessment"
+        url="/discovery-test"
+      />
       <div className="mx-auto max-w-4xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-lg">
         <div className="mb-6 flex items-center justify-between gap-4">
           <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">

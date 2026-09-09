@@ -7,6 +7,7 @@ import {
   Brain, Compass, Check, Briefcase, Zap, ShieldAlert, DollarSign, Award, ShieldCheck, RefreshCw
 } from "lucide-react";
 import BACKEND_BASE_URL from "../API/BaseURL";
+import SEO from "../components/SEO";
 
 const API_BASE_URL = BACKEND_BASE_URL;
 const API_TIMEOUT_MS = 3000;
@@ -487,6 +488,12 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
 
   return (
     <div className="min-h-screen bg-[#FAF6EC] text-[#0b1a36]">
+      <SEO
+        title="Explore 100+ High-Growth Career Paths & Roadmaps"
+        description="Filter and discover verified career options by cluster, salary bracket, required education, and industry growth demand."
+        keywords="explore careers, career clusters, tech careers, highest paying jobs, career roadmaps"
+        url="/explore-careers"
+      />
       {/* Header */}
       <header className="border-b border-[#0b1a36]/5 bg-[#FAF6EC]/85 backdrop-blur-md sticky top-0 z-20 transition-all">
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">

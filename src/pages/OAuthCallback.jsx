@@ -10,30 +10,39 @@ export default function OAuthCallback() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Try to read an OAuth "code" from either the query string or the URL fragment/hash.
-    let code = params.get("code");
-    let tokenFromHash = null;
+    const errorParam = params.get("error_description") || params.get("error");
+    if (errorParam) {
+      setError(errorParam);
+      return;
+    }
 
-    if (!code) {
+    // Try to read an OAuth "code" or token from either query string or URL hash.
+    let code = params.get("code");
+    let token = params.get("access_token") || params.get("token");
+
+    if (!code && !token) {
       const hash = window.location.hash || "";
       if (hash) {
         const hashParams = new URLSearchParams(hash.replace(/^#/, ""));
         code = hashParams.get("code");
-        tokenFromHash = hashParams.get("access_token") || hashParams.get("token");
+        token = hashParams.get("access_token") || hashParams.get("token");
+        const hashError = hashParams.get("error_description") || hashParams.get("error");
+        if (hashError) {
+          setError(hashError);
+          return;
+        }
       }
     }
 
-    if (!code && !tokenFromHash) {
+    if (!code && !token) {
       setError("Missing OAuth code.");
       return;
     }
 
-    // If the provider returned an access token in the URL fragment, use it directly.
-    if (tokenFromHash) {
-      setAuthToken(tokenFromHash);
-      setTokenState(tokenFromHash);
-      // AuthContext restore() will fetch profile & isRegistered automatically.
-      // Navigate to dashboard immediately — redirect to /register happens if needed.
+    // If access token was provided directly, use it
+    if (token) {
+      setAuthToken(token);
+      setTokenState(token);
       navigate("/dashboard", { replace: true });
       return;
     }

@@ -5,6 +5,7 @@ import {
   Award, BookOpen, Compass, CheckCircle, ShieldAlert,
   AlertCircle
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 const LOGO_BLUE = "#5B7EC9";
 const LOGO_DARK = "#3D1F08";
@@ -109,6 +110,30 @@ export default function CareerDetails() {
 
   return (
     <section className="min-h-screen bg-[#FAF6EC] px-4 sm:px-6 py-8 text-slate-800 text-left">
+      <SEO
+        title={`${career["Career Name"]} Career Path, Salary & Skills`}
+        description={career["One-Line Summary"] || `Learn about becoming a ${career["Career Name"]}. Salary: ₹${career["Entry Salary (LPA)"]} - ${career["Senior Salary (LPA)"]} LPA, demand: ${demand}.`}
+        keywords={`${career["Career Name"]}, ${career["Cluster"]}, salary, career roadmap, ${skills.slice(0, 5).join(", ")}`}
+        url={`/career-details/${encodeURIComponent(career["Career Name"] || "")}`}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Occupation",
+          "name": career["Career Name"],
+          "description": career["One-Line Summary"] || career["What They Do Day-to-Day"],
+          "occupationalCategory": career["Cluster"],
+          "skills": skills.join(", "),
+          "estimatedSalary": [
+            {
+              "@type": "MonetaryAmountDistribution",
+              "name": "base",
+              "currency": "INR",
+              "minValue": (parseFloat(career["Entry Salary (LPA)"]) || 0) * 100000,
+              "maxValue": (parseFloat(career["Senior Salary (LPA)"]) || 0) * 100000,
+              "unitText": "YEAR"
+            }
+          ]
+        }}
+      />
       <div className="mx-auto max-w-4xl space-y-8">
         {/* Navigation & Action Header */}
         <div className="flex items-center gap-4">
