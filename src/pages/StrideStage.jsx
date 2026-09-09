@@ -16,9 +16,9 @@ const STAGES_DATA = {
     time: "~5 minutes",
     cta: "Start Discovery Test",
     path: "/assessment",
-    gradient: "from-amber-400 to-orange-500",
-    shadow: "shadow-amber-500/20",
-    themeColor: "amber",
+    gradient: "from-sky-500 to-[#1E88E5]",
+    shadow: "shadow-sky-500/20",
+    themeColor: "sky",
     highlights: [
       "No preparation needed — just honest answers",
       "Matches you with top 3 career clusters",
@@ -34,7 +34,7 @@ const STAGES_DATA = {
     time: "~10 minutes",
     cta: "Explore Careers & Salaries",
     path: "/explore-careers",
-    gradient: "from-blue-400 to-indigo-500",
+    gradient: "from-[#1E88E5] to-[#0b1a36]",
     shadow: "shadow-blue-500/20",
     themeColor: "blue",
     highlights: [
@@ -52,9 +52,9 @@ const STAGES_DATA = {
     time: "~15 minutes",
     cta: "Launch Trial Sandbox",
     path: "/trial-mission",
-    gradient: "from-violet-400 to-purple-500",
-    shadow: "shadow-violet-500/20",
-    themeColor: "violet",
+    gradient: "from-sky-400 to-[#1E88E5]",
+    shadow: "shadow-sky-500/20",
+    themeColor: "sky",
     highlights: [
       "Hands-on interactive workspace simulation",
       "Designed for complete beginners to test skills",
@@ -70,9 +70,9 @@ const STAGES_DATA = {
     time: "Ongoing community access",
     cta: "Enter Career Hubs",
     path: "/career-hubs",
-    gradient: "from-emerald-400 to-teal-500",
-    shadow: "shadow-emerald-500/20",
-    themeColor: "emerald",
+    gradient: "from-[#1E88E5] to-[#0b1a36]",
+    shadow: "shadow-blue-500/20",
+    themeColor: "blue",
     highlights: [
       "Access professional QA forums and group chats",
       "Network with potential career mentors",
@@ -105,14 +105,14 @@ export default function StrideStage() {
   };
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] dark:bg-slate-950 px-6 py-10 text-slate-800 dark:text-slate-100">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] dark:bg-slate-950 px-6 py-10 text-[#0b1a36] dark:text-slate-100">
       <div className="mx-auto max-w-5xl">
         
         {/* Guest Warning Banner */}
         {!token && (
-          <div className="mb-8 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-300 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="mb-8 p-4 rounded-2xl bg-sky-50 border border-[#D3E3F5] text-[#0b1a36] dark:text-sky-300 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 text-left">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#D3E3F5]/50 flex items-center justify-center text-[#1E88E5] dark:text-sky-400 shrink-0">
                 <Sparkles size={20} />
               </div>
               <div>
@@ -122,7 +122,7 @@ export default function StrideStage() {
             </div>
             <button
               onClick={() => setIsLoginOpen(true)}
-              className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all shrink-0 active:scale-95"
+              className="bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all shrink-0 active:scale-95"
             >
               Sign Up for Free
             </button>
@@ -130,12 +130,12 @@ export default function StrideStage() {
         )}
 
         {/* Stages Stepper Navigation */}
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mb-10 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mb-10 pb-6 border-b border-[#D3E3F5] dark:border-slate-800">
           {[
-            { id: "discover", title: "Stage 01: Discover", icon: Sparkles, gradient: "from-amber-400 to-orange-500" },
-            { id: "explore", title: "Stage 02: Explore", icon: TrendingUp, gradient: "from-blue-400 to-indigo-500" },
-            { id: "experience", title: "Stage 03: Experience", icon: Terminal, gradient: "from-violet-400 to-purple-500" },
-            { id: "align", title: "Stage 04: Align", icon: Users, gradient: "from-emerald-400 to-teal-500" }
+            { id: "discover", title: "Stage 01: Discover", icon: Sparkles, gradient: "from-sky-500 to-[#1E88E5]" },
+            { id: "explore", title: "Stage 02: Explore", icon: TrendingUp, gradient: "from-[#1E88E5] to-[#0b1a36]" },
+            { id: "experience", title: "Stage 03: Experience", icon: Terminal, gradient: "from-sky-400 to-[#1E88E5]" },
+            { id: "align", title: "Stage 04: Align", icon: Users, gradient: "from-[#1E88E5] to-[#0b1a36]" }
           ].map((item) => {
             const isCurrent = item.id === stage.id;
             const Icon = item.icon;
@@ -146,7 +146,7 @@ export default function StrideStage() {
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all shadow-sm ${
                   isCurrent
                     ? `bg-gradient-to-br ${item.gradient} text-white border-transparent`
-                    : "bg-white dark:bg-[#181d2a] border-slate-250 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
+                    : "bg-white dark:bg-[#181d2a] border-[#D3E3F5] dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-[#F0F6FC] dark:hover:bg-slate-850"
                 }`}
               >
                 <Icon size={14} className={isCurrent ? "text-white" : "text-slate-400"} />
@@ -171,10 +171,10 @@ export default function StrideStage() {
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl sm:text-4xl font-black font-serif tracking-tight text-slate-900 dark:text-white leading-tight">
+              <h1 className="text-3xl sm:text-4xl font-black font-serif tracking-tight text-[#0b1a36] dark:text-white leading-tight">
                 {stage.title}
               </h1>
-              <p className="text-base sm:text-lg font-medium text-[#7B4A28] dark:text-amber-400">
+              <p className="text-base sm:text-lg font-medium text-[#1E88E5] dark:text-sky-400">
                 {stage.subtitle}
               </p>
             </div>
@@ -213,11 +213,11 @@ export default function StrideStage() {
           {/* Right Column: Visual Mockup */}
           <div className="md:col-span-5 flex justify-center">
             {demoCompleted && !token ? (
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl max-w-sm w-full text-center space-y-4 animate-scale-in">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#D3E3F5] dark:border-slate-800 p-6 shadow-xl max-w-sm w-full text-center space-y-4 animate-scale-in">
                 <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
                   <CheckCircle2 size={24} />
                 </div>
-                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">Demo Mission Completed!</h4>
+                <h4 className="text-sm font-bold text-[#0b1a36] dark:text-slate-200">Demo Mission Completed!</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   You have completed the interactive preview of {stage.title}. Create a free account to access all features, get full diagnostics, and record progress.
                 </p>
@@ -294,14 +294,14 @@ function InteractiveQuiz({ onComplete }) {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl max-w-sm w-full space-y-4 text-left animate-fade-in">
-      <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#D3E3F5] dark:border-slate-800 p-6 shadow-xl max-w-sm w-full space-y-4 text-left animate-fade-in">
+      <div className="flex items-center justify-between border-b pb-3 border-[#D3E3F5] dark:border-slate-800">
         <span className="text-[10px] font-bold text-slate-400 uppercase">Demo Question {qIdx + 1} of 3</span>
-        <span className="h-1.5 w-16 rounded-full bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
-          <span className="absolute left-0 top-0 bottom-0 bg-amber-500 transition-all duration-300" style={{ width: `${((qIdx + 1) / 3) * 100}%` }} />
+        <span className="h-1.5 w-16 rounded-full bg-[#F0F6FC] dark:bg-slate-800 relative overflow-hidden">
+          <span className="absolute left-0 top-0 bottom-0 bg-[#1E88E5] transition-all duration-300" style={{ width: `${((qIdx + 1) / 3) * 100}%` }} />
         </span>
       </div>
-      <p className="text-sm font-bold text-slate-850 dark:text-slate-200">
+      <p className="text-sm font-bold text-[#0b1a36] dark:text-slate-200">
         "{questions[qIdx].text}"
       </p>
       <div className="space-y-2">
@@ -309,7 +309,7 @@ function InteractiveQuiz({ onComplete }) {
           <button
             key={i}
             onClick={handleSelect}
-            className="w-full text-left p-3 rounded-xl border border-slate-150 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-amber-50/50 hover:border-amber-300 dark:hover:bg-amber-950/20 transition-all"
+            className="w-full text-left p-3 rounded-xl border border-[#D3E3F5] dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-[#F0F6FC] hover:border-sky-300 dark:hover:bg-sky-950/20 transition-all"
           >
             {ans}
           </button>
@@ -330,7 +330,7 @@ function InteractiveExplore() {
       peakVal: 80,
       ai: "Moderate (32%)",
       stability: "Very High (9.2)",
-      color: "bg-blue-500"
+      color: "bg-[#1E88E5]"
     },
     design: {
       name: "UX Designer",
@@ -357,16 +357,16 @@ function InteractiveExplore() {
   const info = careersInfo[selected];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl max-w-sm w-full space-y-4 text-left animate-fade-in">
-      <div className="flex gap-1.5 border-b pb-3 border-slate-100 dark:border-slate-800 overflow-x-auto">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#D3E3F5] dark:border-slate-800 p-6 shadow-xl max-w-sm w-full space-y-4 text-left animate-fade-in">
+      <div className="flex gap-1.5 border-b pb-3 border-[#D3E3F5] dark:border-slate-800 overflow-x-auto">
         {Object.keys(careersInfo).map((k) => (
           <button
             key={k}
             onClick={() => setSelected(k)}
             className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition ${
               selected === k
-                ? "bg-blue-550 text-white"
-                : "bg-slate-50 dark:bg-slate-850 text-slate-500 hover:bg-slate-100"
+                ? "bg-[#0b1a36] text-white"
+                : "bg-[#F0F6FC] dark:bg-slate-850 text-slate-500 hover:bg-slate-100"
             }`}
           >
             {careersInfo[k].name.split(" ")[0]}
@@ -375,11 +375,11 @@ function InteractiveExplore() {
       </div>
 
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg bg-sky-50 text-[#1E88E5] border border-sky-200 flex items-center justify-center">
           <TrendingUp size={16} />
         </div>
         <div>
-          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">{info.name}</h4>
+          <h4 className="text-sm font-bold text-[#0b1a36] dark:text-slate-200">{info.name}</h4>
           <p className="text-[10px] text-slate-400">Salary Band (LPA)</p>
         </div>
       </div>
@@ -390,7 +390,7 @@ function InteractiveExplore() {
             <span>Entry Level</span>
             <span>{info.entry}</span>
           </div>
-          <div className="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+          <div className="h-1.5 rounded-full bg-[#F0F6FC] dark:bg-slate-800 overflow-hidden">
             <div className={`h-full ${info.color} rounded-full`} style={{ width: `${info.entryVal}%` }} />
           </div>
         </div>
@@ -399,18 +399,18 @@ function InteractiveExplore() {
             <span>Peak Pay (10+ Yrs)</span>
             <span>{info.peak}</span>
           </div>
-          <div className="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+          <div className="h-1.5 rounded-full bg-[#F0F6FC] dark:bg-slate-800 overflow-hidden">
             <div className={`h-full ${info.color} rounded-full`} style={{ width: `${info.peakVal}%` }} />
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-        <div className="bg-slate-50 dark:bg-slate-850 p-2.5 rounded-xl border border-slate-150/50 dark:border-slate-800 text-center">
+      <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#D3E3F5] dark:border-slate-800">
+        <div className="bg-[#F0F6FC] dark:bg-slate-850 p-2.5 rounded-xl border border-[#D3E3F5] dark:border-slate-800 text-center">
           <p className="text-[9px] font-bold text-slate-400">AI automation</p>
           <p className="text-xs font-black text-amber-600 dark:text-amber-400">{info.ai}</p>
         </div>
-        <div className="bg-slate-50 dark:bg-slate-850 p-2.5 rounded-xl border border-slate-150/50 dark:border-slate-800 text-center">
+        <div className="bg-[#F0F6FC] dark:bg-slate-850 p-2.5 rounded-xl border border-[#D3E3F5] dark:border-slate-800 text-center">
           <p className="text-[9px] font-bold text-slate-400">Stability</p>
           <p className="text-xs font-black text-emerald-600 dark:text-emerald-400">{info.stability}</p>
         </div>
@@ -446,7 +446,7 @@ function InteractiveExperience({ onComplete }) {
         <p className="pl-4"><span className="text-[#f92672]">if</span> salary &gt; <span className="text-[#ae81ff]">100000</span>:</p>
         <p className="pl-8"><span className="text-[#f92672]">return</span> salary * <span className="text-emerald-400 font-bold">0.15</span> <span className="text-slate-500"># fixed from 0.05</span></p>
         <p className="pl-4"><span className="text-[#f92672]">return</span> salary * <span className="text-[#ae81ff]">0.08</span></p>
-      </div>
+    </div>
       <div className="flex justify-between items-center pt-2 border-t border-slate-800 text-[10px]">
         {status === "idle" && <span className="text-slate-500">Ready to test</span>}
         {status === "running" && (
@@ -486,22 +486,22 @@ function InteractiveAlign({ onComplete }) {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xl max-w-sm w-full space-y-3.5 text-left animate-fade-in">
-      <div className="flex items-center justify-between border-b pb-2 border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#D3E3F5] dark:border-slate-800 p-5 shadow-xl max-w-sm w-full space-y-3.5 text-left animate-fade-in">
+      <div className="flex items-center justify-between border-b pb-2 border-[#D3E3F5] dark:border-slate-800">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-[#10B981]">●</span>
-          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">#software-eng-hub</span>
+          <span className="text-xs font-bold text-[#0b1a36] dark:text-slate-200">#software-eng-hub</span>
         </div>
-        <span className="text-[9px] bg-slate-150 dark:bg-slate-850 text-slate-500 px-1.5 py-0.5 rounded-full font-bold">42 Active</span>
+        <span className="text-[9px] bg-[#F0F6FC] dark:bg-slate-850 text-slate-500 px-1.5 py-0.5 rounded-full font-bold">42 Active</span>
       </div>
       <div className="space-y-3 text-[10px] leading-relaxed max-h-48 overflow-y-auto pr-1">
         {chat.map((msg, i) => (
           <div key={i} className="space-y-0.5">
             <div className="flex justify-between text-slate-400">
-              <span className={`font-bold ${msg.isUser ? "text-blue-500" : "text-slate-700 dark:text-slate-300"}`}>{msg.sender}</span>
+              <span className={`font-bold ${msg.isUser ? "text-[#1E88E5]" : "text-slate-700 dark:text-slate-300"}`}>{msg.sender}</span>
               <span>{msg.time}</span>
             </div>
-            <p className={`p-2 rounded-xl ${msg.isUser ? "bg-blue-50 dark:bg-blue-950/20 text-slate-700 dark:text-slate-350 border border-blue-100 dark:border-blue-900/30" : "bg-slate-50 dark:bg-slate-850 text-slate-600 dark:text-slate-400"}`}>
+            <p className={`p-2 rounded-xl ${msg.isUser ? "bg-sky-50 dark:bg-blue-950/20 text-slate-700 dark:text-slate-350 border border-sky-200 dark:border-blue-900/30" : "bg-[#F0F6FC] dark:bg-slate-850 text-slate-600 dark:text-slate-400"}`}>
               {msg.text}
             </p>
           </div>
@@ -513,20 +513,20 @@ function InteractiveAlign({ onComplete }) {
           </p>
         )}
       </div>
-      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
+      <div className="pt-2 border-t border-[#D3E3F5] dark:border-slate-800 space-y-1.5">
         <p className="text-[9px] font-bold text-slate-400 uppercase">Ask a demo question:</p>
         <div className="flex flex-col gap-1">
           <button
             onClick={() => handleAsk("What is the daily work-life balance like?", "Honestly, it depends on project deadlines, but on average it's very manageable! We work 9-5 and rarely work weekends.")}
             disabled={isTyping || chat.length > 2}
-            className="text-[9.5px] text-left px-2 py-1.5 rounded-lg border border-slate-150 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-slate-650 hover:text-emerald-700 transition disabled:opacity-50 truncate"
+            className="text-[9.5px] text-left px-2 py-1.5 rounded-lg border border-[#D3E3F5] hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-slate-650 hover:text-emerald-700 transition disabled:opacity-50 truncate"
           >
             "What is the daily work-life balance like?"
           </button>
           <button
             onClick={() => handleAsk("Which skills are most critical at entry level?", "Mastering basic debugging, version control (Git), and being eager to learn are far more important than knowing 10 frameworks.")}
             disabled={isTyping || chat.length > 2}
-            className="text-[9.5px] text-left px-2 py-1.5 rounded-lg border border-slate-150 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-slate-650 hover:text-emerald-700 transition disabled:opacity-50 truncate"
+            className="text-[9.5px] text-left px-2 py-1.5 rounded-lg border border-[#D3E3F5] hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-slate-650 hover:text-emerald-700 transition disabled:opacity-50 truncate"
           >
             "Which skills are most critical at entry level?"
           </button>

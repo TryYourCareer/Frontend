@@ -4,11 +4,6 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Sparkles, ArrowRight, Check } fro
 import { useAuth } from "../contexts/AuthContext";
 import { getTestProgress, getTestQuestions, startTestSession, submitQuestionAnswer, submitTestSession, saveOnboardingProfile } from "../services/discoveryTest";
 
-const LOGO_BLUE = "#5B7EC9";
-const LOGO_DARK = "#3D1F08";
-const LOGO_MID = "#7B4A28";
-const LOGO_TAN = "#B8712E";
-
 const AVAILABLE_INTEREST_TAGS = [
   "Coding & AI",
   "Tech & Software",
@@ -21,7 +16,6 @@ const AVAILABLE_INTEREST_TAGS = [
   "Gaming & Entertainment",
   "Leadership",
 ];
-
 
 export default function Assessment() {
   const { profile } = useAuth();
@@ -129,7 +123,6 @@ export default function Assessment() {
     setError("");
 
     const questionId = currentQuestion.question_id;
-    // Launch save in background
     const savePromise = submitQuestionAnswer({
       testSessionId,
       questionId,
@@ -147,13 +140,11 @@ export default function Assessment() {
 
     savesRef.current.set(questionId, savePromise);
 
-    // Optimistically update progress and advance index
     setProgress((prev) => Math.max(prev, answeredCount));
 
     if (currentIndex === totalQuestions - 1) {
       setIsSubmitting(true);
       try {
-        // Wait for all background saves to finish
         await Promise.all(savesRef.current.values());
         setStatus("analyzing");
         await submitTestSession(testSessionId);
@@ -180,36 +171,33 @@ export default function Assessment() {
 
   if (status === "instructions") {
     return (
-      <div className="min-h-screen bg-[#FAF6EC] px-6 py-12 text-slate-800 text-left">
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-12 text-slate-800 text-left font-sans">
         <div className="mx-auto w-full max-w-6xl space-y-6">
-          <div className="border-b border-slate-100 pb-4">
-            <span
-              className="inline-flex w-fit items-center rounded-full px-3 py-0.5 text-[9px] font-black tracking-widest uppercase border"
-              style={{ borderColor: LOGO_BLUE, color: LOGO_BLUE, backgroundColor: "#EEF2FB" }}
-            >
+          <div className="border-b border-[#D3E3F5] pb-4">
+            <span className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-0.5 text-[10px] font-bold tracking-[0.2em] uppercase text-[#1E88E5]">
               DISCOVERY RUN
             </span>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 mt-2">
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36] mt-2">
               Start Your Career Discovery
             </h1>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
               This interactive assessment is designed to map your core strengths, interests, and logic styles to real-world career trajectories.
             </p>
           </div>
 
           {previousSessionId && (
-            <div className="border border-[#7B4A28]/30 bg-[#7B4A28]/5 rounded-2xl p-5 space-y-3 shadow-sm">
-              <div className="flex items-center gap-2 text-[#7B4A28] font-bold text-xs uppercase tracking-wider">
+            <div className="border border-[#D3E3F5] bg-white rounded-3xl p-6 space-y-3 shadow-xs">
+              <div className="flex items-center gap-2 text-[#1E88E5] font-bold text-xs uppercase tracking-wider">
                 <Sparkles size={16} />
                 <span>Completed Career Discovery Report Available</span>
               </div>
-              <p className="text-xs text-slate-700 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 You have a previously calculated 6D RIASEC Career Fit Report. You can view your existing matches or retake the assessment test below.
               </p>
               <div className="flex flex-wrap items-center gap-3 pt-1">
                 <button
                   onClick={() => navigate(`/career-report/${previousSessionId}`)}
-                  className="px-5 py-2.5 bg-[#7B4A28] hover:bg-[#633a1f] text-white text-xs font-bold rounded-xl shadow transition flex items-center gap-2"
+                  className="px-5 py-2.5 bg-[#0b1a36] hover:bg-[#122b59] text-white text-xs font-bold rounded-full shadow-xs transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>View Latest Career Fit Report</span>
                   <ArrowRight size={14} />
@@ -219,38 +207,38 @@ export default function Assessment() {
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="border border-[#e2d9c8] bg-[#FAF6EC]/40 rounded-2xl p-4 space-y-1">
+            <div className="border border-[#D3E3F5] bg-white rounded-3xl p-5 space-y-1 shadow-xs">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Estimated Duration</span>
-              <p className="text-sm font-bold text-slate-800">10 – 15 Minutes</p>
+              <p className="text-sm font-bold text-[#0b1a36]">10 – 15 Minutes</p>
             </div>
-            <div className="border border-[#e2d9c8] bg-[#FAF6EC]/40 rounded-2xl p-4 space-y-1">
+            <div className="border border-[#D3E3F5] bg-white rounded-3xl p-5 space-y-1 shadow-xs">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Interactive Questions</span>
-              <p className="text-sm font-bold text-slate-800">Multiple choice & open-text brief</p>
+              <p className="text-sm font-bold text-[#0b1a36]">Multiple choice & open-text brief</p>
             </div>
           </div>
 
           <div className="space-y-3.5">
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">Rules & Tips</h3>
-            <ul className="space-y-2.5 text-xs text-slate-650">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Rules & Tips</h3>
+            <ul className="space-y-2.5 text-xs text-slate-600">
               <li className="flex items-start gap-2.5">
-                <span className="h-1.5 w-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: LOGO_TAN }} />
+                <span className="h-1.5 w-1.5 rounded-full mt-1.5 shrink-0 bg-[#1E88E5]" />
                 <span>Answer naturally and honestly. There are no right or wrong answers.</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="h-1.5 w-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: LOGO_BLUE }} />
+                <span className="h-1.5 w-1.5 rounded-full mt-1.5 shrink-0 bg-[#0b1a36]" />
                 <span>You can go back to review or modify previous answers using the "Previous" action.</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="h-1.5 w-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: LOGO_MID }} />
+                <span className="h-1.5 w-1.5 rounded-full mt-1.5 shrink-0 bg-emerald-500" />
                 <span>Ensure you are in a quiet environment to complete the session without interruptions.</span>
               </li>
             </ul>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-3">
+          <div className="pt-4 border-t border-[#D3E3F5] flex flex-wrap items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="rounded-xl border border-[#e2d9c8] bg-white px-5 py-2.5 text-xs font-bold text-slate-650 hover:bg-slate-50 transition"
+              className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer"
             >
               Cancel
             </button>
@@ -258,15 +246,14 @@ export default function Assessment() {
               <>
                 <button
                   onClick={() => navigate(`/career-report/${previousSessionId}`)}
-                  className="rounded-xl text-white px-6 py-2.5 text-xs font-bold transition shadow-sm flex items-center gap-2"
-                  style={{ backgroundColor: LOGO_MID }}
+                  className="rounded-full text-white px-6 py-2.5 text-xs font-bold transition shadow-xs flex items-center gap-2 bg-[#0b1a36] hover:bg-[#122b59] cursor-pointer"
                 >
                   <span>View Career Fit Report</span>
                   <ArrowRight size={14} />
                 </button>
                 <button
                   onClick={handleStartTest}
-                  className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+                  className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer"
                 >
                   Retake Assessment Test
                 </button>
@@ -274,8 +261,7 @@ export default function Assessment() {
             ) : (
               <button
                 onClick={handleStartTest}
-                className="rounded-xl text-white px-6 py-2.5 text-xs font-bold transition shadow-sm"
-                style={{ backgroundColor: LOGO_DARK }}
+                className="rounded-full text-white px-6 py-2.5 text-xs font-bold transition shadow-xs bg-[#0b1a36] hover:bg-[#122b59] cursor-pointer"
               >
                 Start Discovery Session
               </button>
@@ -288,32 +274,29 @@ export default function Assessment() {
 
   if (status === "onboarding") {
     return (
-      <div className="min-h-screen bg-[#FAF6EC] px-6 py-12 text-slate-800 text-left">
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-12 text-slate-800 text-left font-sans">
         <div className="mx-auto w-full max-w-4xl space-y-6">
-          <div className="border-b border-slate-200 pb-4 space-y-2">
-            <span
-              className="inline-flex w-fit items-center rounded-full px-3 py-0.5 text-[9px] font-black tracking-widest uppercase border"
-              style={{ borderColor: LOGO_BLUE, color: LOGO_BLUE, backgroundColor: "#EEF2FB" }}
-            >
+          <div className="border-b border-[#D3E3F5] pb-4 space-y-2">
+            <span className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-0.5 text-[10px] font-bold tracking-[0.2em] uppercase text-[#1E88E5]">
               STAGE 0 — ONBOARDING SIGNALS
             </span>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36]">
               Tell Us About Yourself
             </h1>
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               These initial context signals set your baseline 6D RIASEC priors before question scoring.
             </p>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#e2d9c8] shadow-sm space-y-6">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#D3E3F5] shadow-xs space-y-6">
             {/* Grade & Stream */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 block uppercase tracking-wider">Current Education Grade</label>
+                <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Current Education Grade</label>
                 <select
                   value={grade}
                   onChange={(e) => setGrade(e.target.value)}
-                  className="w-full rounded-xl border border-stone-300 bg-white p-3 text-xs font-semibold text-slate-800 outline-none focus:border-slate-800"
+                  className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400"
                 >
                   <option value="Class 8">Class 8</option>
                   <option value="Class 9">Class 9</option>
@@ -327,11 +310,11 @@ export default function Assessment() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 block uppercase tracking-wider">Current Academic Stream</label>
+                <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Current Academic Stream</label>
                 <select
                   value={currentStream}
                   onChange={(e) => setCurrentStream(e.target.value)}
-                  className="w-full rounded-xl border border-stone-300 bg-white p-3 text-xs font-semibold text-slate-800 outline-none focus:border-slate-800"
+                  className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400"
                 >
                   <option value="Science (PCM)">Science (PCM - Math)</option>
                   <option value="Science (PCB)">Science (PCB - Medical)</option>
@@ -344,10 +327,10 @@ export default function Assessment() {
 
             {/* Interest Tags */}
             <div className="space-y-2.5">
-              <label className="text-xs font-bold text-slate-700 block uppercase tracking-wider">
+              <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
                 Select Your Top Domain Interests (Select all that apply)
               </label>
-              <div className="flex flex-wrap gap-2.5 pt-1">
+              <div className="flex flex-wrap gap-2 pt-1">
                 {AVAILABLE_INTEREST_TAGS.map((tag) => {
                   const isSelected = interestTags.includes(tag);
                   return (
@@ -355,10 +338,10 @@ export default function Assessment() {
                       key={tag}
                       type="button"
                       onClick={() => toggleInterestTag(tag)}
-                      className={`px-4 py-2 rounded-xl text-xs font-semibold transition border flex items-center gap-1.5 ${
+                      className={`px-4 py-2 rounded-full text-xs font-semibold transition border flex items-center gap-1.5 cursor-pointer shadow-2xs ${
                         isSelected
-                          ? "bg-[#7B4A28] text-white border-[#7B4A28] shadow-sm"
-                          : "bg-stone-50 text-slate-700 border-stone-200 hover:border-slate-400"
+                          ? "bg-[#0b1a36] text-white border-[#0b1a36]"
+                          : "bg-[#F0F6FC] text-slate-700 border-[#D3E3F5] hover:bg-white hover:border-slate-400"
                       }`}
                     >
                       {isSelected && <Check size={13} />}
@@ -371,7 +354,7 @@ export default function Assessment() {
 
             {/* Declared Aspiration */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 block uppercase tracking-wider">
+              <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
                 Declared Aspiration (Optional)
               </label>
               <input
@@ -379,14 +362,14 @@ export default function Assessment() {
                 value={declaredAspiration}
                 onChange={(e) => setDeclaredAspiration(e.target.value)}
                 placeholder="e.g., Software Engineer, AI Researcher, Product Manager..."
-                className="w-full rounded-xl border border-stone-300 bg-white p-3.5 text-xs text-slate-800 outline-none focus:border-slate-800"
+                className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400"
               />
-              <p className="text-[11px] text-slate-400">What career field do you currently think you want to pursue?</p>
+              <p className="text-[11px] text-slate-500">What career field do you currently think you want to pursue?</p>
             </div>
 
             {/* Learning Style */}
             <div className="space-y-2.5">
-              <label className="text-xs font-bold text-slate-700 block uppercase tracking-wider">Preferred Learning & Working Style</label>
+              <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Preferred Learning & Working Style</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {["Hands-on", "Reading & Research", "Team Projects", "Independent"].map((style) => {
                   const isSelected = learningStyle === style;
@@ -395,10 +378,10 @@ export default function Assessment() {
                       key={style}
                       type="button"
                       onClick={() => setLearningStyle(style)}
-                      className={`p-3 rounded-xl text-xs font-bold border transition text-center ${
+                      className={`p-3.5 rounded-2xl text-xs font-bold border transition text-center cursor-pointer shadow-2xs ${
                         isSelected
-                          ? "border-[#7B4A28] bg-[#FAF2DB]/80 text-[#7B4A28]"
-                          : "border-stone-200 bg-white text-slate-600 hover:bg-slate-50"
+                          ? "border-[#1E88E5] bg-sky-50 text-[#1E88E5]"
+                          : "border-[#D3E3F5] bg-[#F0F6FC] text-slate-700 hover:bg-white hover:border-slate-300"
                       }`}
                     >
                       {style}
@@ -412,14 +395,13 @@ export default function Assessment() {
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <button
               onClick={() => setStatus("instructions")}
-              className="rounded-xl border border-[#e2d9c8] bg-white px-5 py-2.5 text-xs font-bold text-slate-650 hover:bg-slate-50 transition"
+              className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer"
             >
               Back to Instructions
             </button>
             <button
               onClick={handleProceedFromOnboarding}
-              className="rounded-xl text-white px-7 py-3 text-xs font-bold transition shadow-sm flex items-center gap-2"
-              style={{ backgroundColor: LOGO_DARK }}
+              className="rounded-full text-white px-6 py-2.5 text-xs font-bold transition shadow-xs flex items-center gap-2 bg-[#0b1a36] hover:bg-[#122b59] cursor-pointer"
             >
               <span>Continue to Assessment Questions</span>
               <ArrowRight size={14} />
@@ -430,34 +412,32 @@ export default function Assessment() {
     );
   }
 
-
   if (status === "analyzing") {
     return <AnalysisAnimation />;
   }
 
   if (status === "completed") {
     return (
-      <div className="min-h-screen bg-[#FAF6EC] px-6 py-10 text-slate-800 text-left">
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800 text-left font-sans">
         <div className="mx-auto w-full max-w-6xl space-y-6">
-
-          <span className="inline-flex items-center rounded-full border border-emerald-600 bg-emerald-50 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-emerald-700">
+          <span className="inline-flex items-center rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[10px] font-bold tracking-wider uppercase text-emerald-800">
             ASSESSMENT COMPLETE
           </span>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 leading-tight">Your answers are saved</h1>
-          <p className="text-xs text-slate-500 leading-relaxed max-w-xl">
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36] leading-tight">Your answers are saved</h1>
+          <p className="text-xs text-slate-600 leading-relaxed max-w-xl">
             We’ve submitted your responses to our AI engine. Your matches and 6D RIASEC personality vectors are now calculated and updated.
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               onClick={() => navigate(testSessionId ? `/career-report/${testSessionId}` : "/dashboard")}
-              className="rounded-xl bg-[#7B4A28] hover:bg-[#633a1f] px-6 py-3 text-xs font-bold text-white transition shadow-md flex items-center gap-2"
+              className="rounded-full bg-[#0b1a36] hover:bg-[#122b59] px-6 py-3 text-xs font-bold text-white transition shadow-xs flex items-center gap-2 cursor-pointer"
             >
               <span>View Your Career Fit Report</span>
               <ChevronRight size={14} />
             </button>
             <button
               onClick={() => navigate("/dashboard")}
-              className="rounded-xl bg-white border border-slate-300 hover:bg-slate-50 px-5 py-3 text-xs font-bold text-slate-700 transition shadow-sm"
+              className="rounded-full bg-white border border-slate-300 hover:bg-slate-50 px-5 py-3 text-xs font-bold text-slate-700 transition shadow-2xs cursor-pointer"
             >
               Go to Dashboard
             </button>
@@ -469,15 +449,15 @@ export default function Assessment() {
 
   if (status === "error") {
     return (
-      <div className="min-h-screen bg-[#FAF6EC] px-6 py-10 flex items-center justify-center text-left">
-        <div className="mx-auto max-w-md rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm space-y-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 flex items-center justify-center text-left font-sans">
+        <div className="mx-auto max-w-md rounded-3xl border border-[#D3E3F5] bg-white p-8 text-center shadow-xs space-y-4">
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1 rounded-md bg-white border border-slate-900/5 px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition"
+            className="inline-flex items-center gap-1 rounded-full bg-white border border-slate-300 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer"
           >
             <ArrowLeft size={13} /> Back
           </button>
-          <p className="rounded-xl border border-red-100 bg-red-50/50 px-4 py-3 text-xs font-semibold text-red-700">
+          <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">
             {error}
           </p>
         </div>
@@ -487,44 +467,39 @@ export default function Assessment() {
 
   if (status === "starting session" || status === "loading questions") {
     return (
-      <div className="min-h-screen bg-[#FAF6EC] px-6 py-10 text-slate-800 text-left animate-pulse">
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800 text-left animate-pulse font-sans">
         <div className="mx-auto max-w-6xl space-y-8">
-          {/* Top header bar skeleton */}
-          <div className="flex items-center justify-between gap-4 border-b border-slate-900/5 pb-4">
-            <div className="h-9 w-20 bg-stone-200 rounded-md"></div>
-            <div className="h-8 w-32 bg-stone-200 rounded-md"></div>
+          <div className="flex items-center justify-between gap-4 border-b border-[#D3E3F5] pb-4">
+            <div className="h-9 w-20 bg-slate-200 rounded-full"></div>
+            <div className="h-8 w-32 bg-slate-200 rounded-full"></div>
           </div>
 
-          {/* Question Panel skeleton */}
           <div className="space-y-6">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-900/5 pb-5">
+            <div className="flex items-start justify-between gap-4 border-b border-[#D3E3F5] pb-5">
               <div className="space-y-2.5 w-3/4">
-                <div className="h-3 w-28 bg-stone-200 rounded-full"></div>
-                <div className="h-6 bg-stone-200 rounded-md w-full"></div>
+                <div className="h-3 w-28 bg-slate-200 rounded-full"></div>
+                <div className="h-6 bg-slate-200 rounded-2xl w-full"></div>
               </div>
-              <div className="h-7 w-12 bg-stone-200 rounded-md"></div>
+              <div className="h-7 w-12 bg-slate-200 rounded-full"></div>
             </div>
 
-            {/* Options block skeletons */}
             <div className="space-y-3">
-              <div className="h-14 bg-white border border-stone-200 rounded-xl w-full"></div>
-              <div className="h-14 bg-white border border-stone-200 rounded-xl w-full"></div>
-              <div className="h-14 bg-white border border-stone-200 rounded-xl w-full"></div>
+              <div className="h-16 bg-white border border-[#D3E3F5] rounded-2xl w-full"></div>
+              <div className="h-16 bg-white border border-[#D3E3F5] rounded-2xl w-full"></div>
+              <div className="h-16 bg-white border border-[#D3E3F5] rounded-2xl w-full"></div>
             </div>
 
-            {/* Navigation skeletons */}
-            <div className="mt-6 flex items-center justify-between gap-3 border-t border-slate-900/5 pt-5">
-              <div className="h-9 w-24 bg-stone-200 rounded-md"></div>
-              <div className="h-9 w-28 bg-stone-200 rounded-md"></div>
+            <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#D3E3F5] pt-5">
+              <div className="h-9 w-24 bg-slate-200 rounded-full"></div>
+              <div className="h-9 w-28 bg-slate-200 rounded-full"></div>
             </div>
 
-            {/* Slider skeleton */}
-            <div className="mt-5 rounded-xl border border-slate-900/5 bg-white p-4 space-y-3">
+            <div className="mt-5 rounded-3xl border border-[#D3E3F5] bg-white p-5 space-y-3 shadow-xs">
               <div className="flex justify-between">
-                <div className="h-3 w-24 bg-stone-200 rounded-full"></div>
-                <div className="h-3 w-32 bg-stone-200 rounded-full"></div>
+                <div className="h-3 w-24 bg-slate-200 rounded-full"></div>
+                <div className="h-3 w-32 bg-slate-200 rounded-full"></div>
               </div>
-              <div className="h-1.5 bg-slate-100 rounded-full w-full"></div>
+              <div className="h-1.5 bg-[#edf3fb] rounded-full w-full"></div>
             </div>
           </div>
         </div>
@@ -534,11 +509,11 @@ export default function Assessment() {
 
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen bg-[#FAF6EC] px-6 py-10 flex items-center justify-center text-left">
-        <div className="mx-auto max-w-md rounded-2xl border border-slate-900/5 bg-white p-8 text-center shadow-sm space-y-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 flex items-center justify-center text-left font-sans">
+        <div className="mx-auto max-w-md rounded-3xl border border-[#D3E3F5] bg-white p-8 text-center shadow-xs space-y-4">
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1 rounded-md bg-white border border-slate-900/5 px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition"
+            className="inline-flex items-center gap-1 rounded-full bg-white border border-slate-300 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer"
           >
             <ArrowLeft size={13} /> Back
           </button>
@@ -549,28 +524,26 @@ export default function Assessment() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF6EC] px-6 py-10 text-slate-800 text-left">
+    <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800 text-left font-sans">
       <div className="mx-auto max-w-6xl space-y-8">
 
-
-
         {/* Question Panel */}
-        <div key={currentIndex} className="space-y-6 animate-question-slide">
+        <div key={currentIndex} className="space-y-6">
 
-          <div className="flex items-start justify-between gap-4 border-b border-slate-900/5 pb-5">
+          <div className="flex items-start justify-between gap-4 border-b border-[#D3E3F5] pb-5">
             <div className="space-y-1.5">
-              <span className="inline-flex items-center rounded-full border border-slate-800 px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase text-slate-800">
+              <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase text-[#1E88E5]">
                 {currentIndex < 10 ? "PART 1: SCENARIO CHOICE" : "PART 2: STAGE 2 REFLECTION"}
               </span>
-              <h2 className="text-xl font-serif font-bold text-slate-900 leading-tight">{currentQuestion.question_text}</h2>
+              <h2 className="text-xl font-serif font-bold text-[#0b1a36] leading-tight">{currentQuestion.question_text}</h2>
             </div>
-            <div className="rounded-md bg-[#FAF2DB] px-3 py-1.5 text-xs font-bold text-slate-800">
+            <div className="rounded-full border border-[#D3E3F5] bg-white px-3.5 py-1.5 text-xs font-bold text-[#0b1a36] shadow-2xs shrink-0">
               Q{currentIndex + 1}/{totalQuestions}
             </div>
           </div>
 
           {progress ? (
-            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
               Completed Answers: {progress} / {totalQuestions}
             </p>
           ) : null}
@@ -584,14 +557,14 @@ export default function Assessment() {
                   onChange={(event) => handleTextAnswerChange(event.target.value)}
                   placeholder="Type your response here..."
                   rows={5}
-                  className="w-full rounded-xl border border-stone-200 bg-white px-5 py-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:ring-2 focus:ring-stone-200/50 focus:border-stone-900"
+                  className="w-full rounded-3xl border border-[#D3E3F5] bg-white p-5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-slate-400 shadow-2xs"
                 />
                 {currentAnswer && (
                   <div className="flex justify-end">
                     <button
                       type="button"
                       onClick={() => handleTextAnswerChange("")}
-                      className="text-xs text-slate-500 hover:text-slate-900 font-bold transition-colors"
+                      className="text-xs text-slate-500 hover:text-slate-900 font-bold transition-colors cursor-pointer"
                     >
                       Clear text
                     </button>
@@ -606,22 +579,22 @@ export default function Assessment() {
                   <button
                     key={option.option_id}
                     onClick={() => handleAnswer(option.option_id)}
-                    className={`w-full rounded-xl border px-5 py-4 text-left transition flex items-center gap-3.5 group cursor-pointer ${
+                    className={`w-full rounded-2xl border p-4 sm:p-5 text-left transition flex items-center gap-3.5 group cursor-pointer shadow-2xs ${
                       isSelected
-                        ? "border-[#7B4A28] bg-[#FAF2DB]/90 text-slate-900 font-semibold shadow-sm"
-                        : "border-stone-200 bg-white hover:bg-slate-50/70 hover:border-slate-300 text-slate-800"
+                        ? "border-[#1E88E5] bg-sky-50/80 text-[#0b1a36] font-semibold"
+                        : "border-[#D3E3F5] bg-white hover:bg-[#F0F6FC] text-slate-800"
                     }`}
                   >
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                         isSelected
-                          ? "border-[#7B4A28] bg-[#7B4A28]"
+                          ? "border-[#1E88E5] bg-[#1E88E5]"
                           : "border-slate-300 bg-white group-hover:border-slate-400"
                       }`}
                     >
                       {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                     </div>
-                    <p className="text-sm leading-relaxed flex-1">{optionText}</p>
+                    <p className="text-xs sm:text-sm leading-relaxed flex-1">{optionText}</p>
                   </button>
                 );
               })
@@ -629,43 +602,43 @@ export default function Assessment() {
           </div>
 
           {error ? (
-            <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">
+            <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">
               {error}
             </p>
           ) : null}
 
           {/* Navigation Controls */}
-          <div className="mt-6 flex items-center justify-between gap-3 border-t border-slate-900/5 pt-5">
+          <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#D3E3F5] pt-5">
             <button
               type="button"
               onClick={handlePrevious}
               disabled={currentIndex === 0}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-900/5 bg-white px-4 py-2.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
-              <ChevronLeft size={13} /> Previous
+              <ChevronLeft size={14} /> Previous
             </button>
             <button
               type="button"
               onClick={handleNext}
               disabled={!currentAnswer?.trim() || isSubmitting}
-              className="inline-flex items-center gap-1.5 rounded-md bg-[#0b1a36] hover:bg-[#122b59] px-4 py-2.5 text-xs font-bold text-white transition shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#0b1a36] hover:bg-[#122b59] px-6 py-2.5 text-xs font-bold text-white transition shadow-xs disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? "Saving..." : currentIndex === totalQuestions - 1 ? "Submit Test" : "Next Question"}
-              <ChevronRight size={13} />
+              <ChevronRight size={14} />
             </button>
           </div>
 
           {/* Progress Slider */}
-          <div className="mt-5 rounded-xl border border-slate-900/5 bg-white p-4 text-xs text-slate-500 shadow-sm space-y-2">
+          <div className="mt-5 rounded-3xl border border-[#D3E3F5] bg-white p-5 text-xs text-slate-500 shadow-xs space-y-2">
             <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
               <span>Overall Progress</span>
               <span>
                 Answered {displayedCount} of {totalQuestions}
               </span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-1.5 overflow-hidden rounded-full bg-[#edf3fb]">
               <div
-                className="h-full rounded-full bg-[#0b1a36]"
+                className="h-full rounded-full bg-[#0b1a36] transition-all duration-300"
                 style={{ width: `${(displayedCount / Math.max(totalQuestions, 1)) * 100}%` }}
               />
             </div>
@@ -698,9 +671,8 @@ function AnalysisAnimation() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FAF6EC] px-6 py-4 flex items-center justify-center text-slate-800 text-left">
+    <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-4 flex items-center justify-center text-slate-800 text-left font-sans">
       <div className="mx-auto w-full max-w-6xl space-y-2">
-        {/* Full-width hiring.svg container */}
         <div className="flex items-center justify-center p-4 max-w-full h-72 overflow-hidden relative">
           <img
             src="/hiring.svg"
@@ -709,34 +681,26 @@ function AnalysisAnimation() {
           />
         </div>
 
-        {/* Text Loader updates */}
         <div className="flex flex-col items-center justify-center text-center space-y-4 pt-4">
-          <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
-            <div className="absolute inset-0 rounded-full border-2 border-[#e2d9c8] opacity-20"></div>
-            {/* <div className="absolute inset-0 rounded-full border-2 border-t-transparent animate-spin" style={{ borderLeftColor: LOGO_BLUE }}></div> */}
-          </div>
-
           <div className="space-y-1">
-            <h2 className="text-xl font-serif font-bold text-slate-900">
+            <h2 className="text-xl font-serif font-bold text-[#0b1a36]">
               Generating Your Career Matrix
             </h2>
-            <p className="text-xs text-slate-500 font-medium h-4 transition-all duration-300">
+            <p className="text-xs text-slate-600 font-medium h-4 transition-all duration-300">
               {stages[step]}
             </p>
           </div>
 
-          {/* Simple progress track */}
           <div className="w-full max-w-md space-y-2 pt-2">
-            <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 border border-slate-200">
+            <div className="h-1.5 overflow-hidden rounded-full bg-[#edf3fb] border border-[#D3E3F5]">
               <div
-                className="h-full rounded-full transition-all duration-700 ease-out"
+                className="h-full rounded-full transition-all duration-700 ease-out bg-[#1E88E5]"
                 style={{
                   width: `${(step + 1) * 25}%`,
-                  backgroundColor: LOGO_BLUE
                 }}
               />
             </div>
-            <div className="flex justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400">
+            <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
               <span>Mapping Capabilities</span>
               <span>{Math.round(((step + 1) * 25))}% Complete</span>
             </div>
@@ -746,4 +710,3 @@ function AnalysisAnimation() {
     </div>
   );
 }
-

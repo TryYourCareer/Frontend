@@ -34,7 +34,7 @@ export default function CompanyInfo() {
   // Mock Data for Team members
   const team = [
     { name: "Ananya Sharma", role: "Co-Founder & CEO", desc: "Ex-Product Leader, passionate about closing the skill gap.", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80" },
-    { name: "Rohit Verma", role: "Chief of Pedagogy", desc: "Former Educator with 12+ years of curriculum design design.", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80" },
+    { name: "Rohit Verma", role: "Chief of Pedagogy", desc: "Former Educator with 12+ years of curriculum design.", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80" },
     { name: "Sneha Patel", role: "Head of Community", desc: "Creating space for collaboration and peer learning hubs.", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80" }
   ];
 
@@ -52,7 +52,7 @@ export default function CompanyInfo() {
   ];
 
   return (
-    <div className="min-h-screen transition-colors duration-300 flex flex-col bg-[#FAF6EC] text-[#0b1a36]">
+    <div className="min-h-screen transition-colors duration-300 flex flex-col bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36] font-sans">
       {/* Landing Navbar */}
       <LandingNavbar isDark={isDark} />
 
@@ -61,19 +61,19 @@ export default function CompanyInfo() {
           
           {/* Header Hero Banner */}
           <div className="text-center space-y-4 max-w-2xl mx-auto pt-4">
-            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider bg-[#7B4A28]/10 text-[#7B4A28] px-3 py-1 rounded-full border border-[#7B4A28]/20">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-sky-50 text-[#1E88E5] px-3.5 py-1 rounded-full border border-sky-200">
               Company Hub
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-serif tracking-tight leading-tight text-slate-900">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight leading-tight text-[#0b1a36]">
               Shaping Career Reality
             </h1>
-            <p className="text-sm sm:text-base text-slate-650 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
               We build simulator sandboxes, structure real metrics, and foster mentor hubs to help students step into their dream careers with confidence.
             </p>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center justify-center gap-1.5 sm:gap-3 border-b border-slate-200/60 pb-4 overflow-x-auto whitespace-nowrap scrollbar-none w-full max-w-2xl mx-auto">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-3 border-b border-[#D3E3F5] pb-4 overflow-x-auto whitespace-nowrap scrollbar-none w-full max-w-2xl mx-auto">
             {[
               { id: "about", label: "About Us", icon: Building },
               { id: "elevate", label: "Elevate Program", icon: Award },
@@ -86,13 +86,13 @@ export default function CompanyInfo() {
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition shadow-sm border shrink-0 ${
+                  className={`flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-bold transition shadow-xs border shrink-0 cursor-pointer ${
                     isActive
-                      ? "bg-[#7B4A28] text-white border-transparent"
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                      ? "bg-[#0b1a36] text-white border-transparent"
+                      : "bg-white border-[#D3E3F5] text-slate-650 hover:bg-[#F0F6FC]"
                   }`}
                 >
-                  <Icon size={14} />
+                  <Icon size={14} className={isActive ? "text-white" : "text-[#1E88E5]"} />
                   <span>{tab.label}</span>
                 </button>
               );
@@ -100,14 +100,14 @@ export default function CompanyInfo() {
           </div>
 
           {/* Tab Content Section */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 md:p-10 shadow-xl text-left">
+          <div className="bg-white rounded-3xl border border-[#D3E3F5] p-6 sm:p-8 md:p-10 shadow-xs text-left">
             
             {/* 1. About Us Tab */}
             {activeTab === "about" && (
               <div className="space-y-8 animate-fade-in">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                   <div className="lg:col-span-7 space-y-4">
-                    <h2 className="text-2xl font-black font-serif text-slate-900">Our Mission</h2>
+                    <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Our Mission</h2>
                     <p className="text-sm leading-relaxed text-slate-600">
                       For decades, students have graduated with textbook definitions but zero actual hands-on career confidence. We founded TryYourCareers to shatter this disconnect.
                     </p>
@@ -115,8 +115,8 @@ export default function CompanyInfo() {
                       We offer interactive sandbox tours where students can solve code test suites, adjust professional UI layouts, and analyze salary growth models. We're here to make real-world professional environments completely transparent and accessible.
                     </p>
                   </div>
-                  <div className="lg:col-span-5 p-6 rounded-2xl bg-[#FAF6EC]/40 border border-slate-200/70 space-y-4">
-                    <h3 className="text-sm font-black uppercase text-[#7B4A28]">Core Values</h3>
+                  <div className="lg:col-span-5 p-6 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E88E5]">Core Values</h3>
                     <div className="space-y-3">
                       {[
                         { title: "Sandbox First", desc: "No boring presentations. Build, debug, and play inside active simulations." },
@@ -136,16 +136,16 @@ export default function CompanyInfo() {
                 </div>
 
                 {/* Team Grid */}
-                <div className="pt-6 border-t border-slate-100 space-y-4">
-                  <h3 className="text-lg font-black font-serif text-slate-900">The Core Team</h3>
+                <div className="pt-6 border-t border-[#D3E3F5] space-y-4">
+                  <h3 className="text-lg font-serif font-bold text-[#0b1a36]">The Core Team</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {team.map((t, idx) => (
-                      <div key={idx} className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/50">
-                        <img src={t.img} alt={t.name} className="w-12 h-12 rounded-xl object-cover" />
+                      <div key={idx} className="flex items-center gap-4 bg-[#F0F6FC] p-4 rounded-2xl border border-[#D3E3F5]">
+                        <img src={t.img} alt={t.name} className="w-12 h-12 rounded-xl object-cover border border-[#D3E3F5]" />
                         <div>
                           <h4 className="text-sm font-bold text-slate-800">{t.name}</h4>
-                          <p className="text-[10px] font-bold text-[#7B4A28]">{t.role}</p>
-                          <p className="text-[11px] text-slate-550 mt-1">{t.desc}</p>
+                          <p className="text-[10px] font-bold text-[#1E88E5]">{t.role}</p>
+                          <p className="text-[11px] text-slate-500 mt-1">{t.desc}</p>
                         </div>
                       </div>
                     ))}
@@ -158,7 +158,7 @@ export default function CompanyInfo() {
             {activeTab === "elevate" && (
               <div className="space-y-8 animate-fade-in">
                 <div className="space-y-3">
-                  <h2 className="text-2xl font-black font-serif text-slate-900">The Elevate Program</h2>
+                  <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">The Elevate Program</h2>
                   <p className="text-sm leading-relaxed text-slate-600 max-w-3xl">
                     Elevate is our flagship internship & mentorship bridge, turning top-performing sandbox students into placement-ready graduates with official corporate sponsorship.
                   </p>
@@ -172,18 +172,18 @@ export default function CompanyInfo() {
                     { num: "03", name: "Production Capstone", desc: "Build feature upgrades for partnered high-growth tech startups." },
                     { num: "04", name: "Direct Placement", desc: "Fast-track interviews with partners (Razorpay, CureFit, and more)." }
                   ].map((step, i) => (
-                    <div key={i} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 relative space-y-3">
-                      <span className="text-3xl font-black text-[#7B4A28]/20 absolute top-4 right-4">{step.num}</span>
+                    <div key={i} className="bg-[#F0F6FC] p-5 rounded-2xl border border-[#D3E3F5] relative space-y-3">
+                      <span className="text-3xl font-black text-[#1E88E5]/15 absolute top-4 right-4">{step.num}</span>
                       <h4 className="text-sm font-bold text-slate-800 pt-2">{step.name}</h4>
-                      <p className="text-xs text-slate-550 leading-relaxed">{step.desc}</p>
+                      <p className="text-xs text-slate-500 leading-relaxed">{step.desc}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="p-6 rounded-2xl bg-gradient-to-br from-[#7B4A28]/5 to-orange-500/5 border border-[#7B4A28]/10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="p-6 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] flex flex-col md:flex-row items-center justify-between gap-6">
                   <div>
                     <h3 className="text-sm font-bold text-slate-800">Want to join the next cohort?</h3>
-                    <p className="text-xs text-slate-550">Applications open every quarter. You must complete your assessment score metrics to qualify.</p>
+                    <p className="text-xs text-slate-500">Applications open every quarter. You must complete your assessment score metrics to qualify.</p>
                   </div>
                   <button 
                     onClick={() => {
@@ -193,7 +193,7 @@ export default function CompanyInfo() {
                         setIsLoginOpen(true);
                       }
                     }}
-                    className="bg-[#7B4A28] hover:bg-[#623b20] text-white font-bold text-xs px-5 py-3 rounded-xl transition shadow-md whitespace-nowrap active:scale-95"
+                    className="bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold text-xs px-5 py-3 rounded-full transition shadow-xs whitespace-nowrap active:scale-95 cursor-pointer"
                   >
                     Start Assessment Qualifying
                   </button>
@@ -205,19 +205,19 @@ export default function CompanyInfo() {
             {activeTab === "stories" && (
               <div className="space-y-8 animate-fade-in">
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black font-serif text-slate-900">Student Success Stories</h2>
-                  <p className="text-sm text-slate-550">See how students pivoted, mastered simulated environments, and unlocked verified positions.</p>
+                  <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Student Success Stories</h2>
+                  <p className="text-sm text-slate-500">See how students pivoted, mastered simulated environments, and unlocked verified positions.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {stories.map((st, i) => (
-                    <div key={i} className="flex flex-col bg-slate-50 rounded-2xl border border-slate-200 p-6 space-y-4">
+                    <div key={i} className="flex flex-col bg-[#F0F6FC] rounded-2xl border border-[#D3E3F5] p-6 space-y-4">
                       <div className="flex items-center gap-4">
-                        <img src={st.img} alt={st.name} className="w-14 h-14 rounded-full object-cover border border-slate-200" />
+                        <img src={st.img} alt={st.name} className="w-14 h-14 rounded-full object-cover border border-[#D3E3F5]" />
                         <div>
                           <h4 className="text-sm font-bold text-slate-800">{st.name}</h4>
                           <p className="text-[11px] font-bold text-slate-400">{st.from}</p>
-                          <p className="text-xs font-black text-emerald-600 flex items-center gap-1">
+                          <p className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                             <TrendingUp size={12} />
                             {st.to}
                           </p>
@@ -238,16 +238,16 @@ export default function CompanyInfo() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                   {/* Job postings */}
                   <div className="lg:col-span-7 space-y-5">
-                    <h2 className="text-2xl font-black font-serif text-slate-900">Open Roles</h2>
+                    <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Open Roles</h2>
                     <div className="space-y-4">
                       {jobs.map((job) => (
-                        <div key={job.id} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex justify-between items-center gap-4 hover:border-slate-350 transition-all">
+                        <div key={job.id} className="bg-[#F0F6FC] p-5 rounded-2xl border border-[#D3E3F5] flex justify-between items-center gap-4 hover:border-slate-300 transition-all">
                           <div className="space-y-1">
                             <h4 className="text-sm font-bold text-slate-800">{job.title}</h4>
                             <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold text-slate-500">
                               <span className="flex items-center gap-1"><Building size={10} />{job.team}</span>
                               <span className="flex items-center gap-1"><Clock size={10} />{job.duration}</span>
-                              <span className="text-[#7B4A28] font-bold">{job.type}</span>
+                              <span className="text-[#1E88E5] font-bold">{job.type}</span>
                             </div>
                           </div>
                           <button
@@ -255,7 +255,7 @@ export default function CompanyInfo() {
                               setApplyingFor(job.title);
                               setApplicationSubmitted(false);
                             }}
-                            className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition active:scale-95"
+                            className="bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold text-xs px-3.5 py-2 rounded-full transition active:scale-95 cursor-pointer shadow-2xs"
                           >
                             Apply
                           </button>
@@ -265,8 +265,8 @@ export default function CompanyInfo() {
                   </div>
 
                   {/* Culture Perks */}
-                  <div className="lg:col-span-5 p-6 rounded-2xl bg-[#FAF6EC]/40 border border-slate-200/70 space-y-4">
-                    <h3 className="text-sm font-black uppercase text-[#7B4A28]">Work Culture Benefits</h3>
+                  <div className="lg:col-span-5 p-6 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E88E5]">Work Culture Benefits</h3>
                     <div className="space-y-3.5">
                       {[
                         { icon: Heart, title: "Wellness First", desc: "Flexible hours, hybrid schedules, and dedicated health stipend." },
@@ -276,7 +276,7 @@ export default function CompanyInfo() {
                         const Icon = perk.icon;
                         return (
                           <div key={i} className="flex gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-[#7B4A28]/10 text-[#7B4A28] flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-sky-50 text-[#1E88E5] border border-sky-200 flex items-center justify-center shrink-0">
                               <Icon size={14} />
                             </div>
                             <div>
@@ -292,14 +292,14 @@ export default function CompanyInfo() {
 
                 {/* Applying Mock form */}
                 {applyingFor && (
-                  <div className="p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 max-w-xl animate-scale-in space-y-4">
+                  <div className="p-6 rounded-2xl bg-sky-50/70 border border-sky-200 max-w-xl animate-scale-in space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="text-sm font-bold text-slate-800">
-                        Apply: <span className="text-[#7B4A28]">{applyingFor}</span>
+                        Apply: <span className="text-[#1E88E5]">{applyingFor}</span>
                       </h3>
                       <button 
                         onClick={() => setApplyingFor(null)}
-                        className="text-xs text-slate-400 hover:text-slate-600"
+                        className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -322,24 +322,24 @@ export default function CompanyInfo() {
                           required
                           type="text" 
                           placeholder="Full Name" 
-                          className="p-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:border-amber-400"
+                          className="p-2.5 rounded-xl border border-[#D3E3F5] bg-white text-xs text-slate-800 focus:outline-none focus:border-slate-400 shadow-2xs"
                         />
                         <input 
                           required
                           type="email" 
                           placeholder="Email Address" 
-                          className="p-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:border-amber-400"
+                          className="p-2.5 rounded-xl border border-[#D3E3F5] bg-white text-xs text-slate-800 focus:outline-none focus:border-slate-400 shadow-2xs"
                         />
                         <input 
                           required
                           type="url" 
                           placeholder="Portfolio / LinkedIn Link" 
-                          className="sm:col-span-2 p-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:border-amber-400"
+                          className="sm:col-span-2 p-2.5 rounded-xl border border-[#D3E3F5] bg-white text-xs text-slate-800 focus:outline-none focus:border-slate-400 shadow-2xs"
                         />
                         <div className="sm:col-span-2 flex justify-end">
                           <button
                             type="submit"
-                            className="bg-[#7B4A28] hover:bg-[#643b20] text-white font-bold text-xs px-4 py-2 rounded-xl transition flex items-center gap-1.5 active:scale-95"
+                            className="bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold text-xs px-4 py-2 rounded-full transition flex items-center gap-1.5 active:scale-95 shadow-xs cursor-pointer"
                           >
                             <Send size={11} />
                             <span>Submit Application</span>

@@ -39,7 +39,7 @@ function formatDateToYYYYMMDD(dateVal) {
       const month = String(dateVal.getMonth() + 1).padStart(2, "0");
       const day = String(dateVal.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
-    }
+  }
 
     if (typeof dateVal === "string") {
       const match = dateVal.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -174,30 +174,30 @@ export default function Registration() {
   };
 
   const inputClass =
-    "w-full rounded-xl border border-[#e2d9c8] bg-white/80 px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-[#5B7EC9] focus:ring-2 focus:ring-[#5B7EC9]/20 placeholder:text-slate-400";
+    "w-full rounded-xl border border-[#D3E3F5] bg-white/80 px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-[#1E88E5] focus:ring-2 focus:ring-[#1E88E5]/20 placeholder:text-slate-400";
 
   const iconClass = "absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3D1F08]/40 p-4 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b1a36]/40 p-4 backdrop-blur-sm overflow-y-auto">
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-[640px] overflow-hidden rounded-3xl bg-[#FAF6EC] shadow-2xl shadow-[#3D1F08]/20 pointer-events-auto my-8 border border-[#e8dfc8]">
+      <div className="relative w-full max-w-[640px] overflow-hidden rounded-3xl bg-white shadow-2xl shadow-[#0b1a36]/10 pointer-events-auto my-8 border border-[#D3E3F5]">
 
         {/* Decorative top band */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-[#5B7EC9] via-[#B8712E] to-[#7B4A28]" />
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#0b1a36] via-[#1E88E5] to-[#D3E3F5]" />
 
         <div className="p-7 sm:p-9">
 
           {/* Header */}
           <div className="mb-7">
-            <span className="inline-flex items-center rounded-full border border-[#5B7EC9]/30 bg-[#5B7EC9]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#5B7EC9] mb-3">
+            <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#1E88E5] mb-3">
               Career Profile Setup
             </span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#3D1F08] leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36] leading-tight">
               Complete Your Profile
             </h2>
-            <p className="mt-1.5 text-sm text-[#7B4A28]/80">
+            <p className="mt-1.5 text-sm text-slate-500">
               Tell us a bit about yourself to personalise your career discovery experience.
             </p>
           </div>
@@ -261,7 +261,7 @@ export default function Registration() {
                 withIcon
               />
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-[#7B4A28] uppercase tracking-wider">Gender</label>
+                <label className="text-xs font-bold text-[#0b1a36] uppercase tracking-wider">Gender</label>
                 <div className="relative">
                   <select
                     value={form.gender}
@@ -281,7 +281,7 @@ export default function Registration() {
 
             {/* Area of Interest */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-[#7B4A28] uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-bold text-[#0b1a36] uppercase tracking-wider flex items-center gap-1.5">
                 <Briefcase size={12} />
                 Area of Interest
               </label>
@@ -317,7 +317,7 @@ export default function Registration() {
             <button
               type="submit"
               disabled={authLoading}
-              className="w-full rounded-xl bg-[#5B7EC9] hover:bg-[#4a6db8] active:bg-[#3d5ea8] py-3 text-sm font-bold text-white transition shadow-md shadow-[#5B7EC9]/30 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full rounded-xl bg-[#0b1a36] hover:bg-[#122b59] active:bg-[#071124] py-3 text-sm font-bold text-white transition shadow-md shadow-[#0b1a36]/20 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {authLoading ? (
                 <><Loader2 size={16} className="animate-spin" /> Saving...</>
@@ -340,7 +340,7 @@ export default function Registration() {
 function Field({ label, value, onChange, type = "text", placeholder = "", className, icon, withIcon, asSelect }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-bold text-[#7B4A28] uppercase tracking-wider">{label}</label>
+      <label className="text-xs font-bold text-[#0b1a36] uppercase tracking-wider">{label}</label>
       <div className="relative">
         {withIcon && icon}
         {asSelect ? (
