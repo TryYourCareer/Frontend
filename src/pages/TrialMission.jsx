@@ -259,9 +259,12 @@ export default function TrialMission() {
     isInvestigationPhase &&
     (briefingDismissed || findings.length > 0 || Boolean(workingNotes));
   const isRecommendationStage =
+    session?.state === "DECISION_PENDING" ||
     session?.current_phase === "recommend" ||
     session?.current_phase === "decision";
   const isRealityEventStage =
+    session?.state === "CONSEQUENCE_ACTIVE" ||
+    session?.state === "REALITY_EVENT_PENDING" ||
     session?.current_phase === "adapt" ||
     session?.current_phase === "reality_event";
   const isOutputStage =
