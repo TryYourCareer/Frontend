@@ -1,84 +1,1884 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Rocket, ArrowLeft, CheckCircle2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import {
+  Rocket,
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
+  Pause,
+  Play,
+  XCircle,
+  Briefcase,
+  Activity,
+  ShieldAlert,
+  UserCheck,
+  FileText,
+  Eye,
+  Check,
+  Plus,
+  BookmarkPlus,
+  CheckCircle2,
+  Lock,
+  Sparkles,
+  RefreshCw,
+  Send,
+  LockKeyhole,
+} from "lucide-react";
+import { useTrialMissionSession } from "../hooks/useTrialMissionSession";
+import { useDebounceAutosave } from "../hooks/useDebounceAutosave";
+
+export function formatDimensionKey(key) {
+  if (!key || typeof key !== "string") return "";
+  return key
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+    .trim();
+}
 
 export default function TrialMission() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchParams] = useSearchParams();
+  const querySessionId = searchParams.get("sessionId");
 
-  const handleSubscribe = (e) => {
+  // Get Ready state
+  const [isReadyChecked, setIsReadyChecked] = useState(false);
+
+  // Findings form state
+  const [showFindingForm, setShowFindingForm] = useState(false);
+  const [findingStatement, setFindingStatement] = useState("");
+  const [findingResource, setFindingResource] = useState("");
+  const [findingExplanation, setFindingExplanation] = useState("");
+  const [findingUncertainty, setFindingUncertainty] = useState("");
+
+  // Recommendation form state
+  const [selectedOption, setSelectedOption] = useState("");
+  const [whyRecommendation, setWhyRecommendation] = useState("");
+  const [selectedEvidenceResources, setSelectedEvidenceResources] = useState([]);
+  const [recommendationUncertainty, setRecommendationUncertainty] = useState("");
+
+  // Reality event update mode state
+  const [isUpdatingRecommendation, setIsUpdatingRecommendation] = useState(false);
+  const [updatedOption, setUpdatedOption] = useState("");
+  const [updatedWhy, setUpdatedWhy] = useState("");
+  const [updatedEvidenceResources, setUpdatedEvidenceResources] = useState([]);
+  const [updatedUncertainty, setUpdatedUncertainty] = useState("");
+
+  // Memo form state
+  const [memoForm, setMemoForm] = useState({
+    executive_summary: "",
+    key_findings: "",
+    evidence: "",
+    recommendation: "",
+    risks_limitations: "",
+    next_steps: "",
+  });
+  const [memoSaveStatus, setMemoSaveStatus] = useState("ready"); // "ready" | "saving" | "saved" | "error"
+
+  // Reflection form state
+  const [reflectionForm, setReflectionForm] = useState({
+    what_felt_natural: "",
+    hardest_part: "",
+    investigate_next: "",
+  });
+  const [reflectionSaveStatus, setReflectionSaveStatus] = useState("ready"); // "ready" | "saving" | "saved" | "error"
+
+  const {
+    missions,
+    session,
+    workingNotes,
+    findings,
+    currentDecision,
+    realityEventData,
+    outputData,
+    reflectionData,
+    evaluationData,
+    evaluationLoading,
+    evaluationError,
+    accessedResourceIds,
+    activeResource,
+    setActiveResource,
+    loading,
+    workspaceLoading,
+    actionLoading,
+    error,
+    startSession,
+    handleTransition,
+    handleAccessResource,
+    handleSaveNotes,
+    handleAddFinding,
+    handleCompleteInvestigation,
+    handleSubmitDecision,
+    handleFetchRealityEvent,
+    handleRealityEventResponse,
+    handleSaveOutput,
+    handleReviewOutput,
+    handleFinaliseOutput,
+    handleSubmitOutput,
+    handleSaveReflection,
+    handleSubmitReflection,
+    handlePause,
+    handleResume,
+    handleAbandon,
+    resetToCatalog,
+    setError,
+  } = useTrialMissionSession(querySessionId);
+
+  // Debounced notes autosave
+  const {
+    value: notesValue,
+    setValue: setNotesValue,
+    status: notesStatus,
+  } = useDebounceAutosave({
+    initialValue: workingNotes,
+    onSave: handleSaveNotes,
+    delay: 800,
+  });
+
+  // Sync memo draft from backend outputData
+  useEffect(() => {
+    if (outputData) {
+      setMemoForm((prev) => ({
+        executive_summary: outputData.executive_summary ?? prev.executive_summary,
+        key_findings: outputData.key_findings ?? prev.key_findings,
+        evidence: outputData.evidence ?? prev.evidence,
+        recommendation: outputData.recommendation ?? prev.recommendation,
+        risks_limitations: outputData.risks_limitations ?? prev.risks_limitations,
+        next_steps: outputData.next_steps ?? prev.next_steps,
+      }));
+    } else if (currentDecision) {
+      // Pre-fill recommendation from decision if empty
+      setMemoForm((prev) => ({
+        ...prev,
+        recommendation: prev.recommendation || currentDecision.selected_option || "",
+        evidence: prev.evidence || currentDecision.why || "",
+        risks_limitations: prev.risks_limitations || currentDecision.uncertainty || "",
+      }));
+    }
+  }, [outputData, currentDecision]);
+
+  // Sync reflection draft from backend reflectionData
+  useEffect(() => {
+    if (reflectionData) {
+      setReflectionForm((prev) => ({
+        what_felt_natural: reflectionData.what_felt_natural ?? prev.what_felt_natural,
+        hardest_part: reflectionData.hardest_part ?? prev.hardest_part,
+        investigate_next: reflectionData.investigate_next ?? prev.investigate_next,
+      }));
+    }
+  }, [reflectionData]);
+
+  // Derive allowed actions from server session
+  const allowedActions = Array.isArray(session?.allowed_actions)
+    ? session.allowed_actions
+    : [];
+
+  const canPause =
+    allowedActions.includes("pause") ||
+    allowedActions.includes("transition:SESSION_PAUSED");
+  const canResume =
+    allowedActions.includes("resume") ||
+    allowedActions.includes("transition:PHASE_ACTIVE") ||
+    session?.state === "SESSION_PAUSED";
+  const canAbandon =
+    allowedActions.includes("abandon") ||
+    allowedActions.includes("transition:SESSION_ABANDONED");
+
+  // Determine transition action for "I'm ready — Start"
+  const startTransitionAction =
+    allowedActions.find((a) => a === "transition:PHASE_ACTIVE" || a === "PHASE_ACTIVE") ||
+    "PHASE_ACTIVE";
+
+  // Check current server stage
+  const isCreatedStage = session?.state === "SESSION_CREATED";
+  const isBriefingStage =
+    session?.state === "PHASE_ACTIVE" &&
+    (session?.current_phase === "initial" || session?.current_phase === "briefing");
+  const isInvestigationStage =
+    session?.current_phase === "investigate" ||
+    session?.current_phase === "investigation";
+  const isRecommendationStage =
+    session?.current_phase === "recommend" ||
+    session?.current_phase === "decision";
+  const isRealityEventStage =
+    session?.current_phase === "adapt" ||
+    session?.current_phase === "reality_event";
+  const isOutputStage =
+    session?.current_phase === "deliver" ||
+    session?.current_phase === "output" ||
+    session?.current_phase === "memo";
+  const isReflectionStage =
+    session?.state === "REFLECTION_ACTIVE" ||
+    session?.current_phase === "reflect" ||
+    session?.current_phase === "reflection";
+  const isCompletedStage =
+    session?.state === "SESSION_COMPLETED" ||
+    session?.state === "COMPLETED";
+
+  const config = session?.mission_configuration || {};
+  const role = config.role || {};
+  const manager = role.manager || {};
+  const briefing = config.briefing || {};
+  const objective = config.objective || {};
+  const resources = Array.isArray(config.resources) ? config.resources : [];
+  const investigationConfig = config.investigation || {};
+  const completionRules = investigationConfig.completion || {};
+  const requiredFindingsCount = completionRules.required_findings || 1;
+  const requiredResourceAccess = completionRules.required_resource_access || [];
+
+  const outputStatus = outputData?.status || "draft";
+  const isMemoFinalised = outputStatus === "finalised" || outputStatus === "submitted";
+
+  // Decision options from backend configuration
+  const decisionsConfig = Array.isArray(config.decisions) && config.decisions.length > 0
+    ? config.decisions[0]
+    : {};
+  const decisionOptions = Array.isArray(decisionsConfig.options)
+    ? decisionsConfig.options
+    : [
+        "Show delivery costs earlier",
+        "Improve payment reliability",
+        "Simplify checkout experience",
+        "Investigate further",
+      ];
+
+  const realityEventsConfig = Array.isArray(config.reality_events) && config.reality_events.length > 0
+    ? config.reality_events[0]
+    : {};
+
+  useEffect(() => {
+    if (isRealityEventStage && !realityEventData) {
+      handleFetchRealityEvent();
+    }
+  }, [isRealityEventStage, realityEventData, handleFetchRealityEvent]);
+
+  // Debounced autosave for memo draft
+  useEffect(() => {
+    if (!isOutputStage || isMemoFinalised) return;
+
+    setMemoSaveStatus("saving");
+    const timer = setTimeout(async () => {
+      try {
+        await handleSaveOutput(memoForm);
+        setMemoSaveStatus("saved");
+      } catch {
+        setMemoSaveStatus("error");
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [memoForm, isOutputStage, isMemoFinalised, handleSaveOutput]);
+
+  // Debounced autosave for reflection draft
+  useEffect(() => {
+    if (!isReflectionStage || isCompletedStage) return;
+
+    setReflectionSaveStatus("saving");
+    const timer = setTimeout(async () => {
+      try {
+        await handleSaveReflection(reflectionForm);
+        setReflectionSaveStatus("saved");
+      } catch {
+        setReflectionSaveStatus("error");
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [reflectionForm, isReflectionStage, isCompletedStage, handleSaveReflection]);
+
+  const handleSaveNewFinding = async (e) => {
     e.preventDefault();
-    if (!email.trim()) return;
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setSubscribed(true);
-      setIsSubmitting(false);
-      setEmail("");
-    }, 1000);
+    if (!findingStatement.trim()) return;
+
+    const payload = {
+      statement: findingStatement.trim(),
+      evidence: findingResource
+        ? [{ resource_id: findingResource, explanation: findingExplanation.trim() }]
+        : [],
+      uncertainty: findingUncertainty.trim(),
+    };
+
+    try {
+      await handleAddFinding(payload);
+      setFindingStatement("");
+      setFindingResource("");
+      setFindingExplanation("");
+      setFindingUncertainty("");
+      setShowFindingForm(false);
+    } catch {
+      // Error handled by hook
+    }
   };
 
+  const handleRecommendationSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedOption || !whyRecommendation.trim()) return;
+
+    const evidenceList = selectedEvidenceResources.map((resId) => ({
+      resource_id: resId,
+      explanation: `Supporting evidence from ${resId}`,
+    }));
+
+    const payload = {
+      selected_option: selectedOption,
+      why: whyRecommendation.trim(),
+      evidence: evidenceList,
+      uncertainty: recommendationUncertainty.trim(),
+    };
+
+    await handleSubmitDecision(payload);
+  };
+
+  const handleKeepRecommendation = async () => {
+    const payload = {
+      action: "keep",
+      selected_option: currentDecision?.selected_option || selectedOption,
+      why: currentDecision?.why || whyRecommendation,
+      evidence: currentDecision?.evidence || [],
+      uncertainty: currentDecision?.uncertainty || recommendationUncertainty,
+    };
+    await handleRealityEventResponse(payload);
+  };
+
+  const handleUpdateRecommendationSubmit = async (e) => {
+    e.preventDefault();
+    if (!updatedOption || !updatedWhy.trim()) return;
+
+    const evidenceList = updatedEvidenceResources.map((resId) => ({
+      resource_id: resId,
+      explanation: `Updated evidence from ${resId}`,
+    }));
+
+    const payload = {
+      action: "update",
+      selected_option: updatedOption,
+      why: updatedWhy.trim(),
+      evidence: evidenceList,
+      uncertainty: updatedUncertainty.trim(),
+    };
+
+    await handleRealityEventResponse(payload);
+  };
+
+  const toggleEvidenceResource = (resId, isUpdate = false) => {
+    if (isUpdate) {
+      setUpdatedEvidenceResources((prev) =>
+        prev.includes(resId) ? prev.filter((id) => id !== resId) : [...prev, resId]
+      );
+    } else {
+      setSelectedEvidenceResources((prev) =>
+        prev.includes(resId) ? prev.filter((id) => id !== resId) : [...prev, resId]
+      );
+    }
+  };
+
+  const handleMemoFieldChange = (field, value) => {
+    if (isMemoFinalised) return;
+    setMemoForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleReflectionFieldChange = (field, value) => {
+    if (isCompletedStage) return;
+    setReflectionForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleReflectionSubmit = async (e) => {
+    e.preventDefault();
+    await handleSubmitReflection(reflectionForm);
+  };
+
+  const reflectionQuestions =
+    Array.isArray(reflectionData?.questions) && reflectionData.questions.length > 0
+      ? reflectionData.questions
+      : [
+          {
+            id: "what_felt_natural",
+            prompt: "What part of this investigation felt most natural to you?",
+          },
+          {
+            id: "hardest_part",
+            prompt: "What was the most challenging or uncertain aspect?",
+          },
+          {
+            id: "investigate_next",
+            prompt: "If you had more time, what would you investigate next?",
+          },
+        ];
+
   return (
-    <div className="min-h-screen bg-slate-50/50 px-4 py-8 sm:px-8">
-      <div className="mx-auto max-w-5xl">
-        {/* Back navigation */}
-        <button 
-          onClick={() => navigate("/dashboard")} 
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
-        >
-          <ArrowLeft size={16} /> Back to Dashboard
-        </button>
+    <div className="min-h-screen bg-[#FAF6EC] px-4 py-8 text-slate-800 sm:px-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        {/* Navigation & Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={() => {
+              if (session) {
+                resetToCatalog();
+              } else {
+                navigate("/dashboard");
+              }
+            }}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#7B4A28]/30"
+          >
+            <ArrowLeft size={16} />
+            {session ? "Back to Catalog" : "Back to Dashboard"}
+          </button>
 
-        {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-[32px] border border-slate-200 bg-white p-8 shadow-xl md:p-12 mb-10">
-          {/* Decorative background glow */}
-          <div className="absolute right-0 top-0 -mr-24 -mt-24 h-96 w-96 rounded-full bg-amber-200/20 blur-3xl" />
-          <div className="absolute left-0 bottom-0 -ml-24 -mb-24 h-96 w-96 rounded-full bg-blue-200/20 blur-3xl" />
+          {session && (
+            <div className="flex items-center gap-3">
+              <span className="rounded-full bg-slate-200 px-3 py-1 font-mono text-xs text-slate-700">
+                Phase: {session.current_phase || "initial"}
+              </span>
 
-          <div className="relative z-10 max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3.5 py-1 text-xs font-bold text-amber-800 uppercase tracking-wider mb-6">
-              <Rocket size={12} className="animate-bounce" /> Launching Soon
-            </span>
+              {/* Lifecycle Controls */}
+              {canPause && (
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={handlePause}
+                  className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+                >
+                  <Pause size={13} /> Pause
+                </button>
+              )}
+              {canResume && (
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={handleResume}
+                  className="inline-flex items-center gap-1 rounded-xl bg-amber-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-amber-700 disabled:opacity-50"
+                >
+                  <Play size={13} /> Resume
+                </button>
+              )}
+              {canAbandon && (
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={handleAbandon}
+                  className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+                >
+                  <ShieldAlert size={13} /> Abandon
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
-            <h1 className="font-serif text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-              Trial Missions
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
-              Embark on real-world simulations of your dream careers. Step into the shoes of professionals, complete hands-on tasks, and build your portfolio before choosing your path.
+        {/* Global Error Banner */}
+        {error && (
+          <div className="flex items-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800 shadow-sm">
+            <AlertCircle size={18} className="shrink-0 text-rose-600" />
+            <span className="flex-1">{error}</span>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="text-rose-600 hover:text-rose-900"
+            >
+              <XCircle size={18} />
+            </button>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 rounded-3xl border border-[#E5DEC9] bg-white p-12 shadow-sm">
+            <Loader2 className="animate-spin text-[#7B4A28]" size={36} />
+            <p className="text-sm font-semibold text-slate-600">
+              Loading Trial Mission server state...
             </p>
+          </div>
+        ) : !session ? (
+          /* ========================================================= */
+          /* 1. Mission Catalog                                       */
+          /* ========================================================= */
+          <div className="space-y-6">
+            <div className="relative overflow-hidden rounded-3xl border border-[#E5DEC9] bg-white p-8 shadow-sm sm:p-10">
+              <div className="max-w-2xl space-y-4">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-amber-900">
+                  <Rocket size={12} /> Live Simulation Catalog
+                </span>
+                <h1 className="font-serif text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                  Trial Missions
+                </h1>
+                <p className="text-base leading-relaxed text-slate-600">
+                  Step into real-world career simulations. Review evidence, make decisions, and receive structured evaluation directly from industry scenarios.
+                </p>
+              </div>
+            </div>
 
-            {/* Newsletter Subscription */}
-            <div className="mt-8 max-w-md">
-              {subscribed ? (
-                <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 border border-emerald-200 px-5 py-4 text-emerald-800">
-                  <CheckCircle2 className="text-emerald-500 shrink-0" size={20} />
-                  <span className="font-semibold text-sm">Thanks! We'll notify you as soon as missions go live.</span>
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold text-slate-900">Available Missions</h2>
+              {missions.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 p-8 text-center text-sm text-slate-500">
+                  No active trial missions available at this moment.
                 </div>
               ) : (
-                <form onSubmit={handleSubscribe} className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <div className="relative flex-1">
-                    <input
-                      type="email"
+                <div className="grid gap-6 md:grid-cols-2">
+                  {missions.map((m) => (
+                    <div
+                      key={m.id}
+                      className="flex flex-col justify-between rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm transition hover:shadow-md"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-0.5 text-xs font-semibold text-slate-700">
+                            <Briefcase size={12} /> {m.workspace_type || "Career Mission"}
+                          </span>
+                          {m.estimated_duration_minutes && (
+                            <span className="text-xs text-slate-500">
+                              ~{m.estimated_duration_minutes} mins
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900">{m.title}</h3>
+                        <p className="text-sm leading-relaxed text-slate-600 line-clamp-3">
+                          {m.description || "Take on real-world business challenges and test your analytical intuition."}
+                        </p>
+                      </div>
+
+                      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <button
+                          type="button"
+                          disabled={actionLoading}
+                          onClick={() => startSession(m.id)}
+                          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#633B20] disabled:opacity-50"
+                        >
+                          {actionLoading ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" /> Starting...
+                            </>
+                          ) : (
+                            <>
+                              Try this career <Rocket size={16} />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : isCreatedStage ? (
+          /* ========================================================= */
+          /* 2. Get Ready Screen                                      */
+          /* ========================================================= */
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-[#E5DEC9] bg-white p-8 shadow-sm sm:p-10 space-y-6">
+              <div className="space-y-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-amber-900">
+                  <UserCheck size={12} /> Get Ready for Your Mission
+                </span>
+                <h1 className="font-serif text-3xl font-bold text-slate-900 sm:text-4xl">
+                  {session.mission_title}
+                </h1>
+                <p className="text-sm text-slate-500">
+                  Role: <span className="font-semibold text-slate-800">{role.title || "Business Analyst"}</span>
+                  {role.company && ` • Company: ${role.company}`}
+                </p>
+              </div>
+
+              <div className="grid gap-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-6 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Mission Context
+                  </h3>
+                  <p className="text-sm leading-relaxed text-slate-700">
+                    {briefing.context ||
+                      "You are taking on the role of a Business Analyst investigating checkout drop-offs."}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Objective
+                  </h3>
+                  <p className="text-sm leading-relaxed text-slate-700">
+                    {objective.description ||
+                      "Investigate where customers abandon checkout, evaluate evidence, and recommend an actionable fix."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 space-y-4">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={isReadyChecked}
+                    onChange={(e) => setIsReadyChecked(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-slate-300 text-[#7B4A28] focus:ring-[#7B4A28]"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    I'm ready to investigate this problem and explore this career scenario.
+                  </span>
+                </label>
+
+                <div>
+                  <button
+                    type="button"
+                    disabled={!isReadyChecked || actionLoading}
+                    onClick={() => handleTransition(startTransitionAction)}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#633B20] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {actionLoading ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" /> Starting...
+                      </>
+                    ) : (
+                      <>
+                        I'm ready — Start <Rocket size={16} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : isBriefingStage ? (
+          /* ========================================================= */
+          /* 3. Meet Manager Screen                                   */
+          /* ========================================================= */
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-[#E5DEC9] bg-white p-8 shadow-sm sm:p-10 space-y-8">
+              <div className="flex flex-wrap items-center gap-4 border-b border-slate-100 pb-6">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#7B4A28]/10 text-[#7B4A28] font-bold text-xl">
+                  {manager.name ? manager.name[0] : "S"}
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Meet your manager: {manager.name || "Sarah"}
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    {manager.title || "Product Manager"} {role.company ? `at ${role.company}` : ""}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-6 space-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                  Manager Briefing & Instructions
+                </h3>
+                <p className="text-sm leading-relaxed text-amber-950">
+                  {briefing.task ||
+                    "Review the checkout analytics, examine customer feedback, and prepare your initial findings."}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-slate-900">
+                    Available Mission Resources
+                  </h3>
+                  <span className="text-xs text-slate-500">
+                    Click to inspect briefing resources
+                  </span>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {resources.map((res) => {
+                    const isAccessed = accessedResourceIds.has(res.id);
+                    return (
+                      <div
+                        key={res.id}
+                        className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:bg-slate-100"
+                      >
+                        <div className="flex items-center gap-3">
+                          <FileText size={18} className="text-slate-500 shrink-0" />
+                          <div>
+                            <h4 className="text-sm font-bold text-slate-900">{res.title}</h4>
+                            <span className="text-xs text-slate-500 uppercase">{res.type}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={actionLoading}
+                          onClick={() => handleAccessResource(res.id)}
+                          className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+                        >
+                          {isAccessed ? (
+                            <>
+                              <Check size={14} className="text-emerald-600" /> Viewed
+                            </>
+                          ) : (
+                            <>
+                              <Eye size={14} /> View resource
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {activeResource && (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-6 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                      Resource Content: {activeResource.title}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setActiveResource(null)}
+                      className="text-xs text-slate-400 hover:text-slate-600"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <p className="text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
+                    {activeResource.content || "No detailed content provided for this resource."}
+                  </p>
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-end">
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={() => handleTransition("PHASE_ACTIVE")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#633B20] disabled:opacity-50"
+                >
+                  {actionLoading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Entering Investigation...
+                    </>
+                  ) : (
+                    <>
+                      Start investigating <Rocket size={16} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : isInvestigationStage ? (
+          /* ========================================================= */
+          /* 4. Business Analyst Investigation Workspace (3-Panels)   */
+          /* ========================================================= */
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-0.5 text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                    <Activity size={12} /> Investigation Workspace
+                  </span>
+                  <span className="text-xs text-slate-500 font-mono">
+                    Phase: {session.current_phase}
+                  </span>
+                </div>
+                <h1 className="font-serif text-2xl font-bold text-slate-900">
+                  {session.mission_title}
+                </h1>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-slate-500">
+                  Notes Autosave:{" "}
+                  <strong className={notesStatus === "error" ? "text-rose-600" : "text-emerald-700 font-mono"}>
+                    {notesStatus === "saving" ? "Saving..." : notesStatus === "saved" ? "Saved" : notesStatus === "error" ? "Error" : "Ready"}
+                  </strong>
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+              {/* LEFT PANEL: Resources */}
+              <div className="space-y-4 lg:col-span-3">
+                <div className="rounded-3xl border border-[#E5DEC9] bg-white p-5 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
+                      Resources
+                    </h2>
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                      {resources.length}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {resources.map((res) => {
+                      const isAccessed = accessedResourceIds.has(res.id);
+                      const isSelected = activeResource?.id === res.id;
+                      return (
+                        <div
+                          key={res.id}
+                          className={`rounded-2xl border p-3.5 transition ${
+                            isSelected
+                              ? "border-[#7B4A28] bg-amber-50/50 shadow-sm"
+                              : "border-slate-200 bg-slate-50/80 hover:bg-slate-100"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="space-y-1">
+                              <h3 className="text-xs font-bold text-slate-900">{res.title}</h3>
+                              <span className="inline-block rounded bg-slate-200/80 px-1.5 py-0.5 font-mono text-[10px] text-slate-700 uppercase">
+                                {res.type}
+                              </span>
+                            </div>
+                            {isAccessed && <Check size={14} className="text-emerald-600 shrink-0 mt-0.5" />}
+                          </div>
+
+                          <div className="mt-3 pt-2 border-t border-slate-200/60 flex justify-end">
+                            <button
+                              type="button"
+                              disabled={actionLoading}
+                              onClick={() => handleAccessResource(res.id)}
+                              className="inline-flex items-center gap-1 text-xs font-bold text-[#7B4A28] hover:underline disabled:opacity-50"
+                            >
+                              <Eye size={12} /> {isAccessed ? "Re-open" : "Inspect"}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {activeResource && (
+                  <div className="rounded-3xl border border-emerald-300 bg-emerald-50/40 p-5 shadow-sm space-y-3">
+                    <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-900">
+                        {activeResource.title}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setActiveResource(null)}
+                        className="text-xs text-slate-400 hover:text-slate-600"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap max-h-60 overflow-y-auto">
+                      {activeResource.content || "No raw content."}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* CENTER PANEL: Working Notes & Findings */}
+              <div className="space-y-6 lg:col-span-6">
+                <div className="rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-base font-bold text-slate-900">Working Notes</h2>
+                      <p className="text-xs text-slate-500">
+                        Private analytical scratchpad (autosaved to server).
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 font-mono text-[11px] text-slate-600">
+                      {notesValue?.length || 0} chars
+                    </span>
+                  </div>
+
+                  <textarea
+                    rows={6}
+                    value={notesValue}
+                    onChange={(e) => setNotesValue(e.target.value)}
+                    placeholder="Record your observations, notes on checkout funnel drop-offs, and thoughts here..."
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#7B4A28] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#7B4A28]"
+                  />
+                </div>
+
+                <div className="rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-base font-bold text-slate-900">Recorded Findings</h2>
+                      <p className="text-xs text-slate-500">
+                        Structured evidence-backed findings submitted for your recommendation.
+                      </p>
+                    </div>
+                    {!showFindingForm && (
+                      <button
+                        type="button"
+                        onClick={() => setShowFindingForm(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#7B4A28] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#633B20]"
+                      >
+                        <Plus size={14} /> Add Finding
+                      </button>
+                    )}
+                  </div>
+
+                  {showFindingForm && (
+                    <form
+                      onSubmit={handleSaveNewFinding}
+                      className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 space-y-4"
+                    >
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                        Record New Evidence Finding
+                      </h3>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-700">Statement *</label>
+                        <input
+                          type="text"
+                          required
+                          value={findingStatement}
+                          onChange={(e) => setFindingStatement(e.target.value)}
+                          placeholder="e.g., Major drop-off concentrated at the payment method selection step."
+                          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-700">Supporting Resource</label>
+                          <select
+                            value={findingResource}
+                            onChange={(e) => setFindingResource(e.target.value)}
+                            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                          >
+                            <option value="">Select Resource...</option>
+                            {resources.map((r) => (
+                              <option key={r.id} value={r.id}>
+                                {r.title}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-700">Uncertainty Note</label>
+                          <input
+                            type="text"
+                            value={findingUncertainty}
+                            onChange={(e) => setFindingUncertainty(e.target.value)}
+                            placeholder="e.g. Latency metrics need confirmation"
+                            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-700">Evidence Explanation</label>
+                        <textarea
+                          rows={2}
+                          value={findingExplanation}
+                          onChange={(e) => setFindingExplanation(e.target.value)}
+                          placeholder="Explain what the data shows..."
+                          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="flex justify-end gap-2 pt-2 border-t border-amber-200/60">
+                        <button
+                          type="button"
+                          onClick={() => setShowFindingForm(false)}
+                          className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={actionLoading || !findingStatement.trim()}
+                          className="inline-flex items-center gap-1 rounded-xl bg-[#7B4A28] px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
+                        >
+                          {actionLoading ? <Loader2 size={13} className="animate-spin" /> : <BookmarkPlus size={13} />}
+                          Save Finding
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {workspaceLoading ? (
+                    <div className="py-6 text-center text-xs text-slate-500">Loading findings...</div>
+                  ) : findings.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-6 text-center text-xs text-slate-500">
+                      No findings recorded yet. Inspect resources and click "Add Finding" to capture evidence.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {findings.map((f, idx) => (
+                        <div
+                          key={f.id || idx}
+                          className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1.5"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="text-xs font-bold text-slate-900">{f.statement}</h4>
+                            <span className="rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-[10px] text-emerald-800">
+                              Finding #{idx + 1}
+                            </span>
+                          </div>
+                          {Array.isArray(f.evidence) && f.evidence.length > 0 && (
+                            <p className="text-[11px] text-slate-600">
+                              <strong className="text-slate-700">Evidence:</strong> {f.evidence[0].explanation || f.evidence[0].resource_id}
+                            </p>
+                          )}
+                          {f.uncertainty && (
+                            <p className="text-[11px] text-slate-500 italic">
+                              Uncertainty: {f.uncertainty}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT PANEL: Task, Manager & Completion */}
+              <div className="space-y-4 lg:col-span-3">
+                <div className="rounded-3xl border border-[#E5DEC9] bg-white p-5 shadow-sm space-y-3">
+                  <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#7B4A28]/10 text-sm font-bold text-[#7B4A28]">
+                      {manager.name ? manager.name[0] : "S"}
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-bold text-slate-900">{manager.name || "Sarah"}</h3>
+                      <p className="text-[11px] text-slate-500">{manager.title || "Product Manager"}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs leading-relaxed text-slate-600">
+                    {briefing.task || "Identify the drop-off causes and record your findings."}
+                  </p>
+                </div>
+
+                <div className="rounded-3xl border border-[#E5DEC9] bg-white p-5 shadow-sm space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
+                    Completion Checklist
+                  </h3>
+
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-slate-700">
+                        {findings.length >= requiredFindingsCount ? (
+                          <CheckCircle2 size={14} className="text-emerald-600" />
+                        ) : (
+                          <Lock size={14} className="text-slate-400" />
+                        )}
+                        Record at least {requiredFindingsCount} finding
+                      </span>
+                      <span className="font-mono text-slate-500">
+                        {findings.length}/{requiredFindingsCount}
+                      </span>
+                    </div>
+
+                    {requiredResourceAccess.map((reqId) => {
+                      const hasAccessed = accessedResourceIds.has(reqId);
+                      return (
+                        <div key={reqId} className="flex items-center justify-between">
+                          <span className="flex items-center gap-1.5 text-slate-700">
+                            {hasAccessed ? (
+                              <CheckCircle2 size={14} className="text-emerald-600" />
+                            ) : (
+                              <Lock size={14} className="text-slate-400" />
+                            )}
+                            Inspect {reqId}
+                          </span>
+                          <span className="font-mono text-slate-500">
+                            {hasAccessed ? "Done" : "Pending"}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100">
+                    <button
+                      type="button"
+                      disabled={actionLoading}
+                      onClick={handleCompleteInvestigation}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-4 py-3 text-xs font-bold text-white shadow-sm transition hover:bg-[#633B20] disabled:opacity-50"
+                    >
+                      {actionLoading ? (
+                        <>
+                          <Loader2 size={14} className="animate-spin" /> Completing...
+                        </>
+                      ) : (
+                        <>
+                          Complete investigation <Rocket size={14} />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : isRecommendationStage ? (
+          /* ========================================================= */
+          /* 5. Make Recommendation Screen                             */
+          /* ========================================================= */
+          <div className="space-y-6">
+            <form
+              onSubmit={handleRecommendationSubmit}
+              className="rounded-3xl border border-[#E5DEC9] bg-white p-8 shadow-sm sm:p-10 space-y-8"
+            >
+              <div className="space-y-2 border-b border-slate-100 pb-6">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-amber-900">
+                  <Sparkles size={12} /> Decision Stage
+                </span>
+                <h1 className="font-serif text-3xl font-bold text-slate-900">
+                  Make your recommendation
+                </h1>
+                <p className="text-sm text-slate-600">
+                  Based on the evidence you've investigated, select an intervention to propose to Sarah.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Select Intervention *
+                </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {decisionOptions.map((opt) => {
+                    const isSelected = selectedOption === opt;
+                    return (
+                      <label
+                        key={opt}
+                        className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition select-none ${
+                          isSelected
+                            ? "border-[#7B4A28] bg-amber-50/50 shadow-sm ring-1 ring-[#7B4A28]"
+                            : "border-slate-200 bg-slate-50/60 hover:bg-slate-100"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="recommendation_option"
+                          value={opt}
+                          checked={isSelected}
+                          onChange={(e) => setSelectedOption(e.target.value)}
+                          className="mt-0.5 text-[#7B4A28] focus:ring-[#7B4A28]"
+                        />
+                        <span className="text-sm font-semibold text-slate-900">{opt}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Why are you recommending this? *
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={whyRecommendation}
+                  onChange={(e) => setWhyRecommendation(e.target.value)}
+                  placeholder="Explain the root cause identified in the data and why this intervention will solve it..."
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Which evidence supports your recommendation?
+                </label>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {resources.map((res) => {
+                    const isChecked = selectedEvidenceResources.includes(res.id);
+                    return (
+                      <label
+                        key={res.id}
+                        className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 cursor-pointer text-xs font-medium text-slate-800"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleEvidenceResource(res.id, false)}
+                          className="rounded text-[#7B4A28] focus:ring-[#7B4A28]"
+                        />
+                        <span>{res.title}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  What are you uncertain about?
+                </label>
+                <textarea
+                  rows={3}
+                  value={recommendationUncertainty}
+                  onChange={(e) => setRecommendationUncertainty(e.target.value)}
+                  placeholder="Highlight any data gaps, latency dependencies, or alternative explanations..."
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={actionLoading || !selectedOption || !whyRecommendation.trim()}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-8 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#633B20] disabled:opacity-40"
+                >
+                  {actionLoading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Submitting...
+                    </>
+                  ) : (
+                    <>
+                      Send recommendation <Rocket size={16} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : isRealityEventStage ? (
+          /* ========================================================= */
+          /* 6. Consequence & Reality Event Screen                      */
+          /* ========================================================= */
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-[#E5DEC9] bg-white p-8 shadow-sm sm:p-10 space-y-8">
+              <div className="space-y-2 border-b border-slate-100 pb-6">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-300 bg-purple-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-purple-900">
+                  <RefreshCw size={12} /> New Information Received
+                </span>
+                <h1 className="font-serif text-3xl font-bold text-slate-900">
+                  Sarah's response & new evidence
+                </h1>
+                <p className="text-sm text-slate-600">
+                  Your initial recommendation has been reviewed. New production signals have just arrived.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-purple-200 bg-purple-50/60 p-6 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-200 font-bold text-purple-900">
+                    {manager.name ? manager.name[0] : "S"}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-purple-950">
+                      {manager.name || "Sarah"}: Response to Your Recommendation
+                    </h3>
+                    <p className="text-xs text-purple-800 font-mono">
+                      Proposed: "{currentDecision?.selected_option || selectedOption}"
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed text-purple-950">
+                  {realityEventsConfig.manager_response ||
+                    realityEventData?.manager_response ||
+                    "Sarah shared new data regarding recent payment interruptions and asks whether you wish to maintain or revise your recommendation."}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  New Information & Evidence
+                </h3>
+                <p className="text-sm leading-relaxed text-slate-800">
+                  {realityEventsConfig.information ||
+                    realityEventData?.information ||
+                    "A new sample suggests payment interruptions are concentrated on one specific payment method."}
+                </p>
+                {Array.isArray(realityEventsConfig.evidence) && realityEventsConfig.evidence.length > 0 && (
+                  <ul className="list-disc pl-5 text-xs text-slate-600 space-y-1">
+                    {realityEventsConfig.evidence.map((ev, i) => (
+                      <li key={i}>{ev}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              {!isUpdatingRecommendation ? (
+                <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    disabled={actionLoading}
+                    onClick={handleKeepRecommendation}
+                    className="rounded-2xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    Keep my recommendation
+                  </button>
+                  <button
+                    type="button"
+                    disabled={actionLoading}
+                    onClick={() => {
+                      setIsUpdatingRecommendation(true);
+                      setUpdatedOption(currentDecision?.selected_option || selectedOption);
+                      setUpdatedWhy(currentDecision?.why || whyRecommendation);
+                    }}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
+                  >
+                    Update my recommendation <RefreshCw size={14} />
+                  </button>
+                </div>
+              ) : (
+                <form
+                  onSubmit={handleUpdateRecommendationSubmit}
+                  className="rounded-2xl border border-amber-200 bg-amber-50/40 p-6 space-y-6"
+                >
+                  <div className="flex items-center justify-between border-b border-amber-200 pb-3">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-amber-900">
+                      Revise Recommendation Based on New Evidence
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => setIsUpdatingRecommendation(false)}
+                      className="text-xs text-slate-500 hover:text-slate-800"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Revised Option *
+                    </label>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {decisionOptions.map((opt) => {
+                        const isSelected = updatedOption === opt;
+                        return (
+                          <label
+                            key={opt}
+                            className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer select-none ${
+                              isSelected
+                                ? "border-[#7B4A28] bg-white shadow-sm ring-1 ring-[#7B4A28]"
+                                : "border-slate-200 bg-white/70 hover:bg-white"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="updated_option"
+                              value={opt}
+                              checked={isSelected}
+                              onChange={(e) => setUpdatedOption(e.target.value)}
+                              className="mt-0.5 text-[#7B4A28] focus:ring-[#7B4A28]"
+                            />
+                            <span className="text-sm font-semibold text-slate-900">{opt}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Updated Rationale *
+                    </label>
+                    <textarea
                       required
-                      placeholder="Enter your email to get early access"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                      rows={3}
+                      value={updatedWhy}
+                      onChange={(e) => setUpdatedWhy(e.target.value)}
+                      placeholder="Explain how the new information changed or refined your recommendation..."
+                      className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:outline-none"
                     />
                   </div>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3 text-sm shadow-sm transition-all duration-200 disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
-                  >
-                    {isSubmitting ? "Submitting..." : "Notify Me"}
-                  </button>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Remaining Uncertainty
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={updatedUncertainty}
+                      onChange={(e) => setUpdatedUncertainty(e.target.value)}
+                      placeholder="Note any unresolved questions or risks..."
+                      className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-3 border-t border-amber-200">
+                    <button
+                      type="button"
+                      onClick={() => setIsUpdatingRecommendation(false)}
+                      className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-700"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={actionLoading || !updatedOption || !updatedWhy.trim()}
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#7B4A28] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
+                    >
+                      {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                      Confirm Updated Recommendation
+                    </button>
+                  </div>
                 </form>
               )}
             </div>
           </div>
-        </div>
+        ) : isOutputStage ? (
+          /* ========================================================= */
+          /* 7. Professional Memo / Output Workflow                     */
+          /* ========================================================= */
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-[#E5DEC9] bg-white p-8 shadow-sm sm:p-10 space-y-8">
+              {/* Header & Status Banner */}
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-6">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-0.5 text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                      <FileText size={12} /> Deliverable: Professional Memo
+                    </span>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-xs text-slate-700 uppercase">
+                      Status: {outputStatus}
+                    </span>
+                  </div>
+                  <h1 className="font-serif text-3xl font-bold text-slate-900">
+                    Finish the work: Executive Memo
+                  </h1>
+                </div>
+
+                {!isMemoFinalised && (
+                  <span className="text-xs text-slate-500">
+                    Draft Autosave:{" "}
+                    <strong className={memoSaveStatus === "error" ? "text-rose-600" : "text-emerald-700 font-mono"}>
+                      {memoSaveStatus === "saving" ? "Saving..." : memoSaveStatus === "saved" ? "Saved" : memoSaveStatus === "error" ? "Save Error" : "Ready"}
+                    </strong>
+                  </span>
+                )}
+              </div>
+
+              {/* Six Required Memo Sections */}
+              <div className="space-y-6">
+                {/* 1. Executive Summary */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    1. Executive Summary *
+                  </label>
+                  {isMemoFinalised ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-900 whitespace-pre-wrap">
+                      {memoForm.executive_summary || "None provided"}
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={3}
+                      value={memoForm.executive_summary}
+                      onChange={(e) => handleMemoFieldChange("executive_summary", e.target.value)}
+                      placeholder="High-level overview of the investigation and core decision..."
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
+                    />
+                  )}
+                </div>
+
+                {/* 2. Key Findings */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    2. Key Findings *
+                  </label>
+                  {isMemoFinalised ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-900 whitespace-pre-wrap">
+                      {memoForm.key_findings || "None provided"}
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={3}
+                      value={memoForm.key_findings}
+                      onChange={(e) => handleMemoFieldChange("key_findings", e.target.value)}
+                      placeholder="Synthesize the critical drop-off points discovered during investigation..."
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
+                    />
+                  )}
+                </div>
+
+                {/* 3. Evidence */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    3. Supporting Evidence *
+                  </label>
+                  {isMemoFinalised ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-900 whitespace-pre-wrap">
+                      {memoForm.evidence || "None provided"}
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={3}
+                      value={memoForm.evidence}
+                      onChange={(e) => handleMemoFieldChange("evidence", e.target.value)}
+                      placeholder="Cite specific metrics, funnel logs, and customer feedback..."
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
+                    />
+                  )}
+                </div>
+
+                {/* 4. Recommendation */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    4. Recommendation *
+                  </label>
+                  {isMemoFinalised ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-900 whitespace-pre-wrap">
+                      {memoForm.recommendation || "None provided"}
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={3}
+                      value={memoForm.recommendation}
+                      onChange={(e) => handleMemoFieldChange("recommendation", e.target.value)}
+                      placeholder="Detailed proposal and chosen intervention..."
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
+                    />
+                  )}
+                </div>
+
+                {/* 5. Risks / Limitations */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    5. Risks & Limitations *
+                  </label>
+                  {isMemoFinalised ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-900 whitespace-pre-wrap">
+                      {memoForm.risks_limitations || "None provided"}
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={3}
+                      value={memoForm.risks_limitations}
+                      onChange={(e) => handleMemoFieldChange("risks_limitations", e.target.value)}
+                      placeholder="Outline uncertainties, technical dependencies, or trade-offs..."
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
+                    />
+                  )}
+                </div>
+
+                {/* 6. Next Steps */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    6. Next Steps *
+                  </label>
+                  {isMemoFinalised ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-900 whitespace-pre-wrap">
+                      {memoForm.next_steps || "None provided"}
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={3}
+                      value={memoForm.next_steps}
+                      onChange={(e) => handleMemoFieldChange("next_steps", e.target.value)}
+                      placeholder="Action items for engineering, analytics, and rollout..."
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Output Actions Bar */}
+              <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+                <div className="text-xs text-slate-500">
+                  {outputStatus === "draft" && "Editing draft. When ready, review the memo document."}
+                  {outputStatus === "review" && "Reviewed document. Finalising will lock all sections."}
+                  {outputStatus === "finalised" && "Memo finalised and locked. Ready to submit to Sarah."}
+                  {outputStatus === "submitted" && "Memo submitted to manager."}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {outputStatus === "draft" && (
+                    <button
+                      type="button"
+                      disabled={actionLoading}
+                      onClick={handleReviewOutput}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
+                    >
+                      {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+                      Review memo
+                    </button>
+                  )}
+
+                  {outputStatus === "review" && (
+                    <button
+                      type="button"
+                      disabled={actionLoading}
+                      onClick={handleFinaliseOutput}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-amber-700 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-amber-800 disabled:opacity-50"
+                    >
+                      {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <LockKeyhole size={16} />}
+                      Finalise memo
+                    </button>
+                  )}
+
+                  {outputStatus === "finalised" && (
+                    <button
+                      type="button"
+                      disabled={actionLoading}
+                      onClick={handleSubmitOutput}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-[#7B4A28] px-8 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
+                    >
+                      {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                      Submit memo to Sarah
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : isReflectionStage ? (
+          /* ========================================================= */
+          /* 8. Reflection Workflow                                    */
+          /* ========================================================= */
+          <div className="space-y-6">
+            <form
+              onSubmit={handleReflectionSubmit}
+              className="rounded-3xl border border-[#E5DEC9] bg-white p-8 shadow-sm sm:p-10 space-y-8"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-6">
+                <div className="space-y-1">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-300 bg-purple-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-purple-900">
+                    <Sparkles size={12} /> Final Reflection
+                  </span>
+                  <h1 className="font-serif text-3xl font-bold text-slate-900">
+                    Reflect on the experience
+                  </h1>
+                  <p className="text-sm text-slate-600">
+                    Reflect on how you approached the investigation, the analytical intuition you developed, and what you would explore further in a Business Analyst role.
+                  </p>
+                </div>
+
+                <span className="text-xs text-slate-500">
+                  Reflection Autosave:{" "}
+                  <strong className={reflectionSaveStatus === "error" ? "text-rose-600" : "text-emerald-700 font-mono"}>
+                    {reflectionSaveStatus === "saving" ? "Saving..." : reflectionSaveStatus === "saved" ? "Saved" : reflectionSaveStatus === "error" ? "Save Error" : "Ready"}
+                  </strong>
+                </span>
+              </div>
+
+              <div className="space-y-6">
+                {reflectionQuestions.map((q, idx) => (
+                  <div key={q.id || idx} className="space-y-2">
+                    <label className="text-sm font-bold text-slate-900">
+                      {idx + 1}. {q.prompt}
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={reflectionForm[q.id] || ""}
+                      onChange={(e) => handleReflectionFieldChange(q.id, e.target.value)}
+                      placeholder="Share your analytical reflections..."
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+                <p className="text-xs text-slate-500">
+                  Submitting your reflection completes the Trial Mission session.
+                </p>
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-[#7B4A28] px-8 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
+                >
+                  {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                  Submit reflection
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : isCompletedStage ? (
+          /* ========================================================= */
+          /* 9. Mission Completion Screen                              */
+          /* ========================================================= */
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-[#E5DEC9] bg-white p-8 shadow-sm sm:p-10 space-y-8">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 border-b border-slate-100 pb-6">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                  <CheckCircle2 size={32} />
+                </div>
+                <div className="space-y-1">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-900">
+                    Mission Completed
+                  </span>
+                  <h1 className="font-serif text-3xl font-bold text-slate-900">
+                    You've completed this Trial Mission
+                  </h1>
+                  <p className="text-sm text-slate-600">
+                    Your investigation findings, executive memo, and reflection have been submitted and recorded.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Mission
+                  </span>
+                  <p className="font-bold text-slate-900 text-sm">{session.mission_title}</p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Simulated Role
+                  </span>
+                  <p className="font-bold text-slate-900 text-sm">
+                    {role.title || "Business Analyst"} {role.company ? `(${role.company})` : ""}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Status
+                  </span>
+                  <p className="font-mono text-sm font-bold text-emerald-700">
+                    {session.state}
+                  </p>
+                </div>
+              </div>
+
+              {/* Evaluation Section */}
+              {evaluationLoading && (
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-6 text-sm text-slate-600">
+                  <Loader2 size={18} className="animate-spin text-[#7B4A28]" />
+                  <span>Loading evaluation details...</span>
+                </div>
+              )}
+
+              {!evaluationLoading && evaluationData?.status === "pending" && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-6 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Loader2 size={16} className="animate-spin text-amber-800" />
+                    <h3 className="text-sm font-bold text-amber-950">
+                      Your evaluation is being prepared
+                    </h3>
+                  </div>
+                  <p className="text-xs text-amber-900 leading-relaxed">
+                    Synthesizing your investigation evidence, recommendation rationale, and reflections...
+                  </p>
+                </div>
+              )}
+
+              {!evaluationLoading && (evaluationError || evaluationData?.status === "failed") && (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-6 text-xs text-slate-600">
+                  <p className="font-semibold text-slate-800 mb-1">Evaluation Details Notice</p>
+                  Evaluation feedback is currently unavailable. Your mission completion is securely recorded.
+                </div>
+              )}
+
+              {!evaluationLoading && evaluationData && (evaluationData.status === "completed" || evaluationData.ai_evaluation || evaluationData.deterministic_evaluation) && (
+                <div className="space-y-6 pt-2">
+                  <div className="space-y-1">
+                    <h2 className="text-xl font-bold text-slate-900">
+                      Mission Evaluation & Feedback
+                    </h2>
+                    <p className="text-xs text-slate-600">
+                      Evidence-backed observations and development notes from your performance in this role.
+                    </p>
+                  </div>
+
+                  {/* AI Evaluation Dimensions */}
+                  {Array.isArray(evaluationData.ai_evaluation?.dimensions) && evaluationData.ai_evaluation.dimensions.length > 0 && (
+                    <div className="space-y-4">
+                      {evaluationData.ai_evaluation.dimensions.map((dim, idx) => (
+                        <div
+                          key={dim.key || idx}
+                          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                            <h3 className="text-base font-bold text-slate-900">
+                              {formatDimensionKey(dim.key)}
+                            </h3>
+                            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                              Demonstrated Analysis
+                            </span>
+                          </div>
+
+                          {dim.observation && (
+                            <div className="space-y-1">
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                What you demonstrated
+                              </span>
+                              <p className="text-sm leading-relaxed text-slate-800">
+                                {dim.observation}
+                              </p>
+                            </div>
+                          )}
+
+                          {Array.isArray(dim.evidence_refs) && dim.evidence_refs.length > 0 && (
+                            <div className="space-y-1.5">
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                Evidence from your work
+                              </span>
+                              <div className="flex flex-wrap gap-2">
+                                {dim.evidence_refs.map((ref, rIdx) => (
+                                  <span
+                                    key={rIdx}
+                                    className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-[11px] text-slate-700"
+                                  >
+                                    {ref}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {dim.development_note && (
+                            <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 space-y-1">
+                              <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                                Development note
+                              </span>
+                              <p className="text-xs leading-relaxed text-amber-950">
+                                {dim.development_note}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Limitations */}
+                  {Array.isArray(evaluationData.ai_evaluation?.limitations) && evaluationData.ai_evaluation.limitations.length > 0 && (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 space-y-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                        Evaluation Limitations & Context
+                      </h4>
+                      <ul className="list-disc pl-5 text-xs text-slate-600 space-y-1">
+                        {evaluationData.ai_evaluation.limitations.map((lim, lIdx) => (
+                          <li key={lIdx}>{lim}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Deterministic Evaluation Signals */}
+                  {evaluationData.deterministic_evaluation?.dimensions && typeof evaluationData.deterministic_evaluation.dimensions === "object" && (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                        Deterministic Signal Context
+                      </h4>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {Object.entries(evaluationData.deterministic_evaluation.dimensions).map(([dKey, dVal]) => (
+                          <div key={dKey} className="rounded-xl border border-slate-200 bg-white p-3.5 space-y-1">
+                            <span className="text-xs font-bold text-slate-900">
+                              {formatDimensionKey(dKey)}
+                            </span>
+                            {typeof dVal === "object" && dVal !== null ? (
+                              <div className="text-xs text-slate-600 space-y-0.5">
+                                {dVal.notes && <p>{dVal.notes}</p>}
+                                {dVal.description && <p>{dVal.description}</p>}
+                                {dVal.observation && <p>{dVal.observation}</p>}
+                                {dVal.score !== undefined && (
+                                  <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-700">
+                                    Signal Score: {dVal.score}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-slate-600">{String(dVal)}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={resetToCatalog}
+                  className="rounded-2xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50"
+                >
+                  Explore More Missions
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard")}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#633B20]"
+                >
+                  Return to Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
