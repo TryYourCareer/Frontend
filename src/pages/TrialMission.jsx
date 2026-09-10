@@ -22,9 +22,7 @@ import {
 } from "lucide-react";
 import { useTrialMissionSession } from "../hooks/useTrialMissionSession";
 import { useDebounceAutosave } from "../hooks/useDebounceAutosave";
-import BusinessAnalystWorkspace from "../components/trialMission/BusinessAnalystWorkspace";
-import DeveloperWorkspace from "../components/trialMission/DeveloperWorkspace";
-import UXDesignerWorkspace from "../components/trialMission/UXDesignerWorkspace";
+import { WORKSPACE_COMPONENTS } from "../components/trialMission/WorkspaceRegistry";
 
 export function formatDimensionKey(key) {
   if (!key || typeof key !== "string") return "";
@@ -398,6 +396,9 @@ export default function TrialMission() {
   const realityEventsConfig = Array.isArray(config.reality_events) && config.reality_events.length > 0
     ? config.reality_events[0]
     : {};
+
+  // Resolve registered workspace component from registry based on session.workspace_type
+  const WorkspaceComponent = WORKSPACE_COMPONENTS[session?.workspace_type];
 
   // Trigger consequence generation when state is CONSEQUENCE_ACTIVE
   useEffect(() => {
@@ -1035,72 +1036,8 @@ export default function TrialMission() {
           /* ========================================================= */
           /* 4. Career-Specific Investigation Workspace Dispatch       */
           /* ========================================================= */
-          session?.workspace_type === "developer" ? (
-            <DeveloperWorkspace
-              session={session}
-              manager={manager}
-              briefing={briefing}
-              resources={resources}
-              accessedResourceIds={accessedResourceIds}
-              activeResource={activeResource}
-              setActiveResource={setActiveResource}
-              handleAccessResource={handleAccessResource}
-              notesValue={notesValue}
-              setNotesValue={setNotesValue}
-              notesStatus={notesStatus}
-              findings={findings}
-              workspaceLoading={workspaceLoading}
-              showFindingForm={showFindingForm}
-              setShowFindingForm={setShowFindingForm}
-              findingStatement={findingStatement}
-              setFindingStatement={setFindingStatement}
-              findingResource={findingResource}
-              setFindingResource={setFindingResource}
-              findingExplanation={findingExplanation}
-              setFindingExplanation={setFindingExplanation}
-              findingUncertainty={findingUncertainty}
-              setFindingUncertainty={setFindingUncertainty}
-              handleSaveNewFinding={handleSaveNewFinding}
-              handleCompleteInvestigation={handleCompleteInvestigation}
-              requiredFindingsCount={requiredFindingsCount}
-              requiredResourceAccess={requiredResourceAccess}
-              actionLoading={actionLoading}
-              isInvestigationPhase={isInvestigationPhase}
-            />
-          ) : session?.workspace_type === "business_analyst" ? (
-            <BusinessAnalystWorkspace
-              session={session}
-              manager={manager}
-              briefing={briefing}
-              resources={resources}
-              accessedResourceIds={accessedResourceIds}
-              activeResource={activeResource}
-              setActiveResource={setActiveResource}
-              handleAccessResource={handleAccessResource}
-              notesValue={notesValue}
-              setNotesValue={setNotesValue}
-              notesStatus={notesStatus}
-              findings={findings}
-              workspaceLoading={workspaceLoading}
-              showFindingForm={showFindingForm}
-              setShowFindingForm={setShowFindingForm}
-              findingStatement={findingStatement}
-              setFindingStatement={setFindingStatement}
-              findingResource={findingResource}
-              setFindingResource={setFindingResource}
-              findingExplanation={findingExplanation}
-              setFindingExplanation={setFindingExplanation}
-              findingUncertainty={findingUncertainty}
-              setFindingUncertainty={setFindingUncertainty}
-              handleSaveNewFinding={handleSaveNewFinding}
-              handleCompleteInvestigation={handleCompleteInvestigation}
-              requiredFindingsCount={requiredFindingsCount}
-              requiredResourceAccess={requiredResourceAccess}
-              actionLoading={actionLoading}
-              isInvestigationPhase={isInvestigationPhase}
-            />
-          ) : session?.workspace_type === "ux_designer" ? (
-            <UXDesignerWorkspace
+          WorkspaceComponent ? (
+            <WorkspaceComponent
               session={session}
               manager={manager}
               briefing={briefing}

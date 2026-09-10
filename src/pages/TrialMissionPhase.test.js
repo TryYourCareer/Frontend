@@ -2065,4 +2065,32 @@ describe("Trial Mission Modular Workspace Architecture & Dispatch", () => {
   });
 });
 
+describe("WorkspaceRegistry", () => {
+  const { WORKSPACE_COMPONENTS, getWorkspaceComponent } = require("../components/trialMission/WorkspaceRegistry");
+  const BusinessAnalystWorkspace = require("../components/trialMission/BusinessAnalystWorkspace").default;
+  const DeveloperWorkspace = require("../components/trialMission/DeveloperWorkspace").default;
+  const UXDesignerWorkspace = require("../components/trialMission/UXDesignerWorkspace").default;
+
+  test("contains valid mappings for all active workspace families", () => {
+    expect(WORKSPACE_COMPONENTS.business_analyst).toBe(BusinessAnalystWorkspace);
+    expect(WORKSPACE_COMPONENTS.developer).toBe(DeveloperWorkspace);
+    expect(WORKSPACE_COMPONENTS.ux_designer).toBe(UXDesignerWorkspace);
+  });
+
+  test("getWorkspaceComponent resolves valid components", () => {
+    expect(getWorkspaceComponent("business_analyst")).toBe(BusinessAnalystWorkspace);
+    expect(getWorkspaceComponent("developer")).toBe(DeveloperWorkspace);
+    expect(getWorkspaceComponent("ux_designer")).toBe(UXDesignerWorkspace);
+  });
+
+  test("getWorkspaceComponent returns null for unknown or invalid workspace types", () => {
+    expect(getWorkspaceComponent("unknown_type")).toBeNull();
+    expect(getWorkspaceComponent("data_science")).toBeNull();
+    expect(getWorkspaceComponent(null)).toBeNull();
+    expect(getWorkspaceComponent(undefined)).toBeNull();
+    expect(getWorkspaceComponent("")).toBeNull();
+  });
+});
+
+
 
