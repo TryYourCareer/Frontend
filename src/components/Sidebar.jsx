@@ -136,11 +136,11 @@ export default function Sidebar({
               {!isCollapsed && (
                 <div className="flex items-center justify-between w-full min-w-0">
                   <span className="truncate">{label}</span>
-                  {isLaunchingSoon && (
+                  {/* {isLaunchingSoon && (
                     <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full ml-auto border border-amber-200 shrink-0">
                       Soon
                     </span>
-                  )}
+                  )} */}
                 </div>
               )}
               {isCollapsed && isLaunchingSoon && (
