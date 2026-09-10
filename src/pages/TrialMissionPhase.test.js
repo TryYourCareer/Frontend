@@ -1923,12 +1923,68 @@ describe("Trial Mission Modular Workspace Architecture & Dispatch", () => {
 
     expect(screen.getByTestId("developer-workspace")).toBeInTheDocument();
     expect(screen.queryByTestId("business-analyst-workspace")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("ux-designer-workspace")).not.toBeInTheDocument();
     expect(screen.queryByTestId("unsupported-workspace")).not.toBeInTheDocument();
     expect(screen.getByText("Debug Production Latency & Cart State Sync")).toBeInTheDocument();
     expect(screen.getByText("Developer Investigation Workspace")).toBeInTheDocument();
   });
 
-  test("unknown workspace_type does NOT silently render BA or Dev workspace", () => {
+  test("dispatches to UXDesignerWorkspace when session.workspace_type is 'ux_designer'", () => {
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "ux-session-id",
+        workspace_type: "ux_designer",
+        state: "PHASE_ACTIVE",
+        current_phase: "investigate",
+        mission_title: "Audit Checkout Usability & Recommend a Redesign",
+        mission_configuration: {
+          phases: [{ id: "investigate", type: "investigation" }],
+          role: {
+            title: "UI / UX Designer",
+            manager: { name: "Elena Rostova", title: "Principal Product Designer" },
+          },
+          briefing: {
+            task: "Review usability research, identify interaction barriers, and prioritize redesign recommendations.",
+          },
+          resources: [
+            { id: "design-heuristic-audit", title: "Heuristic Evaluation & Journey Map", type: "heuristic_evaluation", content: "Heuristic findings" },
+            { id: "usability-test-session-notes", title: "Usability Testing Session Notes & Clips", type: "user_research", content: "Session clips" },
+            { id: "accessibility-mobile-audit", title: "Mobile Interaction & Accessibility Audit", type: "accessibility_audit", content: "Accessibility details" },
+          ],
+          investigation: {
+            completion: {
+              required_findings: 1,
+              required_resource_access: ["usability-test-session-notes"],
+            },
+          },
+        },
+      },
+    });
+
+    render(<TrialMission />);
+
+    expect(screen.getByTestId("ux-designer-workspace")).toBeInTheDocument();
+    expect(screen.queryByTestId("business-analyst-workspace")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("developer-workspace")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("unsupported-workspace")).not.toBeInTheDocument();
+    expect(screen.getByText("Audit Checkout Usability & Recommend a Redesign")).toBeInTheDocument();
+    expect(screen.getByText("UX Investigation Workspace")).toBeInTheDocument();
+
+    // Verify configured UX resources render dynamically
+    expect(screen.getByText("Heuristic Evaluation & Journey Map")).toBeInTheDocument();
+    expect(screen.getByText("Usability Testing Session Notes & Clips")).toBeInTheDocument();
+    expect(screen.getByText("Mobile Interaction & Accessibility Audit")).toBeInTheDocument();
+
+    // Verify manager card displays Elena Rostova
+    expect(screen.getByText("Elena Rostova")).toBeInTheDocument();
+    expect(screen.getByText("Principal Product Designer")).toBeInTheDocument();
+
+    // Verify completion checklist uses configured required resource
+    expect(screen.getByText("Inspect usability-test-session-notes")).toBeInTheDocument();
+  });
+
+  test("unknown workspace_type does NOT silently render BA, Dev, or UX workspace", () => {
     sessionHook.useTrialMissionSession.mockReturnValue({
       ...baseSessionHook,
       session: {
@@ -1948,6 +2004,7 @@ describe("Trial Mission Modular Workspace Architecture & Dispatch", () => {
     expect(screen.getByTestId("unsupported-workspace")).toBeInTheDocument();
     expect(screen.queryByTestId("business-analyst-workspace")).not.toBeInTheDocument();
     expect(screen.queryByTestId("developer-workspace")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("ux-designer-workspace")).not.toBeInTheDocument();
     expect(screen.getByText(/Unsupported workspace type: "data_scientist"/i)).toBeInTheDocument();
   });
 
@@ -1971,6 +2028,7 @@ describe("Trial Mission Modular Workspace Architecture & Dispatch", () => {
     expect(screen.getByTestId("unsupported-workspace")).toBeInTheDocument();
     expect(screen.queryByTestId("business-analyst-workspace")).not.toBeInTheDocument();
     expect(screen.queryByTestId("developer-workspace")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("ux-designer-workspace")).not.toBeInTheDocument();
     expect(screen.getByText(/Unsupported workspace type: "unspecified"/i)).toBeInTheDocument();
   });
 
@@ -2006,4 +2064,5 @@ describe("Trial Mission Modular Workspace Architecture & Dispatch", () => {
     expect(handleAbandon).toHaveBeenCalledTimes(1);
   });
 });
+
 
