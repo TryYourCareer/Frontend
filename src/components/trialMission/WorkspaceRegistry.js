@@ -2,6 +2,7 @@ import BusinessAnalystWorkspace from "./BusinessAnalystWorkspace";
 import DeveloperWorkspace from "./DeveloperWorkspace";
 import UXDesignerWorkspace from "./UXDesignerWorkspace";
 import DataNotebookWorkspace from "./DataNotebookWorkspace";
+import SystemArchitectWorkspace from "./SystemArchitectWorkspace";
 
 /**
  * Registry mapping stable workspace family identifiers (session.workspace_type)
@@ -12,6 +13,7 @@ export const WORKSPACE_COMPONENTS = {
   developer: DeveloperWorkspace,
   ux_designer: UXDesignerWorkspace,
   data_notebook: DataNotebookWorkspace,
+  system_architect: SystemArchitectWorkspace,
 };
 
 /**
