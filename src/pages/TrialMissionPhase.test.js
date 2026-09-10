@@ -2070,17 +2070,20 @@ describe("WorkspaceRegistry", () => {
   const BusinessAnalystWorkspace = require("../components/trialMission/BusinessAnalystWorkspace").default;
   const DeveloperWorkspace = require("../components/trialMission/DeveloperWorkspace").default;
   const UXDesignerWorkspace = require("../components/trialMission/UXDesignerWorkspace").default;
+  const DataNotebookWorkspace = require("../components/trialMission/DataNotebookWorkspace").default;
 
   test("contains valid mappings for all active workspace families", () => {
     expect(WORKSPACE_COMPONENTS.business_analyst).toBe(BusinessAnalystWorkspace);
     expect(WORKSPACE_COMPONENTS.developer).toBe(DeveloperWorkspace);
     expect(WORKSPACE_COMPONENTS.ux_designer).toBe(UXDesignerWorkspace);
+    expect(WORKSPACE_COMPONENTS.data_notebook).toBe(DataNotebookWorkspace);
   });
 
   test("getWorkspaceComponent resolves valid components", () => {
     expect(getWorkspaceComponent("business_analyst")).toBe(BusinessAnalystWorkspace);
     expect(getWorkspaceComponent("developer")).toBe(DeveloperWorkspace);
     expect(getWorkspaceComponent("ux_designer")).toBe(UXDesignerWorkspace);
+    expect(getWorkspaceComponent("data_notebook")).toBe(DataNotebookWorkspace);
   });
 
   test("getWorkspaceComponent returns null for unknown or invalid workspace types", () => {
