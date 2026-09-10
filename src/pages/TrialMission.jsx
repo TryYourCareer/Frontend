@@ -24,6 +24,27 @@ import { useTrialMissionSession } from "../hooks/useTrialMissionSession";
 import { useDebounceAutosave } from "../hooks/useDebounceAutosave";
 import { WORKSPACE_COMPONENTS } from "../components/trialMission/WorkspaceRegistry";
 
+export function formatWorkspaceType(type) {
+  if (!type || typeof type !== "string") return "Interactive Workspace";
+  switch (type.toLowerCase()) {
+    case "business_analyst":
+      return "Analysis Workspace";
+    case "developer":
+      return "Technical Workspace";
+    case "ux_designer":
+      return "Design Studio";
+    case "data_notebook":
+      return "Data Notebook";
+    case "system_architect":
+      return "Architecture Canvas";
+    default:
+      return type
+        .replace(/[_-]+/g, " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase())
+        .trim();
+  }
+}
+
 export function formatDimensionKey(key) {
   if (!key || typeof key !== "string") return "";
   return key
@@ -803,48 +824,59 @@ export default function TrialMission() {
                 </div>
               ) : (
                 <div className="grid gap-6 md:grid-cols-2">
-                  {missions.map((m) => (
-                    <div
-                      key={m.id}
-                      className="flex flex-col justify-between rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm transition hover:shadow-md"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-0.5 text-xs font-semibold text-slate-700">
-                            <Briefcase size={12} /> {m.workspace_type || "Career Mission"}
-                          </span>
-                          {m.estimated_duration_minutes && (
-                            <span className="text-xs text-slate-500">
-                              ~{m.estimated_duration_minutes} mins
+                  {missions.map((m) => {
+                    const careerName = m.career?.name || m.career_name || "Career Mission";
+                    const workspaceLabel = formatWorkspaceType(m.workspace_type);
+                    return (
+                      <div
+                        key={m.id}
+                        className="flex flex-col justify-between rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm transition hover:shadow-md"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200/80 px-3 py-1 text-xs font-bold text-amber-900">
+                              <Briefcase size={12} className="text-amber-700" /> {careerName}
                             </span>
-                          )}
+                            {m.estimated_duration_minutes && (
+                              <span className="text-xs font-medium text-slate-500">
+                                ~{m.estimated_duration_minutes} mins
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-slate-900">{m.title}</h3>
+                            <div className="mt-1 flex items-center gap-2">
+                              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                {workspaceLabel}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-sm leading-relaxed text-slate-600 line-clamp-3">
+                            {m.description || "Take on real-world business challenges and test your analytical intuition."}
+                          </p>
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900">{m.title}</h3>
-                        <p className="text-sm leading-relaxed text-slate-600 line-clamp-3">
-                          {m.description || "Take on real-world business challenges and test your analytical intuition."}
-                        </p>
-                      </div>
 
-                      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <button
-                          type="button"
-                          disabled={actionLoading}
-                          onClick={() => startSession(m.id)}
-                          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#633B20] disabled:opacity-50"
-                        >
-                          {actionLoading ? (
-                            <>
-                              <Loader2 size={16} className="animate-spin" /> Starting...
-                            </>
-                          ) : (
-                            <>
-                              Try this career <Rocket size={16} />
-                            </>
-                          )}
-                        </button>
+                        <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                          <button
+                            type="button"
+                            disabled={actionLoading}
+                            onClick={() => startSession(m.id)}
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#633B20] disabled:opacity-50"
+                          >
+                            {actionLoading ? (
+                              <>
+                                <Loader2 size={16} className="animate-spin" /> Starting...
+                              </>
+                            ) : (
+                              <>
+                                Try this career <Rocket size={16} />
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

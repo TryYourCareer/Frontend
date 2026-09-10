@@ -5,7 +5,7 @@ jest.mock('react-router-dom', () => ({
 
 import React from "react";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
-import TrialMission, { deriveInvestigationPhaseId, mapQuestionIdToCanonicalKey } from "./TrialMission";
+import TrialMission, { deriveInvestigationPhaseId, mapQuestionIdToCanonicalKey, formatWorkspaceType } from "./TrialMission";
 import * as sessionHook from "../hooks/useTrialMissionSession";
 
 jest.mock("../hooks/useTrialMissionSession");
@@ -2097,3 +2097,101 @@ describe("WorkspaceRegistry", () => {
 
 
 
+
+describe("Trial Mission Catalog Role and Workspace Display", () => {
+  test("formatWorkspaceType formats technical workspace identifiers into user-friendly names", () => {
+    expect(formatWorkspaceType("business_analyst")).toBe("Analysis Workspace");
+    expect(formatWorkspaceType("developer")).toBe("Technical Workspace");
+    expect(formatWorkspaceType("ux_designer")).toBe("Design Studio");
+    expect(formatWorkspaceType("data_notebook")).toBe("Data Notebook");
+    expect(formatWorkspaceType("system_architect")).toBe("Architecture Canvas");
+    expect(formatWorkspaceType(null)).toBe("Interactive Workspace");
+    expect(formatWorkspaceType(undefined)).toBe("Interactive Workspace");
+    expect(formatWorkspaceType("custom_modality")).toBe("Custom Modality");
+  });
+
+  test("catalog cards display career name prominently, mission title, and formatted workspace label", () => {
+    const startSession = jest.fn();
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      session: null,
+      activeSessionId: null,
+      loading: false,
+      error: null,
+      missions: [
+        {
+          id: "mission-sc-1",
+          title: "Resolve Cold-Chain Distribution & Temperature Excursion Spikes",
+          description: "Eliminate biological spoilage by optimizing refrigerated routes.",
+          workspace_type: "business_analyst",
+          career: {
+            id: "career-sc-1",
+            name: "Supply Chain Manager",
+            slug: "supply-chain-manager",
+          },
+        },
+        {
+          id: "mission-actuary-1",
+          title: "Commercial Property Coastal Flood Loss Modeling",
+          description: "Model 100-year hurricane storm surges.",
+          workspace_type: "data_notebook",
+          career: {
+            id: "career-actuary-1",
+            name: "Actuary",
+            slug: "actuary",
+          },
+        },
+      ],
+      startSession,
+      actionLoading: false,
+    });
+
+    render(<TrialMission />);
+
+    // 1. Primary Career Names are displayed
+    expect(screen.getByText("Supply Chain Manager")).toBeInTheDocument();
+    expect(screen.getByText("Actuary")).toBeInTheDocument();
+
+    // 2. Mission Titles are displayed
+    expect(screen.getByText("Resolve Cold-Chain Distribution & Temperature Excursion Spikes")).toBeInTheDocument();
+    expect(screen.getByText("Commercial Property Coastal Flood Loss Modeling")).toBeInTheDocument();
+
+    // 3. Formatted Workspace Modalities are displayed (NOT raw internal strings)
+    expect(screen.getByText("Analysis Workspace")).toBeInTheDocument();
+    expect(screen.getByText("Data Notebook")).toBeInTheDocument();
+    expect(screen.queryByText("business_analyst")).not.toBeInTheDocument();
+    expect(screen.queryByText("data_notebook")).not.toBeInTheDocument();
+
+    // 4. Clicking 'Try this career' triggers startSession with the correct mission ID
+    const tryButtons = screen.getAllByRole("button", { name: /Try this career/i });
+    expect(tryButtons.length).toBe(2);
+    fireEvent.click(tryButtons[0]);
+    expect(startSession).toHaveBeenCalledWith("mission-sc-1");
+  });
+
+  test("catalog card handles missing career object gracefully with fallback", () => {
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      session: null,
+      activeSessionId: null,
+      loading: false,
+      error: null,
+      missions: [
+        {
+          id: "mission-fallback-1",
+          title: "Generic Challenge",
+          description: "A business challenge without attached career metadata.",
+          workspace_type: "developer",
+          career: null,
+        },
+      ],
+      startSession: jest.fn(),
+      actionLoading: false,
+    });
+
+    render(<TrialMission />);
+
+    expect(screen.getByText("Career Mission")).toBeInTheDocument();
+    expect(screen.getByText("Generic Challenge")).toBeInTheDocument();
+    expect(screen.getByText("Technical Workspace")).toBeInTheDocument();
+    expect(screen.queryByText("developer")).not.toBeInTheDocument();
+  });
+});
