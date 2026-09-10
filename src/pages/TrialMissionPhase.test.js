@@ -392,6 +392,153 @@ describe("Recommendation to Consequence to Reality Event Lifecycle", () => {
       expect(handleGenerateConsequence).toHaveBeenCalled();
     });
   });
+
+  test("Update recommendation with valid evidence sends non-empty evidence IDs and succeeds", async () => {
+    const handleRealityEventResponse = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REALITY_EVENT_PENDING",
+        current_phase: "adapt",
+        mission_configuration: {
+          phases: [
+            { id: "investigate", type: "investigation" },
+            { id: "recommend", type: "decision" },
+            { id: "adapt", type: "reality_event" },
+          ],
+          decisions: [
+            {
+              options: [
+                "Implement AbortController with request sequence IDs",
+                "Introduce optimistic locking with version checks on server",
+              ],
+            },
+          ],
+          resources: [
+            { id: "incident-brief", title: "Incident brief & issue report" },
+            { id: "api-logs-latency", title: "Server API logs & latency traces" },
+          ],
+          reality_events: [
+            {
+              manager_response: "Marcus reviewed your proposed solution",
+              information: "New telemetry confirms offline reconnect issues",
+            },
+          ],
+        },
+      },
+      currentDecision: {
+        selected_option: "Implement AbortController with request sequence IDs",
+        why: "Initial race condition rationale",
+        evidence: [{ resource_id: "incident-brief" }],
+        uncertainty: "Initial uncertainty",
+      },
+      handleRealityEventResponse,
+    });
+
+    render(<TrialMission />);
+
+    // Click "Update my recommendation"
+    const updateBtn = screen.getByRole("button", { name: /Update my recommendation/i });
+    fireEvent.click(updateBtn);
+
+    // Verify update form is rendered with revised options and evidence checkboxes
+    expect(screen.getByText("Revise Recommendation Based on New Evidence")).toBeInTheDocument();
+    expect(screen.getByLabelText("Incident brief & issue report")).toBeInTheDocument();
+    expect(screen.getByLabelText("Server API logs & latency traces")).toBeInTheDocument();
+
+    // Select revised option
+    const revisedOptionRadio = screen.getByLabelText("Introduce optimistic locking with version checks on server");
+    fireEvent.click(revisedOptionRadio);
+
+    // Update rationale and check new evidence checkbox
+    const rationaleInput = screen.getByPlaceholderText(/Explain how the new information changed or refined your recommendation/i);
+    fireEvent.change(rationaleInput, { target: { value: "Server version checks guard against concurrent overwrites" } });
+
+    const newEvidenceCheckbox = screen.getByLabelText("Server API logs & latency traces");
+    fireEvent.click(newEvidenceCheckbox);
+
+    // Click Confirm Updated Recommendation
+    const confirmBtn = screen.getByRole("button", { name: /Confirm Updated Recommendation/i });
+    expect(confirmBtn).not.toBeDisabled();
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(handleRealityEventResponse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "update",
+          selected_option: "Introduce optimistic locking with version checks on server",
+          why: "Server version checks guard against concurrent overwrites",
+          evidence: expect.arrayContaining([
+            expect.objectContaining({ resource_id: "incident-brief" }),
+            expect.objectContaining({ resource_id: "api-logs-latency" }),
+          ]),
+        })
+      );
+    });
+  });
+
+  test("Update recommendation without evidence does not call the API and shows validation warning", async () => {
+    const handleRealityEventResponse = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REALITY_EVENT_PENDING",
+        current_phase: "adapt",
+        mission_configuration: {
+          phases: [
+            { id: "investigate", type: "investigation" },
+            { id: "recommend", type: "decision" },
+            { id: "adapt", type: "reality_event" },
+          ],
+          decisions: [
+            {
+              options: [
+                "Implement AbortController with request sequence IDs",
+                "Introduce optimistic locking with version checks on server",
+              ],
+            },
+          ],
+          resources: [
+            { id: "incident-brief", title: "Incident brief & issue report" },
+          ],
+          reality_events: [
+            {
+              manager_response: "Marcus reviewed your proposed solution",
+              information: "New telemetry confirms offline reconnect issues",
+            },
+          ],
+        },
+      },
+      currentDecision: {
+        selected_option: "Implement AbortController with request sequence IDs",
+        why: "Initial why",
+        evidence: [],
+        uncertainty: "Initial uncertainty",
+      },
+      handleRealityEventResponse,
+    });
+
+    render(<TrialMission />);
+
+    // Click "Update my recommendation"
+    const updateBtn = screen.getByRole("button", { name: /Update my recommendation/i });
+    fireEvent.click(updateBtn);
+
+    // Ensure validation warning is visible when no evidence is checked
+    expect(screen.getByText("Please select at least one supporting evidence resource.")).toBeInTheDocument();
+
+    const confirmBtn = screen.getByRole("button", { name: /Confirm Updated Recommendation/i });
+    expect(confirmBtn).toBeDisabled();
+
+    // Attempt to submit
+    fireEvent.click(confirmBtn);
+
+    expect(handleRealityEventResponse).not.toHaveBeenCalled();
+  });
 });
 
 describe("Output to Reflection Lifecycle and Autosave", () => {
@@ -1668,3 +1815,195 @@ describe("Professional Memo / Output Autosave and Review Lifecycle", () => {
     );
   });
 });
+
+describe("Trial Mission Modular Workspace Architecture & Dispatch", () => {
+  const baseSessionHook = {
+    missions: [],
+    session: null,
+    workingNotes: "Initial note",
+    findings: [
+      {
+        id: "f1",
+        statement: "Dropoff at payment",
+        resource_id: "res-1",
+        explanation: "Analysis",
+        uncertainty: "None",
+      },
+    ],
+    currentDecision: null,
+    consequenceData: null,
+    realityEventData: null,
+    outputData: null,
+    reflectionData: null,
+    evaluationData: null,
+    evaluationLoading: false,
+    evaluationError: null,
+    accessedResourceIds: new Set(["res-1"]),
+    activeResource: null,
+    setActiveResource: jest.fn(),
+    loading: false,
+    workspaceLoading: false,
+    actionLoading: false,
+    error: null,
+    startSession: jest.fn(),
+    handleTransition: jest.fn(),
+    handleAccessResource: jest.fn(),
+    handleSaveNotes: jest.fn(),
+    handleAddFinding: jest.fn(),
+    handleCompleteInvestigation: jest.fn(),
+    handleSubmitDecision: jest.fn(),
+    handleGenerateConsequence: jest.fn().mockResolvedValue({}),
+    handleFetchRealityEvent: jest.fn(),
+    handleRespondRealityEvent: jest.fn(),
+    handleSaveOutput: jest.fn(),
+    handleReviewOutput: jest.fn(),
+    handleFinaliseOutput: jest.fn(),
+    handleSaveReflection: jest.fn(),
+    handleSubmitReflection: jest.fn(),
+    handlePause: jest.fn(),
+    handleResume: jest.fn(),
+    handleAbandon: jest.fn(),
+    handleRetryEvaluation: jest.fn(),
+    clearSession: jest.fn(),
+  };
+
+  test("dispatches to BusinessAnalystWorkspace when session.workspace_type is 'business_analyst'", () => {
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "ba-session-id",
+        workspace_type: "business_analyst",
+        state: "PHASE_ACTIVE",
+        current_phase: "investigate",
+        mission_title: "Investigate Checkout Abandonment",
+        mission_config: {
+          phases: [{ id: "investigate", type: "investigation" }],
+          briefing: {
+            title: "BA Mission",
+            manager: { name: "Sarah Lin", role: "VP Product" },
+            resources: [
+              { id: "res-1", title: "Funnel Analysis", type: "metric", content: "Data" },
+            ],
+          },
+        },
+      },
+    });
+
+    render(<TrialMission />);
+
+    expect(screen.getByTestId("business-analyst-workspace")).toBeInTheDocument();
+    expect(screen.queryByTestId("developer-workspace")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("unsupported-workspace")).not.toBeInTheDocument();
+    expect(screen.getByText("Investigate Checkout Abandonment")).toBeInTheDocument();
+  });
+
+  test("dispatches to DeveloperWorkspace when session.workspace_type is 'developer'", () => {
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "dev-session-id",
+        workspace_type: "developer",
+        state: "PHASE_ACTIVE",
+        current_phase: "investigate",
+        mission_title: "Debug Production Latency & Cart State Sync",
+        mission_config: {
+          phases: [{ id: "investigate", type: "investigation" }],
+          briefing: {
+            title: "Dev Mission",
+            manager: { name: "Alex Mercer", role: "Staff Engineer" },
+            resources: [
+              { id: "res-1", title: "APM Traces & Flamegraph", type: "telemetry", content: "Trace" },
+            ],
+          },
+        },
+      },
+    });
+
+    render(<TrialMission />);
+
+    expect(screen.getByTestId("developer-workspace")).toBeInTheDocument();
+    expect(screen.queryByTestId("business-analyst-workspace")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("unsupported-workspace")).not.toBeInTheDocument();
+    expect(screen.getByText("Debug Production Latency & Cart State Sync")).toBeInTheDocument();
+    expect(screen.getByText("Developer Investigation Workspace")).toBeInTheDocument();
+  });
+
+  test("unknown workspace_type does NOT silently render BA or Dev workspace", () => {
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "unknown-session-id",
+        workspace_type: "data_scientist",
+        state: "PHASE_ACTIVE",
+        current_phase: "investigate",
+        mission_title: "Data Science Task",
+        mission_config: {
+          phases: [{ id: "investigate", type: "investigation" }],
+        },
+      },
+    });
+
+    render(<TrialMission />);
+
+    expect(screen.getByTestId("unsupported-workspace")).toBeInTheDocument();
+    expect(screen.queryByTestId("business-analyst-workspace")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("developer-workspace")).not.toBeInTheDocument();
+    expect(screen.getByText(/Unsupported workspace type: "data_scientist"/i)).toBeInTheDocument();
+  });
+
+  test("null or undefined workspace_type renders unsupported message and does NOT fallback to BA", () => {
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "null-session-id",
+        workspace_type: null,
+        state: "PHASE_ACTIVE",
+        current_phase: "investigate",
+        mission_title: "Legacy Mission",
+        mission_config: {
+          phases: [{ id: "investigate", type: "investigation" }],
+        },
+      },
+    });
+
+    render(<TrialMission />);
+
+    expect(screen.getByTestId("unsupported-workspace")).toBeInTheDocument();
+    expect(screen.queryByTestId("business-analyst-workspace")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("developer-workspace")).not.toBeInTheDocument();
+    expect(screen.getByText(/Unsupported workspace type: "unspecified"/i)).toBeInTheDocument();
+  });
+
+  test("shared session lifecycle controls (pause, resume, abandon) function identically across workspaces", () => {
+    const handlePause = jest.fn();
+    const handleAbandon = jest.fn();
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "dev-session-id",
+        workspace_type: "developer",
+        state: "PHASE_ACTIVE",
+        current_phase: "investigate",
+        allowed_actions: ["pause", "abandon"],
+        mission_title: "Debug Production Latency & Cart State Sync",
+        mission_config: {
+          phases: [{ id: "investigate", type: "investigation" }],
+        },
+      },
+      handlePause,
+      handleAbandon,
+    });
+
+    render(<TrialMission />);
+
+    const pauseBtn = screen.getByRole("button", { name: /Pause/i });
+    fireEvent.click(pauseBtn);
+    expect(handlePause).toHaveBeenCalledTimes(1);
+
+    const abandonBtn = screen.getByRole("button", { name: /Abandon/i });
+    fireEvent.click(abandonBtn);
+    expect(handleAbandon).toHaveBeenCalledTimes(1);
+  });
+});
+
