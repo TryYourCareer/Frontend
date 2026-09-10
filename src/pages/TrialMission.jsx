@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Rocket,
@@ -74,6 +74,21 @@ export function deriveInvestigationPhaseId(config) {
   return "investigate";
 }
 
+export function mapQuestionIdToCanonicalKey(qId) {
+  if (!qId) return "what_felt_natural";
+  const idStr = String(qId).toLowerCase();
+  if (idStr === "natural" || idStr === "what_felt_natural" || idStr.includes("natural")) {
+    return "what_felt_natural";
+  }
+  if (idStr === "hardest" || idStr === "hardest_part" || idStr.includes("hardest") || idStr.includes("challenging")) {
+    return "hardest_part";
+  }
+  if (idStr === "next_investigation" || idStr === "investigate_next" || idStr.includes("next") || idStr.includes("investigate")) {
+    return "investigate_next";
+  }
+  return qId;
+}
+
 export default function TrialMission() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -103,6 +118,15 @@ export default function TrialMission() {
   const [updatedEvidenceResources, setUpdatedEvidenceResources] = useState([]);
   const [updatedUncertainty, setUpdatedUncertainty] = useState("");
 
+  // Consequence generation ref to avoid duplicate calls
+  const consequenceGeneratedRef = useRef(false);
+  const reflectionDirtyRef = useRef(false);
+  const reflectionEditVersionRef = useRef(0);
+  const reflectionSaveTimerRef = useRef(null);
+  const memoDirtyRef = useRef(false);
+  const memoEditVersionRef = useRef(0);
+  const memoSaveTimerRef = useRef(null);
+
   // Memo form state
   const [memoForm, setMemoForm] = useState({
     executive_summary: "",
@@ -113,6 +137,7 @@ export default function TrialMission() {
     next_steps: "",
   });
   const [memoSaveStatus, setMemoSaveStatus] = useState("ready"); // "ready" | "saving" | "saved" | "error"
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   // Reflection form state
   const [reflectionForm, setReflectionForm] = useState({
@@ -128,6 +153,7 @@ export default function TrialMission() {
     workingNotes,
     findings,
     currentDecision,
+    consequenceData,
     realityEventData,
     outputData,
     reflectionData,
@@ -148,6 +174,7 @@ export default function TrialMission() {
     handleAddFinding,
     handleCompleteInvestigation,
     handleSubmitDecision,
+    handleGenerateConsequence,
     handleFetchRealityEvent,
     handleRealityEventResponse,
     handleSaveOutput,
@@ -177,33 +204,104 @@ export default function TrialMission() {
   // Sync memo draft from backend outputData
   useEffect(() => {
     if (outputData) {
-      setMemoForm((prev) => ({
-        executive_summary: outputData.executive_summary ?? prev.executive_summary,
-        key_findings: outputData.key_findings ?? prev.key_findings,
-        evidence: outputData.evidence ?? prev.evidence,
-        recommendation: outputData.recommendation ?? prev.recommendation,
-        risks_limitations: outputData.risks_limitations ?? prev.risks_limitations,
-        next_steps: outputData.next_steps ?? prev.next_steps,
-      }));
+      setMemoForm((prev) => {
+        if (memoDirtyRef.current) {
+          return prev;
+        }
+
+        const nextExecutive = outputData.executive_summary ?? prev.executive_summary ?? "";
+        const nextFindings = outputData.key_findings ?? prev.key_findings ?? "";
+        const nextEvidence = outputData.evidence ?? prev.evidence ?? "";
+        const nextRec = outputData.recommendation ?? prev.recommendation ?? "";
+        const nextRisks = outputData.risks_limitations ?? prev.risks_limitations ?? "";
+        const nextSteps = outputData.next_steps ?? prev.next_steps ?? "";
+
+        if (
+          prev.executive_summary === nextExecutive &&
+          prev.key_findings === nextFindings &&
+          prev.evidence === nextEvidence &&
+          prev.recommendation === nextRec &&
+          prev.risks_limitations === nextRisks &&
+          prev.next_steps === nextSteps
+        ) {
+          return prev;
+        }
+
+        return {
+          executive_summary: nextExecutive,
+          key_findings: nextFindings,
+          evidence: nextEvidence,
+          recommendation: nextRec,
+          risks_limitations: nextRisks,
+          next_steps: nextSteps,
+        };
+      });
     } else if (currentDecision) {
       // Pre-fill recommendation from decision if empty
-      setMemoForm((prev) => ({
-        ...prev,
-        recommendation: prev.recommendation || currentDecision.selected_option || "",
-        evidence: prev.evidence || currentDecision.why || "",
-        risks_limitations: prev.risks_limitations || currentDecision.uncertainty || "",
-      }));
+      setMemoForm((prev) => {
+        if (memoDirtyRef.current) {
+          return prev;
+        }
+
+        const nextRec = prev.recommendation || currentDecision.selected_option || "";
+        const nextEvidence = prev.evidence || currentDecision.why || "";
+        const nextRisks = prev.risks_limitations || currentDecision.uncertainty || "";
+
+        if (
+          prev.recommendation === nextRec &&
+          prev.evidence === nextEvidence &&
+          prev.risks_limitations === nextRisks
+        ) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          recommendation: nextRec,
+          evidence: nextEvidence,
+          risks_limitations: nextRisks,
+        };
+      });
     }
   }, [outputData, currentDecision]);
 
   // Sync reflection draft from backend reflectionData
   useEffect(() => {
     if (reflectionData) {
-      setReflectionForm((prev) => ({
-        what_felt_natural: reflectionData.what_felt_natural ?? prev.what_felt_natural,
-        hardest_part: reflectionData.hardest_part ?? prev.hardest_part,
-        investigate_next: reflectionData.investigate_next ?? prev.investigate_next,
-      }));
+      setReflectionForm((prev) => {
+        if (reflectionDirtyRef.current) {
+          return prev;
+        }
+
+        const nextWhat =
+          reflectionData.what_felt_natural ??
+          reflectionData.natural ??
+          prev.what_felt_natural ??
+          "";
+        const nextHardest =
+          reflectionData.hardest_part ??
+          reflectionData.hardest ??
+          prev.hardest_part ??
+          "";
+        const nextInvestigate =
+          reflectionData.investigate_next ??
+          reflectionData.next_investigation ??
+          prev.investigate_next ??
+          "";
+
+        if (
+          prev.what_felt_natural === nextWhat &&
+          prev.hardest_part === nextHardest &&
+          prev.investigate_next === nextInvestigate
+        ) {
+          return prev;
+        }
+        return {
+          what_felt_natural: nextWhat,
+          hardest_part: nextHardest,
+          investigate_next: nextInvestigate,
+        };
+      });
     }
   }, [reflectionData]);
 
@@ -267,17 +365,20 @@ export default function TrialMission() {
     session?.state === "REALITY_EVENT_PENDING" ||
     session?.current_phase === "adapt" ||
     session?.current_phase === "reality_event";
-  const isOutputStage =
-    session?.current_phase === "deliver" ||
-    session?.current_phase === "output" ||
-    session?.current_phase === "memo";
-  const isReflectionStage =
-    session?.state === "REFLECTION_ACTIVE" ||
-    session?.current_phase === "reflect" ||
-    session?.current_phase === "reflection";
   const isCompletedStage =
     session?.state === "SESSION_COMPLETED" ||
     session?.state === "COMPLETED";
+  const isReflectionStage =
+    !isCompletedStage &&
+    (session?.state === "REFLECTION_ACTIVE" ||
+      session?.current_phase === "reflect" ||
+      session?.current_phase === "reflection");
+  const isOutputStage =
+    session?.state !== "REFLECTION_ACTIVE" &&
+    !isCompletedStage &&
+    (session?.current_phase === "deliver" ||
+      session?.current_phase === "output" ||
+      session?.current_phase === "memo");
 
   const outputStatus = outputData?.status || "draft";
   const isMemoFinalised = outputStatus === "finalised" || outputStatus === "submitted";
@@ -299,45 +400,113 @@ export default function TrialMission() {
     ? config.reality_events[0]
     : {};
 
+  // Trigger consequence generation when state is CONSEQUENCE_ACTIVE
   useEffect(() => {
-    if (isRealityEventStage && !realityEventData) {
+    if (
+      session?.state === "CONSEQUENCE_ACTIVE" &&
+      !actionLoading &&
+      !consequenceGeneratedRef.current
+    ) {
+      consequenceGeneratedRef.current = true;
+      Promise.resolve(handleGenerateConsequence?.()).catch(() => {
+        consequenceGeneratedRef.current = false;
+      });
+    } else if (session?.state !== "CONSEQUENCE_ACTIVE") {
+      consequenceGeneratedRef.current = false;
+    }
+  }, [session?.state, actionLoading, handleGenerateConsequence]);
+
+  // Fetch reality event only once state is REALITY_EVENT_PENDING
+  useEffect(() => {
+    if (
+      session?.state === "REALITY_EVENT_PENDING" &&
+      !realityEventData &&
+      !actionLoading
+    ) {
       handleFetchRealityEvent();
     }
-  }, [isRealityEventStage, realityEventData, handleFetchRealityEvent]);
+  }, [session?.state, realityEventData, actionLoading, handleFetchRealityEvent]);
 
   // Debounced autosave for memo draft
   useEffect(() => {
     if (!isOutputStage || isMemoFinalised) return;
+    if (!memoDirtyRef.current) return;
+
+    const savingVersion = memoEditVersionRef.current;
+    const snapshot = memoForm;
 
     setMemoSaveStatus("saving");
     const timer = setTimeout(async () => {
       try {
-        await handleSaveOutput(memoForm);
+        await handleSaveOutput(snapshot);
+        if (memoEditVersionRef.current === savingVersion) {
+          memoDirtyRef.current = false;
+        }
         setMemoSaveStatus("saved");
       } catch {
+        memoDirtyRef.current = true;
         setMemoSaveStatus("error");
       }
     }, 800);
 
-    return () => clearTimeout(timer);
+    memoSaveTimerRef.current = timer;
+
+    return () => {
+      clearTimeout(timer);
+      if (memoSaveTimerRef.current === timer) {
+        memoSaveTimerRef.current = null;
+      }
+    };
   }, [memoForm, isOutputStage, isMemoFinalised, handleSaveOutput]);
 
   // Debounced autosave for reflection draft
   useEffect(() => {
-    if (!isReflectionStage || isCompletedStage) return;
+    if (!isReflectionStage || isCompletedStage || session?.state !== "REFLECTION_ACTIVE") return;
+    if (!reflectionDirtyRef.current) return;
+
+    const savingVersion = reflectionEditVersionRef.current;
+    const snapshot = {
+      what_felt_natural: reflectionForm.what_felt_natural || "",
+      hardest_part: reflectionForm.hardest_part || "",
+      investigate_next: reflectionForm.investigate_next || "",
+    };
 
     setReflectionSaveStatus("saving");
     const timer = setTimeout(async () => {
       try {
-        await handleSaveReflection(reflectionForm);
+        // Defensive check: session must still be REFLECTION_ACTIVE, not completed, and dirty
+        if (
+          session?.state !== "REFLECTION_ACTIVE" ||
+          isCompletedStage ||
+          !reflectionDirtyRef.current
+        ) {
+          return;
+        }
+
+        await handleSaveReflection(snapshot);
+        if (reflectionEditVersionRef.current === savingVersion) {
+          reflectionDirtyRef.current = false;
+        }
         setReflectionSaveStatus("saved");
       } catch {
+        reflectionDirtyRef.current = true;
         setReflectionSaveStatus("error");
+      } finally {
+        if (reflectionSaveTimerRef.current === timer) {
+          reflectionSaveTimerRef.current = null;
+        }
       }
     }, 800);
 
-    return () => clearTimeout(timer);
-  }, [reflectionForm, isReflectionStage, isCompletedStage, handleSaveReflection]);
+    reflectionSaveTimerRef.current = timer;
+
+    return () => {
+      clearTimeout(timer);
+      if (reflectionSaveTimerRef.current === timer) {
+        reflectionSaveTimerRef.current = null;
+      }
+    };
+  }, [reflectionForm, isReflectionStage, isCompletedStage, session?.state, handleSaveReflection]);
 
   const handleSaveNewFinding = async (e) => {
     e.preventDefault();
@@ -379,7 +548,15 @@ export default function TrialMission() {
       uncertainty: recommendationUncertainty.trim(),
     };
 
-    await handleSubmitDecision(payload);
+    try {
+      const res = await handleSubmitDecision(payload);
+      if (res?.session?.state === "CONSEQUENCE_ACTIVE" || session?.state === "CONSEQUENCE_ACTIVE") {
+        consequenceGeneratedRef.current = true;
+        await Promise.resolve(handleGenerateConsequence?.());
+      }
+    } catch {
+      // Error handled by hook
+    }
   };
 
   const handleKeepRecommendation = async () => {
@@ -427,17 +604,74 @@ export default function TrialMission() {
 
   const handleMemoFieldChange = (field, value) => {
     if (isMemoFinalised) return;
+    memoDirtyRef.current = true;
+    memoEditVersionRef.current += 1;
     setMemoForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleReviewMemoClick = async () => {
+    if (actionLoading || reviewLoading || isMemoFinalised) return;
+    setReviewLoading(true);
+
+    // Clear any pending debounce timer to prevent duplicate save afterwards
+    if (memoSaveTimerRef.current) {
+      clearTimeout(memoSaveTimerRef.current);
+      memoSaveTimerRef.current = null;
+    }
+
+    try {
+      // If form is dirty, flush the save first
+      if (memoDirtyRef.current) {
+        const savingVersion = memoEditVersionRef.current;
+        const snapshot = memoForm;
+        setMemoSaveStatus("saving");
+        await handleSaveOutput(snapshot);
+        if (memoEditVersionRef.current === savingVersion) {
+          memoDirtyRef.current = false;
+        }
+        setMemoSaveStatus("saved");
+
+        // If newer edits occurred while explicit save was in flight, do not proceed with review
+        if (memoEditVersionRef.current !== savingVersion) {
+          return;
+        }
+      }
+
+      // Now proceed with review
+      await handleReviewOutput();
+    } catch (err) {
+      // If save or review failed, ensure dirty state is maintained and error status shown
+      if (memoDirtyRef.current) {
+        setMemoSaveStatus("error");
+      }
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
   const handleReflectionFieldChange = (field, value) => {
-    if (isCompletedStage) return;
-    setReflectionForm((prev) => ({ ...prev, [field]: value }));
+    if (isCompletedStage || session?.state !== "REFLECTION_ACTIVE") return;
+    const canonicalKey = mapQuestionIdToCanonicalKey(field);
+    reflectionDirtyRef.current = true;
+    reflectionEditVersionRef.current += 1;
+    setReflectionForm((prev) => ({ ...prev, [canonicalKey]: value }));
   };
 
   const handleReflectionSubmit = async (e) => {
     e.preventDefault();
-    await handleSubmitReflection(reflectionForm);
+    if (reflectionSaveTimerRef.current) {
+      clearTimeout(reflectionSaveTimerRef.current);
+      reflectionSaveTimerRef.current = null;
+    }
+    reflectionDirtyRef.current = false;
+
+    const canonicalPayload = {
+      what_felt_natural: reflectionForm.what_felt_natural || "",
+      hardest_part: reflectionForm.hardest_part || "",
+      investigate_next: reflectionForm.investigate_next || "",
+    };
+
+    await handleSubmitReflection(canonicalPayload);
   };
 
   const reflectionQuestions =
@@ -1268,177 +1502,207 @@ export default function TrialMission() {
           /* 6. Consequence & Reality Event Screen                      */
           /* ========================================================= */
           <div className="space-y-6">
-            <div className="rounded-3xl border border-[#E5DEC9] bg-white p-8 shadow-sm sm:p-10 space-y-8">
-              <div className="space-y-2 border-b border-slate-100 pb-6">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-300 bg-purple-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-purple-900">
-                  <RefreshCw size={12} /> New Information Received
-                </span>
-                <h1 className="font-serif text-3xl font-bold text-slate-900">
-                  Sarah's response & new evidence
-                </h1>
-                <p className="text-sm text-slate-600">
-                  Your initial recommendation has been reviewed. New production signals have just arrived.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-purple-200 bg-purple-50/60 p-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-200 font-bold text-purple-900">
-                    {manager.name ? manager.name[0] : "S"}
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-purple-950">
-                      {manager.name || "Sarah"}: Response to Your Recommendation
-                    </h3>
-                    <p className="text-xs text-purple-800 font-mono">
-                      Proposed: "{currentDecision?.selected_option || selectedOption}"
-                    </p>
-                  </div>
+            {session?.state === "CONSEQUENCE_ACTIVE" ? (
+              <div className="flex min-h-[360px] flex-col items-center justify-center gap-4 rounded-3xl border border-[#E5DEC9] bg-white p-12 shadow-sm text-center">
+                <Loader2 className="animate-spin text-[#7B4A28]" size={36} />
+                <div className="space-y-1">
+                  <h3 className="text-lg font-bold text-slate-900">
+                    Simulating Decision Impact...
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    Evaluating consequences and preparing incoming reality event data.
+                  </p>
                 </div>
-                <p className="text-sm leading-relaxed text-purple-950">
-                  {realityEventsConfig.manager_response ||
-                    realityEventData?.manager_response ||
-                    "Sarah shared new data regarding recent payment interruptions and asks whether you wish to maintain or revise your recommendation."}
-                </p>
               </div>
+            ) : (
+              <div className="rounded-3xl border border-[#E5DEC9] bg-white p-8 shadow-sm sm:p-10 space-y-8">
+                <div className="space-y-2 border-b border-slate-100 pb-6">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-300 bg-purple-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-purple-900">
+                    <RefreshCw size={12} /> New Information Received
+                  </span>
+                  <h1 className="font-serif text-3xl font-bold text-slate-900">
+                    Sarah's response & new evidence
+                  </h1>
+                  <p className="text-sm text-slate-600">
+                    Your initial recommendation has been reviewed. New production signals have just arrived.
+                  </p>
+                </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  New Information & Evidence
-                </h3>
-                <p className="text-sm leading-relaxed text-slate-800">
-                  {realityEventsConfig.information ||
-                    realityEventData?.information ||
-                    "A new sample suggests payment interruptions are concentrated on one specific payment method."}
-                </p>
-                {Array.isArray(realityEventsConfig.evidence) && realityEventsConfig.evidence.length > 0 && (
-                  <ul className="list-disc pl-5 text-xs text-slate-600 space-y-1">
-                    {realityEventsConfig.evidence.map((ev, i) => (
-                      <li key={i}>{ev}</li>
-                    ))}
-                  </ul>
+                {consequenceData?.consequence && (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-6 space-y-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                      Outcome Analysis
+                    </h3>
+                    <h4 className="text-sm font-bold text-slate-900">
+                      {consequenceData.consequence.title}
+                    </h4>
+                    {consequenceData.consequence.description && (
+                      <p className="text-sm leading-relaxed text-slate-700">
+                        {consequenceData.consequence.description}
+                      </p>
+                    )}
+                  </div>
                 )}
-              </div>
 
-              {!isUpdatingRecommendation ? (
-                <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-end gap-3">
-                  <button
-                    type="button"
-                    disabled={actionLoading}
-                    onClick={handleKeepRecommendation}
-                    className="rounded-2xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
-                  >
-                    Keep my recommendation
-                  </button>
-                  <button
-                    type="button"
-                    disabled={actionLoading}
-                    onClick={() => {
-                      setIsUpdatingRecommendation(true);
-                      setUpdatedOption(currentDecision?.selected_option || selectedOption);
-                      setUpdatedWhy(currentDecision?.why || whyRecommendation);
-                    }}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
-                  >
-                    Update my recommendation <RefreshCw size={14} />
-                  </button>
-                </div>
-              ) : (
-                <form
-                  onSubmit={handleUpdateRecommendationSubmit}
-                  className="rounded-2xl border border-amber-200 bg-amber-50/40 p-6 space-y-6"
-                >
-                  <div className="flex items-center justify-between border-b border-amber-200 pb-3">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-amber-900">
-                      Revise Recommendation Based on New Evidence
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={() => setIsUpdatingRecommendation(false)}
-                      className="text-xs text-slate-500 hover:text-slate-800"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                      Revised Option *
-                    </label>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {decisionOptions.map((opt) => {
-                        const isSelected = updatedOption === opt;
-                        return (
-                          <label
-                            key={opt}
-                            className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer select-none ${
-                              isSelected
-                                ? "border-[#7B4A28] bg-white shadow-sm ring-1 ring-[#7B4A28]"
-                                : "border-slate-200 bg-white/70 hover:bg-white"
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="updated_option"
-                              value={opt}
-                              checked={isSelected}
-                              onChange={(e) => setUpdatedOption(e.target.value)}
-                              className="mt-0.5 text-[#7B4A28] focus:ring-[#7B4A28]"
-                            />
-                            <span className="text-sm font-semibold text-slate-900">{opt}</span>
-                          </label>
-                        );
-                      })}
+                <div className="rounded-2xl border border-purple-200 bg-purple-50/60 p-6 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-200 font-bold text-purple-900">
+                      {manager.name ? manager.name[0] : "S"}
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-purple-950">
+                        {manager.name || "Sarah"}: Response to Your Recommendation
+                      </h3>
+                      <p className="text-xs text-purple-800 font-mono">
+                        Proposed: "{currentDecision?.selected_option || selectedOption}"
+                      </p>
                     </div>
                   </div>
+                  <p className="text-sm leading-relaxed text-purple-950">
+                    {realityEventsConfig.manager_response ||
+                      realityEventData?.manager_response ||
+                      "Sarah shared new data regarding recent payment interruptions and asks whether you wish to maintain or revise your recommendation."}
+                  </p>
+                </div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                      Updated Rationale *
-                    </label>
-                    <textarea
-                      required
-                      rows={3}
-                      value={updatedWhy}
-                      onChange={(e) => setUpdatedWhy(e.target.value)}
-                      placeholder="Explain how the new information changed or refined your recommendation..."
-                      className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:outline-none"
-                    />
-                  </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    New Information & Evidence
+                  </h3>
+                  <p className="text-sm leading-relaxed text-slate-800">
+                    {realityEventsConfig.information ||
+                      realityEventData?.information ||
+                      "A new sample suggests payment interruptions are concentrated on one specific payment method."}
+                  </p>
+                  {Array.isArray(realityEventsConfig.evidence) && realityEventsConfig.evidence.length > 0 && (
+                    <ul className="list-disc pl-5 text-xs text-slate-600 space-y-1">
+                      {realityEventsConfig.evidence.map((ev, i) => (
+                        <li key={i}>{ev}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                      Remaining Uncertainty
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={updatedUncertainty}
-                      onChange={(e) => setUpdatedUncertainty(e.target.value)}
-                      placeholder="Note any unresolved questions or risks..."
-                      className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:outline-none"
-                    />
-                  </div>
-
-                  <div className="flex justify-end gap-3 pt-3 border-t border-amber-200">
+                {!isUpdatingRecommendation ? (
+                  <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-end gap-3">
                     <button
                       type="button"
-                      onClick={() => setIsUpdatingRecommendation(false)}
-                      className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-700"
+                      disabled={actionLoading}
+                      onClick={handleKeepRecommendation}
+                      className="rounded-2xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
                     >
-                      Back
+                      Keep my recommendation
                     </button>
                     <button
-                      type="submit"
-                      disabled={actionLoading || !updatedOption || !updatedWhy.trim()}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#7B4A28] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
+                      type="button"
+                      disabled={actionLoading}
+                      onClick={() => {
+                        setIsUpdatingRecommendation(true);
+                        setUpdatedOption(currentDecision?.selected_option || selectedOption);
+                        setUpdatedWhy(currentDecision?.why || whyRecommendation);
+                      }}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
                     >
-                      {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-                      Confirm Updated Recommendation
+                      Update my recommendation <RefreshCw size={14} />
                     </button>
                   </div>
-                </form>
-              )}
-            </div>
+                ) : (
+                  <form
+                    onSubmit={handleUpdateRecommendationSubmit}
+                    className="rounded-2xl border border-amber-200 bg-amber-50/40 p-6 space-y-6"
+                  >
+                    <div className="flex items-center justify-between border-b border-amber-200 pb-3">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-amber-900">
+                        Revise Recommendation Based on New Evidence
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => setIsUpdatingRecommendation(false)}
+                        className="text-xs text-slate-500 hover:text-slate-800"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                        Revised Option *
+                      </label>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {decisionOptions.map((opt) => {
+                          const isSelected = updatedOption === opt;
+                          return (
+                            <label
+                              key={opt}
+                              className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer select-none ${
+                                isSelected
+                                  ? "border-[#7B4A28] bg-white shadow-sm ring-1 ring-[#7B4A28]"
+                                  : "border-slate-200 bg-white/70 hover:bg-white"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="updated_option"
+                                value={opt}
+                                checked={isSelected}
+                                onChange={(e) => setUpdatedOption(e.target.value)}
+                                className="mt-0.5 text-[#7B4A28] focus:ring-[#7B4A28]"
+                              />
+                              <span className="text-sm font-semibold text-slate-900">{opt}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                        Updated Rationale *
+                      </label>
+                      <textarea
+                        required
+                        rows={3}
+                        value={updatedWhy}
+                        onChange={(e) => setUpdatedWhy(e.target.value)}
+                        placeholder="Explain how the new information changed or refined your recommendation..."
+                        className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                        Remaining Uncertainty
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={updatedUncertainty}
+                        onChange={(e) => setUpdatedUncertainty(e.target.value)}
+                        placeholder="Note any unresolved questions or risks..."
+                        className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-3 border-t border-amber-200">
+                      <button
+                        type="button"
+                        onClick={() => setIsUpdatingRecommendation(false)}
+                        className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-700"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={actionLoading || !updatedOption || !updatedWhy.trim()}
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#7B4A28] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
+                      >
+                        {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                        Confirm Updated Recommendation
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
           </div>
         ) : isOutputStage ? (
           /* ========================================================= */
@@ -1608,11 +1872,11 @@ export default function TrialMission() {
                   {outputStatus === "draft" && (
                     <button
                       type="button"
-                      disabled={actionLoading}
-                      onClick={handleReviewOutput}
+                      disabled={actionLoading || reviewLoading}
+                      onClick={handleReviewMemoClick}
                       className="inline-flex items-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#633B20] disabled:opacity-50"
                     >
-                      {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+                      {actionLoading || reviewLoading ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
                       Review memo
                     </button>
                   )}
@@ -1675,20 +1939,23 @@ export default function TrialMission() {
               </div>
 
               <div className="space-y-6">
-                {reflectionQuestions.map((q, idx) => (
-                  <div key={q.id || idx} className="space-y-2">
-                    <label className="text-sm font-bold text-slate-900">
-                      {idx + 1}. {q.prompt}
-                    </label>
-                    <textarea
-                      rows={4}
-                      value={reflectionForm[q.id] || ""}
-                      onChange={(e) => handleReflectionFieldChange(q.id, e.target.value)}
-                      placeholder="Share your analytical reflections..."
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
-                    />
-                  </div>
-                ))}
+                {reflectionQuestions.map((q, idx) => {
+                  const canonicalKey = mapQuestionIdToCanonicalKey(q.id);
+                  return (
+                    <div key={q.id || idx} className="space-y-2">
+                      <label className="text-sm font-bold text-slate-900">
+                        {idx + 1}. {q.prompt}
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={reflectionForm[canonicalKey] ?? reflectionForm[q.id] ?? ""}
+                        onChange={(e) => handleReflectionFieldChange(q.id, e.target.value)}
+                        placeholder="Share your analytical reflections..."
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 focus:border-[#7B4A28] focus:bg-white focus:outline-none"
+                      />
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">

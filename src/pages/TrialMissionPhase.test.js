@@ -3,7 +3,19 @@ jest.mock('react-router-dom', () => ({
   useSearchParams: () => [new URLSearchParams()],
 }));
 
-import { deriveInvestigationPhaseId } from "./TrialMission";
+import React from "react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import TrialMission, { deriveInvestigationPhaseId, mapQuestionIdToCanonicalKey } from "./TrialMission";
+import * as sessionHook from "../hooks/useTrialMissionSession";
+
+jest.mock("../hooks/useTrialMissionSession");
+jest.mock("../hooks/useDebounceAutosave", () => ({
+  useDebounceAutosave: ({ initialValue }) => ({
+    value: initialValue,
+    setValue: jest.fn(),
+    status: "ready",
+  }),
+}));
 
 describe("deriveInvestigationPhaseId", () => {
   test("derives investigation phase when phases is an array of objects", () => {
@@ -187,5 +199,1472 @@ describe("Stage recognition conditions", () => {
 
     expect(isRecommendation).toBe(false);
     expect(isReality).toBe(false);
+  });
+});
+
+describe("Recommendation to Consequence to Reality Event Lifecycle", () => {
+  const baseSessionHook = {
+    missions: [],
+    session: null,
+    workingNotes: "",
+    findings: [],
+    currentDecision: null,
+    consequenceData: null,
+    realityEventData: null,
+    outputData: null,
+    reflectionData: null,
+    evaluationData: null,
+    evaluationLoading: false,
+    evaluationError: null,
+    accessedResourceIds: new Set(),
+    activeResource: null,
+    setActiveResource: jest.fn(),
+    loading: false,
+    workspaceLoading: false,
+    actionLoading: false,
+    error: null,
+    startSession: jest.fn(),
+    handleTransition: jest.fn(),
+    handleAccessResource: jest.fn(),
+    handleSaveNotes: jest.fn(),
+    handleAddFinding: jest.fn(),
+    handleCompleteInvestigation: jest.fn(),
+    handleSubmitDecision: jest.fn(),
+    handleGenerateConsequence: jest.fn().mockResolvedValue({}),
+    handleFetchRealityEvent: jest.fn().mockResolvedValue({}),
+    handleRealityEventResponse: jest.fn().mockResolvedValue({}),
+    handleSaveOutput: jest.fn(),
+    handleReviewOutput: jest.fn(),
+    handleFinaliseOutput: jest.fn(),
+    handleSubmitOutput: jest.fn(),
+    handleSaveReflection: jest.fn(),
+    handleSubmitReflection: jest.fn(),
+    handlePause: jest.fn(),
+    handleResume: jest.fn(),
+    handleAbandon: jest.fn(),
+    resetToCatalog: jest.fn(),
+    setError: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("CONSEQUENCE_ACTIVE does NOT fetch reality-event and triggers consequence generation", () => {
+    const handleFetchRealityEvent = jest.fn();
+    const handleGenerateConsequence = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "CONSEQUENCE_ACTIVE",
+        current_phase: "investigate",
+        mission_configuration: {
+          phases: [
+            { id: "investigate", type: "investigation" },
+            { id: "recommend", type: "decision" },
+            { id: "adapt", type: "reality_event" },
+          ],
+        },
+      },
+      handleFetchRealityEvent,
+      handleGenerateConsequence,
+    });
+
+    render(<TrialMission />);
+
+    expect(handleFetchRealityEvent).not.toHaveBeenCalled();
+    expect(handleGenerateConsequence).toHaveBeenCalledTimes(1);
+  });
+
+  test("CONSEQUENCE_ACTIVE displays consequence-processing loading state and Keep/Update controls are unavailable", () => {
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "CONSEQUENCE_ACTIVE",
+        current_phase: "investigate",
+        mission_configuration: {
+          phases: [
+            { id: "investigate", type: "investigation" },
+            { id: "recommend", type: "decision" },
+            { id: "adapt", type: "reality_event" },
+          ],
+        },
+      },
+    });
+
+    render(<TrialMission />);
+
+    expect(screen.getByText("Simulating Decision Impact...")).toBeInTheDocument();
+    expect(screen.getByText("Evaluating consequences and preparing incoming reality event data.")).toBeInTheDocument();
+    expect(screen.queryByText("Keep my recommendation")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Update my recommendation/i)).not.toBeInTheDocument();
+  });
+
+  test("REALITY_EVENT_PENDING fetches reality-event and displays Keep/Update controls", () => {
+    const handleFetchRealityEvent = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REALITY_EVENT_PENDING",
+        current_phase: "adapt",
+        mission_configuration: {
+          phases: [
+            { id: "investigate", type: "investigation" },
+            { id: "recommend", type: "decision" },
+            { id: "adapt", type: "reality_event" },
+          ],
+          reality_events: [
+            {
+              manager_response: "New test data arrived from manager",
+              information: "Test information for reality event",
+            },
+          ],
+        },
+      },
+      handleFetchRealityEvent,
+    });
+
+    render(<TrialMission />);
+
+    expect(handleFetchRealityEvent).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Sarah's response & new evidence")).toBeInTheDocument();
+    expect(screen.getByText("Keep my recommendation")).toBeInTheDocument();
+    expect(screen.getByText(/Update my recommendation/i)).toBeInTheDocument();
+  });
+
+  test("consequence generation is triggered after successful decision submission", async () => {
+    const handleSubmitDecision = jest.fn().mockResolvedValue({
+      session: {
+        id: "test-session-id",
+        state: "CONSEQUENCE_ACTIVE",
+        current_phase: "investigate",
+      },
+    });
+    const handleGenerateConsequence = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "DECISION_PENDING",
+        current_phase: "investigate",
+        mission_configuration: {
+          phases: [
+            { id: "investigate", type: "investigation" },
+            { id: "recommend", type: "decision" },
+            { id: "adapt", type: "reality_event" },
+          ],
+          decisions: [
+            {
+              options: ["Show delivery costs earlier", "Improve payment reliability"],
+            },
+          ],
+        },
+      },
+      handleSubmitDecision,
+      handleGenerateConsequence,
+    });
+
+    render(<TrialMission />);
+
+    // Select option and enter why
+    const optionRadio = screen.getByLabelText("Show delivery costs earlier");
+    fireEvent.click(optionRadio);
+
+    const whyInput = screen.getByPlaceholderText(/Explain the root cause identified in the data/i);
+    fireEvent.change(whyInput, { target: { value: "Delivery fee surprise at checkout causes drop-offs" } });
+
+    const submitBtn = screen.getByRole("button", { name: /Send recommendation/i });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(handleSubmitDecision).toHaveBeenCalledWith(
+        expect.objectContaining({
+          selected_option: "Show delivery costs earlier",
+          why: "Delivery fee surprise at checkout causes drop-offs",
+        })
+      );
+      expect(handleGenerateConsequence).toHaveBeenCalled();
+    });
+  });
+});
+
+describe("Output to Reflection Lifecycle and Autosave", () => {
+  const baseSessionHook = {
+    missions: [],
+    session: null,
+    workingNotes: "",
+    findings: [],
+    currentDecision: null,
+    consequenceData: null,
+    realityEventData: null,
+    outputData: null,
+    reflectionData: null,
+    evaluationData: null,
+    evaluationLoading: false,
+    evaluationError: null,
+    accessedResourceIds: new Set(),
+    activeResource: null,
+    setActiveResource: jest.fn(),
+    loading: false,
+    workspaceLoading: false,
+    actionLoading: false,
+    error: null,
+    startSession: jest.fn(),
+    handleTransition: jest.fn(),
+    handleAccessResource: jest.fn(),
+    handleSaveNotes: jest.fn(),
+    handleAddFinding: jest.fn(),
+    handleCompleteInvestigation: jest.fn(),
+    handleSubmitDecision: jest.fn(),
+    handleGenerateConsequence: jest.fn().mockResolvedValue({}),
+    handleFetchRealityEvent: jest.fn().mockResolvedValue({}),
+    handleRealityEventResponse: jest.fn().mockResolvedValue({}),
+    handleSaveOutput: jest.fn(),
+    handleReviewOutput: jest.fn(),
+    handleFinaliseOutput: jest.fn(),
+    handleSubmitOutput: jest.fn(),
+    handleSaveReflection: jest.fn().mockResolvedValue({}),
+    handleSubmitReflection: jest.fn().mockResolvedValue({}),
+    handlePause: jest.fn(),
+    handleResume: jest.fn(),
+    handleAbandon: jest.fn(),
+    resetToCatalog: jest.fn(),
+    setError: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useRealTimers();
+  });
+
+  test("when session.state is REFLECTION_ACTIVE and current_phase is deliver, Reflection stage renders and Output stage does not", () => {
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+        mission_configuration: {
+          phases: [
+            { id: "investigate", type: "investigation" },
+            { id: "recommend", type: "decision" },
+            { id: "adapt", type: "reality_event" },
+            { id: "deliver", type: "output" },
+            { id: "reflect", type: "reflection" },
+          ],
+        },
+      },
+      outputData: { status: "submitted" },
+      reflectionData: {
+        what_felt_natural: "",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [
+          { id: "what_felt_natural", prompt: "What felt natural?" },
+        ],
+      },
+    });
+
+    render(<TrialMission />);
+
+    expect(screen.getByText("Reflect on the experience")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Submit reflection/i })).toBeInTheDocument();
+    expect(screen.queryByText("Finish the work: Executive Memo")).not.toBeInTheDocument();
+  });
+
+  test("when session.state is SESSION_COMPLETED, neither Output nor Reflection editing stage is shown", () => {
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "SESSION_COMPLETED",
+        current_phase: "deliver",
+        mission_configuration: {
+          phases: [
+            { id: "investigate", type: "investigation" },
+            { id: "recommend", type: "decision" },
+            { id: "adapt", type: "reality_event" },
+            { id: "deliver", type: "output" },
+            { id: "reflect", type: "reflection" },
+          ],
+        },
+      },
+      evaluationData: {
+        overall_score: 85,
+        summary: "Great job completing the mission!",
+      },
+    });
+
+    render(<TrialMission />);
+
+    expect(screen.getByText("Mission Completed")).toBeInTheDocument();
+    expect(screen.queryByText("Finish the work: Executive Memo")).not.toBeInTheDocument();
+    expect(screen.queryByText("Reflect on the experience")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Submit reflection/i })).not.toBeInTheDocument();
+  });
+
+  test("reflection data loaded from server does NOT automatically trigger PUT /reflection", () => {
+    jest.useFakeTimers();
+    const handleSaveReflection = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "Investigating the funnel data",
+        hardest_part: "Trade-offs",
+        investigate_next: "User surveys",
+        questions: [
+          { id: "what_felt_natural", prompt: "What felt natural?" },
+        ],
+      },
+      handleSaveReflection,
+    });
+
+    render(<TrialMission />);
+
+    // Fast-forward past debounce window
+    jest.advanceTimersByTime(2000);
+
+    expect(handleSaveReflection).not.toHaveBeenCalled();
+  });
+
+  test("user changing a reflection field DOES trigger debounced PUT /reflection", async () => {
+    jest.useFakeTimers();
+    const handleSaveReflection = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [
+          { id: "what_felt_natural", prompt: "What felt natural?" },
+        ],
+      },
+      handleSaveReflection,
+    });
+
+    render(<TrialMission />);
+
+    const textarea = screen.getByPlaceholderText("Share your analytical reflections...");
+    fireEvent.change(textarea, { target: { value: "I understood the funnel easily" } });
+
+    // Before debounce delay (800ms)
+    await act(async () => {
+      jest.advanceTimersByTime(400);
+    });
+    expect(handleSaveReflection).not.toHaveBeenCalled();
+
+    // After debounce delay
+    await act(async () => {
+      jest.advanceTimersByTime(450);
+    });
+    expect(handleSaveReflection).toHaveBeenCalledTimes(1);
+    expect(handleSaveReflection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        what_felt_natural: "I understood the funnel easily",
+      })
+    );
+  });
+
+  test("successful PUT /reflection does not cause another PUT loop when reflectionData is synced back", async () => {
+    jest.useFakeTimers();
+    const handleSaveReflection = jest.fn().mockResolvedValue({
+      what_felt_natural: "Updated content from user",
+      hardest_part: "",
+      investigate_next: "",
+    });
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [
+          { id: "what_felt_natural", prompt: "What felt natural?" },
+        ],
+      },
+      handleSaveReflection,
+    });
+
+    const { rerender } = render(<TrialMission />);
+
+    const textarea = screen.getByPlaceholderText("Share your analytical reflections...");
+    fireEvent.change(textarea, { target: { value: "Updated content from user" } });
+
+    // Advance timer to trigger autosave
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+    expect(handleSaveReflection).toHaveBeenCalledTimes(1);
+
+    // Simulate backend response updating reflectionData to match the saved value
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "Updated content from user",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [
+          { id: "what_felt_natural", prompt: "What felt natural?" },
+        ],
+      },
+      handleSaveReflection,
+    });
+
+    rerender(<TrialMission />);
+
+    // Advance timers again - should NOT trigger another save
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+    expect(handleSaveReflection).toHaveBeenCalledTimes(1);
+  });
+
+  test("multiple user changes within the debounce period are coalesced into a single PUT", async () => {
+    jest.useFakeTimers();
+    const handleSaveReflection = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [
+          { id: "what_felt_natural", prompt: "What felt natural?" },
+          { id: "hardest_part", prompt: "Hardest part?" },
+        ],
+      },
+      handleSaveReflection,
+    });
+
+    render(<TrialMission />);
+
+    const textareas = screen.getAllByPlaceholderText("Share your analytical reflections...");
+    fireEvent.change(textareas[0], { target: { value: "First edit" } });
+
+    await act(async () => {
+      jest.advanceTimersByTime(400);
+    });
+
+    fireEvent.change(textareas[0], { target: { value: "First edit updated" } });
+    fireEvent.change(textareas[1], { target: { value: "Second field edit" } });
+
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+
+    expect(handleSaveReflection).toHaveBeenCalledTimes(1);
+    expect(handleSaveReflection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        what_felt_natural: "First edit updated",
+        hardest_part: "Second field edit",
+      })
+    );
+  });
+
+  test("failed PUT /reflection keeps dirty state and enables retry on next edit", async () => {
+    jest.useFakeTimers();
+    const handleSaveReflection = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("Network failure"))
+      .mockResolvedValueOnce({ what_felt_natural: "Retry value" });
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [{ id: "what_felt_natural", prompt: "What felt natural?" }],
+      },
+      handleSaveReflection,
+    });
+
+    render(<TrialMission />);
+
+    const textarea = screen.getByPlaceholderText("Share your analytical reflections...");
+    fireEvent.change(textarea, { target: { value: "Initial attempt" } });
+
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+
+    expect(handleSaveReflection).toHaveBeenCalledTimes(1);
+
+    // After failure, user edits again
+    fireEvent.change(textarea, { target: { value: "Retry value" } });
+
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+
+    expect(handleSaveReflection).toHaveBeenCalledTimes(2);
+    expect(handleSaveReflection).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        what_felt_natural: "Retry value",
+      })
+    );
+  });
+
+  test("edit during an in-flight PUT remains dirty and results in another save with the latest edit", async () => {
+    jest.useFakeTimers();
+    let resolveFirstPut;
+    const firstPutPromise = new Promise((resolve) => {
+      resolveFirstPut = resolve;
+    });
+
+    const handleSaveReflection = jest
+      .fn()
+      .mockImplementationOnce(() => firstPutPromise)
+      .mockResolvedValueOnce({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [{ id: "what_felt_natural", prompt: "What felt natural?" }],
+      },
+      handleSaveReflection,
+    });
+
+    render(<TrialMission />);
+
+    const textarea = screen.getByPlaceholderText("Share your analytical reflections...");
+    fireEvent.change(textarea, { target: { value: "Draft version 1" } });
+
+    // Advance past debounce to launch 1st save (in-flight)
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+    expect(handleSaveReflection).toHaveBeenCalledTimes(1);
+    expect(handleSaveReflection).toHaveBeenCalledWith(
+      expect.objectContaining({ what_felt_natural: "Draft version 1" })
+    );
+
+    // While 1st save is in flight, user types again
+    fireEvent.change(textarea, { target: { value: "Draft version 2" } });
+
+    // Now 1st save finishes
+    await act(async () => {
+      resolveFirstPut({ what_felt_natural: "Draft version 1" });
+    });
+
+    // Advance timer for 2nd save debounce
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+
+    expect(handleSaveReflection).toHaveBeenCalledTimes(2);
+    expect(handleSaveReflection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ what_felt_natural: "Draft version 2" })
+    );
+  });
+
+  test("successful PUT with no newer edit clears dirty state so unrelated rerenders do not save again", async () => {
+    jest.useFakeTimers();
+    const handleSaveReflection = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [{ id: "what_felt_natural", prompt: "What felt natural?" }],
+      },
+      handleSaveReflection,
+    });
+
+    const { rerender } = render(<TrialMission />);
+
+    const textarea = screen.getByPlaceholderText("Share your analytical reflections...");
+    fireEvent.change(textarea, { target: { value: "Saved value" } });
+
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+    expect(handleSaveReflection).toHaveBeenCalledTimes(1);
+
+    // Rerender with identical data or unrelated state change
+    rerender(<TrialMission />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+    expect(handleSaveReflection).toHaveBeenCalledTimes(1);
+  });
+
+  test("submitting reflection cancels pending debounce timer and no PUT occurs after submit", async () => {
+    jest.useFakeTimers();
+    const handleSaveReflection = jest.fn().mockResolvedValue({});
+    const handleSubmitReflection = jest.fn().mockResolvedValue({
+      session: {
+        id: "test-session-id",
+        state: "SESSION_COMPLETED",
+        current_phase: "deliver",
+      },
+    });
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [{ id: "what_felt_natural", prompt: "What felt natural?" }],
+      },
+      handleSaveReflection,
+      handleSubmitReflection,
+    });
+
+    render(<TrialMission />);
+
+    const textarea = screen.getByPlaceholderText("Share your analytical reflections...");
+    fireEvent.change(textarea, { target: { value: "Final reflection before submit" } });
+
+    // Submit button clicked before 800ms timer fires
+    const submitBtn = screen.getByRole("button", { name: /Submit reflection/i });
+    await act(async () => {
+      fireEvent.click(submitBtn);
+    });
+
+    expect(handleSubmitReflection).toHaveBeenCalledTimes(1);
+    expect(handleSubmitReflection).toHaveBeenCalledWith({
+      what_felt_natural: "Final reflection before submit",
+      hardest_part: "",
+      investigate_next: "",
+    });
+
+    // Advance timer past the original 800ms debounce
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    // Stale timer must have been cancelled; no PUT /reflection occurs
+    expect(handleSaveReflection).not.toHaveBeenCalled();
+  });
+
+  test("timeout callback refuses to save if session is no longer REFLECTION_ACTIVE", async () => {
+    jest.useFakeTimers();
+    const handleSaveReflection = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [{ id: "what_felt_natural", prompt: "What felt natural?" }],
+      },
+      handleSaveReflection,
+    });
+
+    const { rerender } = render(<TrialMission />);
+
+    const textarea = screen.getByPlaceholderText("Share your analytical reflections...");
+    fireEvent.change(textarea, { target: { value: "Edit text" } });
+
+    // Simulate session transitioning to completed externally before debounce fires
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "SESSION_COMPLETED",
+        current_phase: "deliver",
+      },
+      evaluationData: {
+        overall_score: 90,
+      },
+      handleSaveReflection,
+    });
+
+    rerender(<TrialMission />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(handleSaveReflection).not.toHaveBeenCalled();
+  });
+
+  test("component unmount cancels pending reflection autosave timer", async () => {
+    jest.useFakeTimers();
+    const handleSaveReflection = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        what_felt_natural: "",
+        hardest_part: "",
+        investigate_next: "",
+        questions: [{ id: "what_felt_natural", prompt: "What felt natural?" }],
+      },
+      handleSaveReflection,
+    });
+
+    const { unmount } = render(<TrialMission />);
+
+    const textarea = screen.getByPlaceholderText("Share your analytical reflections...");
+    fireEvent.change(textarea, { target: { value: "Unmounting edit" } });
+
+    unmount();
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(handleSaveReflection).not.toHaveBeenCalled();
+  });
+
+  test("dynamic question IDs map to canonical backend fields and payload contains only canonical keys", async () => {
+    jest.useFakeTimers();
+    const handleSaveReflection = jest.fn().mockResolvedValue({});
+    const handleSubmitReflection = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "REFLECTION_ACTIVE",
+        current_phase: "deliver",
+      },
+      reflectionData: {
+        questions: [
+          { id: "natural", prompt: "Natural part prompt" },
+          { id: "hardest", prompt: "Hardest part prompt" },
+          { id: "next_investigation", prompt: "Next investigation prompt" },
+        ],
+      },
+      handleSaveReflection,
+      handleSubmitReflection,
+    });
+
+    render(<TrialMission />);
+
+    const textareas = screen.getAllByPlaceholderText("Share your analytical reflections...");
+    fireEvent.change(textareas[0], { target: { value: "Natural answer" } });
+    fireEvent.change(textareas[1], { target: { value: "Hardest answer" } });
+    fireEvent.change(textareas[2], { target: { value: "Next answer" } });
+
+    // Autosave payload
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+
+    expect(handleSaveReflection).toHaveBeenCalledTimes(1);
+    expect(handleSaveReflection).toHaveBeenCalledWith({
+      what_felt_natural: "Natural answer",
+      hardest_part: "Hardest answer",
+      investigate_next: "Next answer",
+    });
+    // Ensure no dynamic keys exist in payload
+    const savePayload = handleSaveReflection.mock.calls[0][0];
+    expect(savePayload.natural).toBeUndefined();
+    expect(savePayload.hardest).toBeUndefined();
+    expect(savePayload.next_investigation).toBeUndefined();
+
+    // Submit payload
+    const submitBtn = screen.getByRole("button", { name: /Submit reflection/i });
+    await act(async () => {
+      fireEvent.click(submitBtn);
+    });
+
+    expect(handleSubmitReflection).toHaveBeenCalledWith({
+      what_felt_natural: "Natural answer",
+      hardest_part: "Hardest answer",
+      investigate_next: "Next answer",
+    });
+    const submitPayload = handleSubmitReflection.mock.calls[0][0];
+    expect(submitPayload.natural).toBeUndefined();
+    expect(submitPayload.hardest).toBeUndefined();
+    expect(submitPayload.next_investigation).toBeUndefined();
+  });
+
+  test("mapQuestionIdToCanonicalKey correctly maps dynamic question IDs", () => {
+    expect(mapQuestionIdToCanonicalKey("natural")).toBe("what_felt_natural");
+    expect(mapQuestionIdToCanonicalKey("what_felt_natural")).toBe("what_felt_natural");
+    expect(mapQuestionIdToCanonicalKey("hardest")).toBe("hardest_part");
+    expect(mapQuestionIdToCanonicalKey("hardest_part")).toBe("hardest_part");
+    expect(mapQuestionIdToCanonicalKey("next_investigation")).toBe("investigate_next");
+    expect(mapQuestionIdToCanonicalKey("investigate_next")).toBe("investigate_next");
+  });
+});
+
+describe("Professional Memo / Output Autosave and Review Lifecycle", () => {
+  const baseSessionHook = {
+    missions: [],
+    session: null,
+    workingNotes: "",
+    findings: [],
+    currentDecision: null,
+    consequenceData: null,
+    realityEventData: null,
+    outputData: null,
+    reflectionData: null,
+    evaluationData: null,
+    evaluationLoading: false,
+    evaluationError: null,
+    accessedResourceIds: new Set(),
+    activeResource: null,
+    setActiveResource: jest.fn(),
+    loading: false,
+    workspaceLoading: false,
+    actionLoading: false,
+    error: null,
+    startSession: jest.fn(),
+    handleTransition: jest.fn(),
+    handleAccessResource: jest.fn(),
+    handleSaveNotes: jest.fn(),
+    handleAddFinding: jest.fn(),
+    handleCompleteInvestigation: jest.fn(),
+    handleSubmitDecision: jest.fn(),
+    handleGenerateConsequence: jest.fn().mockResolvedValue({}),
+    handleFetchRealityEvent: jest.fn().mockResolvedValue({}),
+    handleRealityEventResponse: jest.fn().mockResolvedValue({}),
+    handleSaveOutput: jest.fn().mockResolvedValue({}),
+    handleReviewOutput: jest.fn().mockResolvedValue({}),
+    handleFinaliseOutput: jest.fn().mockResolvedValue({}),
+    handleSubmitOutput: jest.fn().mockResolvedValue({}),
+    handleSaveReflection: jest.fn().mockResolvedValue({}),
+    handleSubmitReflection: jest.fn().mockResolvedValue({}),
+    handlePause: jest.fn(),
+    handleResume: jest.fn(),
+    handleAbandon: jest.fn(),
+    resetToCatalog: jest.fn(),
+    setError: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useRealTimers();
+  });
+
+  test("GET /output does not automatically trigger PUT /output", async () => {
+    jest.useFakeTimers();
+    const handleSaveOutput = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        executive_summary: "Loaded from server",
+        key_findings: "Loaded findings",
+        evidence: "Loaded evidence",
+        recommendation: "Loaded rec",
+        risks_limitations: "Loaded risks",
+        next_steps: "Loaded steps",
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    render(<TrialMission />);
+
+    // Fast-forward past debounce window
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(handleSaveOutput).not.toHaveBeenCalled();
+  });
+
+  test("server outputData containing empty strings does not overwrite newer dirty user input", async () => {
+    jest.useFakeTimers();
+    const handleSaveOutput = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        executive_summary: "",
+        key_findings: "",
+        evidence: "",
+        recommendation: "",
+        risks_limitations: "",
+        next_steps: "",
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    const { rerender } = render(<TrialMission />);
+
+    const nextStepsTextarea = screen.getByPlaceholderText("Action items for engineering, analytics, and rollout...");
+    fireEvent.change(nextStepsTextarea, { target: { value: "latest user text" } });
+
+    expect(nextStepsTextarea.value).toBe("latest user text");
+
+    // Simulate stale server response arriving with empty string
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        executive_summary: "",
+        key_findings: "",
+        evidence: "",
+        recommendation: "",
+        risks_limitations: "",
+        next_steps: "",
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    rerender(<TrialMission />);
+
+    // Dirty user text must NOT be replaced with empty string
+    expect(nextStepsTextarea.value).toBe("latest user text");
+  });
+
+  test("user edits trigger one debounced PUT /output", async () => {
+    jest.useFakeTimers();
+    const handleSaveOutput = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    render(<TrialMission />);
+
+    const summaryTextarea = screen.getByPlaceholderText("High-level overview of the investigation and core decision...");
+    fireEvent.change(summaryTextarea, { target: { value: "Executive overview draft" } });
+
+    // Before debounce
+    await act(async () => {
+      jest.advanceTimersByTime(400);
+    });
+    expect(handleSaveOutput).not.toHaveBeenCalled();
+
+    // After debounce
+    await act(async () => {
+      jest.advanceTimersByTime(450);
+    });
+    expect(handleSaveOutput).toHaveBeenCalledTimes(1);
+    expect(handleSaveOutput).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executive_summary: "Executive overview draft",
+      })
+    );
+  });
+
+  test("successful PUT does not create a PUT loop", async () => {
+    jest.useFakeTimers();
+    const handleSaveOutput = jest.fn().mockResolvedValue({
+      executive_summary: "Executive overview draft",
+      status: "draft",
+    });
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    const { rerender } = render(<TrialMission />);
+
+    const summaryTextarea = screen.getByPlaceholderText("High-level overview of the investigation and core decision...");
+    fireEvent.change(summaryTextarea, { target: { value: "Executive overview draft" } });
+
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+    expect(handleSaveOutput).toHaveBeenCalledTimes(1);
+
+    // Backend syncs back saved data
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        executive_summary: "Executive overview draft",
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    rerender(<TrialMission />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+    expect(handleSaveOutput).toHaveBeenCalledTimes(1);
+  });
+
+  test("failed PUT keeps the memo dirty and allows retry on next edit", async () => {
+    jest.useFakeTimers();
+    const handleSaveOutput = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("Save failed"))
+      .mockResolvedValueOnce({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    render(<TrialMission />);
+
+    const summaryTextarea = screen.getByPlaceholderText("High-level overview of the investigation and core decision...");
+    fireEvent.change(summaryTextarea, { target: { value: "First attempt" } });
+
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+    expect(handleSaveOutput).toHaveBeenCalledTimes(1);
+
+    // Edit again to trigger retry
+    fireEvent.change(summaryTextarea, { target: { value: "Second attempt" } });
+
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+    expect(handleSaveOutput).toHaveBeenCalledTimes(2);
+    expect(handleSaveOutput).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        executive_summary: "Second attempt",
+      })
+    );
+  });
+
+  test("user edits while PUT is in flight remain dirty and are subsequently saved", async () => {
+    jest.useFakeTimers();
+    let resolveFirstPut;
+    const firstPutPromise = new Promise((resolve) => {
+      resolveFirstPut = resolve;
+    });
+
+    const handleSaveOutput = jest
+      .fn()
+      .mockImplementationOnce(() => firstPutPromise)
+      .mockResolvedValueOnce({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    render(<TrialMission />);
+
+    const summaryTextarea = screen.getByPlaceholderText("High-level overview of the investigation and core decision...");
+    fireEvent.change(summaryTextarea, { target: { value: "Version 1" } });
+
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+    expect(handleSaveOutput).toHaveBeenCalledTimes(1);
+
+    // Edit while 1st save is in flight
+    fireEvent.change(summaryTextarea, { target: { value: "Version 2" } });
+
+    // 1st save completes
+    await act(async () => {
+      resolveFirstPut({ executive_summary: "Version 1" });
+    });
+
+    // Advance timer for 2nd save
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+
+    expect(handleSaveOutput).toHaveBeenCalledTimes(2);
+    expect(handleSaveOutput).toHaveBeenLastCalledWith(
+      expect.objectContaining({ executive_summary: "Version 2" })
+    );
+  });
+
+  test("multiple edits inside 800ms coalesce into the latest snapshot", async () => {
+    jest.useFakeTimers();
+    const handleSaveOutput = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    render(<TrialMission />);
+
+    const summaryTextarea = screen.getByPlaceholderText("High-level overview of the investigation and core decision...");
+    const findingsTextarea = screen.getByPlaceholderText("Synthesize the critical drop-off points discovered during investigation...");
+
+    fireEvent.change(summaryTextarea, { target: { value: "Summary v1" } });
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
+
+    fireEvent.change(summaryTextarea, { target: { value: "Summary v2" } });
+    fireEvent.change(findingsTextarea, { target: { value: "Findings v1" } });
+
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+
+    expect(handleSaveOutput).toHaveBeenCalledTimes(1);
+    expect(handleSaveOutput).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executive_summary: "Summary v2",
+        key_findings: "Findings v1",
+      })
+    );
+  });
+
+  test("clicking Review before 800ms debounce expires first saves latest memo and then calls /output/review", async () => {
+    jest.useFakeTimers();
+    const callOrder = [];
+    const handleSaveOutput = jest.fn().mockImplementation(async () => {
+      callOrder.push("save");
+      return {};
+    });
+    const handleReviewOutput = jest.fn().mockImplementation(async () => {
+      callOrder.push("review");
+      return { status: "review" };
+    });
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        status: "draft",
+      },
+      handleSaveOutput,
+      handleReviewOutput,
+    });
+
+    render(<TrialMission />);
+
+    const summaryTextarea = screen.getByPlaceholderText("High-level overview of the investigation and core decision...");
+    fireEvent.change(summaryTextarea, { target: { value: "Complete memo content" } });
+
+    // Click Review immediately before debounce fires
+    const reviewBtn = screen.getByRole("button", { name: /Review memo/i });
+    await act(async () => {
+      fireEvent.click(reviewBtn);
+    });
+
+    expect(callOrder).toEqual(["save", "review"]);
+    expect(handleSaveOutput).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executive_summary: "Complete memo content",
+      })
+    );
+    expect(handleReviewOutput).toHaveBeenCalledTimes(1);
+  });
+
+  test("Review is NOT called if the required draft save fails", async () => {
+    jest.useFakeTimers();
+    const handleSaveOutput = jest.fn().mockRejectedValue(new Error("Save draft failed"));
+    const handleReviewOutput = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        status: "draft",
+      },
+      handleSaveOutput,
+      handleReviewOutput,
+    });
+
+    render(<TrialMission />);
+
+    const summaryTextarea = screen.getByPlaceholderText("High-level overview of the investigation and core decision...");
+    fireEvent.change(summaryTextarea, { target: { value: "Attempt to review" } });
+
+    const reviewBtn = screen.getByRole("button", { name: /Review memo/i });
+    await act(async () => {
+      fireEvent.click(reviewBtn);
+    });
+
+    expect(handleSaveOutput).toHaveBeenCalledTimes(1);
+    expect(handleReviewOutput).not.toHaveBeenCalled();
+  });
+
+  test("Review cannot be submitted twice while flush/review operation is in progress", async () => {
+    jest.useFakeTimers();
+    let resolveSave;
+    const savePromise = new Promise((resolve) => {
+      resolveSave = resolve;
+    });
+    const handleSaveOutput = jest.fn().mockImplementation(() => savePromise);
+    const handleReviewOutput = jest.fn().mockResolvedValue({ status: "review" });
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        status: "draft",
+      },
+      handleSaveOutput,
+      handleReviewOutput,
+    });
+
+    render(<TrialMission />);
+
+    const summaryTextarea = screen.getByPlaceholderText("High-level overview of the investigation and core decision...");
+    fireEvent.change(summaryTextarea, { target: { value: "Memo content" } });
+
+    const reviewBtn = screen.getByRole("button", { name: /Review memo/i });
+    
+    // First click initiates save
+    await act(async () => {
+      fireEvent.click(reviewBtn);
+    });
+    expect(handleSaveOutput).toHaveBeenCalledTimes(1);
+
+    // Second click while in progress
+    await act(async () => {
+      fireEvent.click(reviewBtn);
+    });
+    expect(handleSaveOutput).toHaveBeenCalledTimes(1);
+
+    // Resolve save
+    await act(async () => {
+      resolveSave({});
+    });
+
+    expect(handleReviewOutput).toHaveBeenCalledTimes(1);
+  });
+
+  test("dirty local non-empty value is not overwritten by stale server non-empty value", async () => {
+    jest.useFakeTimers();
+    const handleSaveOutput = jest.fn().mockResolvedValue({});
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        next_steps: "old server text",
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    const { rerender } = render(<TrialMission />);
+
+    const nextStepsTextarea = screen.getByPlaceholderText("Action items for engineering, analytics, and rollout...");
+    fireEvent.change(nextStepsTextarea, { target: { value: "latest user text" } });
+
+    expect(nextStepsTextarea.value).toBe("latest user text");
+
+    // Stale server response arrives containing "old server text"
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        next_steps: "old server text",
+        status: "draft",
+      },
+      handleSaveOutput,
+    });
+
+    rerender(<TrialMission />);
+
+    expect(nextStepsTextarea.value).toBe("latest user text");
+  });
+
+  test("Review with an edit during the in-flight save does not review stale data and saves newer edit", async () => {
+    jest.useFakeTimers();
+    let resolveFirstSave;
+    const firstSavePromise = new Promise((resolve) => {
+      resolveFirstSave = resolve;
+    });
+
+    const handleSaveOutput = jest
+      .fn()
+      .mockImplementationOnce(() => firstSavePromise)
+      .mockResolvedValueOnce({});
+    const handleReviewOutput = jest.fn().mockResolvedValue({ status: "review" });
+
+    sessionHook.useTrialMissionSession.mockReturnValue({
+      ...baseSessionHook,
+      session: {
+        id: "test-session-id",
+        state: "PHASE_ACTIVE",
+        current_phase: "deliver",
+      },
+      outputData: {
+        status: "draft",
+      },
+      handleSaveOutput,
+      handleReviewOutput,
+    });
+
+    render(<TrialMission />);
+
+    const summaryTextarea = screen.getByPlaceholderText("High-level overview of the investigation and core decision...");
+    fireEvent.change(summaryTextarea, { target: { value: "Memo draft A" } });
+
+    const reviewBtn = screen.getByRole("button", { name: /Review memo/i });
+    
+    // User clicks Review -> starts save for snapshot A
+    await act(async () => {
+      fireEvent.click(reviewBtn);
+    });
+    expect(handleSaveOutput).toHaveBeenCalledTimes(1);
+    expect(handleSaveOutput).toHaveBeenCalledWith(
+      expect.objectContaining({ executive_summary: "Memo draft A" })
+    );
+
+    // While save for A is in flight, user modifies memo to B
+    fireEvent.change(summaryTextarea, { target: { value: "Memo draft B" } });
+
+    // Now save for A completes
+    await act(async () => {
+      resolveFirstSave({});
+    });
+
+    // Review must NOT have been called because a newer edit occurred
+    expect(handleReviewOutput).not.toHaveBeenCalled();
+
+    // The newer edit B must be debounced and saved
+    await act(async () => {
+      jest.advanceTimersByTime(850);
+    });
+
+    expect(handleSaveOutput).toHaveBeenCalledTimes(2);
+    expect(handleSaveOutput).toHaveBeenLastCalledWith(
+      expect.objectContaining({ executive_summary: "Memo draft B" })
+    );
   });
 });
