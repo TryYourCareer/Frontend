@@ -66,9 +66,9 @@ export default function Sidebar({
       }`}>
         <div className="flex items-center gap-2.5 overflow-hidden">
           <img
-            src="/favicon.ico"
-            alt="Company Logo"
-            className="h-7 w-7 shrink-0 object-contain"
+            src="/assets/logo/logo-mark.png"
+            alt="Try Your Career"
+            className="h-7 w-7 shrink-0 aspect-square object-contain"
           />
           {!isCollapsed && (
             <motion.div 
@@ -77,7 +77,7 @@ export default function Sidebar({
               className="min-w-0"
             >
               <p className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-[#0b1a36]"}`}>
-                TryYourCareers
+                Try Your Career
               </p>
             </motion.div>
           )}
