@@ -2,12 +2,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardList, Compass, Newspaper,
   Users, LayoutDashboard, LogIn, LogOut,
-  X, ChevronLeft, ChevronRight, Rocket
+  X, ChevronLeft, ChevronRight, Rocket,
+  Brain,
 } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Dashboard", icon: LayoutDashboard, action: "student-dashboard" },
   { label: "Discovery Test", icon: ClipboardList, action: "assessment" },
+  { label: "Career Intelligence", icon: Brain, action: "career-intelligence" },
   { label: "Career Reality", icon: Compass, action: "career-reality" },
   { label: "Insights Feed", icon: Newspaper, action: "insights-feed" },
   { label: "Career Hubs", icon: Users, action: "career-hubs" },
