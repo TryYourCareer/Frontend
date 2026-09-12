@@ -476,7 +476,7 @@ export default function CareerDecision() {
         )}
 
         {/* ================================================================= */}
-        {/* 6. Career Detail Drawer / Panel (Phase 15G-C3)                    */}
+        {/* 6. Career Detail Drawer / Panel (Phase 15G-C3 & C4)               */}
         {/* ================================================================= */}
         {selectedCandidate && (
           <div 
@@ -642,6 +642,82 @@ export default function CareerDecision() {
                     </div>
                   )}
                 </div>
+
+                {/* ================================================================= */}
+                {/* Recommended Next Trial Mission Section (Phase 15G-C4 Authoritative) */}
+                {/* ================================================================= */}
+                {(() => {
+                  // Candidate-scoped next trial mission only (no growth_recommendations matching)
+                  const candidateMission = selectedCandidate.next_trial_mission || (
+                    selectedCandidate.next_action?.action_type === "TRIAL_MISSION" ? selectedCandidate.next_action : null
+                  );
+                  const missionId = candidateMission?.suggested_mission_id || candidateMission?.id || null;
+                  const missionTitle = candidateMission?.suggested_mission_title || candidateMission?.title || null;
+                  const missionRationale = candidateMission?.rationale || candidateMission?.description || null;
+                  const missionSlug = candidateMission?.suggested_mission_slug || null;
+                  const workspaceType = candidateMission?.workspace_type || null;
+
+                  return (
+                    <div className="space-y-3 pt-4 border-t border-[#e2d9c8]" data-testid="detail-next-mission-section">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                          <Play size={15} className="text-[#7B4A28]" />
+                          <span>Recommended Next Trial Mission</span>
+                        </h3>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          Use another simulated work experience to build evidence in this career.
+                        </p>
+                      </div>
+
+                      {candidateMission ? (
+                        <div className="bg-[#FAF6EC] p-4 rounded-xl border border-[#e8dfc8] space-y-3 shadow-sm" data-testid="next-mission-card">
+                          <div className="space-y-1">
+                            {missionTitle && (
+                              <h4 className="text-sm font-bold font-serif text-slate-900" data-testid="next-mission-title">
+                                {missionTitle}
+                              </h4>
+                            )}
+                            {missionSlug && (
+                              <p className="text-[11px] font-mono text-slate-500">
+                                {missionSlug}
+                              </p>
+                            )}
+                            {workspaceType && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                Workspace: {workspaceType}
+                              </span>
+                            )}
+                          </div>
+
+                          {missionRationale && (
+                            <p className="text-xs text-slate-700 bg-white/80 p-2.5 rounded-lg border border-[#e2d9c8] leading-relaxed">
+                              <strong>Evidence Focus:</strong> {missionRationale}
+                            </p>
+                          )}
+
+                          {missionId ? (
+                            <div className="pt-1">
+                              <button
+                                type="button"
+                                onClick={() => navigate(`/trial-mission?missionId=${encodeURIComponent(missionId)}`)}
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-[#0b1a36] text-white hover:bg-[#142447] transition shadow-sm"
+                                aria-label={`Start Trial Mission ${missionTitle || ""}`}
+                                data-testid="start-trial-mission-cta"
+                              >
+                                <Play size={14} />
+                                <span>Start Trial Mission</span>
+                              </button>
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs text-slate-500 italic" data-testid="no-mission-available-notice">
+                          No additional Trial Mission is currently available for this evidence area.
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Work DNA Canonical Dimensions (Rendered ONLY if supplied in candidate data) */}
                 {selectedCandidate.work_dna && (

@@ -59,6 +59,16 @@ const MOCK_SNAPSHOT_MULTI_CANDIDATES = {
           rationale: "Demonstrated Level 1 of 3 in trial mission.",
         },
       ],
+      next_trial_mission: {
+        action_type: "TRIAL_MISSION",
+        gap_key: "comp_systems",
+        target_career_id: "career-1",
+        suggested_mission_id: "mission-ds-1",
+        suggested_mission_slug: "distributed-cache-architecture",
+        suggested_mission_title: "Distributed Cache Architecture",
+        workspace_type: "Developer Workspace",
+        rationale: "Observe systems topography in high-throughput cache invalidation.",
+      },
     },
     {
       career_id: "career-2",
@@ -92,6 +102,15 @@ const MOCK_SNAPSHOT_MULTI_CANDIDATES = {
           rationale: "Single observation recorded; threshold requires two.",
         },
       ],
+      // Mission without title but with valid ID
+      next_trial_mission: {
+        action_type: "TRIAL_MISSION",
+        gap_key: "uncertainty_ambiguity",
+        target_career_id: "career-2",
+        suggested_mission_id: "mission-swe-2",
+        suggested_mission_slug: "refactor-legacy-monolith",
+        rationale: "Observe response to ambiguous codebase constraints.",
+      },
     },
     {
       career_id: "career-3",
@@ -106,6 +125,8 @@ const MOCK_SNAPSHOT_MULTI_CANDIDATES = {
       recommendation_category: "DEVELOPING_TARGET",
       key_strengths: ["Communication"],
       primary_evidence_gaps: [],
+      // No next trial mission
+      next_trial_mission: null,
     },
     {
       career_id: "career-4",
@@ -120,6 +141,33 @@ const MOCK_SNAPSHOT_MULTI_CANDIDATES = {
       recommendation_category: "EVIDENCE_DEFICIENT",
       key_strengths: [],
       primary_evidence_gaps: [],
+      // Incomplete mission without mission ID
+      next_trial_mission: {
+        action_type: "TRIAL_MISSION",
+        gap_key: "systems_topography",
+        target_career_id: "career-4",
+        suggested_mission_id: null,
+        suggested_mission_title: "Unpublished Cloud Architecture Sandbox",
+        rationale: "Observe multi-tier architecture design.",
+      },
+    },
+  ],
+  // Growth recommendations in snapshot must NOT be resolved/matched by frontend
+  growth_recommendations: [
+    {
+      career_id: "career-3",
+      career_title: "Business Analyst",
+      gap_item: {
+        target_type: "WORK_DNA_DIMENSION",
+        target_key: "quantitative_intensity",
+      },
+      next_action: {
+        action_type: "TRIAL_MISSION",
+        gap_key: "quantitative_intensity",
+        target_career_id: "career-3",
+        suggested_mission_id: "unscoped-mission-ba",
+        suggested_mission_title: "Snapshot Unscoped Mission",
+      },
     },
   ],
 };
@@ -145,7 +193,7 @@ const MOCK_SNAPSHOT_WITH_WORK_DNA = {
   ],
 };
 
-describe("Phase 15G — Career Decision Product: C1, C2 & C3 Tests", () => {
+describe("Phase 15G — Career Decision Product: C1-C4 Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -187,7 +235,7 @@ describe("Phase 15G — Career Decision Product: C1, C2 & C3 Tests", () => {
 
   test("C1-3. Displays loading skeleton while recommendation is in flight", () => {
     const { getLatestRecommendation } = require("../services/decisionIntelligence");
-    getLatestRecommendation.mockReturnValue(new Promise(() => {})); // pending
+    getLatestRecommendation.mockReturnValue(new Promise(() => {}));
 
     render(<CareerDecision />);
 
@@ -492,12 +540,13 @@ describe("Phase 15G — Career Decision Product: C1, C2 & C3 Tests", () => {
 
     fireEvent.click(screen.getByTestId("select-candidate-career-1"));
 
-    expect(screen.getByTestId("detail-work-dna-section")).toBeInTheDocument();
-    expect(screen.getByText(/cognitive complexity/i)).toBeInTheDocument();
-    expect(screen.getByText(/quantitative intensity/i)).toBeInTheDocument();
-    expect(screen.getByText(/systems topography/i)).toBeInTheDocument();
-    expect(screen.getByText(/visual spatial rigor/i)).toBeInTheDocument();
-    expect(screen.getByText(/uncertainty ambiguity/i)).toBeInTheDocument();
+    const workDnaSection = screen.getByTestId("detail-work-dna-section");
+    expect(workDnaSection).toBeInTheDocument();
+    expect(workDnaSection).toHaveTextContent(/cognitive complexity/i);
+    expect(workDnaSection).toHaveTextContent(/quantitative intensity/i);
+    expect(workDnaSection).toHaveTextContent(/systems topography/i);
+    expect(workDnaSection).toHaveTextContent(/visual spatial rigor/i);
+    expect(workDnaSection).toHaveTextContent(/uncertainty ambiguity/i);
   });
 
   test("C3-7. Detail view can be closed accessibly via close button or footer button", async () => {
@@ -516,5 +565,108 @@ describe("Phase 15G — Career Decision Product: C1, C2 & C3 Tests", () => {
     const closeBtn = screen.getByTestId("close-detail-button");
     fireEvent.click(closeBtn);
     expect(screen.queryByTestId("career-detail-panel")).not.toBeInTheDocument();
+  });
+
+  // =========================================================================
+  // Phase 15G-C4 Next Trial Mission Integration Tests (Strict Scope)
+  // =========================================================================
+  test("C4-1. Candidate-scoped backend next Trial Mission renders correctly in Career Detail drawer", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("select-candidate-career-1"));
+
+    expect(screen.getByTestId("detail-next-mission-section")).toBeInTheDocument();
+    expect(screen.getByTestId("next-mission-card")).toBeInTheDocument();
+    expect(screen.getByTestId("next-mission-title")).toHaveTextContent("Distributed Cache Architecture");
+    expect(screen.getByText("distributed-cache-architecture")).toBeInTheDocument();
+    expect(screen.getByText(/Workspace: Developer Workspace/i)).toBeInTheDocument();
+    expect(screen.getByText(/Observe systems topography in high-throughput cache invalidation/i)).toBeInTheDocument();
+  });
+
+  test("C4-2. Candidate-scoped mission ID causes Start Trial Mission CTA to appear and navigate", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("select-candidate-career-1"));
+
+    const startBtn = screen.getByTestId("start-trial-mission-cta");
+    expect(startBtn).toBeInTheDocument();
+    fireEvent.click(startBtn);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/trial-mission?missionId=mission-ds-1");
+  });
+
+  test("C4-3. Missing mission title does NOT fabricate a fake title", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("select-candidate-career-2"));
+
+    expect(screen.getByTestId("next-mission-card")).toBeInTheDocument();
+    expect(screen.queryByTestId("next-mission-title")).not.toBeInTheDocument();
+    expect(screen.queryByText(/simulated trial mission/i)).not.toBeInTheDocument();
+    expect(screen.getByText("refactor-legacy-monolith")).toBeInTheDocument();
+    expect(screen.getByText(/Observe response to ambiguous codebase constraints/i)).toBeInTheDocument();
+
+    const startBtn = screen.getByTestId("start-trial-mission-cta");
+    expect(startBtn).toBeInTheDocument();
+    fireEvent.click(startBtn);
+    expect(mockNavigate).toHaveBeenCalledWith("/trial-mission?missionId=mission-swe-2");
+  });
+
+  test("C4-4. Candidate without candidate-scoped next mission shows neutral unavailable state without falling back to growth_recommendations", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    // Career 3 has an item in snapshot.growth_recommendations, but candidate.next_trial_mission is null
+    fireEvent.click(screen.getByTestId("select-candidate-career-3"));
+
+    expect(screen.getByTestId("no-mission-available-notice")).toBeInTheDocument();
+    expect(screen.getByText(/no additional trial mission is currently available for this evidence area/i)).toBeInTheDocument();
+    expect(screen.queryByTestId("start-trial-mission-cta")).not.toBeInTheDocument();
+    expect(screen.queryByText("Snapshot Unscoped Mission")).not.toBeInTheDocument();
+  });
+
+  test("C4-5. Candidate-scoped mission without usable mission ID does NOT show launch CTA", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    // Career 4 has next_trial_mission with title and rationale, but suggested_mission_id is null
+    fireEvent.click(screen.getByTestId("select-candidate-career-4"));
+
+    expect(screen.getByTestId("next-mission-card")).toBeInTheDocument();
+    expect(screen.getByTestId("next-mission-title")).toHaveTextContent("Unpublished Cloud Architecture Sandbox");
+    expect(screen.queryByTestId("start-trial-mission-cta")).not.toBeInTheDocument();
   });
 });

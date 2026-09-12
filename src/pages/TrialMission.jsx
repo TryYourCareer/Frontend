@@ -111,6 +111,8 @@ export default function TrialMission() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const querySessionId = searchParams.get("sessionId");
+  const queryMissionId = searchParams.get("missionId");
+  const autoStartedMissionRef = useRef(false);
 
   // Get Ready state
   const [isReadyChecked, setIsReadyChecked] = useState(false);
@@ -207,6 +209,14 @@ export default function TrialMission() {
     resetToCatalog,
     setError,
   } = useTrialMissionSession(querySessionId);
+
+  // Auto-start mission session if missionId query param provided from Career Decision
+  useEffect(() => {
+    if (queryMissionId && !querySessionId && !session && !autoStartedMissionRef.current && typeof startSession === "function") {
+      autoStartedMissionRef.current = true;
+      startSession(queryMissionId);
+    }
+  }, [queryMissionId, querySessionId, session, startSession]);
 
   // Debounced notes autosave
   const {
