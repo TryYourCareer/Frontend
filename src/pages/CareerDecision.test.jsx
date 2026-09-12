@@ -17,8 +17,10 @@ jest.mock("react-router-dom", () => ({
 jest.mock("../services/decisionIntelligence", () => ({
   __esModule: true,
   getLatestRecommendation: jest.fn(),
+  getRecommendationById: jest.fn(),
   default: {
     getLatestRecommendation: jest.fn(),
+    getRecommendationById: jest.fn(),
   },
 }));
 
@@ -872,4 +874,89 @@ describe("Phase 15G — Career Decision Product: C1-C5 Tests", () => {
     expect(screen.queryByTestId("career-comparison-matrix-section")).not.toBeInTheDocument();
     expect(screen.getByTestId("comparison-selection-bar")).toHaveTextContent("0 / 4 selected");
   });
+
+  // =========================================================================
+  // Phase 15G-D Integration Hardening & Boundary Tests
+  // =========================================================================
+  test("D-1. Navigation CTA passes EXACT backend-provided mission ID without derivation or lookup", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    const customMissionId = "custom-auth-uuid-9999-mission";
+    const customSnapshot = {
+      ...MOCK_SNAPSHOT_MULTI_CANDIDATES,
+      ranked_career_candidates: [
+        {
+          ...MOCK_SNAPSHOT_MULTI_CANDIDATES.ranked_career_candidates[0],
+          career_id: "unrelated-career-id-123",
+          career_code: "data_engineer",
+          career_title: "Arbitrary Career Title",
+          next_trial_mission: {
+            action_type: "TRIAL_MISSION",
+            suggested_mission_id: customMissionId,
+            suggested_mission_slug: "arbitrary-mission-slug",
+            suggested_mission_title: "Arbitrary Mission Title",
+            workspace_type: "arbitrary_workspace",
+            rationale: "Observe data pipeline throughput.",
+          },
+        },
+      ],
+    };
+
+    getLatestRecommendation.mockResolvedValueOnce(customSnapshot);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("select-candidate-unrelated-career-id-123"));
+
+    const startBtn = screen.getByTestId("start-trial-mission-cta");
+    expect(startBtn).toBeInTheDocument();
+    fireEvent.click(startBtn);
+
+    // Verifies exact backend ID is passed, NOT derived from career_id, title, slug, workspace, etc.
+    expect(mockNavigate).toHaveBeenCalledWith(`/trial-mission?missionId=${encodeURIComponent(customMissionId)}`);
+    expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining("unrelated-career-id-123"));
+    expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining("data_engineer"));
+  });
+
+  test("D-2. When candidate.next_trial_mission is null, UI never fabricates mission or constructs mission ID", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    // Career 3 has next_trial_mission = null
+    fireEvent.click(screen.getByTestId("select-candidate-career-3"));
+
+    expect(screen.getByTestId("detail-next-mission-section")).toBeInTheDocument();
+    expect(screen.getByTestId("no-mission-available-notice")).toBeInTheDocument();
+    expect(screen.queryByTestId("start-trial-mission-cta")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("next-mission-card")).not.toBeInTheDocument();
+  });
+
+  test("D-3. C6 Boundary Verification: no history endpoints called, no fake snapshot list, no history selector rendered", async () => {
+    const { getLatestRecommendation, getRecommendationById } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    // Only getLatestRecommendation was called
+    expect(getLatestRecommendation).toHaveBeenCalledTimes(1);
+    expect(getRecommendationById).not.toHaveBeenCalled();
+
+    // No fake snapshot selector or history dropdown
+    expect(screen.queryByRole("combobox", { name: /snapshot history/i })).not.toBeInTheDocument();
+    expect(screen.queryByTestId("snapshot-history-list")).not.toBeInTheDocument();
+  });
 });
+
