@@ -1109,6 +1109,13 @@ export default function TrialMission() {
               requiredResourceAccess={requiredResourceAccess}
               actionLoading={actionLoading}
               isInvestigationPhase={isInvestigationPhase}
+              memoForm={memoForm}
+              setMemoForm={setMemoForm}
+              memoSaveStatus={memoSaveStatus}
+              handleSaveOutput={handleSaveOutput}
+              handleReviewOutput={handleReviewOutput}
+              handleFinaliseOutput={handleFinaliseOutput}
+              outputData={outputData}
             />
           ) : (
             <div
