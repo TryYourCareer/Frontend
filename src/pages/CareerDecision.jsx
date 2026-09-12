@@ -6,11 +6,14 @@ import {
   AlertCircle, 
   Clock, 
   Layers, 
-  Play,
-  X,
-  ChevronRight,
-  Info,
-  CheckCircle2
+  Play, 
+  X, 
+  ChevronRight, 
+  Info, 
+  CheckCircle2, 
+  Columns3, 
+  CheckSquare, 
+  Square 
 } from "lucide-react";
 import { getLatestRecommendation } from "../services/decisionIntelligence";
 
@@ -151,6 +154,7 @@ export default function CareerDecision() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [selectedComparisonIds, setSelectedComparisonIds] = useState([]);
 
   const fetchLatest = useCallback(async () => {
     setLoading(true);
@@ -183,6 +187,31 @@ export default function CareerDecision() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // Comparison toggle handler (strictly 2-4 careers, preserving server order)
+  const toggleComparisonSelection = (careerId) => {
+    setSelectedComparisonIds((prev) => {
+      if (prev.includes(careerId)) {
+        return prev.filter((id) => id !== careerId);
+      }
+      if (prev.length >= 4) {
+        return prev;
+      }
+      return [...prev, careerId];
+    });
+  };
+
+  const clearComparisonSelection = () => {
+    setSelectedComparisonIds([]);
+  };
+
+  // Selected comparison candidates in EXACT server-provided order
+  const comparisonCandidates = (snapshot?.ranked_career_candidates || []).filter(
+    (c) => selectedComparisonIds.includes(c.career_id)
+  );
+
+  const isComparisonActive = comparisonCandidates.length >= 2 && comparisonCandidates.length <= 4;
+  const hasWorkDnaData = comparisonCandidates.some((c) => c.work_dna?.dimensions);
 
   return (
     <div className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-8 text-[#0b1a36]">
@@ -302,21 +331,21 @@ export default function CareerDecision() {
         )}
 
         {/* ================================================================= */}
-        {/* 5. Latest Snapshot View (Ranked Candidate Cards)                  */}
+        {/* 5. Latest Snapshot View (Ranked Candidate Cards & Selection)      */}
         {/* ================================================================= */}
         {!loading && !error && snapshot && (
           <div className="space-y-6" data-testid="decision-snapshot-view">
             
-            {/* Snapshot Metadata Bar */}
+            {/* Snapshot Metadata Bar & Comparison Status */}
             <div className="bg-white/90 rounded-2xl p-4 sm:p-5 border border-[#e2d9c8] shadow-sm flex flex-wrap items-center justify-between gap-4 text-xs sm:text-sm text-slate-600">
-              <div className="flex items-center gap-2">
-                <Clock size={16} className="text-[#7B4A28]" />
-                <span>
-                  <strong>Evaluated:</strong>{" "}
-                  {snapshot.generated_at ? new Date(snapshot.generated_at).toLocaleString() : "Latest"}
-                </span>
-              </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Clock size={16} className="text-[#7B4A28]" />
+                  <span>
+                    <strong>Evaluated:</strong>{" "}
+                    {snapshot.generated_at ? new Date(snapshot.generated_at).toLocaleString() : "Latest"}
+                  </span>
+                </div>
                 {snapshot.recommendation_engine_version && (
                   <span className="bg-slate-100 px-2.5 py-1 rounded-md text-slate-700 font-mono text-xs border border-slate-200">
                     Engine: {snapshot.recommendation_engine_version}
@@ -325,6 +354,23 @@ export default function CareerDecision() {
                 <span>
                   <strong>Candidates:</strong> {snapshot.ranked_career_candidates?.length || 0}
                 </span>
+              </div>
+
+              {/* Comparison Counter & Action */}
+              <div className="flex items-center gap-3" data-testid="comparison-selection-bar">
+                <span className="text-xs font-semibold text-slate-700">
+                  Compare: <strong className="text-slate-900">{selectedComparisonIds.length}</strong> / 4 selected
+                </span>
+                {selectedComparisonIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearComparisonSelection}
+                    className="text-xs font-semibold text-slate-500 hover:text-slate-800 underline underline-offset-2 transition"
+                    data-testid="clear-comparison-button"
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
             </div>
 
@@ -336,30 +382,55 @@ export default function CareerDecision() {
                 const categoryMessage = getRecommendationCategoryMessage(candidate.recommendation_category);
                 const categoryBadgeClass = getCategoryBadgeClasses(candidate.recommendation_category);
                 const uncertaintyBadgeClass = getUncertaintyBadgeClasses(candidate.uncertainty_classification);
-                const isSelected = selectedCandidate?.career_id === candidate.career_id;
+                const isSelectedForDetail = selectedCandidate?.career_id === candidate.career_id;
+                const isSelectedForComparison = selectedComparisonIds.includes(candidate.career_id);
+                const isComparisonDisabled = !isSelectedForComparison && selectedComparisonIds.length >= 4;
 
                 return (
                   <div
                     key={candidate.career_id}
                     className={`bg-white/90 rounded-2xl p-6 border shadow-sm flex flex-col justify-between space-y-5 transition ${
-                      isSelected 
-                        ? "border-[#7B4A28] ring-2 ring-[#7B4A28]/20" 
+                      isSelectedForComparison
+                        ? "border-[#7B4A28] ring-2 ring-[#7B4A28]/20 bg-[#fdfbf7]"
+                        : isSelectedForDetail 
+                        ? "border-slate-400 ring-1 ring-slate-300"
                         : "border-[#e2d9c8] hover:border-slate-400"
                     }`}
                     data-testid={`candidate-card-${candidate.career_id}`}
                   >
                     <div className="space-y-4">
-                      {/* Card Header: Rank & Category */}
+                      {/* Card Header: Rank, Category & Comparison Checkbox */}
                       <div className="flex items-start justify-between gap-2">
-                        <span 
-                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg bg-slate-900 text-white text-xs font-bold font-mono shadow-sm"
-                          data-testid={`candidate-rank-${candidate.career_id}`}
+                        <div className="flex items-center gap-2">
+                          <span 
+                            className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg bg-slate-900 text-white text-xs font-bold font-mono shadow-sm"
+                            data-testid={`candidate-rank-${candidate.career_id}`}
+                          >
+                            Rank #{candidate.rank || 1}
+                          </span>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${categoryBadgeClass}`}>
+                            {categoryLabel}
+                          </span>
+                        </div>
+
+                        {/* Compare Selection Checkbox Button */}
+                        <button
+                          type="button"
+                          onClick={() => toggleComparisonSelection(candidate.career_id)}
+                          disabled={isComparisonDisabled}
+                          aria-pressed={isSelectedForComparison}
+                          aria-label={`Select ${candidate.career_title || candidate.career_code} for comparison`}
+                          className={`p-1.5 rounded-lg border transition ${
+                            isSelectedForComparison
+                              ? "bg-[#7B4A28] text-white border-[#7B4A28]"
+                              : isComparisonDisabled
+                              ? "bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed"
+                              : "bg-white text-slate-400 border-slate-300 hover:border-slate-500 hover:text-slate-700"
+                          }`}
+                          data-testid={`compare-checkbox-${candidate.career_id}`}
                         >
-                          Rank #{candidate.rank || 1}
-                        </span>
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${categoryBadgeClass}`}>
-                          {categoryLabel}
-                        </span>
+                          {isSelectedForComparison ? <CheckSquare size={16} /> : <Square size={16} />}
+                        </button>
                       </div>
 
                       {/* Career Title & Code */}
@@ -452,15 +523,11 @@ export default function CareerDecision() {
                     </div>
 
                     {/* Action: Select Career for Detail View */}
-                    <div className="pt-2 border-t border-[#e2d9c8]">
+                    <div className="pt-2 border-t border-[#e2d9c8] flex items-center justify-between gap-2">
                       <button
                         type="button"
                         onClick={() => setSelectedCandidate(candidate)}
-                        className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl transition shadow-sm ${
-                          isSelected
-                            ? "bg-[#7B4A28] text-white hover:bg-[#633a1e]"
-                            : "bg-white text-slate-800 hover:bg-slate-50 border border-slate-300"
-                        }`}
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-white text-slate-800 hover:bg-slate-50 border border-slate-300 transition shadow-sm"
                         aria-label={`View evidence details for ${candidate.career_title || candidate.career_code}`}
                         data-testid={`select-candidate-${candidate.career_id}`}
                       >
@@ -472,6 +539,258 @@ export default function CareerDecision() {
                 );
               })}
             </div>
+
+            {/* ============================================================= */}
+            {/* 7. Comparison Matrix View (Phase 15G-C5)                      */}
+            {/* ============================================================= */}
+            {isComparisonActive && (
+              <div 
+                className="bg-white/95 rounded-2xl p-6 sm:p-8 border border-[#7B4A28]/30 shadow-md space-y-6 transition"
+                data-testid="career-comparison-matrix-section"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#e2d9c8]">
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-2 text-xs font-bold text-[#7B4A28]">
+                      <Columns3 size={15} />
+                      <span>Career Comparison Matrix</span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-bold font-serif text-slate-900">
+                      Comparing {comparisonCandidates.length} Careers
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-600">
+                      Side-by-side evaluation using server-provided metrics and rankings. Interpret fit scores together with uncertainty classifications.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={clearComparisonSelection}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition"
+                    data-testid="close-comparison-matrix-button"
+                  >
+                    <X size={14} />
+                    <span>Close Comparison</span>
+                  </button>
+                </div>
+
+                {/* Comparison Table */}
+                <div className="overflow-x-auto">
+                  <table 
+                    className="w-full text-left text-xs border-collapse"
+                    data-testid="career-comparison-table"
+                  >
+                    <thead>
+                      <tr className="border-b border-[#e2d9c8]">
+                        <th className="p-3.5 font-bold text-slate-700 bg-slate-50/80 rounded-l-xl w-44">
+                          Metric / Dimension
+                        </th>
+                        {comparisonCandidates.map((candidate) => (
+                          <th 
+                            key={candidate.career_id} 
+                            className="p-3.5 font-bold text-slate-900 bg-slate-50/80 min-w-[200px]"
+                            data-testid={`comparison-column-${candidate.career_id}`}
+                          >
+                            <div className="space-y-1">
+                              <span className="inline-block px-2 py-0.5 rounded bg-slate-900 text-white font-mono text-[10px]">
+                                Rank #{candidate.rank || 1}
+                              </span>
+                              <div className="text-sm font-serif font-bold text-slate-900 leading-snug">
+                                {candidate.career_title || candidate.career_code}
+                              </div>
+                              {candidate.career_code && (
+                                <div className="text-[11px] font-mono text-slate-500 font-normal">
+                                  {candidate.career_code}
+                                </div>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => setSelectedCandidate(candidate)}
+                                className="inline-flex items-center gap-1 text-[11px] text-[#7B4A28] font-semibold hover:underline pt-1"
+                                aria-label={`View evidence details for ${candidate.career_title || candidate.career_code}`}
+                                data-testid={`comparison-detail-link-${candidate.career_id}`}
+                              >
+                                <span>Evidence Details</span>
+                                <ChevronRight size={12} />
+                              </button>
+                            </div>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#f0e9d8]">
+                      {/* Recommendation Category */}
+                      <tr>
+                        <td className="p-3.5 font-semibold text-slate-700 bg-slate-50/40">
+                          Recommendation Category
+                        </td>
+                        {comparisonCandidates.map((candidate) => (
+                          <td key={candidate.career_id} className="p-3.5" data-testid={`cmp-category-${candidate.career_id}`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${getCategoryBadgeClasses(candidate.recommendation_category)}`}>
+                              {formatRecommendationCategory(candidate.recommendation_category)}
+                            </span>
+                            <p className="text-[11px] text-slate-500 italic pt-1 leading-snug">
+                              {getRecommendationCategoryMessage(candidate.recommendation_category)}
+                            </p>
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Empirical Fit Index */}
+                      <tr>
+                        <td className="p-3.5 font-semibold text-slate-700 bg-slate-50/40">
+                          Empirical Fit Index
+                        </td>
+                        {comparisonCandidates.map((candidate) => (
+                          <td key={candidate.career_id} className="p-3.5 font-mono text-sm font-bold text-slate-900" data-testid={`cmp-fit-${candidate.career_id}`}>
+                            {formatFitIndex(candidate.fit_index)}
+                            {candidate.fit_index !== null && candidate.fit_index !== undefined ? " / 100" : ""}
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Fit Tier */}
+                      <tr>
+                        <td className="p-3.5 font-semibold text-slate-700 bg-slate-50/40">
+                          Fit Tier
+                        </td>
+                        {comparisonCandidates.map((candidate) => (
+                          <td key={candidate.career_id} className="p-3.5 font-medium text-slate-800" data-testid={`cmp-tier-${candidate.career_id}`}>
+                            {candidate.fit_tier || "—"}
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Uncertainty Classification */}
+                      <tr>
+                        <td className="p-3.5 font-semibold text-slate-700 bg-slate-50/40">
+                          Uncertainty Classification
+                        </td>
+                        {comparisonCandidates.map((candidate) => (
+                          <td key={candidate.career_id} className="p-3.5" data-testid={`cmp-uncertainty-${candidate.career_id}`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border ${getUncertaintyBadgeClasses(candidate.uncertainty_classification)}`}>
+                              {candidate.uncertainty_classification || "—"}
+                            </span>
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Dimension Coverage Ratio */}
+                      <tr>
+                        <td className="p-3.5 font-semibold text-slate-700 bg-slate-50/40">
+                          Dimension Coverage
+                        </td>
+                        {comparisonCandidates.map((candidate) => (
+                          <td key={candidate.career_id} className="p-3.5 font-semibold text-slate-800" data-testid={`cmp-dim-coverage-${candidate.career_id}`}>
+                            {candidate.dimension_coverage_ratio !== undefined && candidate.dimension_coverage_ratio !== null
+                              ? `${Math.round(candidate.dimension_coverage_ratio * 100)}%`
+                              : "—"}
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Activity Coverage Ratio (if present) */}
+                      <tr>
+                        <td className="p-3.5 font-semibold text-slate-700 bg-slate-50/40">
+                          Activity Coverage
+                        </td>
+                        {comparisonCandidates.map((candidate) => (
+                          <td key={candidate.career_id} className="p-3.5 text-slate-700 font-medium" data-testid={`cmp-act-coverage-${candidate.career_id}`}>
+                            {candidate.activity_coverage_ratio !== undefined && candidate.activity_coverage_ratio !== null
+                              ? `${Math.round(candidate.activity_coverage_ratio * 100)}%`
+                              : "—"}
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Key Strengths */}
+                      <tr>
+                        <td className="p-3.5 font-semibold text-slate-700 bg-slate-50/40">
+                          Demonstrated Strengths
+                        </td>
+                        {comparisonCandidates.map((candidate) => (
+                          <td key={candidate.career_id} className="p-3.5" data-testid={`cmp-strengths-${candidate.career_id}`}>
+                            {candidate.key_strengths && candidate.key_strengths.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {candidate.key_strengths.map((st, sIdx) => (
+                                  <span key={sIdx} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    {st}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 italic">None recorded</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Evidence Gaps */}
+                      <tr>
+                        <td className="p-3.5 font-semibold text-slate-700 bg-slate-50/40">
+                          Evidence Gaps
+                        </td>
+                        {comparisonCandidates.map((candidate) => (
+                          <td key={candidate.career_id} className="p-3.5" data-testid={`cmp-gaps-${candidate.career_id}`}>
+                            {candidate.primary_evidence_gaps && candidate.primary_evidence_gaps.length > 0 ? (
+                              <div className="space-y-1">
+                                <span className="font-semibold text-slate-800 text-[11px]">
+                                  {candidate.primary_evidence_gaps.length} {candidate.primary_evidence_gaps.length === 1 ? "area" : "areas"} to test
+                                </span>
+                                <ul className="list-disc list-inside text-[11px] text-slate-600 space-y-0.5">
+                                  {candidate.primary_evidence_gaps.slice(0, 3).map((gap, gIdx) => (
+                                    <li key={gIdx} className="truncate">
+                                      {gap.target_title || gap.target_key}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 italic">None recorded</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Work DNA Canonical Dimensions (ONLY if supplied in payload) */}
+                      {hasWorkDnaData && (
+                        <>
+                          <tr className="bg-slate-100/80">
+                            <td colSpan={comparisonCandidates.length + 1} className="p-2.5 font-bold text-slate-800 text-[11px]">
+                              Work DNA Alignment (Demonstrated / Required)
+                            </td>
+                          </tr>
+                          {[
+                            ["cognitive_complexity", "Cognitive Complexity"],
+                            ["quantitative_intensity", "Quantitative Intensity"],
+                            ["systems_topography", "Systems Topography"],
+                            ["visual_spatial_rigor", "Visual-Spatial Rigor"],
+                            ["uncertainty_ambiguity", "Uncertainty & Ambiguity"],
+                          ].map(([dimKey, dimLabel]) => (
+                            <tr key={dimKey}>
+                              <td className="p-3.5 font-semibold text-slate-700 bg-slate-50/40">
+                                {dimLabel}
+                              </td>
+                              {comparisonCandidates.map((candidate) => {
+                                const dim = candidate.work_dna?.dimensions?.[dimKey];
+                                return (
+                                  <td key={candidate.career_id} className="p-3.5 font-mono text-slate-800" data-testid={`cmp-dna-${dimKey}-${candidate.career_id}`}>
+                                    {dim && typeof dim === "object"
+                                      ? `${dim.demonstrated_level ?? "—"} / ${dim.career_required_level ?? "—"}`
+                                      : dim !== undefined && dim !== null
+                                      ? String(dim)
+                                      : "—"}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -647,7 +966,6 @@ export default function CareerDecision() {
                 {/* Recommended Next Trial Mission Section (Phase 15G-C4 Authoritative) */}
                 {/* ================================================================= */}
                 {(() => {
-                  // Candidate-scoped next trial mission only (no growth_recommendations matching)
                   const candidateMission = selectedCandidate.next_trial_mission || (
                     selectedCandidate.next_action?.action_type === "TRIAL_MISSION" ? selectedCandidate.next_action : null
                   );

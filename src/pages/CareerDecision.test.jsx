@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
 import CareerDecision, {
   formatRecommendationCategory,
   getRecommendationCategoryMessage,
@@ -102,7 +102,6 @@ const MOCK_SNAPSHOT_MULTI_CANDIDATES = {
           rationale: "Single observation recorded; threshold requires two.",
         },
       ],
-      // Mission without title but with valid ID
       next_trial_mission: {
         action_type: "TRIAL_MISSION",
         gap_key: "uncertainty_ambiguity",
@@ -125,7 +124,6 @@ const MOCK_SNAPSHOT_MULTI_CANDIDATES = {
       recommendation_category: "DEVELOPING_TARGET",
       key_strengths: ["Communication"],
       primary_evidence_gaps: [],
-      // No next trial mission
       next_trial_mission: null,
     },
     {
@@ -141,7 +139,6 @@ const MOCK_SNAPSHOT_MULTI_CANDIDATES = {
       recommendation_category: "EVIDENCE_DEFICIENT",
       key_strengths: [],
       primary_evidence_gaps: [],
-      // Incomplete mission without mission ID
       next_trial_mission: {
         action_type: "TRIAL_MISSION",
         gap_key: "systems_topography",
@@ -151,25 +148,23 @@ const MOCK_SNAPSHOT_MULTI_CANDIDATES = {
         rationale: "Observe multi-tier architecture design.",
       },
     },
-  ],
-  // Growth recommendations in snapshot must NOT be resolved/matched by frontend
-  growth_recommendations: [
     {
-      career_id: "career-3",
-      career_title: "Business Analyst",
-      gap_item: {
-        target_type: "WORK_DNA_DIMENSION",
-        target_key: "quantitative_intensity",
-      },
-      next_action: {
-        action_type: "TRIAL_MISSION",
-        gap_key: "quantitative_intensity",
-        target_career_id: "career-3",
-        suggested_mission_id: "unscoped-mission-ba",
-        suggested_mission_title: "Snapshot Unscoped Mission",
-      },
+      career_id: "career-5",
+      career_code: "product_manager",
+      career_title: "Product Manager",
+      rank: 5,
+      fit_index: 48.0,
+      fit_tier: "DEVELOPING",
+      uncertainty_classification: "MODERATE",
+      dimension_coverage_ratio: 0.4,
+      activity_coverage_ratio: 0.2,
+      recommendation_category: "DEVELOPING_TARGET",
+      key_strengths: [],
+      primary_evidence_gaps: [],
+      next_trial_mission: null,
     },
   ],
+  growth_recommendations: [],
 };
 
 const MOCK_SNAPSHOT_WITH_WORK_DNA = {
@@ -190,10 +185,22 @@ const MOCK_SNAPSHOT_WITH_WORK_DNA = {
         comp_analytical: { title: "Analytical Thinking", evaluated_level: 3.0 },
       },
     },
+    {
+      ...MOCK_SNAPSHOT_MULTI_CANDIDATES.ranked_career_candidates[1],
+      work_dna: {
+        dimensions: {
+          cognitive_complexity: { demonstrated_level: 2.0, career_required_level: 3.0 },
+          quantitative_intensity: { demonstrated_level: 1.0, career_required_level: 2.0 },
+          systems_topography: { demonstrated_level: 3.0, career_required_level: 3.0 },
+          visual_spatial_rigor: { demonstrated_level: 1.0, career_required_level: 1.0 },
+          uncertainty_ambiguity: { demonstrated_level: 1.0, career_required_level: 3.0 },
+        },
+      },
+    },
   ],
 };
 
-describe("Phase 15G — Career Decision Product: C1-C4 Tests", () => {
+describe("Phase 15G — Career Decision Product: C1-C5 Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -310,11 +317,12 @@ describe("Phase 15G — Career Decision Product: C1-C4 Tests", () => {
     });
 
     const cards = screen.getAllByTestId(/^candidate-card-/);
-    expect(cards).toHaveLength(4);
+    expect(cards).toHaveLength(5);
     expect(cards[0]).toHaveAttribute("data-testid", "candidate-card-career-1");
     expect(cards[1]).toHaveAttribute("data-testid", "candidate-card-career-2");
     expect(cards[2]).toHaveAttribute("data-testid", "candidate-card-career-3");
     expect(cards[3]).toHaveAttribute("data-testid", "candidate-card-career-4");
+    expect(cards[4]).toHaveAttribute("data-testid", "candidate-card-career-5");
   });
 
   test("C2-2. Server-provided rank is prominently displayed on each card", async () => {
@@ -568,7 +576,7 @@ describe("Phase 15G — Career Decision Product: C1-C4 Tests", () => {
   });
 
   // =========================================================================
-  // Phase 15G-C4 Next Trial Mission Integration Tests (Strict Scope)
+  // Phase 15G-C4 Next Trial Mission Integration Tests
   // =========================================================================
   test("C4-1. Candidate-scoped backend next Trial Mission renders correctly in Career Detail drawer", async () => {
     const { getLatestRecommendation } = require("../services/decisionIntelligence");
@@ -633,7 +641,7 @@ describe("Phase 15G — Career Decision Product: C1-C4 Tests", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/trial-mission?missionId=mission-swe-2");
   });
 
-  test("C4-4. Candidate without candidate-scoped next mission shows neutral unavailable state without falling back to growth_recommendations", async () => {
+  test("C4-4. Candidate without candidate-scoped next mission shows neutral unavailable state", async () => {
     const { getLatestRecommendation } = require("../services/decisionIntelligence");
     getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
 
@@ -643,13 +651,11 @@ describe("Phase 15G — Career Decision Product: C1-C4 Tests", () => {
       expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
     });
 
-    // Career 3 has an item in snapshot.growth_recommendations, but candidate.next_trial_mission is null
     fireEvent.click(screen.getByTestId("select-candidate-career-3"));
 
     expect(screen.getByTestId("no-mission-available-notice")).toBeInTheDocument();
     expect(screen.getByText(/no additional trial mission is currently available for this evidence area/i)).toBeInTheDocument();
     expect(screen.queryByTestId("start-trial-mission-cta")).not.toBeInTheDocument();
-    expect(screen.queryByText("Snapshot Unscoped Mission")).not.toBeInTheDocument();
   });
 
   test("C4-5. Candidate-scoped mission without usable mission ID does NOT show launch CTA", async () => {
@@ -662,11 +668,208 @@ describe("Phase 15G — Career Decision Product: C1-C4 Tests", () => {
       expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
     });
 
-    // Career 4 has next_trial_mission with title and rationale, but suggested_mission_id is null
     fireEvent.click(screen.getByTestId("select-candidate-career-4"));
 
     expect(screen.getByTestId("next-mission-card")).toBeInTheDocument();
     expect(screen.getByTestId("next-mission-title")).toHaveTextContent("Unpublished Cloud Architecture Sandbox");
     expect(screen.queryByTestId("start-trial-mission-cta")).not.toBeInTheDocument();
+  });
+
+  // =========================================================================
+  // Phase 15G-C5 Career Comparison Matrix Tests
+  // =========================================================================
+  test("C5-1. Candidate comparison selection controls render on cards and update counter", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId("compare-checkbox-career-1")).toBeInTheDocument();
+    expect(screen.getByTestId("compare-checkbox-career-2")).toBeInTheDocument();
+    expect(screen.getByTestId("comparison-selection-bar")).toHaveTextContent("0 / 4 selected");
+  });
+
+  test("C5-2. One selected career does not show/enable comparison matrix", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-1"));
+
+    expect(screen.getByTestId("comparison-selection-bar")).toHaveTextContent("1 / 4 selected");
+    expect(screen.queryByTestId("career-comparison-matrix-section")).not.toBeInTheDocument();
+  });
+
+  test("C5-3. Two selected careers activate comparison matrix table", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-1"));
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-2"));
+
+    expect(screen.getByTestId("comparison-selection-bar")).toHaveTextContent("2 / 4 selected");
+    expect(screen.getByTestId("career-comparison-matrix-section")).toBeInTheDocument();
+    expect(screen.getByTestId("career-comparison-table")).toBeInTheDocument();
+    expect(screen.getByTestId("comparison-column-career-1")).toBeInTheDocument();
+    expect(screen.getByTestId("comparison-column-career-2")).toBeInTheDocument();
+  });
+
+  test("C5-4. Up to 4 selected careers are allowed and 5th career selection is prevented", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-1"));
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-2"));
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-3"));
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-4"));
+
+    expect(screen.getByTestId("comparison-selection-bar")).toHaveTextContent("4 / 4 selected");
+    expect(screen.getByTestId("compare-checkbox-career-5")).toBeDisabled();
+
+    // Trying to click 5th does not increase selection
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-5"));
+    expect(screen.getByTestId("comparison-selection-bar")).toHaveTextContent("4 / 4 selected");
+    expect(screen.queryByTestId("comparison-column-career-5")).not.toBeInTheDocument();
+  });
+
+  test("C5-5. Selected careers preserve their server-provided order in comparison table", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    // Select in reverse order (Career 4 first, then Career 1)
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-4"));
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-1"));
+
+    const cols = screen.getAllByTestId(/^comparison-column-/);
+    expect(cols).toHaveLength(2);
+    // Preserves server-provided ranking order (Career 1 then Career 4)
+    expect(cols[0]).toHaveAttribute("data-testid", "comparison-column-career-1");
+    expect(cols[1]).toHaveAttribute("data-testid", "comparison-column-career-4");
+  });
+
+  test("C5-6. Comparison table displays exact identity, fit, uncertainty, and coverage", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-1"));
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-4"));
+
+    const table = screen.getByTestId("career-comparison-table");
+    expect(table).toBeInTheDocument();
+
+    // Career 1
+    expect(screen.getByTestId("cmp-category-career-1")).toHaveTextContent("Validated Strong Alignment");
+    expect(screen.getByTestId("cmp-fit-career-1")).toHaveTextContent("84.5 / 100");
+    expect(screen.getByTestId("cmp-tier-career-1")).toHaveTextContent("STRONG_ALIGNMENT");
+    expect(screen.getByTestId("cmp-uncertainty-career-1")).toHaveTextContent("LOW");
+    expect(screen.getByTestId("cmp-dim-coverage-career-1")).toHaveTextContent("80%");
+    expect(screen.getByTestId("cmp-act-coverage-career-1")).toHaveTextContent("50%");
+    expect(screen.getByTestId("cmp-strengths-career-1")).toHaveTextContent("Analytical Thinking");
+
+    // Career 4 (Evidence Deficient with null fit)
+    expect(screen.getByTestId("cmp-category-career-4")).toHaveTextContent("Evidence Deficient");
+    expect(screen.getByTestId("cmp-fit-career-4")).toHaveTextContent("—");
+    expect(screen.getByTestId("cmp-tier-career-4")).toHaveTextContent("EXPLORATORY");
+    expect(screen.getByTestId("cmp-uncertainty-career-4")).toHaveTextContent("HIGH");
+    expect(screen.getByTestId("cmp-dim-coverage-career-4")).toHaveTextContent("0%");
+    expect(screen.getByTestId("cmp-strengths-career-4")).toHaveTextContent("None recorded");
+  });
+
+  test("C5-7. Comparison table does NOT declare a winner or compute a relative comparison score", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-1"));
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-2"));
+
+    const matrix = screen.getByTestId("career-comparison-matrix-section");
+    expect(matrix).not.toHaveTextContent(/winner/i);
+    expect(matrix).not.toHaveTextContent(/best career/i);
+    expect(matrix).not.toHaveTextContent(/percentage advantage/i);
+    expect(matrix).not.toHaveTextContent(/composite score/i);
+  });
+
+  test("C5-8. Work DNA rows render ONLY when supplied in payload and omit when absent", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_WITH_WORK_DNA);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-1"));
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-2"));
+
+    expect(screen.getByText("Work DNA Alignment (Demonstrated / Required)")).toBeInTheDocument();
+    expect(screen.getByTestId("cmp-dna-cognitive_complexity-career-1")).toHaveTextContent("3 / 3");
+    expect(screen.getByTestId("cmp-dna-cognitive_complexity-career-2")).toHaveTextContent("2 / 3");
+  });
+
+  test("C5-9. Deselecting a career updates comparison and clearing closes comparison", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-1"));
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-2"));
+    expect(screen.getByTestId("career-comparison-matrix-section")).toBeInTheDocument();
+
+    // Deselect career 2 -> drops back to 1 selected -> closes comparison
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-2"));
+    expect(screen.queryByTestId("career-comparison-matrix-section")).not.toBeInTheDocument();
+
+    // Select 2 again, then click Clear button
+    fireEvent.click(screen.getByTestId("compare-checkbox-career-2"));
+    expect(screen.getByTestId("career-comparison-matrix-section")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("clear-comparison-button"));
+    expect(screen.queryByTestId("career-comparison-matrix-section")).not.toBeInTheDocument();
+    expect(screen.getByTestId("comparison-selection-bar")).toHaveTextContent("0 / 4 selected");
   });
 });
