@@ -29,6 +29,24 @@ export function formatRecommendationCategory(category) {
 }
 
 /**
+ * Recommendation state neutral supporting copy.
+ */
+export function getRecommendationCategoryMessage(category) {
+  switch (category) {
+    case "VALIDATED_STRONG_ALIGNMENT":
+      return "Strong alignment is supported by the available trial evidence.";
+    case "HIGH_POTENTIAL_EXPLORATORY":
+      return "Promising alignment, with additional evidence needed for stronger confidence.";
+    case "DEVELOPING_TARGET":
+      return "Current evidence indicates areas that can be developed through further practice.";
+    case "EVIDENCE_DEFICIENT":
+      return "There is not yet enough evidence to draw a strong conclusion.";
+    default:
+      return "Alignment evaluation based on available trial evidence.";
+  }
+}
+
+/**
  * Category badge styling map.
  */
 export function getCategoryBadgeClasses(category) {
@@ -220,7 +238,7 @@ export default function CareerDecision() {
         )}
 
         {/* ================================================================= */}
-        {/* 5. Latest Snapshot View                                           */}
+        {/* 5. Latest Snapshot View (Ranked Candidate Cards)                  */}
         {/* ================================================================= */}
         {!loading && !error && snapshot && (
           <div className="space-y-6" data-testid="decision-snapshot-view">
@@ -251,6 +269,7 @@ export default function CareerDecision() {
               {(snapshot.ranked_career_candidates || []).map((candidate) => {
                 const isDeficient = candidate.recommendation_category === "EVIDENCE_DEFICIENT";
                 const categoryLabel = formatRecommendationCategory(candidate.recommendation_category);
+                const categoryMessage = getRecommendationCategoryMessage(candidate.recommendation_category);
                 const categoryBadgeClass = getCategoryBadgeClasses(candidate.recommendation_category);
                 const uncertaintyBadgeClass = getUncertaintyBadgeClasses(candidate.uncertainty_classification);
 
@@ -263,8 +282,11 @@ export default function CareerDecision() {
                     <div className="space-y-4">
                       {/* Card Header: Rank & Category */}
                       <div className="flex items-start justify-between gap-2">
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-900 text-white text-xs font-bold font-mono">
-                          #{candidate.rank || 1}
+                        <span 
+                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg bg-slate-900 text-white text-xs font-bold font-mono shadow-sm"
+                          data-testid={`candidate-rank-${candidate.career_id}`}
+                        >
+                          Rank #{candidate.rank || 1}
                         </span>
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${categoryBadgeClass}`}>
                           {categoryLabel}
@@ -273,19 +295,26 @@ export default function CareerDecision() {
 
                       {/* Career Title & Code */}
                       <div>
-                        <h2 className="text-lg font-bold text-slate-900 leading-snug">
+                        <h2 className="text-xl font-bold font-serif text-slate-900 leading-snug">
                           {candidate.career_title || candidate.career_code}
                         </h2>
-                        <p className="text-xs text-slate-500 font-mono">
-                          {candidate.career_code}
-                        </p>
+                        {candidate.career_code && (
+                          <p className="text-xs text-slate-500 font-mono pt-0.5">
+                            {candidate.career_code}
+                          </p>
+                        )}
                       </div>
 
+                      {/* Recommendation State Neutral Supporting Copy */}
+                      <p className="text-xs text-slate-600 leading-relaxed italic bg-slate-50/80 p-2.5 rounded-lg border border-slate-200/80">
+                        {categoryMessage}
+                      </p>
+
                       {/* Metrics Box */}
-                      <div className="bg-[#FAF6EC] rounded-xl p-3.5 border border-[#e8dfc8] space-y-2 text-xs">
+                      <div className="bg-[#FAF6EC] rounded-xl p-3.5 border border-[#e8dfc8] space-y-2.5 text-xs">
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-600 font-medium">Fit Index</span>
-                          <span className="text-sm font-bold text-slate-900 font-mono">
+                          <span className="text-slate-600 font-medium">Empirical Fit Index</span>
+                          <span className="text-sm font-bold text-slate-900 font-mono" data-testid={`fit-index-${candidate.career_id}`}>
                             {formatFitIndex(candidate.fit_index)}
                             {candidate.fit_index !== null && candidate.fit_index !== undefined ? " / 100" : ""}
                           </span>
@@ -300,41 +329,55 @@ export default function CareerDecision() {
 
                         <div className="flex items-center justify-between">
                           <span className="text-slate-600 font-medium">Uncertainty</span>
-                          <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${uncertaintyBadgeClass}`}>
+                          <span 
+                            className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${uncertaintyBadgeClass}`}
+                            data-testid={`uncertainty-${candidate.career_id}`}
+                          >
                             {candidate.uncertainty_classification || "—"}
                           </span>
                         </div>
 
                         <div className="flex items-center justify-between pt-1 border-t border-[#e2d9c8]">
                           <span className="text-slate-600 font-medium">Dimension Coverage</span>
-                          <span className="font-semibold text-slate-900">
-                            {candidate.dimension_coverage_ratio !== undefined
+                          <span className="font-semibold text-slate-900" data-testid={`coverage-${candidate.career_id}`}>
+                            {candidate.dimension_coverage_ratio !== undefined && candidate.dimension_coverage_ratio !== null
                               ? `${Math.round(candidate.dimension_coverage_ratio * 100)}%`
                               : "—"}
                           </span>
                         </div>
                       </div>
 
-                      {/* Evidence Deficient Explanation */}
+                      {/* Evidence Deficient Notice */}
                       {isDeficient && (
                         <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200 leading-relaxed">
                           Available simulated trial evidence is currently insufficient to evaluate fit. Complete missions for this career to gather evidence.
                         </p>
                       )}
 
-                      {/* Strengths & Gaps Count Preview */}
-                      {!isDeficient && (
-                        <div className="space-y-1 text-xs text-slate-600">
-                          {candidate.key_strengths && candidate.key_strengths.length > 0 && (
-                            <p className="truncate">
-                              <strong className="text-slate-800">Strengths:</strong> {candidate.key_strengths.join(", ")}
-                            </p>
-                          )}
-                          {candidate.primary_evidence_gaps && candidate.primary_evidence_gaps.length > 0 && (
-                            <p>
-                              <strong className="text-slate-800">Identified Gaps:</strong> {candidate.primary_evidence_gaps.length} areas to test
-                            </p>
-                          )}
+                      {/* Strengths Preview */}
+                      {!isDeficient && candidate.key_strengths && candidate.key_strengths.length > 0 && (
+                        <div className="space-y-1.5 pt-1">
+                          <span className="text-xs font-semibold text-slate-700">Key Strengths:</span>
+                          <div className="flex flex-wrap gap-1.5" data-testid={`strengths-${candidate.career_id}`}>
+                            {candidate.key_strengths.map((strength, sIdx) => (
+                              <span 
+                                key={sIdx} 
+                                className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200"
+                              >
+                                {strength}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Evidence Gaps Summary */}
+                      {!isDeficient && candidate.primary_evidence_gaps && candidate.primary_evidence_gaps.length > 0 && (
+                        <div className="text-xs text-slate-600 pt-0.5" data-testid={`gaps-count-${candidate.career_id}`}>
+                          <span className="font-semibold text-slate-700">Evidence Gaps:</span>{" "}
+                          <span className="text-slate-800 font-medium">
+                            {candidate.primary_evidence_gaps.length} {candidate.primary_evidence_gaps.length === 1 ? "area" : "areas"} to test
+                          </span>
                         </div>
                       )}
                     </div>
