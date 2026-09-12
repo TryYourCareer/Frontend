@@ -5,6 +5,7 @@ import DataNotebookWorkspace from "./DataNotebookWorkspace";
 import SystemArchitectWorkspace from "./SystemArchitectWorkspace";
 import DocumentWorkbenchWorkspace from "./DocumentWorkbenchWorkspace";
 import ProcessWorkflowWorkspace from "./ProcessWorkflowWorkspace";
+import ResearchInterviewWorkspace from "./ResearchInterviewWorkspace";
 
 /**
  * Registry mapping stable workspace family identifiers (session.workspace_type)
@@ -18,6 +19,7 @@ export const WORKSPACE_COMPONENTS = {
   system_architect: SystemArchitectWorkspace,
   document_workbench: DocumentWorkbenchWorkspace,
   process_workflow: ProcessWorkflowWorkspace,
+  research_interview: ResearchInterviewWorkspace,
 };
 
 /**
