@@ -22,6 +22,7 @@ import CompanyInfo from "./pages/CompanyInfo";
 import SupportInfo from "./pages/SupportInfo";
 import CareerReport from "./pages/CareerReport";
 import CareerIntelligence from "./pages/CareerIntelligence";
+import CareerDecision from "./pages/CareerDecision";
 
 
 
@@ -86,6 +87,7 @@ function AppShell({ children }) {
     if (path === "/career-hubs") return "career-hubs";
     if (path === "/trial-mission") return "trial-mission";
     if (path.startsWith("/career-intelligence")) return "career-intelligence";
+    if (path === "/career-decision") return "career-decision";
     return "landing";
   }, [location.pathname]);
 
@@ -119,6 +121,7 @@ function AppShell({ children }) {
       roadmap: "/roadmap",
       "trial-mission": "/trial-mission",
       "career-intelligence": "/career-intelligence",
+      "career-decision": "/career-decision",
     };
     if (action === "login") {
       setIsLoginOpen(true);
@@ -191,6 +194,7 @@ function AppRoutes() {
         <Route path="/career-intelligence" element={<ProtectedRoute><AppShell><CareerIntelligence /></AppShell></ProtectedRoute>} />
         <Route path="/career-intelligence/family/:familyKey" element={<ProtectedRoute><AppShell><CareerIntelligence /></AppShell></ProtectedRoute>} />
         <Route path="/career-intelligence/career/:careerSlug" element={<ProtectedRoute><AppShell><CareerIntelligence /></AppShell></ProtectedRoute>} />
+        <Route path="/career-decision" element={<ProtectedRoute><AppShell><CareerDecision /></AppShell></ProtectedRoute>} />
         <Route path="/stride-journey/:stageId" element={<AppShell><StrideStage /></AppShell>} />
         <Route path="/company/:tabId" element={<CompanyInfo />} />
         <Route path="/support/:tabId" element={<SupportInfo />} />

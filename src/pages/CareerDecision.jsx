@@ -1,0 +1,351 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { 
+  Compass, 
+  RefreshCw, 
+  AlertCircle, 
+  Clock, 
+  Layers, 
+  Play
+} from "lucide-react";
+import { getLatestRecommendation } from "../services/decisionIntelligence";
+
+/**
+ * Format recommendation category to authoritative human-readable label.
+ */
+export function formatRecommendationCategory(category) {
+  switch (category) {
+    case "VALIDATED_STRONG_ALIGNMENT":
+      return "Validated Strong Alignment";
+    case "HIGH_POTENTIAL_EXPLORATORY":
+      return "High Potential (Exploratory)";
+    case "DEVELOPING_TARGET":
+      return "Developing Target";
+    case "EVIDENCE_DEFICIENT":
+      return "Evidence Deficient";
+    default:
+      return category || "Uncategorized";
+  }
+}
+
+/**
+ * Category badge styling map.
+ */
+export function getCategoryBadgeClasses(category) {
+  switch (category) {
+    case "VALIDATED_STRONG_ALIGNMENT":
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    case "HIGH_POTENTIAL_EXPLORATORY":
+      return "bg-amber-50 text-amber-700 border-amber-200";
+    case "DEVELOPING_TARGET":
+      return "bg-blue-50 text-blue-700 border-blue-200";
+    case "EVIDENCE_DEFICIENT":
+      return "bg-slate-100 text-slate-700 border-slate-300";
+    default:
+      return "bg-slate-50 text-slate-600 border-slate-200";
+  }
+}
+
+/**
+ * Uncertainty badge styling map.
+ */
+export function getUncertaintyBadgeClasses(uncertainty) {
+  switch (String(uncertainty).toUpperCase()) {
+    case "LOW":
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    case "MODERATE":
+      return "bg-amber-50 text-amber-700 border-amber-200";
+    case "HIGH":
+      return "bg-slate-100 text-slate-700 border-slate-300";
+    default:
+      return "bg-slate-50 text-slate-600 border-slate-200";
+  }
+}
+
+/**
+ * Format Fit Index safely (null -> em dash).
+ */
+export function formatFitIndex(fitIndex) {
+  if (fitIndex === null || fitIndex === undefined) {
+    return "—";
+  }
+  const num = Number(fitIndex);
+  if (isNaN(num)) return "—";
+  return num.toFixed(1);
+}
+
+export default function CareerDecision() {
+  const navigate = useNavigate();
+
+  const [snapshot, setSnapshot] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchLatest = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getLatestRecommendation();
+      setSnapshot(data);
+    } catch (err) {
+      if (err.status === 404 || String(err.message).includes("No recommendation snapshot found")) {
+        setSnapshot(null);
+      } else {
+        setError(err.message || "Failed to load the latest career decision recommendations.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLatest();
+  }, [fetchLatest]);
+
+  return (
+    <div className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-8 text-[#0b1a36]">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* ================================================================= */}
+        {/* 1. Page Header                                                    */}
+        {/* ================================================================= */}
+        <div className="bg-white/90 rounded-2xl p-6 sm:p-8 border border-[#e2d9c8] shadow-sm space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#7B4A28]/10 text-[#7B4A28] border border-[#7B4A28]/20">
+                <Compass size={13} />
+                <span>Decision Intelligence</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif text-slate-900">
+                Career Decision
+              </h1>
+            </div>
+
+            {snapshot && (
+              <button
+                type="button"
+                onClick={fetchLatest}
+                disabled={loading}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-white text-slate-700 hover:bg-slate-50 border border-slate-300 transition shadow-sm disabled:opacity-50"
+                aria-label="Refresh latest recommendation"
+              >
+                <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+                <span>Refresh</span>
+              </button>
+            )}
+          </div>
+
+          <p className="text-sm sm:text-base text-slate-600 max-w-3xl leading-relaxed">
+            Synthesizes empirical evidence from completed Trial Missions and canonical Career Intelligence Work DNA profiles. 
+            Evaluations reflect demonstrated performance on simulated tasks; they do not represent personality profiles or guaranteed hiring outcomes.
+          </p>
+        </div>
+
+        {/* ================================================================= */}
+        {/* 2. Loading State                                                  */}
+        {/* ================================================================= */}
+        {loading && (
+          <div className="space-y-6 animate-pulse" data-testid="decision-loading-skeleton">
+            <div className="bg-white/80 rounded-2xl p-6 border border-[#e2d9c8] space-y-4">
+              <div className="h-5 w-48 bg-[#e8dfc8] rounded-md" />
+              <div className="h-10 w-full bg-[#f0e9d8] rounded-xl" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-56 bg-white/80 rounded-2xl p-6 border border-[#e2d9c8] space-y-3">
+                  <div className="h-5 w-36 bg-[#e8dfc8] rounded-md" />
+                  <div className="h-6 w-24 bg-[#f0e9d8] rounded-full" />
+                  <div className="h-16 bg-[#f0e9d8] rounded-xl" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ================================================================= */}
+        {/* 3. Error State                                                    */}
+        {/* ================================================================= */}
+        {!loading && error && (
+          <div 
+            className="bg-white/90 rounded-2xl p-8 border border-red-200 text-center max-w-xl mx-auto shadow-sm space-y-4"
+            data-testid="decision-error-state"
+          >
+            <div className="h-14 w-14 rounded-2xl flex items-center justify-center bg-red-50 text-red-600 border border-red-200 mx-auto">
+              <AlertCircle size={28} />
+            </div>
+            <div className="space-y-1">
+              <h2 className="text-lg font-bold text-slate-900">Failed to Load Recommendations</h2>
+              <p className="text-sm text-slate-600 max-w-md mx-auto">{error}</p>
+            </div>
+            <button
+              type="button"
+              onClick={fetchLatest}
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl bg-[#0b1a36] text-white hover:bg-[#142447] transition shadow-sm"
+            >
+              <RefreshCw size={15} />
+              <span>Retry Evaluation</span>
+            </button>
+          </div>
+        )}
+
+        {/* ================================================================= */}
+        {/* 4. No Data / Empty State                                          */}
+        {/* ================================================================= */}
+        {!loading && !error && !snapshot && (
+          <div 
+            className="bg-white/90 rounded-2xl p-8 sm:p-12 border border-[#e2d9c8] text-center max-w-2xl mx-auto shadow-sm space-y-6"
+            data-testid="decision-empty-state"
+          >
+            <div className="h-16 w-16 rounded-2xl flex items-center justify-center bg-[#7B4A28]/10 text-[#7B4A28] border border-[#7B4A28]/20 mx-auto">
+              <Layers size={32} />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold font-serif text-slate-900">
+                No Decision Recommendations Yet
+              </h2>
+              <p className="text-sm text-slate-600 max-w-lg mx-auto leading-relaxed">
+                Career decision recommendations are generated after you complete simulated Trial Missions. 
+                Complete your first mission to produce empirical evidence and evaluate your alignment across target careers.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/trial-mission")}
+              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl bg-[#0b1a36] text-white hover:bg-[#142447] transition shadow-sm"
+            >
+              <Play size={16} />
+              <span>Explore Trial Missions</span>
+            </button>
+          </div>
+        )}
+
+        {/* ================================================================= */}
+        {/* 5. Latest Snapshot View                                           */}
+        {/* ================================================================= */}
+        {!loading && !error && snapshot && (
+          <div className="space-y-6" data-testid="decision-snapshot-view">
+            
+            {/* Snapshot Metadata Bar */}
+            <div className="bg-white/90 rounded-2xl p-4 sm:p-5 border border-[#e2d9c8] shadow-sm flex flex-wrap items-center justify-between gap-4 text-xs sm:text-sm text-slate-600">
+              <div className="flex items-center gap-2">
+                <Clock size={16} className="text-[#7B4A28]" />
+                <span>
+                  <strong>Evaluated:</strong>{" "}
+                  {snapshot.generated_at ? new Date(snapshot.generated_at).toLocaleString() : "Latest"}
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                {snapshot.recommendation_engine_version && (
+                  <span className="bg-slate-100 px-2.5 py-1 rounded-md text-slate-700 font-mono text-xs border border-slate-200">
+                    Engine: {snapshot.recommendation_engine_version}
+                  </span>
+                )}
+                <span>
+                  <strong>Candidates:</strong> {snapshot.ranked_career_candidates?.length || 0}
+                </span>
+              </div>
+            </div>
+
+            {/* Candidates Summary Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(snapshot.ranked_career_candidates || []).map((candidate) => {
+                const isDeficient = candidate.recommendation_category === "EVIDENCE_DEFICIENT";
+                const categoryLabel = formatRecommendationCategory(candidate.recommendation_category);
+                const categoryBadgeClass = getCategoryBadgeClasses(candidate.recommendation_category);
+                const uncertaintyBadgeClass = getUncertaintyBadgeClasses(candidate.uncertainty_classification);
+
+                return (
+                  <div
+                    key={candidate.career_id}
+                    className="bg-white/90 rounded-2xl p-6 border border-[#e2d9c8] shadow-sm flex flex-col justify-between space-y-5 hover:border-slate-400 transition"
+                    data-testid={`candidate-card-${candidate.career_id}`}
+                  >
+                    <div className="space-y-4">
+                      {/* Card Header: Rank & Category */}
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-900 text-white text-xs font-bold font-mono">
+                          #{candidate.rank || 1}
+                        </span>
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${categoryBadgeClass}`}>
+                          {categoryLabel}
+                        </span>
+                      </div>
+
+                      {/* Career Title & Code */}
+                      <div>
+                        <h2 className="text-lg font-bold text-slate-900 leading-snug">
+                          {candidate.career_title || candidate.career_code}
+                        </h2>
+                        <p className="text-xs text-slate-500 font-mono">
+                          {candidate.career_code}
+                        </p>
+                      </div>
+
+                      {/* Metrics Box */}
+                      <div className="bg-[#FAF6EC] rounded-xl p-3.5 border border-[#e8dfc8] space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-600 font-medium">Fit Index</span>
+                          <span className="text-sm font-bold text-slate-900 font-mono">
+                            {formatFitIndex(candidate.fit_index)}
+                            {candidate.fit_index !== null && candidate.fit_index !== undefined ? " / 100" : ""}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-600 font-medium">Fit Tier</span>
+                          <span className="font-semibold text-slate-800">
+                            {candidate.fit_tier || "—"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-600 font-medium">Uncertainty</span>
+                          <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${uncertaintyBadgeClass}`}>
+                            {candidate.uncertainty_classification || "—"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-1 border-t border-[#e2d9c8]">
+                          <span className="text-slate-600 font-medium">Dimension Coverage</span>
+                          <span className="font-semibold text-slate-900">
+                            {candidate.dimension_coverage_ratio !== undefined
+                              ? `${Math.round(candidate.dimension_coverage_ratio * 100)}%`
+                              : "—"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Evidence Deficient Explanation */}
+                      {isDeficient && (
+                        <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200 leading-relaxed">
+                          Available simulated trial evidence is currently insufficient to evaluate fit. Complete missions for this career to gather evidence.
+                        </p>
+                      )}
+
+                      {/* Strengths & Gaps Count Preview */}
+                      {!isDeficient && (
+                        <div className="space-y-1 text-xs text-slate-600">
+                          {candidate.key_strengths && candidate.key_strengths.length > 0 && (
+                            <p className="truncate">
+                              <strong className="text-slate-800">Strengths:</strong> {candidate.key_strengths.join(", ")}
+                            </p>
+                          )}
+                          {candidate.primary_evidence_gaps && candidate.primary_evidence_gaps.length > 0 && (
+                            <p>
+                              <strong className="text-slate-800">Identified Gaps:</strong> {candidate.primary_evidence_gaps.length} areas to test
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
