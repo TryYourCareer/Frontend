@@ -6,7 +6,11 @@ import {
   AlertCircle, 
   Clock, 
   Layers, 
-  Play
+  Play,
+  X,
+  ChevronRight,
+  Info,
+  CheckCircle2
 } from "lucide-react";
 import { getLatestRecommendation } from "../services/decisionIntelligence";
 
@@ -92,12 +96,61 @@ export function formatFitIndex(fitIndex) {
   return num.toFixed(1);
 }
 
+/**
+ * Format Evidence Gap State to human-readable label.
+ */
+export function formatGapState(gapState) {
+  switch (gapState) {
+    case "DEMONSTRATED_GROWTH_AREA":
+      return "Demonstrated Growth Area";
+    case "INSUFFICIENT_EVIDENCE":
+      return "Insufficient Evidence";
+    case "UNTESTED_AREA":
+      return "Untested Area";
+    default:
+      return gapState || "Unknown State";
+  }
+}
+
+/**
+ * Neutral interpretation copy for evidence gap states.
+ */
+export function getGapStateDescription(gapState) {
+  switch (gapState) {
+    case "DEMONSTRATED_GROWTH_AREA":
+      return "Current evidence indicates a development opportunity.";
+    case "INSUFFICIENT_EVIDENCE":
+      return "More observations are needed before making a stronger conclusion.";
+    case "UNTESTED_AREA":
+      return "The area has not yet been sufficiently observed (neutral exploration).";
+    default:
+      return "Gap identified from evidence evaluation.";
+  }
+}
+
+/**
+ * Styling classes for gap states.
+ */
+export function getGapBadgeClasses(gapState) {
+  switch (gapState) {
+    case "DEMONSTRATED_GROWTH_AREA":
+      return "bg-amber-50 text-amber-700 border-amber-200";
+    case "INSUFFICIENT_EVIDENCE":
+      return "bg-blue-50 text-blue-700 border-blue-200";
+    case "UNTESTED_AREA":
+      return "bg-slate-100 text-slate-700 border-slate-300";
+    default:
+      return "bg-slate-50 text-slate-600 border-slate-200";
+  }
+}
+
 export default function CareerDecision() {
   const navigate = useNavigate();
 
   const [snapshot, setSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
 
   const fetchLatest = useCallback(async () => {
     setLoading(true);
@@ -119,6 +172,17 @@ export default function CareerDecision() {
   useEffect(() => {
     fetchLatest();
   }, [fetchLatest]);
+
+  // Handle ESC key to close drawer
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setSelectedCandidate(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-8 text-[#0b1a36]">
@@ -272,11 +336,16 @@ export default function CareerDecision() {
                 const categoryMessage = getRecommendationCategoryMessage(candidate.recommendation_category);
                 const categoryBadgeClass = getCategoryBadgeClasses(candidate.recommendation_category);
                 const uncertaintyBadgeClass = getUncertaintyBadgeClasses(candidate.uncertainty_classification);
+                const isSelected = selectedCandidate?.career_id === candidate.career_id;
 
                 return (
                   <div
                     key={candidate.career_id}
-                    className="bg-white/90 rounded-2xl p-6 border border-[#e2d9c8] shadow-sm flex flex-col justify-between space-y-5 hover:border-slate-400 transition"
+                    className={`bg-white/90 rounded-2xl p-6 border shadow-sm flex flex-col justify-between space-y-5 transition ${
+                      isSelected 
+                        ? "border-[#7B4A28] ring-2 ring-[#7B4A28]/20" 
+                        : "border-[#e2d9c8] hover:border-slate-400"
+                    }`}
                     data-testid={`candidate-card-${candidate.career_id}`}
                   >
                     <div className="space-y-4">
@@ -381,9 +450,264 @@ export default function CareerDecision() {
                         </div>
                       )}
                     </div>
+
+                    {/* Action: Select Career for Detail View */}
+                    <div className="pt-2 border-t border-[#e2d9c8]">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCandidate(candidate)}
+                        className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl transition shadow-sm ${
+                          isSelected
+                            ? "bg-[#7B4A28] text-white hover:bg-[#633a1e]"
+                            : "bg-white text-slate-800 hover:bg-slate-50 border border-slate-300"
+                        }`}
+                        aria-label={`View evidence details for ${candidate.career_title || candidate.career_code}`}
+                        data-testid={`select-candidate-${candidate.career_id}`}
+                      >
+                        <span>View Evidence Details</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* ================================================================= */}
+        {/* 6. Career Detail Drawer / Panel (Phase 15G-C3)                    */}
+        {/* ================================================================= */}
+        {selectedCandidate && (
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-sm flex justify-end"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="career-detail-title"
+            data-testid="career-detail-panel"
+          >
+            <div className="bg-white w-full max-w-2xl h-full shadow-2xl overflow-y-auto p-6 sm:p-8 space-y-6 flex flex-col justify-between">
+              
+              <div className="space-y-6">
+                {/* Detail Header & Close Button */}
+                <div className="flex items-start justify-between gap-4 pb-4 border-b border-[#e2d9c8]">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-900 text-white text-xs font-bold font-mono">
+                        Rank #{selectedCandidate.rank || 1}
+                      </span>
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${getCategoryBadgeClasses(selectedCandidate.recommendation_category)}`}>
+                        {formatRecommendationCategory(selectedCandidate.recommendation_category)}
+                      </span>
+                    </div>
+
+                    <h2 id="career-detail-title" className="text-2xl sm:text-3xl font-bold font-serif text-slate-900 leading-tight">
+                      {selectedCandidate.career_title || selectedCandidate.career_code}
+                    </h2>
+                    
+                    {selectedCandidate.career_code && (
+                      <p className="text-xs text-slate-500 font-mono">
+                        Code: {selectedCandidate.career_code}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCandidate(null)}
+                    className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition"
+                    aria-label="Close career detail view"
+                    data-testid="close-detail-button"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Recommendation Interpretation Banner */}
+                <div className="bg-[#FAF6EC] p-4 rounded-xl border border-[#e8dfc8] space-y-1">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                    <Info size={14} className="text-[#7B4A28]" />
+                    <span>Evidence Assessment</span>
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed italic">
+                    {getRecommendationCategoryMessage(selectedCandidate.recommendation_category)}
+                  </p>
+                </div>
+
+                {/* Metrics Breakdown */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <span className="text-slate-500 block">Fit Index</span>
+                    <span className="text-base font-bold font-mono text-slate-900">
+                      {formatFitIndex(selectedCandidate.fit_index)}
+                      {selectedCandidate.fit_index !== null && selectedCandidate.fit_index !== undefined ? " / 100" : ""}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <span className="text-slate-500 block">Fit Tier</span>
+                    <span className="text-sm font-semibold text-slate-800">
+                      {selectedCandidate.fit_tier || "—"}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <span className="text-slate-500 block">Uncertainty</span>
+                    <span className="text-sm font-semibold text-slate-800">
+                      {selectedCandidate.uncertainty_classification || "—"}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <span className="text-slate-500 block">Dimension Coverage</span>
+                    <span className="text-sm font-semibold text-slate-900">
+                      {selectedCandidate.dimension_coverage_ratio !== undefined && selectedCandidate.dimension_coverage_ratio !== null
+                        ? `${Math.round(selectedCandidate.dimension_coverage_ratio * 100)}%`
+                        : "—"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Key Strengths */}
+                {selectedCandidate.key_strengths && selectedCandidate.key_strengths.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <CheckCircle2 size={16} className="text-emerald-600" />
+                      <span>Demonstrated Strengths</span>
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedCandidate.key_strengths.map((s, idx) => (
+                        <span 
+                          key={idx} 
+                          className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Evidence Gaps Breakdown */}
+                <div className="space-y-3" data-testid="detail-evidence-gaps-section">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <Layers size={16} className="text-[#7B4A28]" />
+                    <span>Diagnosed Evidence Gaps & Exploration Areas</span>
+                  </h3>
+
+                  {(!selectedCandidate.primary_evidence_gaps || selectedCandidate.primary_evidence_gaps.length === 0) ? (
+                    <p className="text-xs text-slate-500 italic bg-slate-50 p-3 rounded-xl border border-slate-200">
+                      No primary evidence gaps were recorded in this snapshot.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {selectedCandidate.primary_evidence_gaps.map((gap, gIdx) => (
+                        <div 
+                          key={gIdx}
+                          className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2 text-xs"
+                          data-testid={`evidence-gap-item-${gIdx}`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <span className="font-bold text-slate-900 text-sm block">
+                                {gap.target_title || gap.target_key}
+                              </span>
+                              <span className="text-[11px] font-mono text-slate-400">
+                                {gap.target_type}
+                              </span>
+                            </div>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border ${getGapBadgeClasses(gap.gap_state)}`}>
+                              {formatGapState(gap.gap_state)}
+                            </span>
+                          </div>
+
+                          <p className="text-slate-600 leading-relaxed">
+                            {getGapStateDescription(gap.gap_state)}
+                          </p>
+
+                          {gap.rationale && (
+                            <p className="text-slate-500 italic bg-slate-50 p-2 rounded border border-slate-100 text-[11px]">
+                              <strong>Rationale:</strong> {gap.rationale}
+                            </p>
+                          )}
+
+                          {(gap.demonstrated_level !== null && gap.demonstrated_level !== undefined && gap.expected_level !== null && gap.expected_level !== undefined) && (
+                            <div className="flex items-center gap-3 pt-1 text-[11px] text-slate-600">
+                              <span><strong>Demonstrated:</strong> Level {gap.demonstrated_level}</span>
+                              <span><strong>Expected:</strong> Level {gap.expected_level}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Work DNA Canonical Dimensions (Rendered ONLY if supplied in candidate data) */}
+                {selectedCandidate.work_dna && (
+                  <div className="space-y-3" data-testid="detail-work-dna-section">
+                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <Compass size={16} className="text-[#7B4A28]" />
+                      <span>Work DNA Dimension Alignment</span>
+                    </h3>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
+                      {Object.entries(selectedCandidate.work_dna.dimensions || {}).map(([dimKey, dimVal]) => (
+                        <div key={dimKey} className="flex items-center justify-between border-b border-slate-200 pb-1.5 last:border-0 last:pb-0">
+                          <span className="text-slate-700 font-medium capitalize">{dimKey.replace(/_/g, " ")}</span>
+                          <span className="font-mono font-semibold text-slate-900">
+                            {typeof dimVal === "object" ? `${dimVal.demonstrated_level || "—"} / ${dimVal.career_required_level || "—"}` : String(dimVal)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Competencies Breakdown (Rendered ONLY if supplied in candidate data) */}
+                {selectedCandidate.evaluated_competencies && (
+                  <div className="space-y-3" data-testid="detail-competencies-section">
+                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <CheckCircle2 size={16} className="text-emerald-600" />
+                      <span>Evaluated Competencies</span>
+                    </h3>
+                    <div className="space-y-2 text-xs">
+                      {Object.entries(selectedCandidate.evaluated_competencies).map(([compKey, compVal]) => (
+                        <div key={compKey} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center">
+                          <span className="font-medium text-slate-800">{compVal.title || compKey}</span>
+                          <span className="font-mono text-slate-600">Level {compVal.evaluated_level || "—"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Evidence Basis & Version Lineage */}
+                {selectedCandidate.version_lineage && (
+                  <div className="space-y-2 pt-2 border-t border-[#e2d9c8] text-xs text-slate-500">
+                    <h3 className="font-bold text-slate-700">Authoritative Provenance Lineage</h3>
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 font-mono text-[11px] space-y-1">
+                      <div>Fit Algorithm: {selectedCandidate.version_lineage.fit_algorithm_version || "fit_algo_v1.0"}</div>
+                      <div>Engine: {selectedCandidate.version_lineage.recommendation_engine_version || "rec_engine_v1.0"}</div>
+                      <div>CTEP Extractor: {selectedCandidate.version_lineage.ctep_extractor_version || "ctep_v1.0.0"}</div>
+                      <div>Taxonomy: {selectedCandidate.version_lineage.competency_taxonomy_version || "comp_tax_v1.0"}</div>
+                      <div>Contributing CTEP Evidence: {selectedCandidate.contributing_evidence_ids?.length || 0} items</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Close Button Footer */}
+              <div className="pt-4 border-t border-[#e2d9c8]">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCandidate(null)}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition"
+                  data-testid="detail-footer-close-button"
+                >
+                  Close Detail View
+                </button>
+              </div>
+
             </div>
           </div>
         )}
