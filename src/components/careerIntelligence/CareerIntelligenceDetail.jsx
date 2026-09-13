@@ -1,8 +1,12 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Layers,
   HelpCircle,
+  Rocket,
+  Clock,
+  AlertCircle,
 } from "lucide-react";
 import WorkDNACard from "./WorkDNACard";
 import CareerActivitiesList from "./CareerActivitiesList";
@@ -11,9 +15,13 @@ import IntelligenceEmptyState from "./IntelligenceEmptyState";
 
 export default function CareerIntelligenceDetail({
   detailData,
+  publishedMission,
+  missionLookupError,
   onBack,
   onNavigateFamily,
 }) {
+  const navigate = useNavigate();
+
   if (!detailData || !detailData.career) {
     return (
       <IntelligenceEmptyState
@@ -98,6 +106,64 @@ export default function CareerIntelligenceDetail({
             <span>slug: {career.slug}</span>
             {career.id && <span className="text-[10px] text-slate-400">id: {career.id}</span>}
           </div>
+        </div>
+
+        {/* Action Block: Trial Mission Connection */}
+        <div className="pt-4 border-t border-slate-200/80" data-testid="trial-mission-action-block">
+          {publishedMission ? (
+            /* Case 1: Published Mission Exists */
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#fbf9f4] border border-[#e8dfc8]">
+              <div className="space-y-0.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
+                  Live Simulation Available
+                </span>
+                <p className="text-sm font-semibold text-slate-800" data-testid="published-mission-title">
+                  Mission: {publishedMission.title}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(`/trial-mission?missionId=${encodeURIComponent(publishedMission.id)}`)}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#0b1a36] text-white text-sm font-bold shadow-sm transition hover:bg-[#142447] focus:outline-none focus:ring-2 focus:ring-[#0b1a36]/30"
+                aria-label={`Try a Trial Mission: ${publishedMission.title}`}
+                data-testid="try-trial-mission-cta"
+              >
+                <Rocket size={16} />
+                <span>Try a Trial Mission</span>
+              </button>
+            </div>
+          ) : missionLookupError ? (
+            /* Case 3: Mission Lookup Failed / Unavailable */
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-600">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5 text-slate-700">
+                  <AlertCircle size={15} className="text-slate-500" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700" data-testid="trial-mission-unavailable-badge">
+                    Trial Mission availability unavailable
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500" data-testid="trial-mission-unavailable-text">
+                  Unable to determine Trial Mission availability right now.
+                </p>
+              </div>
+            </div>
+          ) : (
+            /* Case 2: Mission Lookup Succeeded & No Published Mission */
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-600">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5 text-slate-700">
+                  <Clock size={15} />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700" data-testid="trial-mission-coming-soon-badge">
+                    Trial Mission coming soon
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500" data-testid="trial-mission-coming-soon-text">
+                  A simulated work mission for this career is currently in development.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

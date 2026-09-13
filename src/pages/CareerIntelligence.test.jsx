@@ -12,6 +12,7 @@ import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import CareerIntelligence from "./CareerIntelligence";
 import careerIntelligenceService from "../services/careerIntelligence";
+import trialMissionService from "../services/trialMission";
 
 // Mock API service
 jest.mock("../services/careerIntelligence", () => ({
@@ -21,6 +22,13 @@ jest.mock("../services/careerIntelligence", () => ({
     getFamilyCareers: jest.fn(),
     getCareerIntelligence: jest.fn(),
     getCareerActivities: jest.fn(),
+  },
+}));
+
+jest.mock("../services/trialMission", () => ({
+  __esModule: true,
+  default: {
+    getTrialMissions: jest.fn(),
   },
 }));
 
@@ -99,17 +107,18 @@ const MOCK_CLASSIFIED_CAREER_DETAIL = {
       simulation_fidelity: 3,
       safety_liability_barrier: 1,
       cognitive_representation: 3,
-      recommended_mission_type: "cloud_architecture_eval",
+      recommended_mission_type: "DEBUG_TRIAGE",
+      trialability_rationale: "High fidelity architectural failure simulation.",
     },
   ],
 };
 
 const MOCK_UNCLASSIFIED_CAREER_DETAIL = {
   career: {
-    id: "c9999999-9999-9999-9999-999999999999",
+    id: "c2222222-2222-2222-2222-222222222222",
     name: "Unclassified Novel Career",
     slug: "unclassified-novel-career",
-    description: "A career without occupational intelligence ingested yet.",
+    description: "Novel emergent career pending taxonomy classification.",
     sector_name: "Emerging Fields",
   },
   classification: null,
@@ -117,16 +126,35 @@ const MOCK_UNCLASSIFIED_CAREER_DETAIL = {
   activities: [],
 };
 
+const MOCK_PUBLISHED_MISSIONS = [
+  {
+    id: "m1111111-1111-1111-1111-111111111111",
+    career_id: "c1111111-1111-1111-1111-111111111111",
+    title: "Architect Active-Active Cross-Region Database Synchronization",
+    slug: "architect-active-active-database-sync",
+    description: "Distributed database architecture simulation.",
+    workspace_type: "SYSTEM_TOPOLOGY",
+    status: "published",
+    is_active: true,
+    career: {
+      id: "c1111111-1111-1111-1111-111111111111",
+      name: "Cloud Solutions Architect",
+      slug: "cloud-solutions-architect",
+    },
+  },
+];
+
 describe("Phase 12E — Career Intelligence Frontend/UI", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockParams = {};
-    mockNavigate = jest.fn();
+    mockNavigate.mockReset();
     mockLocation = { pathname: "/career-intelligence" };
+    trialMissionService.getTrialMissions.mockResolvedValue([]);
   });
 
   // -------------------------------------------------------------------------
-  // 1. Landing / Families Catalog Tests
+  // 1. Families Catalog View Tests
   // -------------------------------------------------------------------------
   test("loads and renders career families catalog dynamically from API", async () => {
     careerIntelligenceService.listCareerFamilies.mockResolvedValueOnce(MOCK_FAMILIES);
@@ -311,5 +339,89 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
     // Work DNA and activities should not fabricate values
     expect(screen.queryByText("Work DNA Profile")).not.toBeInTheDocument();
     expect(screen.queryByText("Professional Activities (")).not.toBeInTheDocument();
+  });
+
+  // -------------------------------------------------------------------------
+  // 6. Trial Mission Connection Tests (3 Distinct States)
+  // -------------------------------------------------------------------------
+  test("State 1: Published mission exists -> renders 'Try a Trial Mission', mission title, and navigates to correct missionId", async () => {
+    mockParams = { careerSlug: "cloud-solutions-architect" };
+    careerIntelligenceService.getCareerIntelligence.mockResolvedValueOnce(MOCK_CLASSIFIED_CAREER_DETAIL);
+    trialMissionService.getTrialMissions.mockResolvedValueOnce(MOCK_PUBLISHED_MISSIONS);
+
+    render(<CareerIntelligence />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Cloud Solutions Architect" })).toBeInTheDocument();
+      expect(screen.getByTestId("try-trial-mission-cta")).toBeInTheDocument();
+    });
+
+    // CTA and mission title assertion
+    const ctaButton = screen.getByRole("button", { name: /try a trial mission/i });
+    expect(ctaButton).toBeInTheDocument();
+    expect(screen.getByText("Mission: Architect Active-Active Cross-Region Database Synchronization")).toBeInTheDocument();
+
+    // Click CTA and verify navigation
+    fireEvent.click(ctaButton);
+    expect(mockNavigate).toHaveBeenCalledWith("/trial-mission?missionId=m1111111-1111-1111-1111-111111111111");
+
+    // Ensure neither "coming soon" nor "unavailable" badges are rendered
+    expect(screen.queryByTestId("trial-mission-coming-soon-badge")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("trial-mission-unavailable-badge")).not.toBeInTheDocument();
+  });
+
+  test("State 2: Mission lookup succeeded with no matching mission -> renders 'Trial Mission coming soon' without launch button", async () => {
+    mockParams = { careerSlug: "cloud-solutions-architect" };
+    careerIntelligenceService.getCareerIntelligence.mockResolvedValueOnce(MOCK_CLASSIFIED_CAREER_DETAIL);
+    trialMissionService.getTrialMissions.mockResolvedValueOnce([]); // No published mission for this career
+
+    render(<CareerIntelligence />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Cloud Solutions Architect" })).toBeInTheDocument();
+    });
+
+    // Non-interactive coming soon status
+    expect(screen.getByTestId("trial-mission-coming-soon-badge")).toBeInTheDocument();
+    expect(screen.getByText("Trial Mission coming soon")).toBeInTheDocument();
+    expect(screen.getByText("A simulated work mission for this career is currently in development.")).toBeInTheDocument();
+
+    // Ensure no launch button is present
+    expect(screen.queryByTestId("try-trial-mission-cta")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /try a trial mission/i })).not.toBeInTheDocument();
+
+    // Ensure unavailable badge is not shown
+    expect(screen.queryByTestId("trial-mission-unavailable-badge")).not.toBeInTheDocument();
+  });
+
+  test("State 3: Mission lookup failure -> renders neutral unavailable state without 'coming soon', keeping Career Detail fully usable", async () => {
+    mockParams = { careerSlug: "cloud-solutions-architect" };
+    careerIntelligenceService.getCareerIntelligence.mockResolvedValueOnce(MOCK_CLASSIFIED_CAREER_DETAIL);
+    trialMissionService.getTrialMissions.mockRejectedValueOnce(new Error("Trial mission service unavailable"));
+
+    render(<CareerIntelligence />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Cloud Solutions Architect" })).toBeInTheDocument();
+      expect(screen.getByText("Work DNA Profile")).toBeInTheDocument();
+    });
+
+    // Neutral availability-unavailable state must be rendered
+    expect(screen.getByTestId("trial-mission-unavailable-badge")).toBeInTheDocument();
+    expect(screen.getByText("Trial Mission availability unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Unable to determine Trial Mission availability right now.")).toBeInTheDocument();
+
+    // "Trial Mission coming soon" must NOT be shown
+    expect(screen.queryByTestId("trial-mission-coming-soon-badge")).not.toBeInTheDocument();
+    expect(screen.queryByText("Trial Mission coming soon")).not.toBeInTheDocument();
+    expect(screen.queryByText(/currently in development/i)).not.toBeInTheDocument();
+
+    // No launch button present
+    expect(screen.queryByTestId("try-trial-mission-cta")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /try a trial mission/i })).not.toBeInTheDocument();
+
+    // Career detail content remains fully rendered and usable
+    expect(screen.getByText("Cognitive Complexity")).toBeInTheDocument();
+    expect(screen.getByText("Enterprise Disaster Recovery & Multi-Region Topology Planning")).toBeInTheDocument();
   });
 });

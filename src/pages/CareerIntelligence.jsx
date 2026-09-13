@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import careerIntelligenceService from "../services/careerIntelligence";
+import trialMissionService from "../services/trialMission";
 import CareerFamilyList from "../components/careerIntelligence/CareerFamilyList";
 import FamilyCareersList from "../components/careerIntelligence/FamilyCareersList";
 import CareerIntelligenceDetail from "../components/careerIntelligence/CareerIntelligenceDetail";
@@ -23,6 +24,8 @@ export default function CareerIntelligence() {
 
   // State for 3. Career Detail
   const [careerDetail, setCareerDetail] = useState(null);
+  const [publishedMission, setPublishedMission] = useState(null);
+  const [missionLookupError, setMissionLookupError] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(null);
 
@@ -66,16 +69,43 @@ export default function CareerIntelligence() {
   }, []);
 
   // -------------------------------------------------------------------------
-  // 3. Fetch Career Intelligence Detail
+  // 3. Fetch Career Intelligence Detail & Published Mission
   // -------------------------------------------------------------------------
   const fetchCareerDetail = useCallback((slug) => {
     if (!slug) return;
     setDetailLoading(true);
     setDetailError(null);
-    careerIntelligenceService
-      .getCareerIntelligence(slug)
-      .then((data) => {
-        setCareerDetail(data);
+    setPublishedMission(null);
+    setMissionLookupError(false);
+
+    Promise.allSettled([
+      careerIntelligenceService.getCareerIntelligence(slug),
+      trialMissionService.getTrialMissions(),
+    ])
+      .then(([detailResult, missionsResult]) => {
+        if (detailResult.status === "fulfilled") {
+          const detail = detailResult.value;
+          setCareerDetail(detail);
+
+          if (missionsResult.status === "fulfilled" && Array.isArray(missionsResult.value)) {
+            setMissionLookupError(false);
+            const missions = missionsResult.value;
+            const career = detail?.career;
+            const matched = missions.find(
+              (m) =>
+                (career?.id && m.career_id === career.id) ||
+                (career?.slug && m.career?.slug === career.slug)
+            );
+            setPublishedMission(matched || null);
+          } else {
+            setMissionLookupError(true);
+            setPublishedMission(null);
+          }
+        } else {
+          setDetailError(
+            detailResult.reason?.message || `Failed to load career intelligence for '${slug}'.`
+          );
+        }
       })
       .catch((err) => {
         setDetailError(err.message || `Failed to load career intelligence for '${slug}'.`);
@@ -145,6 +175,8 @@ export default function CareerIntelligence() {
     return (
       <CareerIntelligenceDetail
         detailData={careerDetail}
+        publishedMission={publishedMission}
+        missionLookupError={missionLookupError}
         onBack={handleBackFromDetail}
         onNavigateFamily={handleSelectFamily}
       />
