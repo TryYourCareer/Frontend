@@ -958,5 +958,103 @@ describe("Phase 15G — Career Decision Product: C1-C5 Tests", () => {
     expect(screen.queryByRole("combobox", { name: /snapshot history/i })).not.toBeInTheDocument();
     expect(screen.queryByTestId("snapshot-history-list")).not.toBeInTheDocument();
   });
-});
 
+  test("V1-1. Truthful V1 competency presentation: does not render 'Level 1 of 3' or 'Expected: Level 3', and displays 'Demonstrated' for V1 competencies", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    const mockV1Snapshot = {
+      id: "snap-v1-truthful",
+      user_id: "user-4d6fc95f",
+      recommendation_engine_version: "rec_engine_v1.0",
+      generated_at: "2026-09-13T19:30:00Z",
+      ranked_career_candidates: [
+        {
+          career_id: "career-v1-dev",
+          career_code: "full_stack_developer",
+          career_title: "Full Stack Web Developer",
+          rank: 1,
+          fit_index: 52.2,
+          fit_tier: "DEVELOPING",
+          uncertainty_classification: "MODERATE",
+          dimension_coverage_ratio: 0.4,
+          recommendation_category: "DEVELOPING_TARGET",
+          key_strengths: [
+            "Problem Analysis & Decision Quality",
+            "Deliverable Execution & Structured Synthesis",
+            "Adaptive Reasoning & Revision",
+            "Work DNA: Uncertainty Ambiguity"
+          ],
+          primary_evidence_gaps: [
+            {
+              target_type: "COMPETENCY",
+              target_key: "comp_problem_analysis_and_decision_quality",
+              target_title: "Problem Analysis & Decision Quality",
+              gap_state: "DEMONSTRATED_GROWTH_AREA",
+              demonstrated_level: 1.0,
+              expected_level: null,
+              rationale: "Milestone demonstrated through completed trial mission evidence."
+            },
+            {
+              target_type: "WORK_DNA_DIMENSION",
+              target_key: "quantitative_intensity",
+              target_title: "Quantitative Intensity",
+              gap_state: "UNTESTED_AREA",
+              demonstrated_level: null,
+              expected_level: 2.0,
+              rationale: "Work DNA dimension 'Quantitative Intensity' (Required: 2) is unassessed in completed missions."
+            }
+          ],
+          evaluated_competencies: {
+            comp_problem_analysis_and_decision_quality: {
+              title: "Problem Analysis & Decision Quality",
+              evaluated_level: 1,
+              status: "evaluated"
+            }
+          },
+          contributing_evidence_ids: ["ev-1", "ev-2", "ev-3", "ev-4", "ev-5", "ev-6", "ev-7", "ev-8"],
+          version_lineage: {
+            fit_algorithm_version: "fit_algo_v1.0",
+            recommendation_engine_version: "rec_engine_v1.0",
+            ctep_extractor_version: "ctep_v1.0.0",
+            competency_taxonomy_version: "comp_tax_v1.0"
+          }
+        }
+      ],
+      growth_recommendations: []
+    };
+
+    getLatestRecommendation.mockResolvedValueOnce(mockV1Snapshot);
+
+    render(<CareerDecision />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    // Open detail drawer
+    fireEvent.click(screen.getByTestId("select-candidate-career-v1-dev"));
+
+    expect(screen.getByTestId("career-detail-panel")).toBeInTheDocument();
+
+    // Verify key strengths include V1 competencies
+    expect(screen.getAllByText("Problem Analysis & Decision Quality").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Deliverable Execution & Structured Synthesis").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Adaptive Reasoning & Revision").length).toBeGreaterThanOrEqual(1);
+
+    // Verify no misleading Level 1 of 3 or Expected: Level 3
+    expect(screen.queryByText(/Level 1 of 3/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Expected: Level 3/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Demonstrated: Level 1/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/distinguished mastery/i)).not.toBeInTheDocument();
+
+    // Verify truthful milestone wording
+    expect(screen.getByText("Milestone Demonstrated")).toBeInTheDocument();
+
+    // Verify evaluated competencies renders "Demonstrated" instead of "Level 1"
+    const compSection = screen.getByTestId("detail-competencies-section");
+    expect(within(compSection).getByText("Demonstrated")).toBeInTheDocument();
+    expect(within(compSection).queryByText("Level 1")).not.toBeInTheDocument();
+
+    // Verify cumulative evidence count remains 8 items
+    expect(screen.getByText(/Contributing CTEP Evidence: 8 items/i)).toBeInTheDocument();
+  });
+});

@@ -950,11 +950,19 @@ export default function CareerDecision() {
                             </p>
                           )}
 
-                          {(gap.demonstrated_level !== null && gap.demonstrated_level !== undefined && gap.expected_level !== null && gap.expected_level !== undefined) && (
-                            <div className="flex items-center gap-3 pt-1 text-[11px] text-slate-600">
-                              <span><strong>Demonstrated:</strong> Level {gap.demonstrated_level}</span>
-                              <span><strong>Expected:</strong> Level {gap.expected_level}</span>
-                            </div>
+                          {gap.target_type === "COMPETENCY" ? (
+                            (gap.demonstrated_level !== null && gap.demonstrated_level !== undefined) && (
+                              <div className="flex items-center gap-3 pt-1 text-[11px] text-slate-600">
+                                <span><strong>Status:</strong> Milestone Demonstrated</span>
+                              </div>
+                            )
+                          ) : (
+                            (gap.demonstrated_level !== null && gap.demonstrated_level !== undefined && gap.expected_level !== null && gap.expected_level !== undefined) && (
+                              <div className="flex items-center gap-3 pt-1 text-[11px] text-slate-600">
+                                <span><strong>Demonstrated:</strong> Level {gap.demonstrated_level}</span>
+                                <span><strong>Expected:</strong> Level {gap.expected_level}</span>
+                              </div>
+                            )
                           )}
                         </div>
                       ))}
@@ -1068,7 +1076,9 @@ export default function CareerDecision() {
                       {Object.entries(selectedCandidate.evaluated_competencies).map(([compKey, compVal]) => (
                         <div key={compKey} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center">
                           <span className="font-medium text-slate-800">{compVal.title || compKey}</span>
-                          <span className="font-mono text-slate-600">Level {compVal.evaluated_level || "—"}</span>
+                          <span className="font-mono text-slate-600">
+                            {compVal.evaluated_level === 1 ? "Demonstrated" : (compVal.evaluated_level ? `Level ${compVal.evaluated_level}` : "—")}
+                          </span>
                         </div>
                       ))}
                     </div>
