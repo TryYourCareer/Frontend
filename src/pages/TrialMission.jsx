@@ -1976,9 +1976,16 @@ export default function TrialMission() {
                 <button
                   type="button"
                   onClick={() => navigate("/dashboard")}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#633B20]"
+                  className="rounded-2xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50"
                 >
                   Return to Dashboard
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/career-decision")}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-[#7B4A28] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#633B20]"
+                >
+                  View Career Decision & Fit
                 </button>
               </div>
             </div>

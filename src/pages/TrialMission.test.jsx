@@ -7,7 +7,7 @@ jest.mock("react-router-dom", () => ({
 }));
 
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import TrialMission from "./TrialMission";
 import { useTrialMissionSession } from "../hooks/useTrialMissionSession";
 
@@ -125,5 +125,52 @@ describe("Phase 15G-D — TrialMission Route & Session Query Param Integration",
       expect(mockStartSession).toHaveBeenCalledTimes(1);
       expect(mockStartSession).toHaveBeenCalledWith(rawMissionId);
     });
+  });
+});
+
+describe("Gap #1 — Step 2: Trial Mission completion screen CTA", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSearchParams = new URLSearchParams();
+  });
+
+  test("renders View Career Decision & Fit CTA for SESSION_COMPLETED, clicking navigates to /career-decision, and existing actions remain intact", () => {
+    const mockResetToCatalog = jest.fn();
+    useTrialMissionSession.mockReturnValue({
+      ...defaultMockSessionHook,
+      session: {
+        id: "test-session-completed",
+        state: "SESSION_COMPLETED",
+        mission_title: "Investigate Checkout Abandonment",
+      },
+      evaluationData: {
+        status: "completed",
+      },
+      resetToCatalog: mockResetToCatalog,
+    });
+
+    render(<TrialMission />);
+
+    // 1. Primary CTA is rendered
+    const cta = screen.getByRole("button", { name: /view career decision & fit/i });
+    expect(cta).toBeInTheDocument();
+
+    // 2. Existing completion actions remain present
+    const exploreBtn = screen.getByRole("button", { name: /explore more missions/i });
+    expect(exploreBtn).toBeInTheDocument();
+
+    const dashboardBtn = screen.getByRole("button", { name: /return to dashboard/i });
+    expect(dashboardBtn).toBeInTheDocument();
+
+    // 3. Clicking CTA navigates to /career-decision
+    fireEvent.click(cta);
+    expect(mockNavigate).toHaveBeenCalledWith("/career-decision");
+
+    // 4. Existing actions still work as expected
+    fireEvent.click(exploreBtn);
+    expect(mockResetToCatalog).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(dashboardBtn);
+    expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
   });
 });
