@@ -135,6 +135,10 @@ export const submitReflection = (sessionId, payload = {}) =>
 export const getEvaluation = (sessionId) =>
   api.get(`/trial-missions/sessions/${sessionId}/evaluation`);
 
+// Activity Summary
+export const getSessionActivitySummary = (sessionId) =>
+  api.get(`/trial-missions/sessions/${sessionId}/activity-summary`);
+
 const trialMissionService = {
   getTrialMissions,
   getTrialMission,
@@ -164,6 +168,7 @@ const trialMissionService = {
   saveReflection,
   submitReflection,
   getEvaluation,
+  getSessionActivitySummary,
 };
 
 export default trialMissionService;

@@ -23,6 +23,7 @@ import {
 import { useTrialMissionSession } from "../hooks/useTrialMissionSession";
 import { useDebounceAutosave } from "../hooks/useDebounceAutosave";
 import { WORKSPACE_COMPONENTS } from "../components/trialMission/WorkspaceRegistry";
+import { getSessionActivitySummary } from "../services/trialMission";
 
 export function formatWorkspaceType(type) {
   if (!type || typeof type !== "string") return "Interactive Workspace";
@@ -167,6 +168,11 @@ export default function TrialMission() {
   });
   const [reflectionSaveStatus, setReflectionSaveStatus] = useState("ready"); // "ready" | "saving" | "saved" | "error"
 
+  // Activity Summary state
+  const [activitySummary, setActivitySummary] = useState(null);
+  const [activitySummaryLoading, setActivitySummaryLoading] = useState(false);
+  const [activitySummaryError, setActivitySummaryError] = useState(null);
+
   const {
     missions,
     session,
@@ -217,6 +223,36 @@ export default function TrialMission() {
       startSession(queryMissionId);
     }
   }, [queryMissionId, querySessionId, session, startSession]);
+
+  useEffect(() => {
+    if (session?.state === "SESSION_COMPLETED" && session?.id) {
+      let isMounted = true;
+      setActivitySummaryLoading(true);
+      setActivitySummaryError(null);
+      const req = getSessionActivitySummary(session.id);
+      if (req && typeof req.then === "function") {
+        req
+          .then((data) => {
+            if (isMounted) {
+              setActivitySummary(data);
+              setActivitySummaryLoading(false);
+            }
+          })
+          .catch((err) => {
+            if (isMounted) {
+              console.error("Failed to load activity summary:", err);
+              setActivitySummaryError("Activity summary is temporarily unavailable.");
+              setActivitySummaryLoading(false);
+            }
+          });
+      } else {
+        setActivitySummaryLoading(false);
+      }
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [session?.state, session?.id]);
 
   // Debounced notes autosave
   const {
@@ -1815,6 +1851,62 @@ export default function TrialMission() {
                   </p>
                 </div>
               </div>
+
+              {/* Activity Summary Section */}
+              {activitySummaryLoading && (
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-6 text-sm text-slate-600">
+                  <Loader2 size={18} className="animate-spin text-[#7B4A28]" />
+                  <span>Loading mission activity summary...</span>
+                </div>
+              )}
+
+              {!activitySummaryLoading && activitySummaryError && (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 text-xs text-slate-600">
+                  <p className="font-semibold text-slate-800 mb-1">Activity Summary Notice</p>
+                  {activitySummaryError}
+                </div>
+              )}
+
+              {!activitySummaryLoading && activitySummary && Array.isArray(activitySummary.categories) && activitySummary.categories.length > 0 && (
+                <div className="rounded-3xl border border-slate-200 bg-slate-50/50 p-6 sm:p-8 space-y-6">
+                  <div className="space-y-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#7B4A28]">
+                      Activity Summary
+                    </span>
+                    <h2 className="text-xl font-bold text-slate-900">
+                      WHAT WE OBSERVED
+                    </h2>
+                    <p className="text-xs text-slate-600">
+                      A factual summary of the observable actions and work patterns recorded during your mission.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {activitySummary.categories.map((cat, idx) => (
+                      <div
+                        key={cat.category || idx}
+                        className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-3"
+                      >
+                        <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">
+                          {cat.category}
+                        </h3>
+                        {Array.isArray(cat.observations) && cat.observations.length > 0 ? (
+                          <ul className="space-y-2 text-xs leading-relaxed text-slate-700">
+                            {cat.observations.map((obs, oIdx) => (
+                              <li key={oIdx} className="flex items-start gap-2">
+                                <span className="text-slate-400 select-none mt-0.5">•</span>
+                                <span>{obs}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-xs text-slate-500 italic">No activity recorded.</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Evaluation Section */}
               {evaluationLoading && (
