@@ -1042,8 +1042,8 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
       num: "01",
       navTitle: "Answer",
       title: "Answer a series of questions",
-      desc: "Take the assessment and get your career matches, personality archetype, and more along the way.",
-      badge: "Stage 01: Discover",
+      desc: "Share a bit about yourself by answering a series of quick, interactive questions.",
+      badge: "Stage 01: Answer",
       ctaText: "Start Assessment",
       ctaAction: () => {
         if (onStartDiscovery) onStartDiscovery();
@@ -1056,8 +1056,8 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
       num: "02",
       navTitle: "Discover",
       title: "Discover what makes you — You",
-      desc: "Find out what makes you stand apart from others and why certain careers are great fits for you.",
-      badge: "Stage 02: Personality & Archetype",
+      desc: "Uncover your unique personality archetype and find your initial career matches.",
+      badge: "Stage 02: Discover",
       ctaText: "Explore Personality Fits",
       ctaAction: () => {
         if (onStartDiscovery) onStartDiscovery();
@@ -1070,8 +1070,8 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
       num: "03",
       navTitle: "Explore",
       title: "Explore the world of school & work",
-      desc: "Find all the information you need to know about your dream career. Then make a plan to get there.",
-      badge: "Stage 03: Career & Salary Metrics",
+      desc: "Browse tailored degree options and dive deeper into what fits you best.",
+      badge: "Stage 03: Explore",
       ctaText: "Explore Salaries & Trends",
       ctaAction: () => {
         if (onExploreCareers) onExploreCareers();
@@ -1084,8 +1084,8 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
       num: "04",
       navTitle: "Align",
       title: "Align with experts & trial sandboxes",
-      desc: "Experience real-world task sandboxes and connect with practicing mentors in career hubs.",
-      badge: "Stage 04: Practical Sandboxes & Hubs",
+      desc: "Put everything together with final results, trait reports, and a clear roadmap.",
+      badge: "Stage 04: Align",
       ctaText: "Launch Sandboxes & Hubs",
       ctaAction: () => navigate("/career-hubs"),
       gradient: "from-[#1E88E5] to-[#0b1a36]"

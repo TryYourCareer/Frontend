@@ -106,7 +106,7 @@ export default function CareerDetails() {
   const certs = (career["Key Certifications"] || "").split(",").map(c => c.trim()).filter(Boolean);
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-4 sm:px-6 py-8 text-slate-800 text-left">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 sm:px-6 py-8 text-slate-800 text-left">
       <SEO
         title={`${career["Career Name"]} Career Path, Salary & Skills`}
         description={career["One-Line Summary"] || `Learn about becoming a ${career["Career Name"]}. Salary: ₹${career["Entry Salary (LPA)"]} - ${career["Senior Salary (LPA)"]} LPA, demand: ${demand}.`}

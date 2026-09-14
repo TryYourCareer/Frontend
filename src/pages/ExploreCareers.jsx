@@ -435,7 +435,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
   );
 
   return (
-    <div className="min-h-screen bg-[#FAF6EC] text-[#0b1a36]">
+    <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36]">
       <SEO
         title="Explore 100+ High-Growth Career Paths & Roadmaps"
         description="Filter and discover verified career options by cluster, salary bracket, required education, and industry growth demand."

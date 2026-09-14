@@ -23,7 +23,7 @@ export default function AppLayout({
   const isDark = theme === "dark";
 
   return (
-    <div className={`cc-app-layout h-screen overflow-hidden ${isDark ? "bg-[#0f172a]" : "bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]"}`}>
+    <div className={`cc-app-layout h-screen overflow-hidden ${isDark ? "bg-slate-950" : "bg-white"}`}>
       {/* Sidebar */}
       <Sidebar
         activePage={activePage}
@@ -60,7 +60,7 @@ export default function AppLayout({
         />
 
         {/* Page Content */}
-        <main className="flex-1 min-w-0 overflow-y-auto">
+        <main className="flex-1 min-w-0 overflow-y-auto bg-white">
           {children}
         </main>
       </div>

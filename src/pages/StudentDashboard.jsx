@@ -8,7 +8,7 @@ import { getUserProfile } from "../services/users";
 const dashboardData = {
   userName: "Jane",
   stats: [
-    { label: "Assessments",    value: "3/3",          icon: ClipboardList, bg: "bg-sky-50",     border: "border-sky-200",     iconColor: "#1E88E5",  textColor: "#0b1a36"  },
+    { label: "Assessments",    value: "3/3",           icon: ClipboardList, bg: "bg-sky-50",    border: "border-sky-200",    iconColor: "#1E88E5",  textColor: "#0b1a36"  },
     { label: "Missions Done",  value: "12 Completed", icon: CheckCircle2,  bg: "bg-emerald-50", border: "border-emerald-200", iconColor: "#059669",  textColor: "#065f46"  },
     { label: "Skills Unlocked",value: "8 Active",     icon: Zap,           bg: "bg-purple-50",  border: "border-purple-200",  iconColor: "#7c3aed",  textColor: "#5b21b6"  },
     { label: "Streak",         value: "5 Days",       icon: Flame,         bg: "bg-amber-50",   border: "border-amber-200",   iconColor: "#d97706",  textColor: "#92400e"  },
@@ -23,8 +23,8 @@ const dashboardData = {
     values:  [85, 74, 78, 88, 68, 81],
   },
   missions: [
-    { title: "Frontend Fixer",   subtitle: "Software Engineer · Today",     score: "85%", accent: "#1E88E5" },
-    { title: "Wireframe Wizard", subtitle: "UX Designer · Yesterday",       score: "92%", accent: "#7c3aed" },
+    { title: "Frontend Fixer",   subtitle: "Software Engineer · Today",    score: "85%", accent: "#1E88E5" },
+    { title: "Wireframe Wizard", subtitle: "UX Designer · Yesterday",      score: "92%", accent: "#7c3aed" },
     { title: "Sprint Planning",  subtitle: "Product Manager · 2 days ago",  score: "—",   accent: "#059669" },
   ],
   recommendations: [
@@ -40,7 +40,7 @@ function Bone({ className = "", style }) {
 
 function DashboardSkeleton() {
   return (
-    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800">
+    <section className="min-h-screen bg-white px-6 py-10 text-slate-800">
       <div className="mx-auto max-w-6xl space-y-8">
 
         {/* Header skeleton */}
@@ -197,7 +197,7 @@ export default function StudentDashboard() {
   const gender    = userData?.gender || "—";
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800 text-left">
+    <section className="min-h-screen bg-white px-6 py-10 text-slate-800 text-left">
       <div className="mx-auto max-w-6xl space-y-8">
 
         {/* Header */}
