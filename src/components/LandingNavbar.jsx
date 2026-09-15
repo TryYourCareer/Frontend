@@ -53,16 +53,18 @@ export default function LandingNavbar({ isDark }) {
           {/* Logo */}
           <div 
             onClick={() => navigate("/")} 
-            className="flex items-center gap-2 text-base sm:text-lg md:text-xl font-bold font-sans tracking-tight cursor-pointer hover:opacity-80 transition"
+            className="flex items-center cursor-pointer hover:opacity-80 transition"
           >
             <img
-              src="/favicon.ico"
-              alt="Company Logo"
-              className="h-6 w-6 sm:h-7 sm:w-7 object-contain"
+              src="/assets/logo/logo-mark.png"
+              alt="Try Your Career"
+              className="h-10 w-10 aspect-square object-contain md:hidden"
             />
-            <span className={isDark ? "text-slate-100" : "text-[#0b1a36]"}>
-              TryYourCareers
-            </span>
+            <img
+              src="/assets/logo/logo-horizontal.png"
+              alt="Try Your Career"
+              className="hidden h-11 w-auto aspect-[4.2/1] object-contain md:block"
+            />
           </div>
 
           {/* Action Button (Mobile only) */}

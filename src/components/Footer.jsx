@@ -16,9 +16,9 @@ export default function Footer({ theme = "light" }) {
         <div className="space-y-4 md:col-span-1 text-left">
           <div className="flex items-center gap-3">
             <img
-              src="/favicon.ico"
-              alt="Company Logo"
-              className="h-8 w-8 shrink-0 object-contain"
+              src="/assets/logo/logo-mark.png"
+              alt="Try Your Career"
+              className="h-8 w-8 shrink-0 aspect-square object-contain"
             />
             <span className={`cc-display font-black text-base ${isDark ? "text-white" : "text-[#0b1a36]"}`}>
               Try Your Career

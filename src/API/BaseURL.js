@@ -1,2 +1,2 @@
-const BACKEND_BASE_URL = process.env.REACT_APP_API_URL || "https://backend-9g1n.onrender.com";
+const BACKEND_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 export default BACKEND_BASE_URL;

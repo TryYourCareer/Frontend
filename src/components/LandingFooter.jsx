@@ -17,12 +17,12 @@ export default function LandingFooter({ isDark }) {
           <div className="lg:col-span-2 flex flex-col items-start gap-4">
             <div className="flex items-center gap-2.5">
               <img
-                src="/favicon.ico"
-                alt="Company Logo"
-                className="h-7 w-7 shrink-0 object-contain"
+                src="/assets/logo/logo-mark.png"
+                alt="Try Your Career"
+                className="h-7 w-7 shrink-0 aspect-square object-contain"
               />
               <h3 className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-[#0b1a36]"}`}>
-                TryYourCareers
+                Try Your Career
               </h3>
             </div>
             <p className="text-sm leading-relaxed max-w-sm text-left">
@@ -61,7 +61,7 @@ export default function LandingFooter({ isDark }) {
         <div className={`border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs ${
           isDark ? "border-slate-800" : "border-[#D3E3F5]"
         }`}>
-          <span>© 2026 TryYourCareers. All rights reserved.</span>
+          <span>© 2026 Try Your Career. All rights reserved.</span>
           <div className="flex gap-6">
             <button onClick={() => navigate("/support/privacy")} className="hover:text-[#1E88E5] transition cursor-pointer">Privacy</button>
             <button onClick={() => navigate("/support/terms")} className="hover:text-[#1E88E5] transition cursor-pointer">Terms</button>
