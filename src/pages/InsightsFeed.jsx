@@ -181,7 +181,7 @@ export default function InsightsFeed({ onBack }) {
   }, [activeCategory, insights, searchQuery]);
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-10">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 sm:px-6 lg:px-10">
       <SEO
         title="Daily Career Insights & Tech Opportunities"
         description="Stay ahead with curated internship opportunities, in-demand skill trends, student scholarships, and technology industry news."

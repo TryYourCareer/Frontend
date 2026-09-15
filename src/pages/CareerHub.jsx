@@ -183,25 +183,25 @@ export default function CareerHub() {
   // -----------------------------------------------------------------------
   return (
     <section className="h-[calc(100vh-80px)] bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] overflow-hidden flex flex-col font-sans">
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[320px_1fr] bg-white/40 backdrop-blur-md overflow-hidden">
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[320px_1fr] bg-transparent overflow-hidden">
 
         {/* ================================================================
             LEFT — Sidebar: My Communities
         ================================================================ */}
         <aside
-          className={`border-r border-[#D3E3F5] flex flex-col overflow-hidden bg-white/90 backdrop-blur-md
+          className={`border-r border-[#D3E3F5] flex flex-col overflow-hidden bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]
             ${mobileView === "list" ? "flex" : "hidden lg:flex"}
           `}
         >
           {/* Header */}
-          <div className="px-4 py-3.5 border-b border-[#D3E3F5] shrink-0 bg-white/60">
+          <div className="px-4 py-3.5 border-b border-[#D3E3F5] shrink-0 bg-white">
             <h2 className="font-serif text-sm font-bold text-[#0b1a36] flex items-center gap-2">
               <span className="text-base">💬</span> Career Hubs
             </h2>
           </div>
 
           {/* Search */}
-          <div className="p-3 border-b border-[#D3E3F5] shrink-0 bg-[#F0F6FC]/50">
+          <div className="p-3 border-b border-[#D3E3F5] shrink-0 bg-white">
             <div className="relative">
               <Search size={13} className="absolute inset-y-0 left-3 my-auto text-slate-400" />
               <input
@@ -215,7 +215,7 @@ export default function CareerHub() {
           </div>
 
           {/* Joined communities list */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-2.5 space-y-1.5">
+          <div className="flex-1 min-h-0 overflow-y-auto p-2.5 space-y-1.5 bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
             {myCommLoading && (
               <div className="flex justify-center py-8">
                 <Loader2 size={18} className="animate-spin text-[#1E88E5]" />
@@ -224,7 +224,7 @@ export default function CareerHub() {
 
             {!myCommLoading && filteredMyCommunities.length === 0 && (
               <div className="flex flex-col items-center justify-center gap-2 py-12 text-center px-4">
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] text-[#1E88E5] shadow-2xs">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white border border-[#D3E3F5] text-[#1E88E5] shadow-2xs">
                   <Users size={22} />
                 </div>
                 <p className="font-serif text-xs font-bold text-[#0b1a36] mt-1">No communities yet</p>
@@ -249,11 +249,11 @@ export default function CareerHub() {
                   className={`w-full rounded-2xl p-2.5 text-left transition flex items-center gap-3 relative cursor-pointer
                     ${isActive
                       ? "bg-[#EAF2FA] border border-[#D3E3F5] shadow-xs"
-                      : "bg-white/80 border border-transparent hover:border-[#D3E3F5] hover:bg-[#F0F6FC]"
+                      : "bg-white border border-transparent hover:border-[#D3E3F5] hover:bg-[#F0F6FC]"
                     }
                   `}
                 >
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#F0F6FC] text-lg border border-[#D3E3F5] shadow-2xs">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-lg border border-[#D3E3F5] shadow-2xs">
                     {comm.career_icon || "💬"}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -271,7 +271,7 @@ export default function CareerHub() {
           </div>
 
           {/* Browse Careers toggle */}
-          <div className="shrink-0 border-t border-[#D3E3F5] p-3 bg-white/60">
+          <div className="shrink-0 border-t border-[#D3E3F5] p-3 bg-white">
             <button
               onClick={handleToggleBrowse}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full border border-[#D3E3F5] bg-white text-[#0b1a36] text-xs font-bold hover:bg-[#0b1a36] hover:text-white transition shadow-2xs cursor-pointer"
@@ -286,16 +286,16 @@ export default function CareerHub() {
             RIGHT — Chat window or browse panel
         ================================================================ */}
         <main
-          className={`flex flex-col min-h-0 overflow-hidden bg-transparent
+          className={`flex flex-col min-h-0 overflow-hidden bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]
             ${mobileView !== "list" ? "flex" : "hidden lg:flex"}
           `}
         >
           {/* ---- Browse panel (slide-in when browseOpen OR mobileView === 'browse') ---- */}
           {(browseOpen || mobileView === "browse") && (
-            <div className={`shrink-0 border-b border-[#D3E3F5] bg-white/95 backdrop-blur-md overflow-hidden flex flex-col shadow-xs
+            <div className={`shrink-0 border-b border-[#D3E3F5] bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] backdrop-blur-md overflow-hidden flex flex-col shadow-xs
               ${mobileView === "browse" ? "flex-1 h-full" : "max-h-[380px]"}
             `}>
-              <div className="flex items-center justify-between px-4 pt-4 pb-2 sm:px-6">
+              <div className="flex items-center justify-between px-4 pt-4 pb-2 sm:px-6 bg-white border-b border-[#D3E3F5]">
                 <div className="flex items-center gap-2">
                   {mobileView === "browse" && (
                     <button
@@ -316,7 +316,7 @@ export default function CareerHub() {
               </div>
 
               {/* Browse search */}
-              <div className="px-4 pb-3 sm:px-6">
+              <div className="px-4 pb-3 pt-3 sm:px-6 bg-white border-b border-[#D3E3F5]">
                 <div className="relative">
                   <Search size={13} className="absolute inset-y-0 left-3 my-auto text-slate-400" />
                   <input
@@ -324,13 +324,13 @@ export default function CareerHub() {
                     placeholder="Search careers by name or keyword..."
                     value={browseSearch}
                     onChange={(e) => setBrowseSearch(e.target.value)}
-                    className="w-full pl-8 pr-3 py-2 rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] text-xs text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:bg-white outline-none transition shadow-2xs"
+                    className="w-full pl-8 pr-3 py-2 rounded-2xl border border-[#D3E3F5] bg-white text-xs text-slate-800 placeholder-slate-400 focus:border-[#1E88E5] focus:bg-white outline-none transition shadow-2xs"
                   />
                 </div>
               </div>
 
               {/* Career cards grid */}
-              <div className="px-4 pb-4 sm:px-6 flex-1 overflow-y-auto min-h-0">
+              <div className="px-4 py-4 sm:px-6 flex-1 overflow-y-auto min-h-0 bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
                 {careersLoading && (
                   <div className="flex justify-center py-8">
                     <Loader2 size={20} className="animate-spin text-[#1E88E5]" />
@@ -366,7 +366,7 @@ export default function CareerHub() {
 
           {/* ---- Chat area ---- */}
           {mobileView !== "browse" && (
-            <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-hidden bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
               {activeCommunity ? (
                 <ChatWindow
                   community={activeCommunity}
@@ -377,7 +377,7 @@ export default function CareerHub() {
                   }}
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center h-full gap-4 text-center p-8 bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+                <div className="flex flex-col items-center justify-center h-full gap-4 text-center p-8 bg-transparent">
                   <div className="w-16 h-16 rounded-3xl bg-white border border-[#D3E3F5] flex items-center justify-center text-3xl shadow-xs">
                     💬
                   </div>
