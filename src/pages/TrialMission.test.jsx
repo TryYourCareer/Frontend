@@ -319,3 +319,85 @@ describe("Gap #2A — User-facing Trial Mission Activity Summary", () => {
     expect(screen.getByRole("button", { name: /view career decision & fit/i })).toBeInTheDocument();
   });
 });
+
+
+describe("Trial Mission UI Refinement — Full-Screen Shell & Stopwatch Header", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSearchParams = new URLSearchParams();
+  });
+
+  test("active Trial Mission renders in full-screen overlay shell with top stopwatch header bar", async () => {
+    useTrialMissionSession.mockReturnValue({
+      ...defaultMockSessionHook,
+      session: {
+        id: "active-session-123",
+        state: "PHASE_ACTIVE",
+        current_phase: "investigate",
+        mission_title: "Incident Response Investigation",
+        active_duration_seconds: 527,
+        stage_durations: [
+          { stage: "WORKSPACE", stage_display: "Investigation Workspace", formatted_duration: "08m 47s" }
+        ]
+      },
+      formattedStopwatch: "08:47",
+    });
+
+    const { container } = render(<TrialMission />);
+
+    // 1. Full-screen overlay container is present with fixed inset-0 z-[100]
+    const rootShell = container.querySelector(".cc-trial-mission-root");
+    expect(rootShell).toBeInTheDocument();
+    expect(rootShell.className).toContain("fixed inset-0 z-[100]");
+
+    // 2. Integrated top header renders Trial Mission title, current phase & formatted stopwatch
+    expect(screen.getByText("Trial Mission")).toBeInTheDocument();
+    expect(screen.getByText(/Incident Response Investigation/)).toBeInTheDocument();
+    expect(screen.getByText("08:47")).toBeInTheDocument();
+
+    // 3. Control buttons are rendered
+    expect(screen.getByRole("button", { name: /pause/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /exit/i })).toBeInTheDocument();
+  });
+
+  test("completion screen renders refined timing summary breakdown alongside existing completion experience", async () => {
+    getSessionActivitySummary.mockResolvedValue({ categories: [] });
+
+    useTrialMissionSession.mockReturnValue({
+      ...defaultMockSessionHook,
+      session: {
+        id: "completed-session-789",
+        state: "SESSION_COMPLETED",
+        mission_title: "Business Analyst Trial Mission",
+        formatted_active_duration: "22m 00s",
+        stage_durations: [
+          { stage: "WORKSPACE", stage_display: "Investigation Workspace", formatted_duration: "06m 37s" },
+          { stage: "RECOMMENDATION", stage_display: "Recommendation Rationale", formatted_duration: "03m 12s" },
+          { stage: "FINAL_MEMO", stage_display: "Final Executive Memo", formatted_duration: "05m 51s" },
+          { stage: "REFLECTION", stage_display: "Self Reflection", formatted_duration: "02m 16s" },
+        ],
+      },
+      evaluationData: { status: "completed" },
+      formattedStopwatch: "22:00",
+    });
+
+    render(<TrialMission />);
+
+    // 1. Timing Summary Card renders total time and stage breakdown
+    expect(await screen.findByText("Mission Timing Summary")).toBeInTheDocument();
+    expect(screen.getByText("22m 00s")).toBeInTheDocument();
+    expect(screen.getByText("Investigation Workspace")).toBeInTheDocument();
+    expect(screen.getByText("06m 37s")).toBeInTheDocument();
+    expect(screen.getByText("Recommendation Rationale")).toBeInTheDocument();
+    expect(screen.getByText("03m 12s")).toBeInTheDocument();
+    expect(screen.getByText("Final Executive Memo")).toBeInTheDocument();
+    expect(screen.getByText("05m 51s")).toBeInTheDocument();
+    expect(screen.getByText("Self Reflection")).toBeInTheDocument();
+    expect(screen.getByText("02m 16s")).toBeInTheDocument();
+
+    // 2. Existing completion functionality remains intact
+    expect(screen.getByText("You've completed this Trial Mission")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /explore more missions/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /return to dashboard/i })).toBeInTheDocument();
+  });
+});

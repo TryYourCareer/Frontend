@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Rocket,
@@ -19,6 +19,8 @@ import {
   RefreshCw,
   Send,
   LockKeyhole,
+  Timer,
+  LogOut,
 } from "lucide-react";
 import { useTrialMissionSession } from "../hooks/useTrialMissionSession";
 import { useDebounceAutosave } from "../hooks/useDebounceAutosave";
@@ -215,6 +217,8 @@ export default function TrialMission() {
     handleAbandon,
     resetToCatalog,
     setError,
+    formattedStopwatch,
+    handleRecordScreenTransition,
   } = useTrialMissionSession(querySessionId);
 
   // Auto-start mission session if missionId query param provided from Career Decision
@@ -447,6 +451,63 @@ export default function TrialMission() {
 
   const outputStatus = outputData?.status || "draft";
   const isMemoFinalised = outputStatus === "finalised" || outputStatus === "submitted";
+
+  const currentStageDisplay = useMemo(() => {
+    if (isCreatedStage) return "Get Ready";
+    if (isBriefingStage) return "Manager Briefing";
+    if (isInvestigationStage) return "Investigation Workspace";
+    if (isRecommendationStage) return "Recommendation Rationale";
+    if (isRealityEventStage) return "Reality Event";
+    if (isOutputStage) return "Final Executive Memo";
+    if (isReflectionStage) return "Self Reflection";
+    if (isCompletedStage) return "Mission Complete";
+    return "";
+  }, [
+    isCreatedStage,
+    isBriefingStage,
+    isInvestigationStage,
+    isRecommendationStage,
+    isRealityEventStage,
+    isOutputStage,
+    isReflectionStage,
+    isCompletedStage,
+  ]);
+
+  // Track stage transitions for authoritative timing
+  const currentStageName = useMemo(() => {
+    if (isCreatedStage) return "GET_READY";
+    if (isBriefingStage) return "MEET_MANAGER";
+    if (isInvestigationStage) return "WORKSPACE";
+    if (isRecommendationStage) return "RECOMMENDATION";
+    if (isRealityEventStage) return "REALITY_EVENT";
+    if (isOutputStage) return "FINAL_MEMO";
+    if (isReflectionStage) return "REFLECTION";
+    return null;
+  }, [
+    isCreatedStage,
+    isBriefingStage,
+    isInvestigationStage,
+    isRecommendationStage,
+    isRealityEventStage,
+    isOutputStage,
+    isReflectionStage,
+  ]);
+
+  const lastRecordedStageRef = useRef(null);
+  useEffect(() => {
+    if (
+      session?.id &&
+      currentStageName &&
+      lastRecordedStageRef.current !== currentStageName &&
+      session.state !== "SESSION_PAUSED" &&
+      session.state !== "SESSION_COMPLETED"
+    ) {
+      lastRecordedStageRef.current = currentStageName;
+      if (typeof handleRecordScreenTransition === "function") {
+        handleRecordScreenTransition(currentStageName);
+      }
+    }
+  }, [session?.id, currentStageName, session?.state, handleRecordScreenTransition]);
 
   // Decision options from backend configuration
   const decisionsConfig = Array.isArray(config.decisions) && config.decisions.length > 0
@@ -760,8 +821,82 @@ export default function TrialMission() {
           },
         ];
 
-  return (
-    <div className="min-h-screen bg-[#FAF6EC] px-4 py-8 text-slate-800 sm:px-8">
+    return (
+    <div className={`cc-trial-mission-root ${session ? "fixed inset-0 z-[100] flex h-screen w-screen flex-col overflow-hidden bg-[#FAF6EC]" : "min-h-screen bg-[#FAF6EC] px-4 py-8 text-slate-800 sm:px-8"}`}>
+      {session && (
+        <header className="sticky top-0 z-50 flex shrink-0 items-center justify-between border-b border-[#E5DEC9] bg-white px-6 py-3.5 shadow-sm">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#7B4A28]/10 text-[#7B4A28]">
+              <Rocket size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-serif text-lg font-bold text-slate-900 tracking-tight">
+                  Trial Mission
+                </span>
+                {session?.state === "SESSION_PAUSED" && (
+                  <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-amber-800">
+                    Paused
+                  </span>
+                )}
+                {isCompletedStage && (
+                  <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-emerald-800">
+                    Completed
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 font-medium">
+                {session?.mission_title || "Competitive Mission Workspace"}
+                {currentStageDisplay ? ` • ${currentStageDisplay}` : ""}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3.5">
+            {/* Redesigned Stopwatch matching app visual design */}
+            <div className="flex items-center gap-2 rounded-full border border-[#E5DEC9] bg-[#FAF6EC] px-4 py-1.5 shadow-inner">
+              <Timer size={16} className="text-[#7B4A28]" />
+              <span className="font-mono text-base font-bold tracking-wider text-[#7B4A28]">
+                {formattedStopwatch || "00:00"}
+              </span>
+            </div>
+
+            {/* Pause / Resume Controls */}
+            {session && !isCompletedStage && (
+              session.state === "SESSION_PAUSED" ? (
+                <button
+                  type="button"
+                  onClick={handleResume}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors"
+                >
+                  <Play size={14} /> Resume
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handlePause}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition-colors"
+                >
+                  <Pause size={14} /> Pause
+                </button>
+              )
+            )}
+
+            {/* Exit Control */}
+            <button
+              type="button"
+              onClick={resetToCatalog}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+              title="Exit Trial Mission workspace"
+            >
+              <LogOut size={14} /> Exit
+            </button>
+          </div>
+        </header>
+      )}
+      <div className={session ? "flex-1 overflow-y-auto px-4 py-6 sm:px-8" : ""}>
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Navigation & Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -1853,6 +1988,46 @@ export default function TrialMission() {
                 </div>
               </div>
 
+                                          {/* Refined Timing Summary Section */}
+              {((session?.stage_durations && session.stage_durations.length > 0) || (activitySummary?.timing_summary?.stage_durations && activitySummary.timing_summary.stage_durations.length > 0)) && (
+                <div className="rounded-3xl border border-[#E5DEC9] bg-white p-6 sm:p-8 space-y-6 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-4">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-[#7B4A28]">
+                        Mission Timing Summary
+                      </span>
+                      <h2 className="text-xl font-bold text-slate-900 font-serif">
+                        Trial Mission Complete
+                      </h2>
+                    </div>
+                    <div className="sm:text-right rounded-2xl border border-[#E5DEC9] bg-[#FAF6EC] px-4 py-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Time</span>
+                      <span className="font-mono text-xl font-bold text-[#7B4A28]">
+                        {session?.formatted_active_duration || activitySummary?.timing_summary?.formatted_active_duration || formattedStopwatch || "00m 00s"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2">
+                      Time by Stage
+                    </h3>
+                    <div className="grid gap-2.5 sm:grid-cols-2">
+                      {(session?.stage_durations || activitySummary?.timing_summary?.stage_durations || []).map((sd, i) => (
+                        <div key={sd.stage || i} className="flex items-center justify-between py-2.5 px-4 rounded-2xl bg-slate-50 border border-slate-100">
+                          <span className="text-xs font-bold text-slate-800">
+                            {sd.stage_display || sd.stage}
+                          </span>
+                          <span className="font-mono text-xs font-bold text-[#7B4A28]">
+                            {sd.formatted_duration || "00m 00s"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Activity Summary Section */}
               {activitySummaryLoading && (
                 <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-6 text-sm text-slate-600">
@@ -2086,5 +2261,6 @@ export default function TrialMission() {
         ) : null}
       </div>
     </div>
+  </div>
   );
 }

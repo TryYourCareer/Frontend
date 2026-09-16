@@ -26,6 +26,7 @@ import {
   pauseSession,
   resumeSession,
   abandonSession,
+  recordScreenTransition,
 } from "../services/trialMission";
 
 export function useTrialMissionSession(initialSessionId = null) {
@@ -585,6 +586,57 @@ export function useTrialMissionSession(initialSessionId = null) {
     }
   }, [initialSessionId, loadSession, loadCatalog]);
 
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [syncTiming, setSyncTiming] = useState(null);
+
+  useEffect(() => {
+    if (session?.active_duration_seconds !== undefined) {
+      const baseSec = Math.max(0, Math.round(session.active_duration_seconds));
+      setSyncTiming({
+        serverSeconds: baseSec,
+        syncTimeMs: Date.now(),
+        isPaused: session.state === "SESSION_PAUSED",
+        isCompleted: session.state === "SESSION_COMPLETED",
+      });
+      setElapsedSeconds(baseSec);
+    }
+  }, [session?.id, session?.state, session?.active_duration_seconds, session?.updated_at]);
+
+  useEffect(() => {
+    if (!syncTiming || syncTiming.isPaused || syncTiming.isCompleted) return;
+
+    const interval = setInterval(() => {
+      const deltaSec = Math.floor((Date.now() - syncTiming.syncTimeMs) / 1000);
+      setElapsedSeconds(syncTiming.serverSeconds + deltaSec);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [syncTiming]);
+
+  const formatStopwatch = useCallback((sec) => {
+    const totalSec = Math.max(0, Math.floor(sec));
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    if (hrs > 0) {
+      return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+    }
+    return `${pad(mins)}:${pad(secs)}`;
+  }, []);
+
+  const handleRecordScreenTransition = useCallback(async (screenName) => {
+    if (!session?.id || !screenName) return;
+    try {
+      const updated = await recordScreenTransition(session.id, screenName);
+      if (updated) {
+        setSession(updated);
+      }
+    } catch (err) {
+      console.error("Failed to record screen transition:", err);
+    }
+  }, [session?.id]);
+
   return {
     missions,
     session,
@@ -632,6 +684,9 @@ export function useTrialMissionSession(initialSessionId = null) {
     handleAbandon,
     resetToCatalog,
     setError,
+    elapsedSeconds,
+    formattedStopwatch: formatStopwatch(elapsedSeconds),
+    handleRecordScreenTransition,
   };
 }
 

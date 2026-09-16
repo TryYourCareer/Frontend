@@ -139,6 +139,9 @@ export const getEvaluation = (sessionId) =>
 export const getSessionActivitySummary = (sessionId) =>
   api.get(`/trial-missions/sessions/${sessionId}/activity-summary`);
 
+export const recordScreenTransition = (sessionId, screen) =>
+  api.post(`/trial-missions/sessions/${sessionId}/screen-transition`, { screen });
+
 const trialMissionService = {
   getTrialMissions,
   getTrialMission,
@@ -169,6 +172,7 @@ const trialMissionService = {
   submitReflection,
   getEvaluation,
   getSessionActivitySummary,
+  recordScreenTransition,
 };
 
 export default trialMissionService;
