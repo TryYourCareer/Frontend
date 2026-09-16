@@ -192,6 +192,7 @@ export default function TrialMission() {
     loading,
     workspaceLoading,
     actionLoading,
+    startingMissionId,
     error,
     startSession,
     handleTransition,
@@ -909,7 +910,7 @@ export default function TrialMission() {
                             onClick={() => startSession(m.id)}
                             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7B4A28] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#633B20] disabled:opacity-50"
                           >
-                            {actionLoading ? (
+                            {actionLoading && startingMissionId === m.id ? (
                               <>
                                 <Loader2 size={16} className="animate-spin" /> Starting...
                               </>

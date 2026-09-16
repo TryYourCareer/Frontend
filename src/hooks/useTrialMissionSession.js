@@ -46,6 +46,7 @@ export function useTrialMissionSession(initialSessionId = null) {
   const [loading, setLoading] = useState(true);
   const [workspaceLoading, setWorkspaceLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [startingMissionId, setStartingMissionId] = useState(null);
   const [error, setError] = useState(null);
 
   const loadCatalog = useCallback(async () => {
@@ -189,6 +190,7 @@ export function useTrialMissionSession(initialSessionId = null) {
 
   const startSession = useCallback(async (missionId) => {
     if (!missionId) return;
+    setStartingMissionId(missionId);
     setActionLoading(true);
     setError(null);
     try {
@@ -200,6 +202,7 @@ export function useTrialMissionSession(initialSessionId = null) {
       throw err;
     } finally {
       setActionLoading(false);
+      setStartingMissionId(null);
     }
   }, []);
 
@@ -601,6 +604,7 @@ export function useTrialMissionSession(initialSessionId = null) {
     loading,
     workspaceLoading,
     actionLoading,
+    startingMissionId,
     error,
     startSession,
     handleTransition,
