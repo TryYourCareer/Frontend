@@ -7,6 +7,7 @@ import FamilyCareersList from "../components/careerIntelligence/FamilyCareersLis
 import CareerIntelligenceDetail from "../components/careerIntelligence/CareerIntelligenceDetail";
 import IntelligenceLoadingSkeleton from "../components/careerIntelligence/IntelligenceLoadingSkeleton";
 import IntelligenceEmptyState from "../components/careerIntelligence/IntelligenceEmptyState";
+import SEO from "../components/SEO";
 
 export default function CareerIntelligence() {
   const { familyKey, careerSlug } = useParams();
@@ -173,13 +174,20 @@ export default function CareerIntelligence() {
       );
     }
     return (
-      <CareerIntelligenceDetail
-        detailData={careerDetail}
-        publishedMission={publishedMission}
-        missionLookupError={missionLookupError}
-        onBack={handleBackFromDetail}
-        onNavigateFamily={handleSelectFamily}
-      />
+      <>
+        <SEO
+          title={careerDetail?.career?.name ? `${careerDetail.career.name} — Career Intelligence` : "Career Intelligence Detail"}
+          description={careerDetail?.career?.description || "In-depth intelligence, competencies, industry metrics, and simulator missions for this career."}
+          url={`/career-intelligence/career/${careerSlug}`}
+        />
+        <CareerIntelligenceDetail
+          detailData={careerDetail}
+          publishedMission={publishedMission}
+          missionLookupError={missionLookupError}
+          onBack={handleBackFromDetail}
+          onNavigateFamily={handleSelectFamily}
+        />
+      </>
     );
   }
 
@@ -201,11 +209,18 @@ export default function CareerIntelligence() {
       );
     }
     return (
-      <FamilyCareersList
-        familyData={familyData}
-        onSelectCareer={handleSelectCareer}
-        onBack={handleBackToFamilies}
-      />
+      <>
+        <SEO
+          title={familyData?.family_name ? `${familyData.family_name} Careers — Career Intelligence` : "Career Family Intelligence"}
+          description={familyData?.tagline || "Explore career options, salary potential, and trial missions within this industry cluster."}
+          url={`/career-intelligence/family/${familyKey}`}
+        />
+        <FamilyCareersList
+          familyData={familyData}
+          onSelectCareer={handleSelectCareer}
+          onBack={handleBackToFamilies}
+        />
+      </>
     );
   }
 
@@ -225,9 +240,16 @@ export default function CareerIntelligence() {
   }
 
   return (
-    <CareerFamilyList
-      families={families}
-      onSelectFamily={handleSelectFamily}
-    />
+    <>
+      <SEO
+        title="Career Intelligence & Industry Clusters"
+        description="Comprehensive career intelligence library, taxonomy clusters, demand insights, and interactive real-world work simulators."
+        url="/career-intelligence"
+      />
+      <CareerFamilyList
+        families={families}
+        onSelectFamily={handleSelectFamily}
+      />
+    </>
   );
 }

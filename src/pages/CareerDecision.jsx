@@ -16,6 +16,7 @@ import {
   Square 
 } from "lucide-react";
 import { getLatestRecommendation } from "../services/decisionIntelligence";
+import SEO from "../components/SEO";
 
 /**
  * Format recommendation category to authoritative human-readable label.
@@ -215,6 +216,11 @@ export default function CareerDecision() {
 
   return (
     <div className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-8 text-[#0b1a36]">
+      <SEO
+        title="Career Decision & Multi-Track Comparison"
+        description="Compare your top career candidates side-by-side across multidimensional RIASEC alignment, salary potential, and trial mission scores."
+        url="/career-decision"
+      />
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* ================================================================= */}

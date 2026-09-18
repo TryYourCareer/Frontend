@@ -7,6 +7,7 @@ import {
   Users, Briefcase, TrendingUp, Heart, Award, Sparkles, 
   Clock, CheckCircle2, Smile, Building, Send 
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function CompanyInfo() {
   const { tabId } = useParams();
@@ -53,6 +54,11 @@ export default function CompanyInfo() {
 
   return (
     <div className="min-h-screen transition-colors duration-300 flex flex-col bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36] font-sans">
+      <SEO
+        title={activeTab === "about" ? "About Us" : activeTab === "careers" ? "Careers & Open Roles" : activeTab === "privacy" ? "Privacy Policy" : "Company"}
+        description="Learn more about Try Your Careers, our mission to democratize career discovery, our team, open career opportunities, and principles."
+        url={`/company/${activeTab}`}
+      />
       {/* Landing Navbar */}
       <LandingNavbar isDark={isDark} />
 

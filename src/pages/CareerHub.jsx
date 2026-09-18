@@ -12,6 +12,7 @@ import CareerCard from "../components/CareerCard";
 import ChatWindow from "../components/ChatWindow";
 import JoinLeaveButton from "../components/JoinLeaveButton";
 import { getCareerFitReport } from "../services/discoveryTest";
+import SEO from "../components/SEO";
 
 function formatMessageTime(dateStr) {
   if (!dateStr) return "";
@@ -492,6 +493,12 @@ export default function CareerHub() {
 
   return (
     <section className="h-[calc(100vh-80px)] bg-gradient-to-br from-[#f7fafd] via-[#eef4fc] to-[#e4eef9] overflow-hidden flex flex-col font-sans text-left">
+      <SEO
+        title="Career Hubs & Communities"
+        description="Connect with peers, explore verified roadmaps, get industry updates, and participate in active discussions across 400+ careers."
+        keywords="career hubs, career communities, peer learning, career roadmaps, job discussions, try your careers"
+        url="/career-hubs"
+      />
       <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[360px_1fr] bg-transparent overflow-hidden">
 
         {/* ================================================================

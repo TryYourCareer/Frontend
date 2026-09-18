@@ -11,6 +11,6 @@ const isLocalhost =
 
 const BACKEND_BASE_URL = isLocalhost
   ? (process.env.REACT_APP_LOCAL_API_URL || "http://localhost:8000")
-  : (process.env.REACT_APP_API_URL || "https://backend-9g1n.onrender.com");
+  : (process.env.REACT_APP_API_URL || "https://api.tryyourcareer.com");
 
 export default BACKEND_BASE_URL;

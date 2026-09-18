@@ -6,6 +6,7 @@ import {
   HelpCircle, MessageSquare, Shield, FileText, ChevronDown, 
   Send, Loader2, CheckCircle2, Mail, Phone, MapPin 
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function SupportInfo() {
   const { tabId } = useParams();
@@ -52,6 +53,11 @@ export default function SupportInfo() {
 
   return (
     <div className="min-h-screen transition-colors duration-300 flex flex-col bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36]">
+      <SEO
+        title={activeTab === "faq" ? "Frequently Asked Questions" : activeTab === "contact" ? "Contact Support" : activeTab === "guidelines" ? "Community Guidelines" : "Support Center"}
+        description="Get answers to frequently asked questions about Try Your Careers assessments, simulators, hubs, or get in touch with our student support team."
+        url={`/support/${activeTab}`}
+      />
       {/* Landing Navbar */}
       <LandingNavbar isDark={isDark} />
 

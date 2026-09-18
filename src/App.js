@@ -28,6 +28,8 @@ import CareerDecision from "./pages/CareerDecision";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import careersData from "./data/clearcareers_data.json";
+import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 
 
@@ -234,6 +236,8 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppRoutes />
+        <SpeedInsights />
+        <Analytics />
       </AuthProvider>
     </BrowserRouter>
   );
