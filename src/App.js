@@ -21,6 +21,8 @@ import StrideStage from "./pages/StrideStage";
 import CompanyInfo from "./pages/CompanyInfo";
 import SupportInfo from "./pages/SupportInfo";
 import CareerReport from "./pages/CareerReport";
+import CareerIntelligence from "./pages/CareerIntelligence";
+import CareerDecision from "./pages/CareerDecision";
 
 
 
@@ -83,7 +85,12 @@ function AppShell({ children }) {
     if (path === "/career-reality") return "career-reality";
     if (path === "/insights-feed") return "insights-feed";
     if (path === "/career-hubs") return "career-hubs";
+    if (path === "/roadmap") return "roadmap";
+    if (path.startsWith("/career-details")) return "career-reality";
+    if (path.startsWith("/career-search")) return "career-reality";
     if (path === "/trial-mission") return "trial-mission";
+    if (path.startsWith("/career-intelligence")) return "career-intelligence";
+    if (path === "/career-decision") return "career-decision";
     return "landing";
   }, [location.pathname]);
 
@@ -116,6 +123,8 @@ function AppShell({ children }) {
       profile: "/profile",
       roadmap: "/roadmap",
       "trial-mission": "/trial-mission",
+      "career-intelligence": "/career-intelligence",
+      "career-decision": "/career-decision",
     };
     if (action === "login") {
       setIsLoginOpen(true);
@@ -194,11 +203,15 @@ function AppRoutes() {
         <Route path="/insights-feed" element={<ProtectedRoute><AppShell><InsightsFeed /></AppShell></ProtectedRoute>} />
         <Route path="/career-hubs" element={<ProtectedRoute><AppShell><CareerHub /></AppShell></ProtectedRoute>} />
         <Route path="/explore-careers" element={<ExploreCareers />} />
-        <Route path="/roadmap" element={<ProtectedRoute><AppShell><Roadmap /></AppShell></ProtectedRoute>} />
-        <Route path="/career-search" element={<ProtectedRoute><AppShell><CareerSearch /></AppShell></ProtectedRoute>} />
-        <Route path="/career-details/:careerName" element={<CareerDetails />} />
+        <Route path="/roadmap" element={<AppShell><Roadmap /></AppShell>} />
+        <Route path="/career-search" element={<AppShell><CareerSearch /></AppShell>} />
+        <Route path="/career-details/:careerName" element={<AppShell><CareerDetails /></AppShell>} />
         <Route path="/career-report/:sessionId" element={<ProtectedRoute requireRegistration><AppShell><CareerReport /></AppShell></ProtectedRoute>} />
         <Route path="/trial-mission" element={<ProtectedRoute><AppShell><TrialMission /></AppShell></ProtectedRoute>} />
+        <Route path="/career-intelligence" element={<ProtectedRoute><AppShell><CareerIntelligence /></AppShell></ProtectedRoute>} />
+        <Route path="/career-intelligence/family/:familyKey" element={<ProtectedRoute><AppShell><CareerIntelligence /></AppShell></ProtectedRoute>} />
+        <Route path="/career-intelligence/career/:careerSlug" element={<ProtectedRoute><AppShell><CareerIntelligence /></AppShell></ProtectedRoute>} />
+        <Route path="/career-decision" element={<ProtectedRoute><AppShell><CareerDecision /></AppShell></ProtectedRoute>} />
         <Route path="/stride-journey/:stageId" element={<AppShell><StrideStage /></AppShell>} />
         <Route path="/company/:tabId" element={<CompanyInfo />} />
         <Route path="/support/:tabId" element={<SupportInfo />} />

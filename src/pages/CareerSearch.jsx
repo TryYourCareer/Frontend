@@ -6,9 +6,13 @@ import {
 } from "lucide-react";
 import SEO from "../components/SEO";
 
+import BACKEND_BASE_URL from "../API/BaseURL";
+
 const DEMAND_COLOR = {
   "Very High": "#16a34a",
   "High": "#1E88E5",
+  "growing": "#16a34a",
+  "stable": "#1E88E5",
   "Moderate": "#d97706",
   "Low": "#94a3b8",
 };
@@ -63,22 +67,29 @@ function SkeletonCard() {
 /* Single career result card */
 function CareerCard({ career }) {
   const navigate = useNavigate();
-  const demand = career["Demand Level"] || "";
-  const demandColor = DEMAND_COLOR[demand] || "#94a3b8";
-  const sector = career["Sector"] || career["Cluster"] || "";
-  const entryPay = career["Entry Salary (LPA)"] || "—";
-  const seniorPay = career["Senior Salary (LPA)"] || "—";
-  const growth = career["Growth Rate"] || "—";
-  const aiImpact = career["AI Impact"] || "—";
-  const summary = career["One-Line Summary"] || "";
-  const skills = (career["Core Skills"] || "").split(",").slice(0, 4).map(s => s.trim()).filter(Boolean);
-  const moneyScore = parseInt(career["Money Score"]) || 0;
-  const growthScore = parseInt(career["Growth Score"]) || 0;
+  const title = career["Career Name"] || career.career_name || "Career";
+  const rawDemand = career["Demand Level"] || career.growth_outlook || career.demand_trend || "Growing";
+  const demand = rawDemand.charAt(0).toUpperCase() + rawDemand.slice(1);
+  const demandColor = DEMAND_COLOR[rawDemand] || DEMAND_COLOR[demand] || "#1E88E5";
+  const sector = career["Sector"] || career["Cluster"] || career.sector || career.discipline || "General";
+  
+  const salIndia = career.salary_india_lpa || {};
+  const entryPay = career["Entry Salary (LPA)"] ? `₹${career["Entry Salary (LPA)"]} LPA` : (salIndia.entry ? (typeof salIndia.entry === "number" ? `₹${salIndia.entry} LPA` : salIndia.entry) : "₹4–7 LPA");
+  const seniorPay = career["Senior Salary (LPA)"] ? `₹${career["Senior Salary (LPA)"]} LPA` : (salIndia.senior ? (typeof salIndia.senior === "number" ? `₹${salIndia.senior} LPA` : salIndia.senior) : "₹25–40 LPA");
+  const growth = career["Growth Rate"] || (career.demand_trend ? (career.demand_trend.charAt(0).toUpperCase() + career.demand_trend.slice(1)) : "High (+20%)");
+  const aiImpact = career["AI Impact"] || (career.automation_exposure ? (career.automation_exposure.charAt(0).toUpperCase() + career.automation_exposure.slice(1)) : "Moderate");
+  const summary = career["One-Line Summary"] || career.description || "";
+  
+  const rawSkills = career["Core Skills"] || career.core_skills || [];
+  const skills = Array.isArray(rawSkills) ? rawSkills.slice(0, 4) : typeof rawSkills === "string" ? rawSkills.split(",").slice(0, 4).map(s => s.trim()).filter(Boolean) : [];
+  const moneyScore = parseInt(career["Money Score"]) || 8;
+  const growthScore = parseInt(career["Growth Score"]) || 8;
+  const stabilityScore = parseInt(career["Stability Score"]) || 8;
 
   return (
     <article
       className="group rounded-3xl border border-[#D3E3F5] bg-white p-5 shadow-xs hover:shadow-md hover:border-slate-300 hover:-translate-y-0.5 transition-all cursor-pointer text-left"
-      onClick={() => navigate(`/career-details/${encodeURIComponent(career["Career Name"] || "")}`)}
+      onClick={() => navigate(`/career-details/${encodeURIComponent(title)}`)}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-3">
@@ -99,7 +110,7 @@ function CareerCard({ career }) {
             </span>
           </div>
           <h2 className="font-serif text-base font-bold leading-snug text-[#0b1a36] group-hover:text-[#1E88E5] transition-colors">
-            {career["Career Name"]}
+            {title}
           </h2>
           <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{summary}</p>
         </div>
@@ -113,8 +124,8 @@ function CareerCard({ career }) {
 
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-        <Stat icon={<DollarSign size={11} />} label="Entry Pay" value={`₹${entryPay} LPA`} color="#d97706" />
-        <Stat icon={<TrendingUp size={11} />} label="Senior Pay" value={`₹${seniorPay} LPA`} color="#16a34a" />
+        <Stat icon={<DollarSign size={11} />} label="Entry Pay" value={entryPay} color="#d97706" />
+        <Stat icon={<TrendingUp size={11} />} label="Senior Pay" value={seniorPay} color="#16a34a" />
         <Stat icon={<BarChart3 size={11} />} label="Growth" value={growth} color="#1E88E5" />
         <Stat icon={<Zap size={11} />} label="AI Impact" value={aiImpact} color="#0b1a36" />
       </div>
@@ -138,7 +149,7 @@ function CareerCard({ career }) {
         <div className="flex items-center gap-3">
           <ScoreDot label="Money" value={moneyScore} color="#d97706" />
           <ScoreDot label="Growth" value={growthScore} color="#16a34a" />
-          <ScoreDot label="Stability" value={parseInt(career["Stability Score"]) || 0} color="#1E88E5" />
+          <ScoreDot label="Stability" value={stabilityScore} color="#1E88E5" />
         </div>
         <div className="grid h-6 w-6 place-items-center rounded-full bg-[#F0F6FC] border border-[#D3E3F5] text-slate-600 group-hover:bg-[#0b1a36] group-hover:border-[#0b1a36] group-hover:text-white transition shadow-2xs">
           <ChevronRight size={13} />
@@ -176,24 +187,50 @@ export default function CareerSearch() {
   const [careers, setCareers] = useState([]);
   const [loadingCSV, setLoadingCSV] = useState(true);
 
-  /* Load CSV once */
+  /* Load careers from Backend API or CSV fallback */
   useEffect(() => {
-    fetch("/data/Careers.csv")
-      .then((r) => r.text())
-      .then((text) => {
-        setCareers(parseCSV(text));
+    async function loadCareers() {
+      setLoadingCSV(true);
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}/match-engine/careers`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setCareers(data);
+            setLoadingCSV(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Backend careers load in CareerSearch failed:", err);
+      }
+
+      // Fallback to CSV
+      try {
+        const r = await fetch("/data/Careers.csv");
+        if (r.ok) {
+          const text = await r.text();
+          setCareers(parseCSV(text));
+        }
+      } catch (csvErr) {
+        console.warn("CSV fallback in CareerSearch failed:", csvErr);
+      } finally {
         setLoadingCSV(false);
-      })
-      .catch(() => setLoadingCSV(false));
+      }
+    }
+    loadCareers();
   }, []);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q || careers.length === 0) return [];
-    return careers.filter((c) =>
-      c["Career Name"]?.toLowerCase().includes(q) ||
-      c["Industries"]?.toLowerCase().includes(q)
-    );
+    return careers.filter((c) => {
+      const name = (c["Career Name"] || c.career_name || "").toLowerCase();
+      const sector = (c["Sector"] || c["Cluster"] || c.sector || c.discipline || "").toLowerCase();
+      const desc = (c["One-Line Summary"] || c.description || "").toLowerCase();
+      const skills = Array.isArray(c.core_skills) ? c.core_skills.join(" ").toLowerCase() : (c["Core Skills"] || "").toLowerCase();
+      return name.includes(q) || sector.includes(q) || desc.includes(q) || skills.includes(q);
+    });
   }, [query, careers]);
 
   return (

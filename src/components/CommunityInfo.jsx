@@ -19,10 +19,12 @@ import {
   MessageSquare,
   Compass,
   Share2,
+  LogOut,
+  Loader2,
 } from "lucide-react";
 import api from "../lib/api";
 
-export default function CommunityInfo({ community, messages = [], onBack }) {
+export default function CommunityInfo({ community, messages = [], onBack, onLeave }) {
   const communityId = community?.id;
 
   const [activeTab, setActiveTab] = useState("overview"); // overview | members | media | links | docs
@@ -40,6 +42,10 @@ export default function CommunityInfo({ community, messages = [], onBack }) {
       return false;
     }
   });
+
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  const [leaveError, setLeaveError] = useState(null);
 
   const [lightboxItem, setLightboxItem] = useState(null);
 
@@ -223,6 +229,26 @@ export default function CommunityInfo({ community, messages = [], onBack }) {
     } catch {}
   };
 
+  const handleLeave = async () => {
+    if (leaving || !communityId) return;
+    setLeaving(true);
+    setLeaveError(null);
+    try {
+      await api.delete(`/api/communities/${communityId}/leave`);
+      setShowLeaveConfirm(false);
+      if (onLeave) {
+        onLeave(community);
+      }
+      if (onBack) {
+        onBack();
+      }
+    } catch (err) {
+      setLeaveError(err.message || "Failed to leave hub");
+    } finally {
+      setLeaving(false);
+    }
+  };
+
   if (!community) return null;
 
   return (
@@ -247,14 +273,27 @@ export default function CommunityInfo({ community, messages = [], onBack }) {
           </div>
         </div>
 
-        <button
-          onClick={handleCopyLink}
-          title="Share Hub Link"
-          className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-[#D3E3F5] bg-[#F0F6FC] hover:bg-sky-50 text-[11px] font-bold text-[#1E88E5] transition shadow-2xs cursor-pointer"
-        >
-          {copiedLink ? <Check size={12} className="text-emerald-600" /> : <Share2 size={12} />}
-          <span>{copiedLink ? "Copied" : "Share"}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowLeaveConfirm(true)}
+            title="Leave this Career Hub"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-rose-200 bg-rose-50/80 hover:bg-rose-100 text-[11px] font-bold text-rose-600 transition shadow-2xs cursor-pointer"
+          >
+            <LogOut size={12} />
+            <span>Leave Hub</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            title="Share Hub Link"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-[#D3E3F5] bg-[#F0F6FC] hover:bg-sky-50 text-[11px] font-bold text-[#1E88E5] transition shadow-2xs cursor-pointer"
+          >
+            {copiedLink ? <Check size={12} className="text-emerald-600" /> : <Share2 size={12} />}
+            <span>{copiedLink ? "Copied" : "Share"}</span>
+          </button>
+        </div>
       </header>
 
       {/* ── Community Banner & Meta Card ────────────────────────────────────── */}
@@ -411,6 +450,20 @@ export default function CommunityInfo({ community, messages = [], onBack }) {
                 </span>
               </div>
             </div>
+
+            {/* Membership & Leave Hub Action Card */}
+            {/* <div className="rounded-2xl border border-rose-200/80 bg-gradient-to-br from-white to-rose-50/40 p-4 shadow-2xs space-y-3"> */}
+            <div className="flex items-start justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setShowLeaveConfirm(true)}
+                className="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition shrink-0 cursor-pointer shadow-2xs flex items-center gap-1.5"
+              >
+                <LogOut size={12} />
+                Leave Hub
+              </button>
+            </div>
+            {/* </div> */}
           </div>
         )}
 
@@ -668,6 +721,55 @@ export default function CommunityInfo({ community, messages = [], onBack }) {
           </div>
         )}
       </div>
+
+      {/* ── Leave Hub Confirmation Modal ────────────────────────────────────── */}
+      {showLeaveConfirm && (
+        <div
+          className="fixed inset-0 z-70 bg-slate-950/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => !leaving && setShowLeaveConfirm(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 space-y-4 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 border border-rose-200 text-rose-600">
+              <LogOut size={22} />
+            </div>
+            <div>
+              <h3 className="font-serif text-base font-bold text-[#0b1a36]">
+                Leave {community.career_name || community.name}?
+              </h3>
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                You will no longer receive live chat messages or mentor updates in this hub. You can freely rejoin anytime from the Hubs Directory.
+              </p>
+            </div>
+            {leaveError && (
+              <p className="text-xs text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200 font-semibold text-left">
+                {leaveError}
+              </p>
+            )}
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                disabled={leaving}
+                onClick={() => setShowLeaveConfirm(false)}
+                className="flex-1 py-2.5 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={leaving}
+                onClick={handleLeave}
+                className="flex-1 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {leaving ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
+                {leaving ? "Leaving..." : "Yes, Leave"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Media Lightbox Modal ────────────────────────────────────────────── */}
       {lightboxItem && (

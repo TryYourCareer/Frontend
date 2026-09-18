@@ -7,14 +7,43 @@
  *   onBack        () => void   (mobile back button)
  */
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Loader2, Send, Paperclip, Info } from "lucide-react";
+import { ArrowLeft, Loader2, Send, Paperclip, Info, LogOut } from "lucide-react";
 import useCommunityMessages from "../hooks/useCommunityMessages";
 import MessageBubble from "./MessageBubble";
 import CommunityInfo from "./CommunityInfo";
 import api from "../lib/api";
 
-export default function ChatWindow({ community, currentUserId, onBack }) {
+function ChatMessagesSkeleton() {
+  return (
+    <div className="space-y-4 p-2 animate-pulse">
+      <div className="flex justify-start">
+        <div className="max-w-[70%] space-y-2 bg-white border border-[#D3E3F5] rounded-3xl rounded-tl-sm p-4 shadow-2xs">
+          <div className="h-3 w-24 bg-slate-200 rounded-md" />
+          <div className="h-3 w-48 bg-slate-100 rounded-md" />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <div className="max-w-[70%] space-y-2 bg-[#EAF2FA] border border-[#D3E3F5] rounded-3xl rounded-tr-sm p-4 shadow-2xs">
+          <div className="h-3 w-36 bg-blue-200/70 rounded-md" />
+        </div>
+      </div>
+      <div className="flex justify-start">
+        <div className="max-w-[70%] space-y-2 bg-white border border-[#D3E3F5] rounded-3xl rounded-tl-sm p-4 shadow-2xs">
+          <div className="h-3 w-20 bg-slate-200 rounded-md" />
+          <div className="h-3 w-56 bg-slate-100 rounded-md" />
+          <div className="h-3 w-40 bg-slate-100 rounded-md" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ChatWindow({ community, currentUserId, onBack, onMemberChange, onLeave }) {
   const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  const [leaveError, setLeaveError] = useState(null);
+
   const { messages, loading, error, hasMore, loadingMore, loadMore, deleteMessage } =
     useCommunityMessages(community?.id);
 
@@ -203,6 +232,29 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
     }
   };
 
+  // -----------------------------------------------------------------------
+  // Leave Community
+  // -----------------------------------------------------------------------
+  const handleLeaveCommunity = async () => {
+    if (leaving || !community?.id) return;
+    setLeaving(true);
+    setLeaveError(null);
+    try {
+      await api.delete(`/api/communities/${community.id}/leave`);
+      setShowLeaveConfirm(false);
+      setShowInfoPanel(false);
+      if (onMemberChange) {
+        onMemberChange(community, false);
+      } else if (onLeave) {
+        onLeave(community);
+      }
+    } catch (err) {
+      setLeaveError(err.message || "Failed to leave hub.");
+    } finally {
+      setLeaving(false);
+    }
+  };
+
   if (!community) {
     return (
       <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">
@@ -212,39 +264,42 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <header className="shrink-0 z-10 flex items-center justify-between border-b border-[#D3E3F5] bg-white/90 backdrop-blur-md px-4 py-3 shadow-2xs">
-        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setShowInfoPanel(true)}>
+    <div className="flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#f7fafd] via-[#eef4fc] to-[#e4eef9]">
+      {/* WhatsApp Channel Header */}
+      <header className="shrink-0 z-10 flex items-center justify-between border-b border-[#D3E3F5] bg-white px-4 py-2.5 shadow-2xs">
+        <div className="flex items-center gap-3 cursor-pointer group min-w-0 flex-1" onClick={() => setShowInfoPanel(true)}>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onBack();
             }}
-            className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#D3E3F5] bg-white text-[#0b1a36] hover:bg-[#F0F6FC] transition cursor-pointer"
+            className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#D3E3F5] bg-white text-[#0b1a36] hover:bg-[#F0F6FC] transition cursor-pointer shrink-0"
           >
             <ArrowLeft size={15} />
           </button>
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-sky-50 to-[#EAF2FA] text-xl border border-sky-200 shadow-2xs group-hover:scale-105 transition">
-            {community.career_icon || "💬"}
+
+          <div className="relative shrink-0">
+            <div className="h-10 w-10 rounded-full bg-[#F0F6FC] border border-[#D3E3F5] flex items-center justify-center text-xl shadow-2xs group-hover:scale-105 transition">
+              {community.career_icon || "🎓"}
+            </div>
           </div>
-          <div>
-            <h3 className="text-xs font-bold text-[#0b1a36] leading-none group-hover:text-[#1E88E5] transition">
-              {community.name}
+
+          <div className="min-w-0 flex-1">
+            <h3 className="text-xs sm:text-sm font-bold text-[#0b1a36] leading-tight group-hover:text-[#1E88E5] transition truncate">
+              {community.career_name || community.name}
             </h3>
-            <p className="mt-1 flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              {(community.member_count || 0).toLocaleString()} members
+            <p className="mt-0.5 text-[11px] font-medium text-slate-500">
+              {(community.member_count || 0).toLocaleString()} {(community.member_count || 0) === 1 ? "follower" : "followers"}
             </p>
           </div>
         </div>
 
-        {/* Right header actions: Hub Info button */}
-        <div className="flex items-center gap-2">
+        {/* Right header actions: Hub Info */}
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={() => setShowInfoPanel(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#D3E3F5] bg-[#F0F6FC] hover:bg-sky-50 hover:border-[#1E88E5]/40 text-[#0b1a36] text-xs font-bold transition shadow-2xs cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-[#D3E3F5] bg-[#F0F6FC] hover:bg-sky-50 text-[#0b1a36] text-xs font-bold transition shadow-2xs cursor-pointer"
           >
             <Info size={14} className="text-[#1E88E5]" />
             <span className="hidden sm:inline">Hub Info</span>
@@ -271,11 +326,7 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
 
-        {loading && (
-          <div className="flex justify-center items-center h-full">
-            <Loader2 size={20} className="animate-spin text-slate-400" />
-          </div>
-        )}
+        {loading && <ChatMessagesSkeleton />}
 
         {error && !loading && (
           <div className="flex justify-center">
@@ -437,7 +488,65 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
       {showInfoPanel && (
         <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-sm" onClick={() => setShowInfoPanel(false)}>
           <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <CommunityInfo community={community} messages={messages} onBack={() => setShowInfoPanel(false)} />
+            <CommunityInfo
+              community={community}
+              messages={messages}
+              onBack={() => setShowInfoPanel(false)}
+              onLeave={(comm) => {
+                setShowInfoPanel(false);
+                if (onMemberChange) onMemberChange(comm, false);
+                else if (onLeave) onLeave(comm);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Leave Hub Confirmation Modal */}
+      {showLeaveConfirm && (
+        <div
+          className="fixed inset-0 z-60 bg-slate-950/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => !leaving && setShowLeaveConfirm(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 space-y-4 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 border border-rose-200 text-rose-600">
+              <LogOut size={22} />
+            </div>
+            <div>
+              <h3 className="font-serif text-base font-bold text-[#0b1a36]">
+                Leave {community.name}?
+              </h3>
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                You will no longer receive live chat messages or mentor updates in this hub. You can freely rejoin anytime from the Directory.
+              </p>
+            </div>
+            {leaveError && (
+              <p className="text-xs text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200 font-semibold text-left">
+                {leaveError}
+              </p>
+            )}
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                disabled={leaving}
+                onClick={() => setShowLeaveConfirm(false)}
+                className="flex-1 py-2.5 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={leaving}
+                onClick={handleLeaveCommunity}
+                className="flex-1 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {leaving ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
+                {leaving ? "Leaving..." : "Yes, Leave"}
+              </button>
+            </div>
           </div>
         </div>
       )}

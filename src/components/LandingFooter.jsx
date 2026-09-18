@@ -15,15 +15,29 @@ export default function LandingFooter({ isDark }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-start mb-12">
           {/* Brand Info */}
           <div className="lg:col-span-2 flex flex-col items-start gap-4">
-            <div className="flex items-center gap-2.5">
-              <img
-                src="/assets/logo/logo-mark.png"
-                alt="Try Your Career"
-                className="h-7 w-7 shrink-0 aspect-square object-contain"
-              />
-              <h3 className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-[#0b1a36]"}`}>
-                Try Your Career
-              </h3>
+            <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate("/")}>
+              <div className={`relative flex items-center justify-center h-10 w-10 rounded-2xl shadow-2xs ${isDark
+                  ? "bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/80"
+                  : "bg-gradient-to-br from-sky-50 via-white to-blue-50/60 border border-[#D3E3F5]"
+                }`}>
+                <img
+                  src="/assets/logo/logo-mark.png"
+                  alt="Try Your Career"
+                  className="h-7 w-7 aspect-square object-contain drop-shadow-xs"
+                />
+                {/* <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" /> */}
+              </div>
+              <div className="flex flex-col text-left">
+                <h3 className={`text-lg font-black font-sans tracking-tight leading-none ${isDark ? "text-slate-100" : "text-[#0b1a36]"}`}>
+                  Try Your{" "}
+                  <span className="bg-gradient-to-r from-blue-600 via-[#1E88E5] to-indigo-600 bg-clip-text text-transparent">
+                    Career
+                  </span>
+                </h3>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">
+                  Career Intelligence
+                </span>
+              </div>
             </div>
             <p className="text-sm leading-relaxed max-w-sm text-left">
               Your personalized path to lasting success. We combine interactive simulator sandboxes, real market data, and personalized validation to build your career confidence.
