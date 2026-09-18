@@ -50,19 +50,35 @@ export default function LandingNavbar({ isDark }) {
         
         {/* Mobile Header Row */}
         <div className="flex items-center justify-between w-full md:w-auto shrink-0">
-          {/* Logo */}
+          {/* Logo & Brand Header */}
           <div 
             onClick={() => navigate("/")} 
-            className="flex items-center gap-2 text-base sm:text-lg md:text-xl font-bold font-sans tracking-tight cursor-pointer hover:opacity-80 transition"
+            className="flex items-center gap-3 cursor-pointer group select-none"
           >
-            <img
-              src="/favicon.ico"
-              alt="Company Logo"
-              className="h-6 w-6 sm:h-7 sm:w-7 object-contain"
-            />
-            <span className={isDark ? "text-slate-100" : "text-[#0b1a36]"}>
-              TryYourCareers
-            </span>
+            <div className={`relative flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 rounded-2xl transition-all duration-300 shadow-2xs group-hover:shadow-xs group-hover:scale-105 ${isDark
+                ? "bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/80 group-hover:border-cyan-500/50"
+                : "bg-gradient-to-br from-sky-50 via-white to-blue-50/60 border border-[#D3E3F5] group-hover:border-[#1E88E5]/50"
+              }`}>
+              <img
+                src="/assets/logo/logo-mark.png"
+                alt="Try Your Career"
+                className="h-7 w-7 sm:h-8 sm:w-8 aspect-square object-contain drop-shadow-xs"
+              />
+              {/* <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" /> */}
+            </div>
+
+            <div className="flex flex-col text-left">
+              <span className={`text-lg sm:text-xl font-black font-sans tracking-tight leading-none transition-colors ${isDark ? "text-slate-100" : "text-[#0b1a36]"
+                }`}>
+                Try Your{" "}
+                <span className="bg-gradient-to-r from-blue-600 via-[#1E88E5] to-indigo-600 bg-clip-text text-transparent">
+                  Career
+                </span>
+              </span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">
+                Career Intelligence
+              </span>
+            </div>
           </div>
 
           {/* Action Button (Mobile only) */}
@@ -156,7 +172,7 @@ export default function LandingNavbar({ isDark }) {
               onClick={() => setIsLoginOpen(true)}
               className="rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold px-5 py-2.5 text-xs shadow-xs transition cursor-pointer"
             >
-              Find a career
+                Login
             </button>
           )}
         </div>

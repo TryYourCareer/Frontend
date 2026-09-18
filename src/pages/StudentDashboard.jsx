@@ -1,444 +1,666 @@
-import { ClipboardList, CheckCircle2, Zap, Flame, TrendingUp, Sparkles, ArrowRight, BarChart3, Target, Play, User, BookOpen, Briefcase, Mail } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  ClipboardList, Flame,
+  Sparkles, ArrowRight, BarChart3, Target,
+  Award, Compass, Layers,
+  ChevronRight, ArrowUpRight,
+  Check, MessageSquare, Terminal
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { getUserProfile } from "../services/users";
+import { getCareerFitReport } from "../services/discoveryTest";
+import SEO from "../components/SEO";
+import BACKEND_BASE_URL from "../API/BaseURL";
 
-// ── Harmonious Light Pastel Multi-Color Palette ─────────────────────────────
-const dashboardData = {
-  userName: "Jane",
-  stats: [
-    { label: "Assessments",    value: "3/3",          icon: ClipboardList, bg: "bg-sky-50",     border: "border-sky-200",     iconColor: "#1E88E5",  textColor: "#0b1a36"  },
-    { label: "Missions Done",  value: "12 Completed", icon: CheckCircle2,  bg: "bg-emerald-50", border: "border-emerald-200", iconColor: "#059669",  textColor: "#065f46"  },
-    { label: "Skills Unlocked",value: "8 Active",     icon: Zap,           bg: "bg-purple-50",  border: "border-purple-200",  iconColor: "#7c3aed",  textColor: "#5b21b6"  },
-    { label: "Streak",         value: "5 Days",       icon: Flame,         bg: "bg-amber-50",   border: "border-amber-200",   iconColor: "#d97706",  textColor: "#92400e"  },
-  ],
-  compatibility: [
-    { label: "Software Engineering", value: 92, color: "#1E88E5" },
-    { label: "UX Design",            value: 78, color: "#7c3aed" },
-    { label: "Product Management",   value: 65, color: "#059669" },
-  ],
-  skillProfile: {
-    labels: ["Problem Solving", "Creativity", "Communication", "Technical", "Leadership", "Adaptability"],
-    values:  [85, 74, 78, 88, 68, 81],
+const STAGES = [
+  { id: 1, name: "Discovery Test", path: "/assessment", desc: "6D RIASEC Vector Analysis", icon: Compass },
+  { id: 2, name: "Career Reality", path: "/career-reality", desc: "500+ Verified Market Tracks", icon: Layers },
+  { id: 3, name: "Trial Simulation", path: "/trial-mission", desc: "Hands-on Role Sandbox", icon: Terminal },
+  { id: 4, name: "Learning Roadmap", path: "/roadmap", desc: "5-Stage Milestone Path", icon: Award },
+];
+
+const DEFAULT_SIMULATIONS = [
+  {
+    id: "frontend-fixer",
+    title: "Frontend Architecture & API Lab",
+    role: "Software Engineer",
+    duration: "20 Mins",
+    difficulty: "Intermediate",
+    status: "Ready",
+    accent: "border-blue-200 bg-gradient-to-br from-blue-50/60 to-white",
+    iconColor: "text-blue-600",
+    badge: "Engineering Track",
   },
-  missions: [
-    { title: "Frontend Fixer",   subtitle: "Software Engineer · Today",     score: "85%", accent: "#1E88E5" },
-    { title: "Wireframe Wizard", subtitle: "UX Designer · Yesterday",       score: "92%", accent: "#7c3aed" },
-    { title: "Sprint Planning",  subtitle: "Product Manager · 2 days ago",  score: "—",   accent: "#059669" },
-  ],
-  recommendations: [
-    "Complete Data Science Mission",
-    "Read 'Day in the Life: PM'",
-  ],
-};
+  {
+    id: "ux-audit",
+    title: "UX Wireframe & Design Strategy",
+    role: "Product Designer",
+    duration: "15 Mins",
+    difficulty: "Beginner Friendly",
+    status: "Popular",
+    accent: "border-purple-200 bg-gradient-to-br from-purple-50/60 to-white",
+    iconColor: "text-purple-600",
+    badge: "Design Track",
+  },
+  {
+    id: "rca-process",
+    title: "Root Cause Failure Analysis (RCFA)",
+    role: "Reliability Engineer",
+    duration: "25 Mins",
+    difficulty: "Advanced",
+    status: "High Value",
+    accent: "border-amber-200 bg-gradient-to-br from-amber-50/60 to-white",
+    iconColor: "text-amber-600",
+    badge: "Industry 4.0",
+  },
+];
 
-/* ── Skeleton helpers ────────────────────────────────────────────────────── */
-function Bone({ className = "", style }) {
-  return <div className={`animate-pulse rounded-xl bg-[#D3E3F5]/60 ${className}`} style={style} />;
-}
-
-function DashboardSkeleton() {
-  return (
-    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800">
-      <div className="mx-auto max-w-6xl space-y-8">
-
-        {/* Header skeleton */}
-        <div className="flex flex-col gap-3 border-b border-[#D3E3F5] pb-6">
-          <Bone className="h-5 w-28 rounded-full" />
-          <Bone className="h-8 w-64" />
-          <Bone className="h-3 w-72 rounded-full" />
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[1.5fr_0.8fr]">
-          {/* Main column */}
-          <div className="space-y-6">
-
-            {/* Stat cards */}
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="min-h-[118px] rounded-3xl border border-[#D3E3F5] bg-white p-4 flex flex-col justify-between animate-pulse">
-                  <div className="flex justify-between">
-                    <Bone className="h-2.5 w-16 rounded-full bg-[#D3E3F5]" />
-                    <Bone className="h-7 w-7 rounded-2xl bg-[#D3E3F5]" />
-                  </div>
-                  <Bone className="h-6 w-24 bg-[#D3E3F5]" />
-                </div>
-              ))}
-            </div>
-
-            {/* Metrics row */}
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="rounded-3xl border border-[#D3E3F5] bg-white p-5 space-y-4 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <Bone className="h-3 w-32 rounded-full" />
-                  <Bone className="h-4 w-10 rounded-full" />
-                </div>
-                {[80, 60, 45].map((w, i) => (
-                  <div key={i} className="space-y-1.5">
-                    <div className="flex justify-between">
-                      <Bone className="h-2.5 w-32 rounded-full" />
-                      <Bone className="h-2.5 w-8 rounded-full" />
-                    </div>
-                    <Bone className="h-1.5 rounded-full" style={{ width: `${w}%` }} />
-                  </div>
-                ))}
-              </div>
-              <div className="rounded-3xl border border-[#D3E3F5] bg-white p-5 shadow-xs space-y-3">
-                <Bone className="h-3 w-24 rounded-full" />
-                <Bone className="h-40 w-full rounded-2xl" />
-              </div>
-            </div>
-
-            {/* Missions skeleton */}
-            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-5 shadow-xs space-y-4">
-              <div className="flex items-center justify-between">
-                <Bone className="h-3 w-36 rounded-full" />
-                <Bone className="h-6 w-16 rounded-lg" />
-              </div>
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between rounded-2xl border border-[#D3E3F5]/60 bg-[#F0F6FC] p-3">
-                  <div className="flex items-center gap-3">
-                    <Bone className="h-8 w-8 rounded-2xl flex-shrink-0" />
-                    <div className="space-y-1.5">
-                      <Bone className="h-3 w-28 rounded-full" />
-                      <Bone className="h-2.5 w-36 rounded-full" />
-                    </div>
-                  </div>
-                  <Bone className="h-6 w-12 rounded-md" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Sidebar skeleton */}
-          <aside className="space-y-6">
-            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-5 shadow-xs space-y-4">
-              <Bone className="h-3 w-36 rounded-full" />
-              {[...Array(2)].map((_, i) => (
-                <Bone key={i} className="h-10 w-full rounded-2xl" />
-              ))}
-              <Bone className="h-9 w-full rounded-2xl" />
-            </div>
-            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-5 shadow-xs space-y-4">
-              <Bone className="h-3 w-24 rounded-full" />
-              <Bone className="h-28 w-full rounded-2xl" />
-            </div>
-          </aside>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── Sub-components ──────────────────────────────────────────────────────── */
-function CompatBar({ label, value, color }) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-xs text-slate-600">
-        <span className="font-semibold">{label}</span>
-        <span className="font-bold" style={{ color }}>{value}%</span>
-      </div>
-      <div className="h-2 rounded-full bg-[#F0F6FC]">
-        <div className="h-full rounded-full transition-all" style={{ width: `${value}%`, backgroundColor: color }} />
-      </div>
-    </div>
-  );
-}
-
-function RadarDot({ angle, radius, label, color }) {
-  const rad = (angle * Math.PI) / 180;
-  const x   = 50 + Math.cos(rad) * radius;
-  const y   = 50 + Math.sin(rad) * radius;
-  return (
-    <g>
-      <circle cx={x} cy={y} r="2.8" fill={color} />
-      <text x={x} y={y - 6} textAnchor="middle" fontSize="4.5" fontWeight="bold" fill="#0b1a36" dominantBaseline="middle">
-        {label}
-      </text>
-    </g>
-  );
-}
-
-const radarColors = ["#1E88E5", "#7c3aed", "#059669", "#1E88E5", "#7c3aed", "#059669"];
-
-/* ── Main Component ──────────────────────────────────────────────────────── */
 export default function StudentDashboard() {
   const navigate = useNavigate();
-  const { loading, profile: authProfile } = useAuth();
-  const [userData, setUserData] = useState(null);
-  const [fetchingUser, setFetchingUser] = useState(false);
+  const { loading: authLoading, profile: authProfile, user: authUser } = useAuth();
+  const [userData, setUserData] = useState(() => authProfile || null);
+  const [reportData, setReportData] = useState(null);
+  const [featuredCareers, setFeaturedCareers] = useState([]);
 
-  // Use profile from auth context; if not present, fetch from API
+  // Sync auth profile
   useEffect(() => {
     if (authProfile) {
       setUserData(authProfile);
       return;
     }
-    if (!loading) {
-      setFetchingUser(true);
+    if (!authLoading && !userData) {
       getUserProfile()
         .then((u) => setUserData(u))
-        .catch(() => setUserData(null))
-        .finally(() => setFetchingUser(false));
+        .catch(() => setUserData(null));
     }
-  }, [authProfile, loading]);
+  }, [authProfile, authLoading, userData]);
 
-  const { stats, compatibility, missions, recommendations } = dashboardData;
+  // Load real assessment report and featured database careers
+  useEffect(() => {
+    let isMounted = true;
+    async function loadDashboardData() {
+      const sessionId = localStorage.getItem("latest_test_session_id");
 
-  if (loading || fetchingUser) return <DashboardSkeleton />;
+      // 1. Fetch real assessment report if exists
+      if (sessionId) {
+        try {
+          const rep = await getCareerFitReport(sessionId);
+          if (isMounted && rep) {
+            setReportData(rep);
+          }
+        } catch (err) {
+          console.warn("No active test report for dashboard:", err);
+        }
+      }
 
-  // Derive display values from real profile
-  const firstName = userData?.name?.split(" ")[0] || "there";
-  const fullName  = userData?.name || "—";
-  const email     = userData?.email || "—";
-  const education = userData?.current_education || "—";
-  const interest  = userData?.area_of_interest || "—";
-  const gender    = userData?.gender || "—";
+      // 2. Fetch featured careers from backend database
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}/match-engine/careers`);
+        if (res.ok) {
+          const careers = await res.json();
+          if (isMounted && Array.isArray(careers) && careers.length > 0) {
+            setFeaturedCareers(careers.slice(0, 3));
+          }
+        }
+      } catch (err) {
+        console.warn("Featured careers fetch failed:", err);
+      }
+    }
+
+    loadDashboardData();
+    return () => { isMounted = false; };
+  }, []);
+
+  const activeProfile = authProfile || userData;
+  const fullName = activeProfile?.name || authUser?.user_metadata?.full_name || authUser?.name || "Explorer";
+  const firstName = (fullName !== "Explorer" ? fullName.split(" ")[0] : "") || activeProfile?.email?.split("@")[0] || "Explorer";
+  const education = activeProfile?.current_education || "Undergraduate / Graduate Studies";
+
+  // Dynamic RIASEC 6-Dimensional Trait Calculation
+  const dimensionTraits = useMemo(() => {
+    const rawVector = reportData?.dimension_vector || {
+      investigative: 0.85,
+      technical: 0.78,
+      creative: 0.65,
+      social: 0.58,
+      entrepreneurial: 0.52,
+      leadership: 0.48,
+    };
+
+    return Object.entries(rawVector).map(([key, val]) => {
+      const pct = Math.round((typeof val === "number" ? val : 0.5) * 100);
+      return {
+        label: key.charAt(0).toUpperCase() + key.slice(1),
+        percent: pct,
+        key: key.toLowerCase(),
+      };
+    }).sort((a, b) => b.percent - a.percent);
+  }, [reportData]);
+
+  // Dynamic Top Career Matches (from real assessment or spotlight DB)
+  const topMatches = useMemo(() => {
+    if (reportData?.top_matches && reportData.top_matches.length > 0) {
+      return reportData.top_matches.slice(0, 3).map((m) => ({
+        title: m.career_name,
+        sector: m.sector || m.cluster || "Technology",
+        discipline: m.discipline || m.sector || "Specialization Track",
+        matchScore: m.similarity_score > 1 ? Math.round(m.similarity_score) : Math.round((m.similarity_score || 0.85) * 100),
+        salaryRange: m.salary_range || "₹6 – ₹24 LPA",
+        description: m.why_it_fits || "High dimensional fit with your investigative and technical profile.",
+        skills: m.key_skills?.slice(0, 3) || ["Root Cause Analysis", "Systems Design", "Data Strategy"],
+      }));
+    }
+
+    if (featuredCareers.length > 0) {
+      return featuredCareers.map((c) => {
+        const sal = c.salary_india_lpa || {};
+        const salaryRange = sal.entry && sal.senior ? `₹${sal.entry} – ${sal.senior}` : "₹5 – ₹25 LPA";
+        return {
+          title: c.career_name || "Career Role",
+          sector: c.sector || "Engineering",
+          discipline: c.discipline || c.sector || "Specialization",
+          matchScore: 92,
+          salaryRange,
+          description: c.description || "High-demand industry specialization with verified growth trajectory.",
+          skills: Array.isArray(c.core_skills) ? c.core_skills.slice(0, 3) : ["System Design", "Diagnostics", "Execution"],
+        };
+      });
+    }
+
+    return [
+      {
+        title: "Software Systems Architect",
+        sector: "Technology",
+        discipline: "Software & Cloud",
+        matchScore: 94,
+        salaryRange: "₹8 – ₹35 LPA",
+        description: "Designs fault-tolerant cloud software and scalable distributed microservices.",
+        skills: ["System Design", "Cloud Infrastructure", "Distributed Data"],
+      },
+      {
+        title: "Reliability Engineer",
+        sector: "Engineering",
+        discipline: "Industrial & Asset Engineering",
+        matchScore: 89,
+        salaryRange: "₹6 – ₹28 LPA",
+        description: "Prevents critical asset downtime using sensor vibration and predictive maintenance.",
+        skills: ["RCFA & FMEA", "Vibration Analysis", "CMMS Systems"],
+      },
+      {
+        title: "AI Solutions Consultant",
+        sector: "Technology",
+        discipline: "Applied AI & Strategy",
+        matchScore: 86,
+        salaryRange: "₹10 – ₹40 LPA",
+        description: "Aligns machine learning model pipelines with industrial automation needs.",
+        skills: ["Machine Learning", "Model Governance", "Solution Architecture"],
+      },
+    ];
+  }, [reportData, featuredCareers]);
+
+  // Overall Clarity Score
+  const clarityScore = reportData ? 88 : 45;
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-6 py-10 text-slate-800 text-left">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <section className="min-h-screen bg-gradient-to-br from-[#f7fafd] via-[#eef4fc] to-[#e4eef9] px-4 py-8 sm:px-6 lg:px-10 text-slate-800 font-sans text-left">
+      <SEO
+        title="Student Career Command Center | ClearCareers"
+        description="Track your personalized career discovery roadmap, RIASEC vector diagnostic scores, interactive trial mission simulations, and verified industry trajectories."
+      />
 
-        {/* Header */}
-        <div className="flex flex-col gap-3 border-b border-[#D3E3F5] pb-6">
-          <span
-            className="inline-flex w-fit items-center rounded-full px-3.5 py-1 text-[10px] font-bold tracking-widest uppercase border border-sky-200 bg-sky-50 text-[#1E88E5]"
-          >
-            STUDENT PORTAL
-          </span>
-          <h1 className="text-3xl font-serif font-bold leading-tight text-[#0b1a36]">
-            Welcome back, {firstName} 👋
-          </h1>
-          <p className="text-xs text-slate-500">You're making great progress on your career discovery journey.</p>
+      <div className="mx-auto max-w-7xl space-y-8">
+        
+        {/* Top Hero Command Banner */}
+        <div className="relative overflow-hidden rounded-3xl border border-[#D3E3F5] bg-white p-6 sm:p-8 lg:p-10 shadow-sm shadow-blue-900/5 space-y-6">
+          <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-gradient-to-br from-blue-400/10 to-indigo-500/10 blur-3xl pointer-events-none" />
 
-          {/* Profile info pills */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mt-1">
-            <div className="flex flex-wrap gap-2">
-              <InfoPill icon={<User size={11} />} label={fullName} />
-              {email !== "—" && <InfoPill icon={<Mail size={11} />} label={email} />}
-              {education !== "—" && <InfoPill icon={<BookOpen size={11} />} label={education} />}
-              {interest !== "—" && <InfoPill icon={<Briefcase size={11} />} label={interest} />}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+            <div className="space-y-3 max-w-2xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#1E88E5]">
+                  <Sparkles size={13} className="text-[#1E88E5]" />
+                  Career Command Center
+                </span>
+                <span className="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full">
+                  {education}
+                </span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-black tracking-tight text-[#0b1a36] leading-tight">
+                Welcome back, {firstName} 👋
+              </h1>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                Your personalized career discovery ecosystem is active. Track your 6D behavioral alignment, explore verified compensation benchmarks, and practice real-world trial simulations.
+              </p>
             </div>
-            <button
-              onClick={() => navigate("/assessment")}
-              className="flex items-center gap-1.5 px-5 py-2.5 bg-[#0b1a36] hover:bg-[#122b59] text-white text-xs font-bold rounded-full shadow-xs transition shrink-0 cursor-pointer"
-            >
-              <Sparkles size={14} className="text-[#1E88E5]" />
-              <span>View Career Fit Diagnostic</span>
-            </button>
+
+            {/* Quick Readiness Score Card */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0 bg-gradient-to-br from-[#F0F6FC] to-white p-5 rounded-3xl border border-[#D3E3F5] shadow-xs">
+              <div className="relative w-20 h-20 flex items-center justify-center">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                  <path
+                    className="text-slate-200"
+                    strokeWidth="3.5"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  <path
+                    className="text-blue-600 transition-all duration-1000 ease-out"
+                    strokeDasharray={`${clarityScore}, 100`}
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-base font-black text-[#0b1a36]">{clarityScore}%</span>
+                  <span className="text-[7px] font-bold uppercase tracking-wider text-slate-400">Clarity</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 text-center sm:text-left">
+                <span className="text-xs font-bold text-[#0b1a36] block">
+                  {reportData ? "Verified Diagnostic Match" : "Diagnostic Ready"}
+                </span>
+                <p className="text-[11px] text-slate-500 max-w-[160px]">
+                  {reportData ? "Based on your 6D RIASEC vector." : "Take the 15-min assessment to reach 100%."}
+                </p>
+                {!reportData && (
+                  <button
+                    onClick={() => navigate("/assessment")}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 transition cursor-pointer"
+                  >
+                    Start Test Now <ArrowRight size={11} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Dashboard Grid */}
-        <div className="grid gap-6 lg:grid-cols-[1.5fr_0.8fr]">
+          {/* 4-Stage Career Readiness Journey Stepper */}
+          <div className="pt-6 border-t border-[#D3E3F5] space-y-3 relative z-10">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Your 4-Stage Career Launch Trajectory
+              </span>
+              <span className="text-xs font-bold text-blue-600">
+                Stage {reportData ? "02 / 04 Active" : "01 / 04 In Progress"}
+              </span>
+            </div>
 
-          {/* Main Column */}
-          <div className="space-y-6">
-
-            {/* Stat Cards */}
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {stats.map((stat) => {
-                const Icon = stat.icon;
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {STAGES.map((stage) => {
+                const Icon = stage.icon;
+                const isPassed = reportData ? stage.id <= 2 : stage.id === 1;
+                const isCurrent = reportData ? stage.id === 2 : stage.id === 1;
                 return (
                   <div
-                    key={stat.label}
-                    className={`${stat.bg} rounded-3xl p-5 flex flex-col justify-between min-h-[128px] border ${stat.border} shadow-2xs hover:shadow-xs transition`}
+                    key={stage.id}
+                    onClick={() => navigate(stage.path)}
+                    className={`group p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                      isCurrent
+                        ? "bg-gradient-to-br from-blue-50/70 to-white border-blue-300 shadow-xs"
+                        : "bg-[#F0F6FC]/60 border-[#D3E3F5] hover:bg-white hover:border-slate-300"
+                    }`}
                   >
-                    <div className="flex justify-between items-start">
-                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: stat.textColor }}>
-                        {stat.label}
-                      </span>
-                      <div className="grid h-8 w-8 place-items-center rounded-2xl bg-white shadow-2xs border border-white">
-                        <Icon size={15} style={{ color: stat.iconColor }} />
+                    <div className="flex items-center justify-between">
+                      <div className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold ${
+                        isPassed ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+                      }`}>
+                        <Icon size={14} />
                       </div>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                        Step 0{stage.id}
+                      </span>
                     </div>
-                    <p className="mt-4 text-2xl font-serif font-bold" style={{ color: stat.textColor }}>
-                      {stat.value}
-                    </p>
+
+                    <div>
+                      <p className="text-xs font-bold text-[#0b1a36] group-hover:text-blue-600 transition flex items-center gap-1">
+                        {stage.name}
+                        <ArrowUpRight size={11} className="opacity-0 group-hover:opacity-100 transition" />
+                      </p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">{stage.desc}</p>
+                    </div>
                   </div>
                 );
               })}
             </div>
+          </div>
+        </div>
 
-            {/* Metrics Row */}
-            <div className="grid gap-6 sm:grid-cols-2">
+        {/* 4 Stat Cards Ribbon */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatHighlightCard
+            icon={<ClipboardList size={16} />}
+            label="Discovery Status"
+            value={reportData ? "Vector Mapped" : "Ready"}
+            subText={reportData ? "6D RIASEC Active" : "15-Min Assessment"}
+            color="text-blue-600"
+            bg="bg-blue-50/60"
+            border="border-blue-200"
+            action={() => navigate("/assessment")}
+          />
+          <StatHighlightCard
+            icon={<Layers size={16} />}
+            label="Reality Verification"
+            value="513 Roles"
+            subText="Real Market Salarie"
+            color="text-emerald-600"
+            bg="bg-emerald-50/60"
+            border="border-emerald-200"
+            action={() => navigate("/career-reality")}
+          />
+          <StatHighlightCard
+            icon={<Terminal size={16} />}
+            label="Trial Simulations"
+            value="3 Workspaces"
+            subText="Hands-on Role Labs"
+            color="text-purple-600"
+            bg="bg-purple-50/60"
+            border="border-purple-200"
+            action={() => navigate("/trial-mission")}
+          />
+          <StatHighlightCard
+            icon={<Flame size={16} />}
+            label="Momentum"
+            value="5-Day Streak"
+            subText="Consistent Explorer"
+            color="text-amber-600"
+            bg="bg-amber-50/60"
+            border="border-amber-200"
+            action={() => navigate("/roadmap")}
+          />
+        </div>
 
-              {/* Compatibility */}
-              <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#0b1a36]">
-                    Dynamic Compatibility
-                  </h3>
-                  <span
-                    className="rounded-full px-2.5 py-0.5 text-[10px] font-bold border border-sky-200 bg-sky-50 text-[#1E88E5]"
-                  >
-                    Live
+        {/* Dashboard Main Grid */}
+        <div className="grid gap-8 lg:grid-cols-[1.85fr_1fr]">
+
+          {/* LEFT COLUMN: Top Matches, Dimensional Traits & Simulation Sandbox */}
+          <div className="space-y-8">
+
+            {/* Top Recommended Career Matches Section */}
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 sm:p-7 shadow-xs space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-0.5">
+                    {reportData ? "Dynamic Cognitive Alignment" : "High-Growth Spotlight"}
                   </span>
+                  <h3 className="font-serif text-lg sm:text-xl font-bold text-[#0b1a36]">
+                    {reportData ? "Your Top Career Matches" : "Recommended Career Tracks"}
+                  </h3>
                 </div>
-                <div className="mt-5 space-y-4">
-                  {compatibility.map((item) => (
-                    <CompatBar key={item.label} {...item} />
-                  ))}
-                </div>
-              </div>
-
-              {/* Skill Radar */}
-              <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#0b1a36]">
-                  Skill Profile
-                </h3>
-                <div className="mt-4 flex items-center justify-center">
-                  <svg viewBox="0 0 100 100" className="h-44 w-full">
-                    <polygon points="50,5 85,30 85,70 50,95 15,70 15,30" fill="#F0F6FC" stroke="#D3E3F5" strokeWidth="0.8" />
-                    <polygon
-                      points="50,17 78,36 74,66 50,83 23,66 22,36"
-                      fill="#1E88E5"
-                      opacity="0.12"
-                      stroke="#1E88E5"
-                      strokeWidth="1"
-                    />
-                    {dashboardData.skillProfile.labels.map((label, index) => {
-                      const angle = 90 + index * 60;
-                      return (
-                        <RadarDot key={label} angle={angle} radius={33} label={label} color={radarColors[index]} />
-                      );
-                    })}
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Trial Missions */}
-            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0b1a36]">
-                  <Target size={14} className="text-[#1E88E5]" />
-                  Recent Trial Missions
-                </h3>
                 <button
-                  className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition hover:opacity-80 border border-sky-200 bg-sky-50 text-[#1E88E5] cursor-pointer"
+                  onClick={() => navigate("/career-reality")}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition cursor-pointer"
                 >
-                  View All <ArrowRight size={12} />
+                  Explore All 500+ <ChevronRight size={13} />
                 </button>
               </div>
-              <div className="mt-5 space-y-3">
-                {missions.map((mission) => (
-                  <div key={mission.title} className="rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-4 hover:bg-[#EAF2FA] transition">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-white shadow-2xs border border-sky-100"
+
+              {/* Match Cards List */}
+              <div className="space-y-3.5">
+                {topMatches.map((career, idx) => (
+                  <div
+                    key={idx}
+                    className="p-5 rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC]/50 hover:bg-white hover:border-blue-300 hover:shadow-md transition-all duration-300 space-y-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-sky-200 bg-sky-50 text-[#1E88E5]">
+                            {career.sector}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-semibold">{career.discipline}</span>
+                        </div>
+                        <h4
+                          onClick={() => navigate(`/career-details/${encodeURIComponent(career.title)}`)}
+                          className="font-serif text-base font-bold text-[#0b1a36] hover:text-blue-600 transition cursor-pointer"
                         >
-                          <Play size={13} style={{ color: mission.accent }} className="ml-0.5" />
-                        </div>
-                        <div>
-                          <p className="text-xs sm:text-sm font-bold text-slate-800">{mission.title}</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">{mission.subtitle}</p>
-                        </div>
+                          {career.title}
+                        </h4>
                       </div>
-                      <div
-                        className="rounded-full px-3 py-1 text-xs font-bold border border-[#D3E3F5] bg-white shadow-2xs"
-                        style={
-                          mission.score === "—"
-                            ? { color: "#94a3b8" }
-                            : { color: mission.accent }
-                        }
-                      >
-                        {mission.score}
+
+                      <div className="flex flex-col items-end">
+                        <span className="text-xs font-black px-2.5 py-1 rounded-full border border-emerald-300 bg-emerald-50 text-emerald-800">
+                          {career.matchScore}% Fit
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-bold mt-1">{career.salaryRange}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                      {career.description}
+                    </p>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200/60">
+                      <div className="flex flex-wrap gap-1.5">
+                        {career.skills.map((skill) => (
+                          <span key={skill} className="text-[10px] font-semibold text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-lg">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => navigate(`/career-details/${encodeURIComponent(career.title)}`)}
+                          className="rounded-xl bg-[#0b1a36] hover:bg-[#152e5d] text-white px-3 py-1.5 text-xs font-bold transition shadow-2xs cursor-pointer"
+                        >
+                          Reality Check
+                        </button>
+                        <button
+                          onClick={() => navigate(`/roadmap?career=${encodeURIComponent(career.title)}`)}
+                          className="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 text-xs font-bold transition shadow-2xs cursor-pointer"
+                        >
+                          Roadmap
+                        </button>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* Sidebar Column */}
-          <aside className="space-y-6">
+            {/* Trial Missions & Role Simulators Sandbox */}
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 sm:p-7 shadow-xs space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 block mb-0.5">
+                    Stage 03 Sandbox
+                  </span>
+                  <h3 className="font-serif text-lg sm:text-xl font-bold text-[#0b1a36] flex items-center gap-2">
+                    <Terminal size={18} className="text-purple-600" />
+                    Interactive Trial Simulations
+                  </h3>
+                </div>
+                <button
+                  onClick={() => navigate("/trial-mission")}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-600 hover:text-purple-800 transition cursor-pointer"
+                >
+                  All Labs <ChevronRight size={13} />
+                </button>
+              </div>
 
-            {/* User Profile Card */}
-            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#0b1a36]">Your Profile</h3>
-              <div className="space-y-3 text-xs text-slate-600">
-                <ProfileRow icon={<User size={13} />} label="Name" value={fullName} />
-                <ProfileRow icon={<BookOpen size={13} />} label="Education" value={education} />
-                <ProfileRow icon={<Briefcase size={13} />} label="Interest" value={interest} />
-                {gender !== "—" && <ProfileRow icon={<User size={13} />} label="Gender" value={gender} />}
-                {email !== "—" && <ProfileRow icon={<Mail size={13} />} label="Email" value={email} />}
+              <div className="grid sm:grid-cols-3 gap-4">
+                {DEFAULT_SIMULATIONS.map((sim) => (
+                  <div
+                    key={sim.id}
+                    onClick={() => navigate("/trial-mission")}
+                    className={`p-5 rounded-2xl border transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between space-y-3 ${sim.accent}`}
+                  >
+                    <div className="space-y-1.5">
+                      <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/80 border border-slate-200 text-slate-600 inline-block">
+                        {sim.badge}
+                      </span>
+                      <h4 className="font-serif text-sm font-bold text-[#0b1a36] leading-snug">
+                        {sim.title}
+                      </h4>
+                      <p className="text-[11px] text-slate-500">{sim.role}</p>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-200/50 flex items-center justify-between text-xs">
+                      <span className="text-[10px] font-semibold text-slate-500">{sim.duration}</span>
+                      <span className="inline-flex items-center gap-1 font-bold text-blue-700">
+                        Launch <ArrowRight size={11} />
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Next Steps */}
+          </div>
+
+          {/* RIGHT COLUMN: Psychometrics, Action Goals & Profile */}
+          <div className="space-y-6">
+
+            {/* Psychometric 6D RIASEC Vector Breakdown */}
             <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-4">
-              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0b1a36]">
-                <BarChart3 size={14} className="text-[#1E88E5]" />
-                Recommended Next Steps
-              </h3>
-              <ul className="space-y-2.5 text-xs text-slate-600">
-                {recommendations.map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-start gap-2.5 rounded-2xl px-4 py-3 border border-sky-200 bg-sky-50 shadow-2xs"
-                  >
-                    <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[#1E88E5]" />
-                    <span className="font-semibold text-slate-700">{item}</span>
-                  </li>
+              <div className="flex items-center justify-between">
+                <h3 className="font-serif text-sm font-bold text-[#0b1a36] flex items-center gap-1.5">
+                  <BarChart3 size={15} className="text-blue-600" />
+                  6D RIASEC Behavioral Vector
+                </h3>
+                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                  Match Engine
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-500">
+                Cognitive strengths computed for optimal career track alignment.
+              </p>
+
+              <div className="space-y-3 pt-1">
+                {dimensionTraits.map((trait) => (
+                  <div key={trait.key} className="space-y-1">
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span className="text-slate-700">{trait.label}</span>
+                      <span className="text-[#0b1a36] font-bold">{trait.percent}%</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-700"
+                        style={{ width: `${trait.percent}%` }}
+                      />
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
+
+              {!reportData && (
+                <button
+                  onClick={() => navigate("/assessment")}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0b1a36] hover:bg-[#122b59] text-white py-2.5 text-xs font-bold transition shadow-2xs cursor-pointer"
+                >
+                  <Sparkles size={13} className="text-amber-400" />
+                  Calibrate Vector with Assessment
+                </button>
+              )}
+            </div>
+
+            {/* Actionable Next Goals Checklist */}
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-4">
+              <h3 className="font-serif text-sm font-bold text-[#0b1a36] flex items-center gap-1.5">
+                <Target size={15} className="text-emerald-600" />
+                Recommended Discovery Actions
+              </h3>
+
+              <div className="space-y-2.5">
+                <GoalItem
+                  done={Boolean(reportData)}
+                  text="Take the 15-Minute RIASEC Discovery Test"
+                  onClick={() => navigate("/assessment")}
+                />
+                <GoalItem
+                  done={true}
+                  text="Explore 513 Verified Career Realities"
+                  onClick={() => navigate("/career-reality")}
+                />
+                <GoalItem
+                  done={false}
+                  text="Run 1 Hands-on Trial Simulation Lab"
+                  onClick={() => navigate("/trial-mission")}
+                />
+                <GoalItem
+                  done={false}
+                  text="Build 5-Stage Learning Roadmap"
+                  onClick={() => navigate("/roadmap")}
+                />
+              </div>
+            </div>
+
+            {/* Career Hubs Community CTA */}
+            <div className="rounded-3xl border border-blue-200 bg-gradient-to-br from-[#0b1a36] to-[#122c5e] p-6 text-white shadow-md space-y-3.5 text-center">
+              <div className="w-10 h-10 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center mx-auto text-sky-300">
+                <MessageSquare size={18} />
+              </div>
+              <div>
+                <h4 className="font-serif text-base font-bold">Connect with Peer Communities</h4>
+                <p className="text-xs text-blue-200 mt-1 leading-relaxed">
+                  Join 15 verified discipline hubs to discuss career transitions, salaries, and interview tracks.
+                </p>
+              </div>
               <button
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-xs font-bold text-white transition hover:bg-[#122b59] bg-[#0b1a36] shadow-xs cursor-pointer"
+                onClick={() => navigate("/career-hubs")}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-[#0b1a36] hover:bg-blue-50 px-4 py-2.5 text-xs font-bold shadow-sm transition cursor-pointer"
               >
-                <Play size={12} className="ml-0.5" />
-                Start Next Mission
+                Join Career Hubs <ArrowRight size={13} />
               </button>
             </div>
 
-            {/* AI Insights */}
-            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0b1a36]">
-                  <Sparkles size={14} className="text-[#1E88E5]" />
-                  AI Insights
-                </h3>
-                <button className="flex items-center gap-1 text-xs font-bold transition hover:underline text-[#1E88E5] cursor-pointer">
-                  Generate <TrendingUp size={12} />
-                </button>
-              </div>
-              <div
-                className="rounded-2xl border border-dashed border-[#D3E3F5] bg-[#F0F6FC] p-6 text-center text-xs text-slate-500 shadow-2xs"
-              >
-                <Sparkles size={22} className="mx-auto mb-2 text-[#1E88E5]" />
-                <p className="font-bold text-[#0b1a36]">No Insights Yet</p>
-                <p className="mt-1">Click the button above to generate personalized insights.</p>
-              </div>
-            </div>
+          </div>
 
-          </aside>
         </div>
+
       </div>
     </section>
   );
 }
 
-/* ── Small helper sub-components ─────────────────────────────────────────── */
-function InfoPill({ icon, label }) {
+function StatHighlightCard({ icon, label, value, subText, color, bg, border, action }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D3E3F5] bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs">
-      <span className="text-[#1E88E5]">{icon}</span>
-      {label}
-    </span>
+    <div
+      onClick={action}
+      className={`p-5 rounded-3xl border ${border} bg-white hover:border-slate-300 transition-all hover:shadow-md cursor-pointer flex flex-col justify-between space-y-2`}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</span>
+        <div className={`w-8 h-8 rounded-xl ${bg} ${color} flex items-center justify-center`}>
+          {icon}
+        </div>
+      </div>
+      <div>
+        <p className="text-lg font-black text-[#0b1a36]">{value}</p>
+        <p className="text-[11px] text-slate-500 font-medium">{subText}</p>
+      </div>
+    </div>
   );
 }
 
-function ProfileRow({ icon, label, value }) {
+function GoalItem({ done, text, onClick }) {
   return (
-    <div className="flex items-start gap-2.5">
-      <span className="mt-0.5 shrink-0 text-[#1E88E5]">{icon}</span>
-      <div className="min-w-0">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
-        <p className="font-semibold text-slate-700 truncate">{value}</p>
+    <div
+      onClick={onClick}
+      className={`p-3 rounded-2xl border transition flex items-center justify-between gap-3 cursor-pointer ${
+        done
+          ? "bg-emerald-50/50 border-emerald-200 text-emerald-900"
+          : "bg-[#F0F6FC] border-[#D3E3F5] text-slate-700 hover:border-blue-300"
+      }`}
+    >
+      <div className="flex items-center gap-2.5">
+        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0 ${
+          done ? "bg-emerald-600 text-white" : "border border-slate-300 bg-white text-transparent"
+        }`}>
+          <Check size={11} />
+        </div>
+        <span className="text-xs font-semibold">{text}</span>
       </div>
+      <ChevronRight size={13} className="text-slate-400 shrink-0" />
     </div>
   );
 }

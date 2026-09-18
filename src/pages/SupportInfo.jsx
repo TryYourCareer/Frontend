@@ -6,6 +6,7 @@ import {
   HelpCircle, MessageSquare, Shield, FileText, ChevronDown, 
   Send, Loader2, CheckCircle2, Mail, Phone, MapPin 
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function SupportInfo() {
   const { tabId } = useParams();
@@ -34,10 +35,10 @@ export default function SupportInfo() {
 
   // FAQs data
   const faqs = [
-    { q: "Is the assessment diagnostic test completely free?", a: "Yes! The core Stride Journey diagnostics, career path selector, and basic simulator sandboxes are 100% free for all registered students." },
-    { q: "What is the Elevate placement sponsorship program?", a: "Elevate matches high-performing students (based on simulation metrics and sandbox scores) with sponsored tech capstones and direct interview panels at partnered growth firms." },
-    { q: "How do I join a professional career hub chat?", a: "Once you complete a career path assessment, you will unlock the corresponding public Career Hub. Active premium hubs (with dedicated industry architects) are open to students who complete the Stride Diagnostic." },
-    { q: "Can I try coding sandboxes as an unauthenticated guest?", a: "Absolutely. Logged-out guests can try out interactive preview sandboxes directly on the landing page, but must create an account to record scores, join hubs, and unlock verified badges." }
+    { q: "Is the assessment diagnostic test completely free?", a: "Yes! The main Stride Journey diagnostics, career path tools, and basic practice sandboxes are completely free for all signed-up students." },
+    { q: "What is the Elevate placement sponsorship program?", a: "Elevate connects top-performing students (judged by their simulation stats and sandbox scores) with sponsored tech projects and direct interviews at our partner startups." },
+    { q: "How do I join a professional career hub chat?", a: "Finishing a career path assessment unlocks your access to that public Career Hub. Active premium hubs (featuring real industry experts) become available once you complete the Stride Diagnostic." },
+    { q: "Can I try coding sandboxes as an unauthenticated guest?", a: "Definitely! Guests who aren't logged in can test out our preview sandboxes right on the landing page. However, you'll need to create an account to save your scores, join chats, and earn verified badges." }
   ];
 
   const handleContactSubmit = (e) => {
@@ -52,6 +53,11 @@ export default function SupportInfo() {
 
   return (
     <div className="min-h-screen transition-colors duration-300 flex flex-col bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36]">
+      <SEO
+        title={activeTab === "faq" ? "Frequently Asked Questions" : activeTab === "contact" ? "Contact Support" : activeTab === "guidelines" ? "Community Guidelines" : "Support Center"}
+        description="Get answers to frequently asked questions about Try Your Careers assessments, simulators, hubs, or get in touch with our student support team."
+        url={`/support/${activeTab}`}
+      />
       {/* Landing Navbar */}
       <LandingNavbar isDark={isDark} />
 
@@ -67,7 +73,7 @@ export default function SupportInfo() {
               We are here to help
             </h1>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              Need guidance on simulators, hubs, or placement tracks? Browse our resources or contact our student support team.
+              Got questions about simulators, hubs, or placements? Look through our guides below or reach out to our student support crew.
             </p>
           </div>
 
@@ -260,17 +266,17 @@ export default function SupportInfo() {
                 <div className="space-y-4">
                   <h3 className="text-base font-bold text-slate-800">1. Information We Collect</h3>
                   <p>
-                    We collect information when you register an account, fill out profiles, complete diagnostic tests, or write/execute code logic in our sandbox simulator environments. This includes names, emails, diagnostic scores, community chat messages, and basic diagnostic answers.
+                    We gather details when you sign up, complete profiles, take diagnostic tests, or run code inside our practice sandboxes. This includes your name, email, test scores, chat messages, and answers.
                   </p>
                   
                   <h3 className="text-base font-bold text-slate-800">2. Simulator Sandbox Logging</h3>
                   <p>
-                    In order to compute performance scores, diagnostic indices, and verify execution states, we log interactive testing indicators inside the compiler and sandbox mockups. No personal script files on your desktop are scanned or indexed.
+                    To calculate performance scores and check your code progress, we track interactive testing metrics within our compiler and simulations. We never scan or access personal files on your computer.
                   </p>
                   
                   <h3 className="text-base font-bold text-slate-800">3. Data Sharing and Sponsorships</h3>
                   <p>
-                    Your individual diagnostic scores and profile badges are completely private. If you apply for the Elevate placement sponsorship cohorts, you explicitly authorize sharing score metrics and portfolio summaries with partnered growth firms.
+                    Your test scores and badges remain private by default. If you apply for our Elevate sponsorship programs, you agree to let us share your performance metrics and portfolio summaries with our hiring partners.
                   </p>
                 </div>
               </div>
@@ -285,17 +291,17 @@ export default function SupportInfo() {
                 <div className="space-y-4">
                   <h3 className="text-base font-bold text-slate-800">1. Account Security and Integrity</h3>
                   <p>
-                    By registering an account on TryYourCareers, you agree to safeguard your credentials and maintain score honesty. Sharing access with third parties to manipulate mock assessments or code results is strictly prohibited.
+                    By creating an account on TryYourCareers, you agree to keep your login secure and keep your test scores honest. Sharing your account with others to fake test or code results is not allowed.
                   </p>
                   
                   <h3 className="text-base font-bold text-slate-800">2. Permitted Use of Sandboxes</h3>
                   <p>
-                    Simulator sandbox tools (code compilers, quiz mockups, real-time channels) are provided for personal educational training only. Attempting to reverse engineer execution servers or script bot queries is a violation of these terms.
+                    Our practice tools (like code compilers and quizzes) are meant solely for your own learning and training. Trying to hack our servers or use automated bots against our systems breaks these rules.
                   </p>
                   
                   <h3 className="text-base font-bold text-slate-800">3. Placement Disclaimers</h3>
                   <p>
-                    Completion of Stride Stages, assessment indices, or participation in Elevate mentoring reviews provides placement support and interview eligibility but does not guarantee employment.
+                    Finishing Stride levels, assessments, or Elevate mentoring helps you get noticed and preps you for interviews, but it does not guarantee a job offer.
                   </p>
                 </div>
               </div>

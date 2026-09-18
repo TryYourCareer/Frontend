@@ -7,6 +7,7 @@ import {
   Users, Briefcase, TrendingUp, Heart, Award, Sparkles, 
   Clock, CheckCircle2, Smile, Building, Send 
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function CompanyInfo() {
   const { tabId } = useParams();
@@ -33,15 +34,15 @@ export default function CompanyInfo() {
 
   // Mock Data for Team members
   const team = [
-    { name: "Ananya Sharma", role: "Co-Founder & CEO", desc: "Ex-Product Leader, passionate about closing the skill gap.", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80" },
-    { name: "Rohit Verma", role: "Chief of Pedagogy", desc: "Former Educator with 12+ years of curriculum design.", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80" },
-    { name: "Sneha Patel", role: "Head of Community", desc: "Creating space for collaboration and peer learning hubs.", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80" }
+    { name: "Ananya Sharma", role: "Co-Founder & CEO", desc: "An ex-product leader who is passionate about helping people overcome the experience barrier.", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80" },
+    { name: "Rohit Verma", role: "Chief of Pedagogy", desc: "A veteran educator with over 12 years of experience designing learning curriculums.", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80" },
+    { name: "Sneha Patel", role: "Head of Community", desc: "Focused on creating engaging, friendly spaces for peer-to-peer learning.", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80" }
   ];
 
   // Mock Success Stories
   const stories = [
-    { name: "Rahul S.", from: "B.Com Student", to: "Backend Developer at Razorpay", quote: "The simulator code sandboxes changed everything. I wasn't just learning concepts; I was solving actual production tasks. It gave me the coding confidence I needed to ace the technical round.", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80" },
-    { name: "Meera Nair", from: "Freelance Content Writer", to: "UX Architect at CureFit", quote: "Aligning my creative skills with clear career metrics helped me pivot. The pathway maps showed me exactly what portfolio elements were missing, and the mentor hub supported me daily.", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80" }
+    { name: "Rahul S.", from: "B.Com Student", to: "Backend Developer at Razorpay", quote: "The practice sandboxes completely flipped the script for me. Instead of just memorizing theory, I was tackling actual engineering problems. It gave me the courage and skills I needed to crush my technical interviews.", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80" },
+    { name: "Meena Nair", from: "Freelance Content Writer", to: "UX Architect at CureFit", quote: "Matching my creative background with transparent career guidelines made pivoting so much easier. The roadmap showed me exactly what my portfolio was lacking, and the daily mentor support kept me on track.", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80" }
   ];
 
   // Open job listings
@@ -53,6 +54,11 @@ export default function CompanyInfo() {
 
   return (
     <div className="min-h-screen transition-colors duration-300 flex flex-col bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36] font-sans">
+      <SEO
+        title={activeTab === "about" ? "About Us" : activeTab === "careers" ? "Careers & Open Roles" : activeTab === "privacy" ? "Privacy Policy" : "Company"}
+        description="Learn more about Try Your Careers, our mission to democratize career discovery, our team, open career opportunities, and principles."
+        url={`/company/${activeTab}`}
+      />
       {/* Landing Navbar */}
       <LandingNavbar isDark={isDark} />
 
@@ -68,7 +74,7 @@ export default function CompanyInfo() {
               Shaping Career Reality
             </h1>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              We build simulator sandboxes, structure real metrics, and foster mentor hubs to help students step into their dream careers with confidence.
+              We create realistic practice simulators, clear career steps, and helpful mentor networks so students can step into tech jobs feeling totally ready.
             </p>
           </div>
 
@@ -107,21 +113,21 @@ export default function CompanyInfo() {
               <div className="space-y-8 animate-fade-in">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                   <div className="lg:col-span-7 space-y-4">
-                    <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Our Mission</h2>
+                    <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Fixing the Skills Gap</h2>
                     <p className="text-sm leading-relaxed text-slate-600">
-                      For decades, students have graduated with textbook definitions but zero actual hands-on career confidence. We founded TryYourCareers to shatter this disconnect.
+                      For years, students have graduated knowing only textbook definitions without any practical experience. We started TryYourCareers to fix this broken system.
                     </p>
                     <p className="text-sm leading-relaxed text-slate-600">
-                      We offer interactive sandbox tours where students can solve code test suites, adjust professional UI layouts, and analyze salary growth models. We're here to make real-world professional environments completely transparent and accessible.
+                      We provide interactive sandbox tools where students can solve real coding challenges, design user interfaces, and check out actual salary trends. Our goal is to make the tech industry completely transparent and easy to break into.
                     </p>
                   </div>
                   <div className="lg:col-span-5 p-6 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] space-y-4">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E88E5]">Core Values</h3>
                     <div className="space-y-3">
                       {[
-                        { title: "Sandbox First", desc: "No boring presentations. Build, debug, and play inside active simulations." },
-                        { title: "Metric Transparency", desc: "Real salary bands, automation indices, and placement tracks." },
-                        { title: "Community Cohesion", desc: "Connect with mentors, ask daily QAs, and learn together." }
+                        { title: "Sandbox First", desc: "Skip the boring slides—you'll build, test, and learn inside live, hands-on practice environments." },
+                        { title: "Metric Transparency", desc: "Get open access to real salary expectations, skill breakdowns, and clear hiring paths." },
+                        { title: "Community Cohesion", desc: "Learn together by asking questions, teaming up, and chatting with experienced mentors daily." }
                       ].map((val, i) => (
                         <div key={i} className="flex gap-3">
                           <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
@@ -160,17 +166,17 @@ export default function CompanyInfo() {
                 <div className="space-y-3">
                   <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">The Elevate Program</h2>
                   <p className="text-sm leading-relaxed text-slate-600 max-w-3xl">
-                    Elevate is our flagship internship & mentorship bridge, turning top-performing sandbox students into placement-ready graduates with official corporate sponsorship.
+                    Elevate is our premier internship and coaching bridge that takes our top sandbox performers and turns them into job-backed professionals with formal company backing.
                   </p>
                 </div>
 
                 {/* Steps timeline */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-4">
                   {[
-                    { num: "01", name: "Simulate & Qualify", desc: "Complete Stride Journey stages and finish the interactive diagnostic tests." },
-                    { num: "02", name: "1-on-1 Hub Review", desc: "Get matched with professional architects for weekly code/design reviews." },
-                    { num: "03", name: "Production Capstone", desc: "Build feature upgrades for partnered high-growth tech startups." },
-                    { num: "04", name: "Direct Placement", desc: "Fast-track interviews with partners (Razorpay, CureFit, and more)." }
+                    { num: "01", name: "Simulate & Qualify", desc: "Progress through our learning milestones and pass the hands-on diagnostic tests." },
+                    { num: "02", name: "1-on-1 Hub Review", desc: "Get paired with industry experts for weekly feedback on your code and design projects." },
+                    { num: "03", name: "Production Capstone", desc: "Work on real feature updates and tasks for fast-growing startup partners." },
+                    { num: "04", name: "Direct Placement", desc: "Skip the usual queue with fast-tracked interviews at partner companies like Razorpay and CureFit." }
                   ].map((step, i) => (
                     <div key={i} className="bg-[#F0F6FC] p-5 rounded-2xl border border-[#D3E3F5] relative space-y-3">
                       <span className="text-3xl font-black text-[#1E88E5]/15 absolute top-4 right-4">{step.num}</span>
@@ -182,8 +188,8 @@ export default function CompanyInfo() {
 
                 <div className="p-6 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] flex flex-col md:flex-row items-center justify-between gap-6">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-800">Want to join the next cohort?</h3>
-                    <p className="text-xs text-slate-500">Applications open every quarter. You must complete your assessment score metrics to qualify.</p>
+                    <h3 className="text-sm font-bold text-slate-800">Ready to join our next batch?</h3>
+                    <p className="text-xs text-slate-500">New groups start every quarter. Just hit your assessment targets to qualify.</p>
                   </div>
                   <button 
                     onClick={() => {
@@ -195,7 +201,7 @@ export default function CompanyInfo() {
                     }}
                     className="bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold text-xs px-5 py-3 rounded-full transition shadow-xs whitespace-nowrap active:scale-95 cursor-pointer"
                   >
-                    Start Assessment Qualifying
+                    Start Assessment
                   </button>
                 </div>
               </div>
@@ -206,7 +212,7 @@ export default function CompanyInfo() {
               <div className="space-y-8 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Student Success Stories</h2>
-                  <p className="text-sm text-slate-500">See how students pivoted, mastered simulated environments, and unlocked verified positions.</p>
+                  <p className="text-sm text-slate-500">Read how everyday students successfully shifted their careers, mastered our practice environments, and landed real tech jobs.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -269,9 +275,9 @@ export default function CompanyInfo() {
                     <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E88E5]">Work Culture Benefits</h3>
                     <div className="space-y-3.5">
                       {[
-                        { icon: Heart, title: "Wellness First", desc: "Flexible hours, hybrid schedules, and dedicated health stipend." },
-                        { icon: Sparkles, title: "Builder Mindset", desc: "We favor prototypes and testing over massive documents." },
-                        { icon: Users, title: "Inclusive Vibe", desc: "Collaborate closely with team partners on equal footing." }
+                        { icon: Heart, title: "Wellness First", desc: "Enjoy flexible hours, hybrid work arrangements, and a dedicated wellness budget." },
+                        { icon: Sparkles, title: "Builder Mindset", desc: "We care more about building and testing practical prototypes than heavy paperwork." },
+                        { icon: Users, title: "Inclusive Vibe", desc: "Work side-by-side with teammates where everyone's voice carries equal weight." }
                       ].map((perk, i) => {
                         const Icon = perk.icon;
                         return (

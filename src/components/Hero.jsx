@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, TrendingUp, Terminal, Users,
-  ArrowRight, ArrowLeft, ChevronDown,
+  ArrowRight, ChevronDown,
   CheckCircle2, Clock, X, Loader2, ChevronRight
 } from "lucide-react";
 
@@ -132,8 +132,6 @@ export default function Hero({ onStartDiscovery, onExploreCareers, careersCount 
         onOpenModal={handleStageClick}
       />
 
-      {/* Testimonials */}
-      <TestimonialSlider isDark={isDark} />
 
       {/* Modal Overlay */}
       <AnimatePresence>
@@ -639,7 +637,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
             </motion.div>
 
             {/* BY THE NUMBERS Section */}
-            <motion.div
+            {/* <motion.div
               variants={fadeUp}
               className="pt-5 w-full text-left mt-1"
             >
@@ -649,7 +647,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 items-start">
                 {/* Metric 1: AVG RATING */}
-                <div className="flex flex-col justify-between">
+            {/* <div className="flex flex-col justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     AVG RATING
                   </span>
@@ -661,30 +659,30 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
                     860+ from the last 30 days
                   </p>
-                </div>
+                </div> */}
 
                 {/* Metric 2: Trusted Users */}
-                <div>
+            {/* <div>
                   <p className="text-2xl sm:text-3xl font-extrabold text-[#1E88E5] dark:text-sky-400 tracking-tight">
                     500 K
                   </p>
                   <p className="text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-400 mt-0.5">
                     Trusted Users
                   </p>
-                </div>
+                </div> */}
 
                 {/* Metric 3: Careers */}
-                <div>
+            {/* <div>
                   <p className="text-2xl sm:text-3xl font-extrabold text-purple-600 dark:text-purple-400 tracking-tight">
                     1500+
                   </p>
                   <p className="text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-400 mt-0.5">
                     Careers
                   </p>
-                </div>
+                </div> */}
 
                 {/* Metric 4: Hubs */}
-                <div>
+            {/* <div>
                   <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">
                     140+
                   </p>
@@ -693,7 +691,7 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
                   </p>
                 </div>
               </div>
-            </motion.div>
+      </motion.div> */}
           </motion.div>
 
           {/* Right Column: Beautiful Abstract Career Test Visualization */}
@@ -820,198 +818,6 @@ function EcosystemSection({ isDark }) {
   );
 }
 
-/* ─────────────────────────── Testimonial Slider ─────────────────────────── */
-const TESTIMONIALS = [
-  {
-    name: "David R.",
-    role: "Business Owner / Student Parent",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-    quote: "TryYourCareers truly changed my life. I tried everything, but this program gave me the simulator test-drives and personalized guidance I needed. I found my fit in Software Engineering and finally feel truly energized, confident, and in control of my future.",
-    rating: 5,
-    tag: "Software Engineering"
-  },
-  {
-    name: "Elena M.",
-    role: "Data Analyst Student",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face",
-    quote: "The interactive trial sandboxes let me feel what it's actually like to analyze models and write Python code. I'm now studying Data Science with 100% confidence instead of guessing.",
-    rating: 5,
-    tag: "Data Science"
-  },
-  {
-    name: "Marcus K.",
-    role: "DevOps Engineer",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face",
-    quote: "Having the confidence reports backed by actual runtime simulator testing made it so easy to get validation from my parents and counselors. Highly recommend the simulator!",
-    rating: 5,
-    tag: "DevOps & Cloud"
-  }
-];
-
-function TestimonialSlider({ isDark }) {
-  const [curr, setCurr] = useState(0);
-  const active = TESTIMONIALS[curr];
-  const next = TESTIMONIALS[(curr + 1) % TESTIMONIALS.length];
-
-  // Auto carousel loop every 5.5 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurr((prev) => (prev + 1) % TESTIMONIALS.length);
-    }, 5500);
-    return () => clearInterval(timer);
-  }, []);
-
-  const handlePrev = () => {
-    setCurr(prev => (prev === 0 ? TESTIMONIALS.length - 1 : prev - 1));
-  };
-
-  const handleNext = () => {
-    setCurr(prev => (prev === TESTIMONIALS.length - 1 ? 0 : prev + 1));
-  };
-
-  return (
-    <div className={`py-16 md:py-24 border-t transition-colors duration-300 ${isDark ? "bg-[#0b0f19] border-slate-800 text-slate-100" : "bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] border-[#D3E3F5] text-[#0b1a36]"
-      }`}>
-      <div className="mx-auto max-w-6xl px-6 sm:px-8 text-left">
-
-        {/* Header Tag */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
-          <div>
-            <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wider uppercase ${isDark ? "border-sky-500/30 bg-sky-500/10 text-sky-300" : "border-sky-200 bg-sky-50 text-[#1E88E5]"
-              }`}>
-              <span className="h-2 w-2 rounded-full bg-[#1E88E5] animate-pulse" />
-              STUDENT TESTIMONIALS
-            </span>
-            <h2 className={`mt-3 text-3xl sm:text-4xl font-serif font-extrabold tracking-tight ${isDark ? "text-white" : "text-[#0b1a36]"
-              }`}>
-              Real Lives Changed
-            </h2>
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={handlePrev}
-              aria-label="Previous Testimonial"
-              className={`p-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer ${isDark
-                ? "bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200"
-                : "bg-white border-[#D3E3F5] hover:bg-[#F0F6FC] text-[#0b1a36] shadow-2xs"
-                }`}
-            >
-              <ArrowLeft size={18} />
-            </button>
-
-            {/* Dots */}
-            <div className="flex gap-1.5 px-2">
-              {TESTIMONIALS.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurr(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${curr === idx ? "w-6 bg-[#1E88E5]" : "w-2 bg-slate-300 dark:bg-slate-700"
-                    }`}
-                />
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label="Next Testimonial"
-              className={`p-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer ${isDark
-                ? "bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-200"
-                : "bg-white border-[#D3E3F5] hover:bg-[#F0F6FC] text-[#0b1a36] shadow-2xs"
-                }`}
-            >
-              <ArrowRight size={18} />
-            </button>
-          </div>
-        </div>
-
-        {/* Main Content Grid */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={curr}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.4 }}
-            className={`grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch rounded-3xl p-6 sm:p-10 border ${isDark
-              ? "bg-[#111827]/90 border-slate-800/80 shadow-2xl shadow-slate-950/60"
-              : "bg-white border-[#D3E3F5] shadow-xs"
-              }`}
-          >
-            {/* Left Column: Reviewer Photo & Trust Badge */}
-            <div className="lg:col-span-4 flex flex-col justify-between items-center sm:items-start gap-6">
-              <div className="relative w-full max-w-[260px] sm:max-w-none aspect-square rounded-3xl overflow-hidden shadow-sm border border-[#D3E3F5] dark:border-slate-800">
-                <img
-                  src={active.image}
-                  alt={active.name}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                />
-                <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-full border border-[#D3E3F5] dark:border-slate-800 text-[10px] font-bold text-amber-500 flex items-center gap-1 shadow-2xs">
-                  <span>⭐⭐⭐⭐⭐</span>
-                </div>
-              </div>
-
-              {/* Verified Student Pill */}
-              <div className={`w-full p-4 rounded-2xl border ${isDark ? "bg-slate-900/70 border-slate-800" : "bg-[#F0F6FC] border-[#D3E3F5]"
-                }`}>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                  <span className="text-xs font-bold tracking-tight">Verified Graduate Match</span>
-                </div>
-                <p className={`text-[11px] mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                  Matched with <span className="font-semibold text-[#1E88E5] dark:text-sky-400">{active.tag}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Right Column: Quote & Details */}
-            <div className="lg:col-span-8 flex flex-col justify-between space-y-6 pt-2">
-              <div>
-                <div className="text-amber-500 font-serif text-5xl leading-none select-none opacity-40">“</div>
-                <p className={`text-lg sm:text-xl md:text-2xl font-serif leading-relaxed -mt-4 ${isDark ? "text-slate-200" : "text-[#0b1a36]"
-                  }`}>
-                  {active.quote}
-                </p>
-              </div>
-
-              <div className="pt-6 border-t border-[#D3E3F5] dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h4 className={`text-lg font-bold ${isDark ? "text-white" : "text-[#0b1a36]"}`}>
-                    {active.name}
-                  </h4>
-                  <p className={`text-xs sm:text-sm font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    {active.role}
-                  </p>
-                </div>
-
-                {/* Next preview card */}
-                <button
-                  onClick={handleNext}
-                  className={`flex items-center gap-3 rounded-2xl p-2.5 px-3.5 border transition-all duration-200 text-left active:scale-95 cursor-pointer ${isDark
-                    ? "bg-slate-900/80 border-slate-800 hover:bg-slate-800"
-                    : "bg-[#F0F6FC] border-[#D3E3F5] hover:bg-sky-50"
-                    }`}
-                >
-                  <img src={next.image} alt={next.name} className="w-9 h-9 rounded-xl object-cover" />
-                  <div>
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Up Next</span>
-                    <p className="text-xs font-bold text-[#0b1a36] dark:text-white truncate max-w-[110px]">{next.name}</p>
-                  </div>
-                  <ChevronRight size={16} className="text-slate-400" />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-
-      </div>
-    </div>
-  );
-}
-
 /* ─────────────────────────── CareerExplorer Scroll-Pinned How It Works ─────────── */
 function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOpenModal }) {
   const navigate = useNavigate();
@@ -1042,8 +848,8 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
       num: "01",
       navTitle: "Answer",
       title: "Answer a series of questions",
-      desc: "Take the assessment and get your career matches, personality archetype, and more along the way.",
-      badge: "Stage 01: Discover",
+      desc: "Share a bit about yourself by answering a series of quick, interactive questions.",
+      badge: "Stage 01: Answer",
       ctaText: "Start Assessment",
       ctaAction: () => {
         if (onStartDiscovery) onStartDiscovery();
@@ -1056,8 +862,8 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
       num: "02",
       navTitle: "Discover",
       title: "Discover what makes you — You",
-      desc: "Find out what makes you stand apart from others and why certain careers are great fits for you.",
-      badge: "Stage 02: Personality & Archetype",
+      desc: "Uncover your unique personality archetype and find your initial career matches.",
+      badge: "Stage 02: Discover",
       ctaText: "Explore Personality Fits",
       ctaAction: () => {
         if (onStartDiscovery) onStartDiscovery();
@@ -1070,8 +876,8 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
       num: "03",
       navTitle: "Explore",
       title: "Explore the world of school & work",
-      desc: "Find all the information you need to know about your dream career. Then make a plan to get there.",
-      badge: "Stage 03: Career & Salary Metrics",
+      desc: "Browse tailored degree options and dive deeper into what fits you best.",
+      badge: "Stage 03: Explore",
       ctaText: "Explore Salaries & Trends",
       ctaAction: () => {
         if (onExploreCareers) onExploreCareers();
@@ -1084,8 +890,8 @@ function StrideJourneySection({ isDark, onStartDiscovery, onExploreCareers, onOp
       num: "04",
       navTitle: "Align",
       title: "Align with experts & trial sandboxes",
-      desc: "Experience real-world task sandboxes and connect with practicing mentors in career hubs.",
-      badge: "Stage 04: Practical Sandboxes & Hubs",
+      desc: "Put everything together with final results, trait reports, and a clear roadmap.",
+      badge: "Stage 04: Align",
       ctaText: "Launch Sandboxes & Hubs",
       ctaAction: () => navigate("/career-hubs"),
       gradient: "from-[#1E88E5] to-[#0b1a36]"

@@ -2,11 +2,15 @@
 User-agent: *
 Allow: /
 Allow: /explore-careers
+Allow: /career-hubs
 Allow: /career-details/*
 Allow: /career-search
 Allow: /insights-feed
 Allow: /discovery-test
 Allow: /roadmap
+Allow: /career-reality
+Allow: /career-intelligence
+Allow: /career-decision
 Allow: /company/*
 Allow: /support/*
 

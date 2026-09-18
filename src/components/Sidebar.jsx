@@ -2,13 +2,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardList, Compass, Newspaper,
   Users, LayoutDashboard, LogIn, LogOut,
-  X, ChevronLeft, ChevronRight, Rocket
+  X, ChevronLeft, ChevronRight, Rocket,
+  Brain,
 } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Dashboard", icon: LayoutDashboard, action: "student-dashboard" },
   { label: "Discovery Test", icon: ClipboardList, action: "assessment" },
   { label: "Career Reality", icon: Compass, action: "career-reality" },
+  { label: "Career Intelligence", icon: Brain, action: "career-intelligence" },
   { label: "Insights Feed", icon: Newspaper, action: "insights-feed" },
   { label: "Career Hubs", icon: Users, action: "career-hubs" },
   { label: "Trial Mission", icon: Rocket, action: "trial-mission", isLaunchingSoon: true },
@@ -61,24 +63,35 @@ export default function Sidebar({
   const sidebarContent = (
     <div className="sidebar-inner flex h-full flex-col">
       {/* Logo / Brand */}
-      <div className={`sidebar-brand flex h-20 items-center justify-between gap-3 px-4 border-b ${
-        isDark ? "border-slate-800" : "border-[#D3E3F5]"
-      }`}>
-        <div className="flex items-center gap-2.5 overflow-hidden">
-          <img
-            src="/favicon.ico"
-            alt="Company Logo"
-            className="h-7 w-7 shrink-0 object-contain"
-          />
+      <div className={`sidebar-brand flex h-20 items-center justify-between gap-3 px-4 border-b ${isDark ? "border-slate-800" : "border-[#D3E3F5]"
+        }`}>
+        <div className="flex items-center gap-3 overflow-hidden group cursor-pointer" onClick={() => handleNav("landing")}>
+          <div className={`relative flex items-center justify-center h-10 w-10 shrink-0 rounded-2xl transition-all duration-300 shadow-2xs group-hover:scale-105 ${isDark
+              ? "bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/80"
+              : "bg-gradient-to-br from-sky-50 via-white to-blue-50/60 border border-[#D3E3F5]"
+            }`}>
+            <img
+              src="/assets/logo/logo-mark.png"
+              alt="Try Your Career"
+              className="h-7 w-7 aspect-square object-contain drop-shadow-xs"
+            />
+            {/* <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" /> */}
+          </div>
           {!isCollapsed && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
-              className="min-w-0"
+              className="min-w-0 flex flex-col text-left"
             >
-              <p className={`text-xl font-bold font-sans tracking-tight ${isDark ? "text-slate-100" : "text-[#0b1a36]"}`}>
-                TryYourCareers
+              <p className={`text-base font-black font-sans tracking-tight leading-none ${isDark ? "text-slate-100" : "text-[#0b1a36]"}`}>
+                Try Your{" "}
+                <span className="bg-gradient-to-r from-blue-600 via-[#1E88E5] to-indigo-600 bg-clip-text text-transparent">
+                  Career
+                </span>
               </p>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">
+                Career Intelligence
+              </span>
             </motion.div>
           )}
         </div>
@@ -113,34 +126,30 @@ export default function Sidebar({
               whileTap={{ scale: 0.97 }}
               onClick={() => handleNav(action)}
               title={isCollapsed ? (isLaunchingSoon ? `${label} (Launching Soon)` : label) : undefined}
-              className={`sidebar-nav-item group flex w-full items-center gap-3 rounded-2xl py-2.5 text-left text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                isCollapsed ? "justify-center px-0" : "px-3.5"
-              } ${
-                isActive
+              className={`sidebar-nav-item group flex w-full items-center gap-3 rounded-2xl py-2.5 text-left text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${isCollapsed ? "justify-center px-0" : "px-3.5"
+                } ${isActive
                   ? "bg-[#0b1a36] text-white shadow-xs"
                   : isLaunchingSoon
-                  ? "text-slate-650 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
-                  : "text-slate-650 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
-              }`}
+                    ? "text-slate-650 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
+                    : "text-slate-650 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
+                }`}
             >
               {/* Active indicator bar */}
-              <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-r-full transition-all duration-200 ${
-                isActive ? "bg-[#1E88E5] opacity-100" : "opacity-0"
-              }`} />
+              <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-r-full transition-all duration-200 ${isActive ? "bg-[#1E88E5] opacity-100" : "opacity-0"
+                }`} />
               <Icon
                 size={17}
-                className={`shrink-0 transition-colors ${
-                  isActive ? "text-white" : isLaunchingSoon ? "text-[#1E88E5] group-hover:text-[#1E88E5]" : "text-slate-400 group-hover:text-[#1E88E5]"
-                }`}
+                className={`shrink-0 transition-colors ${isActive ? "text-white" : isLaunchingSoon ? "text-[#1E88E5] group-hover:text-[#1E88E5]" : "text-slate-400 group-hover:text-[#1E88E5]"
+                  }`}
               />
               {!isCollapsed && (
                 <div className="flex items-center justify-between w-full min-w-0">
                   <span className="truncate">{label}</span>
-                  {isLaunchingSoon && (
-                    <span className="text-[10px] bg-sky-50 text-[#1E88E5] font-bold px-2.5 py-0.5 rounded-full ml-auto border border-sky-200 shrink-0">
+                  {/* {isLaunchingSoon && (
+                    <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full ml-auto border border-amber-200 shrink-0">
                       Soon
                     </span>
-                  )}
+                  )} */}
                 </div>
               )}
               {isCollapsed && isLaunchingSoon && (
@@ -236,11 +245,9 @@ export default function Sidebar({
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className={`cc-sidebar hidden lg:flex lg:flex-col lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:z-40 border-r border-[#D3E3F5] transition-all duration-350 ease-in-out ${
-        isCollapsed ? "lg:w-[80px]" : "lg:w-[260px]"
-      } ${
-        isDark ? "bg-slate-950" : "bg-white"
-      }`}>
+      <aside className={`cc-sidebar hidden lg:flex lg:flex-col lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:z-40 border-r border-[#D3E3F5] transition-all duration-350 ease-in-out ${isCollapsed ? "lg:w-[80px]" : "lg:w-[260px]"
+        } ${isDark ? "bg-slate-950" : "bg-white"
+        }`}>
         {sidebarContent}
       </aside>
 
@@ -260,9 +267,8 @@ export default function Sidebar({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className={`fixed inset-y-0 left-0 z-[70] flex w-[280px] flex-col lg:hidden border-r border-[#D3E3F5] ${
-                isDark ? "bg-slate-950" : "bg-white"
-              }`}
+              className={`fixed inset-y-0 left-0 z-[70] flex w-[280px] flex-col lg:hidden border-r border-[#D3E3F5] ${isDark ? "bg-slate-950" : "bg-white"
+                }`}
             >
               {/* Close button */}
               <button

@@ -12,8 +12,7 @@
 
 import BACKEND_BASE_URL from "../API/BaseURL";
 
-const BASE_URL =
-  process.env.REACT_APP_API_URL || BACKEND_BASE_URL || "https://backend-9g1n.onrender.com";
+const BASE_URL = BACKEND_BASE_URL;
 
 // Token store — updated by the AuthContext via setApiToken()
 let _token = "";

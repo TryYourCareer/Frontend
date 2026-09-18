@@ -1,9 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
-import { Search, Filter, Clock, ExternalLink, Tag } from "lucide-react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import {
+  Search,
+  Filter,
+  Clock,
+  ExternalLink,
+  Tag,
+  Sparkles,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  GraduationCap,
+  Briefcase,
+  UserCheck,
+} from "lucide-react";
 
 import { isFirebaseReady, getDocuments } from "../utils/supabaseStorage";
 import BACKEND_BASE_URL from "../API/BaseURL";
 import SEO from "../components/SEO";
+import { useAuth } from "../contexts/AuthContext";
 
 const API_BASE_URL = BACKEND_BASE_URL;
 const CATEGORY_TABS = ["All", "Opportunity", "Skill Trend", "News", "Success Story"];
@@ -25,14 +39,79 @@ const badgeStyles = {
   Innovation: "bg-purple-50 text-purple-700 border border-purple-200",
 };
 
-const DOMAIN_OPTIONS = [
-  { value: "All", label: "All Sectors" },
-  { value: "Technology & Careers", label: "Technology & Careers" },
-  { value: "SPORTS, FITNESS & ESPORTS", label: "Sports & Esports" },
-  { value: "HOSPITALITY, WELLNESS & LIFESTYLE", label: "Hospitality & Wellness" },
-  { value: "EDUCATION, COACHING & HUMAN DEVELOPMENT", label: "Education & Coaching" },
-  { value: "EMERGING, FRONTIER & INTERDISCIPLINARY CAREERS", label: "Emerging & Frontier" },
-];
+function mapEducationToStage(edu) {
+  if (!edu || typeof edu !== "string") return "All";
+  const s = edu.toLowerCase();
+  if (
+    s.includes("school") ||
+    s.includes("class") ||
+    s.includes("hsc") ||
+    s.includes("ssc") ||
+    s.includes("+2") ||
+    s.includes("10th") ||
+    s.includes("12th") ||
+    s.includes("k12")
+  ) {
+    return "school";
+  }
+  if (
+    s.includes("working") ||
+    s.includes("employed") ||
+    s.includes("professional") ||
+    s.includes("ph.d") ||
+    s.includes("doctorate") ||
+    s.includes("experienced")
+  ) {
+    return "professional";
+  }
+  if (
+    s.includes("bachelor") ||
+    s.includes("b.") ||
+    s.includes("m.") ||
+    s.includes("degree") ||
+    s.includes("college") ||
+    s.includes("undergrad") ||
+    s.includes("diploma") ||
+    s.includes("iti") ||
+    s.includes("mba") ||
+    s.includes("student")
+  ) {
+    return "undergrad";
+  }
+  return "All";
+}
+
+function mapInterestToDomain(interest) {
+  if (!interest || typeof interest !== "string" || interest === "—" || interest.toLowerCase() === "other") {
+    return "All";
+  }
+  const s = interest.toLowerCase();
+  if (s.includes("tech") || s.includes("code") || s.includes("software") || s.includes("ai") || s.includes("digital") || s.includes("data")) {
+    return "Technology";
+  }
+  if (s.includes("business") || s.includes("finance") || s.includes("corporate") || s.includes("strategy") || s.includes("entrepreneur")) {
+    return "Business";
+  }
+  if (s.includes("media") || s.includes("art") || s.includes("design") || s.includes("journalism") || s.includes("public discourse")) {
+    return "Media";
+  }
+  if (s.includes("sport") || s.includes("fitness") || s.includes("esport")) {
+    return "Sports";
+  }
+  if (s.includes("health") || s.includes("medical") || s.includes("wellness") || s.includes("lifestyle") || s.includes("hospitality")) {
+    return "Healthcare";
+  }
+  if (s.includes("education") || s.includes("teach") || s.includes("coaching") || s.includes("social impact") || s.includes("public service")) {
+    return "Education";
+  }
+  if (s.includes("emerging") || s.includes("frontier") || s.includes("interdisciplinary")) {
+    return "Emerging";
+  }
+  if (s.includes("heritage") || s.includes("cultural") || s.includes("india")) {
+    return "Cultural";
+  }
+  return interest;
+}
 
 function formatTimeAgo(timestamp) {
   const diffSeconds = Math.max(0, Math.floor((Date.now() - new Date(timestamp)) / 1000));
@@ -112,60 +191,143 @@ function mapBackendInsight(item) {
 }
 
 export default function InsightsFeed({ onBack }) {
+  const { token, profile, user } = useAuth();
+  const activeProfile = useMemo(() => profile || user || {}, [profile, user]);
+
+  const currentEducation = activeProfile?.current_education || activeProfile?.currentlyPursuing || "";
+  const areaOfInterest = activeProfile?.area_of_interest || activeProfile?.areaOfInterest || "";
+
+  const autoStage = useMemo(() => mapEducationToStage(currentEducation), [currentEducation]);
+  const autoDomain = useMemo(() => mapInterestToDomain(areaOfInterest), [areaOfInterest]);
+
+  const [isTailored, setIsTailored] = useState(true);
   const [insights, setInsights] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStage, setSelectedStage] = useState("All");
-  const [selectedDomain, setSelectedDomain] = useState("All");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchInsights = async () => {
-      setLoading(true);
-      try {
-        let url = `${API_BASE_URL}/insights`;
-        const params = [];
-        if (selectedDomain !== "All") {
-          params.push(`domain=${encodeURIComponent(selectedDomain)}`);
-        }
-        if (selectedStage !== "All") {
-          params.push(`stage=${encodeURIComponent(selectedStage.toLowerCase())}`);
-        }
-        if (params.length > 0) {
-          url += `?${params.join("&")}`;
-        }
+  // Live AI Ingestion Trigger State
+  const [isTriggering, setIsTriggering] = useState(false);
+  const [triggerStatus, setTriggerStatus] = useState(null);
 
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch insights");
-        const payload = await response.json();
-        if (!Array.isArray(payload)) throw new Error("Invalid insights payload");
-        
-        const mapped = payload.map(mapBackendInsight);
-        setInsights(mapped);
-      } catch (err) {
-        console.warn("Backend fetch failed, attempting Firebase fallback...", err);
-        let fallbackLoaded = false;
-        if (isFirebaseReady) {
-          try {
-            const fbInsights = await getDocuments("insightsFeed", 50);
-            if (fbInsights && fbInsights.length > 0) {
-              setInsights(fbInsights);
-              fallbackLoaded = true;
-            }
-          } catch (fbErr) {
-            console.error("Firebase fetch failed:", fbErr);
-          }
-        }
-        if (!fallbackLoaded) {
-          setInsights(INITIAL_INSIGHTS);
-        }
-      } finally {
-        setLoading(false);
+  const fetchInsights = useCallback(async () => {
+    setLoading(true);
+    try {
+      let url = `${API_BASE_URL}/insights`;
+      const params = [];
+      const effectiveDomain = isTailored && autoDomain !== "All" ? autoDomain : null;
+      const effectiveStage = isTailored && autoStage !== "All" ? autoStage : null;
+
+      if (effectiveDomain) {
+        params.push(`domain=${encodeURIComponent(effectiveDomain)}`);
       }
-    };
+      if (effectiveStage) {
+        params.push(`stage=${encodeURIComponent(effectiveStage.toLowerCase())}`);
+      }
+      if (params.length > 0) {
+        url += `?${params.join("&")}`;
+      }
 
+      let response = await fetch(url);
+      let payload = response.ok ? await response.json() : [];
+
+      // If strict tailored filter yielded 0 results, fall back to general feed so user always gets content
+      if (payload.length === 0 && (effectiveDomain || effectiveStage)) {
+        const fallbackRes = await fetch(`${API_BASE_URL}/insights`);
+        if (fallbackRes.ok) {
+          payload = await fallbackRes.json();
+        }
+      }
+
+      if (!Array.isArray(payload)) throw new Error("Invalid insights payload");
+      
+      const mapped = payload.map(mapBackendInsight);
+      setInsights(mapped);
+    } catch (err) {
+      console.warn("Backend fetch failed, attempting Firebase fallback...", err);
+      let fallbackLoaded = false;
+      if (isFirebaseReady) {
+        try {
+          const fbInsights = await getDocuments("insightsFeed", 50);
+          if (fbInsights && fbInsights.length > 0) {
+            setInsights(fbInsights);
+            fallbackLoaded = true;
+          }
+        } catch (fbErr) {
+          console.error("Firebase fetch failed:", fbErr);
+        }
+      }
+      if (!fallbackLoaded) {
+        setInsights(INITIAL_INSIGHTS);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [isTailored, autoDomain, autoStage]);
+
+  useEffect(() => {
     fetchInsights();
-  }, [selectedDomain, selectedStage]);
+  }, [fetchInsights]);
+
+  // Trigger Live AI Ingestion Pipeline
+  const handleTriggerIngestion = async () => {
+    if (isTriggering) return;
+    setIsTriggering(true);
+    setTriggerStatus({
+      type: "loading",
+      message: "AI agent is searching live web results & extracting opportunities...",
+    });
+
+    try {
+      const cronSecret = process.env.REACT_APP_CRON_SECRET || "_2tM-Uqwa3tikeXcfsSh1eWbMoqEQdC18LjPj-qngjc";
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      if (cronSecret) {
+        headers["X-Cron-Secret"] = cronSecret;
+      }
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(`${API_BASE_URL}/insights/run?limit=3`, {
+        method: "POST",
+        headers,
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.detail || `Server returned ${res.status}`);
+      }
+
+      const data = await res.json();
+      const count = data.inserted ?? 0;
+      setTriggerStatus({
+        type: "success",
+        message: count > 0 
+          ? `Discovered and added ${count} new live insights to the feed!`
+          : "AI search complete! All latest opportunities are currently up to date.",
+      });
+
+      // Refresh feed with newly inserted opportunities
+      await fetchInsights();
+
+      setTimeout(() => {
+        setTriggerStatus(null);
+      }, 5000);
+    } catch (err) {
+      console.error("Trigger error:", err);
+      setTriggerStatus({
+        type: "error",
+        message: err.message || "Failed to trigger live AI ingestion. Please try again.",
+      });
+      setTimeout(() => {
+        setTriggerStatus(null);
+      }, 6000);
+    } finally {
+      setIsTriggering(false);
+    }
+  };
 
   const filteredInsights = useMemo(() => {
     return insights.filter((insight) => {
@@ -181,7 +343,7 @@ export default function InsightsFeed({ onBack }) {
   }, [activeCategory, insights, searchQuery]);
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-4 py-8 sm:px-6 lg:px-10">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 sm:px-6 lg:px-10">
       <SEO
         title="Daily Career Insights & Tech Opportunities"
         description="Stay ahead with curated internship opportunities, in-demand skill trends, student scholarships, and technology industry news."
@@ -190,15 +352,67 @@ export default function InsightsFeed({ onBack }) {
       />
       <div className="mx-auto max-w-6xl space-y-6">
 
-        {/* Title Header */}
-        <div className="space-y-1.5 pb-2">
-          <h1 className="font-serif text-3xl font-bold tracking-tight text-[#0b1a36]">
-            Daily Career Insights
-          </h1>
-          <p className="text-xs font-semibold text-slate-500 max-w-2xl">
-            Curated opportunities, industry skill trends, and fresh career news for students and professionals.
-          </p>
+        {/* Title Header & Trigger Action */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#D3E3F5]/60">
+          <div className="space-y-1.5">
+            <h1 className="font-serif text-3xl font-bold tracking-tight text-[#0b1a36]">
+              Daily Career Insights
+            </h1>
+            <p className="text-xs font-semibold text-slate-500 max-w-2xl">
+              Curated opportunities, industry skill trends, and fresh career news for students and professionals.
+            </p>
+          </div>
+
+          {/* Live AI Trigger Button */}
+          <button
+            id="trigger-ai-insights-btn"
+            type="button"
+            onClick={handleTriggerIngestion}
+            disabled={isTriggering}
+            className="inline-flex items-center gap-2 self-start sm:self-center px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#0b1a36] via-[#152e59] to-[#1E88E5] text-white text-xs font-bold shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:pointer-events-none cursor-pointer"
+          >
+            {isTriggering ? (
+              <>
+                <Loader2 size={15} className="animate-spin text-blue-300" />
+                <span>Searching Live Opportunities...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles size={15} className="text-amber-300 animate-pulse" />
+                <span>Discover Live Insights</span>
+              </>
+            )}
+          </button>
         </div>
+
+        {/* Live Status Toast Banner */}
+        {triggerStatus && (
+          <div
+            className={`flex items-center justify-between gap-3 px-4 py-3 rounded-2xl text-xs font-medium border shadow-sm transition-all animate-[fadeIn_0.3s_ease-out] ${
+              triggerStatus.type === "loading"
+                ? "bg-blue-50/90 border-blue-200 text-blue-900"
+                : triggerStatus.type === "success"
+                ? "bg-emerald-50/90 border-emerald-200 text-emerald-900"
+                : "bg-red-50/90 border-red-200 text-red-900"
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              {triggerStatus.type === "loading" && <Loader2 size={16} className="animate-spin text-blue-600 shrink-0" />}
+              {triggerStatus.type === "success" && <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />}
+              {triggerStatus.type === "error" && <AlertCircle size={16} className="text-red-600 shrink-0" />}
+              <span className="font-semibold">{triggerStatus.message}</span>
+            </div>
+            {triggerStatus.type !== "loading" && (
+              <button
+                type="button"
+                onClick={() => setTriggerStatus(null)}
+                className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-0.5 rounded-lg hover:bg-slate-200/50 transition"
+              >
+                Dismiss
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Toolbar: categories left, search right */}
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -230,59 +444,55 @@ export default function InsightsFeed({ onBack }) {
           </div>
         </div>
 
-        {/* Dropdown Filters Row */}
-        <div className="flex flex-wrap items-center gap-4 bg-white border border-[#D3E3F5] rounded-2xl p-4 shadow-sm">
-          {/* Stage Dropdown */}
-          <div className="flex flex-col gap-1 min-w-[140px] flex-1 sm:flex-initial">
-            <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Career Stage</span>
-            <div className="relative">
-              <select
-                id="stage-select"
-                value={selectedStage}
-                onChange={(e) => setSelectedStage(e.target.value)}
-                className="w-full appearance-none rounded-xl border border-[#D3E3F5] bg-[#F0F6FC] px-3 py-2 pr-8 text-xs font-bold text-slate-700 outline-none transition focus:border-slate-400 hover:bg-slate-100/50"
-              >
-                <option value="All">All Stages</option>
-                <option value="school">School</option>
-                <option value="undergrad">Undergrad</option>
-                <option value="professional">Professional</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
-                <Filter size={10} />
-              </div>
+        {/* Profile Auto-Filter Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-[#D3E3F5] rounded-2xl p-4 shadow-sm">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
+              <UserCheck size={14} className="text-[#1E88E5]" />
+              <span>Tailored by Profile:</span>
+            </div>
+
+            {/* Current Education -> Stage */}
+            <div className="flex items-center gap-2 bg-[#F0F6FC] border border-[#D3E3F5] px-3 py-1.5 rounded-xl">
+              <GraduationCap size={14} className="text-[#0b1a36]" />
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wide">Current Education:</span>
+              <span className="font-bold text-slate-800 text-xs">
+                {currentEducation || "All Stages"}
+              </span>
+              {autoStage !== "All" && (
+                <span className="ml-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                  {autoStage}
+                </span>
+              )}
+            </div>
+
+            {/* Area of Interest -> Sector */}
+            <div className="flex items-center gap-2 bg-[#F0F6FC] border border-[#D3E3F5] px-3 py-1.5 rounded-xl">
+              <Briefcase size={14} className="text-[#0b1a36]" />
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wide">Area of Interest:</span>
+              <span className="font-bold text-slate-800 text-xs">
+                {areaOfInterest || "All Sectors"}
+              </span>
+              {autoDomain !== "All" && (
+                <span className="ml-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  {autoDomain}
+                </span>
+              )}
             </div>
           </div>
 
-          {/* Sector/Domain Dropdown */}
-          <div className="flex flex-col gap-1 min-w-[220px] flex-1 sm:flex-initial">
-            <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Career Sector</span>
-            <div className="relative">
-              <select
-                id="sector-select"
-                value={selectedDomain}
-                onChange={(e) => setSelectedDomain(e.target.value)}
-                className="w-full appearance-none rounded-xl border border-[#D3E3F5] bg-[#F0F6FC] px-3 py-2 pr-8 text-xs font-bold text-slate-700 outline-none transition focus:border-slate-400 hover:bg-slate-100/50"
-              >
-                {DOMAIN_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
-                <Filter size={10} />
-              </div>
-            </div>
-          </div>
-          
-          {/* Active filters clear button */}
-          {(selectedStage !== "All" || selectedDomain !== "All") && (
+          {/* Tailored / All toggle */}
+          {(autoStage !== "All" || autoDomain !== "All") && (
             <button
-              onClick={() => {
-                setSelectedStage("All");
-                setSelectedDomain("All");
-              }}
-              className="sm:self-end mt-2 sm:mt-0 text-[10px] font-extrabold text-red-600 hover:text-red-700 transition py-2 px-3 rounded-xl hover:bg-red-50/50 border border-transparent hover:border-red-100"
+              type="button"
+              onClick={() => setIsTailored((prev) => !prev)}
+              className={`text-xs font-bold px-3.5 py-1.5 rounded-xl border transition ${
+                isTailored
+                  ? "bg-[#0b1a36] text-white border-[#0b1a36] shadow-sm"
+                  : "bg-white text-slate-600 border-[#D3E3F5] hover:bg-slate-50"
+              }`}
             >
-              Clear Filters
+              {isTailored ? "Tailored Active" : "Showing All (Click to Tailor)"}
             </button>
           )}
         </div>
