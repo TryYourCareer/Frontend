@@ -12,8 +12,7 @@
 
 import BACKEND_BASE_URL from "../API/BaseURL";
 
-const BASE_URL =
-  process.env.REACT_APP_API_URL || BACKEND_BASE_URL || "http://localhost:8000";
+const BASE_URL = BACKEND_BASE_URL;
 
 // Token store — updated by the AuthContext via setApiToken()
 let _token = "";

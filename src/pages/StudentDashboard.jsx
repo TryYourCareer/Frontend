@@ -165,36 +165,40 @@ const radarColors = ["#1E88E5", "#7c3aed", "#059669", "#1E88E5", "#7c3aed", "#05
 /* ── Main Component ──────────────────────────────────────────────────────── */
 export default function StudentDashboard() {
   const navigate = useNavigate();
-  const { loading, profile: authProfile } = useAuth();
-  const [userData, setUserData] = useState(null);
+  const { loading, profile: authProfile, user: authUser } = useAuth();
+  const [userData, setUserData] = useState(() => authProfile || null);
   const [fetchingUser, setFetchingUser] = useState(false);
 
-  // Use profile from auth context; if not present, fetch from API
+  // Sync if authProfile becomes available
   useEffect(() => {
     if (authProfile) {
       setUserData(authProfile);
       return;
     }
-    if (!loading) {
+    // Only fetch if we have NO profile at all and auth initialization has finished
+    if (!loading && !userData) {
       setFetchingUser(true);
       getUserProfile()
         .then((u) => setUserData(u))
         .catch(() => setUserData(null))
         .finally(() => setFetchingUser(false));
     }
-  }, [authProfile, loading]);
+  }, [authProfile, loading, userData]);
 
   const { stats, compatibility, missions, recommendations } = dashboardData;
 
-  if (loading || fetchingUser) return <DashboardSkeleton />;
+  const activeProfile = authProfile || userData;
 
-  // Derive display values from real profile
-  const firstName = userData?.name?.split(" ")[0] || "there";
-  const fullName  = userData?.name || "—";
-  const email     = userData?.email || "—";
-  const education = userData?.current_education || "—";
-  const interest  = userData?.area_of_interest || "—";
-  const gender    = userData?.gender || "—";
+  // Only block the entire view if we truly have NO profile to show
+  if ((loading || fetchingUser) && !activeProfile) return <DashboardSkeleton />;
+
+  // Derive display values from active profile or authUser fallback
+  const fullName  = activeProfile?.name || authUser?.user_metadata?.full_name || authUser?.name || "—";
+  const firstName = (fullName !== "—" ? fullName.split(" ")[0] : "") || activeProfile?.email?.split("@")[0] || authUser?.email?.split("@")[0] || "there";
+  const email     = activeProfile?.email || authUser?.email || "—";
+  const education = activeProfile?.current_education || "—";
+  const interest  = activeProfile?.area_of_interest || "—";
+  const gender    = activeProfile?.gender || "—";
 
   return (
     <section className="min-h-screen bg-white px-6 py-10 text-slate-800 text-left">

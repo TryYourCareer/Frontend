@@ -7,7 +7,7 @@
  *   onBack        () => void   (mobile back button)
  */
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Loader2, Send, Paperclip } from "lucide-react";
+import { ArrowLeft, Loader2, Send, Paperclip, Info } from "lucide-react";
 import useCommunityMessages from "../hooks/useCommunityMessages";
 import MessageBubble from "./MessageBubble";
 import CommunityInfo from "./CommunityInfo";
@@ -214,26 +214,41 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 z-10 flex items-center justify-between border-b border-[#D3E3F5] bg-white/80 backdrop-blur-md px-4 py-3 shadow-2xs">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setShowInfoPanel(true)}>
+      <header className="shrink-0 z-10 flex items-center justify-between border-b border-[#D3E3F5] bg-white/90 backdrop-blur-md px-4 py-3 shadow-2xs">
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setShowInfoPanel(true)}>
           <button
-            onClick={onBack}
+            onClick={(e) => {
+              e.stopPropagation();
+              onBack();
+            }}
             className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#D3E3F5] bg-white text-[#0b1a36] hover:bg-[#F0F6FC] transition cursor-pointer"
           >
             <ArrowLeft size={15} />
           </button>
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#F0F6FC] text-lg border border-[#D3E3F5]">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-sky-50 to-[#EAF2FA] text-xl border border-sky-200 shadow-2xs group-hover:scale-105 transition">
             {community.career_icon || "💬"}
           </div>
           <div>
-            <h3 className="text-xs font-bold text-[#0b1a36] leading-none">
+            <h3 className="text-xs font-bold text-[#0b1a36] leading-none group-hover:text-[#1E88E5] transition">
               {community.name}
             </h3>
-            <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
+            <p className="mt-1 flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               {(community.member_count || 0).toLocaleString()} members
             </p>
           </div>
+        </div>
+
+        {/* Right header actions: Hub Info button */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowInfoPanel(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#D3E3F5] bg-[#F0F6FC] hover:bg-sky-50 hover:border-[#1E88E5]/40 text-[#0b1a36] text-xs font-bold transition shadow-2xs cursor-pointer"
+          >
+            <Info size={14} className="text-[#1E88E5]" />
+            <span className="hidden sm:inline">Hub Info</span>
+          </button>
         </div>
       </header>
 
@@ -421,8 +436,8 @@ export default function ChatWindow({ community, currentUserId, onBack }) {
       </footer>
       {showInfoPanel && (
         <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-sm" onClick={() => setShowInfoPanel(false)}>
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <CommunityInfo community={community} onBack={() => setShowInfoPanel(false)} />
+          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <CommunityInfo community={community} messages={messages} onBack={() => setShowInfoPanel(false)} />
           </div>
         </div>
       )}
