@@ -1418,6 +1418,7 @@ export default function TrialMission() {
             WorkspaceComponent ? (
               <WorkspaceComponent
                 session={session}
+                configuration={config}
                 manager={manager}
                 briefing={briefing}
                 resources={resources}
