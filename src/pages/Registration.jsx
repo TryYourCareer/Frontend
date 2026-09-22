@@ -165,6 +165,7 @@ export default function Registration() {
         area_of_interest: form.areaOfInterest,
         auth_user_id: user?.id,
         is_registered: true,
+        is_privacy_policy_terms_accepted: true,
       });
       setSuccess("Profile saved! Welcome aboard 🎉");
       navigate("/dashboard", { replace: true });
@@ -317,18 +318,34 @@ export default function Registration() {
             <button
               type="submit"
               disabled={authLoading}
-              className="w-full rounded-xl bg-[#0b1a36] hover:bg-[#122b59] active:bg-[#071124] py-3 text-sm font-bold text-white transition shadow-md shadow-[#0b1a36]/20 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full rounded-xl bg-[#0b1a36] hover:bg-[#122b59] active:bg-[#071124] py-3 text-sm font-bold text-white transition shadow-md shadow-[#0b1a36]/20 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
             >
               {authLoading ? (
                 <><Loader2 size={16} className="animate-spin" /> Saving...</>
               ) : (
-                "Save & Continue →"
+                "Continue"
               )}
             </button>
 
-            <p className="flex items-center justify-center gap-2 text-center text-[11px] text-slate-400">
-              <CheckCircle2 size={12} className="text-slate-400 shrink-0" />
-              Your profile is securely stored and never shared.
+            <p className="text-center text-xs text-slate-500 leading-relaxed">
+              By continuing you are accepting the{" "}
+              <a
+                href="/support/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#1E88E5] hover:underline"
+              >
+                Privacy Policy
+              </a>{" "}
+              and{" "}
+              <a
+                href="/support/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#1E88E5] hover:underline"
+              >
+                Terms and conditions
+              </a>
             </p>
           </form>
         </div>
