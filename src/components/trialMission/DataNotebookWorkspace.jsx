@@ -455,7 +455,7 @@ export default function DataNotebookWorkspace({
               Phase: {session?.current_phase || "investigate"}
             </span>
           </div>
-          <h1 className="font-serif text-2xl font-bold text-slate-900">
+          <h1 className="font-sans text-2xl font-bold text-slate-900">
             {session?.mission_title || "Empirical Data Investigation"}
           </h1>
         </div>

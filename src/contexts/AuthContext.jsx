@@ -9,12 +9,15 @@ import {
   updateCurrentUser,
   setAuthToken,
   supabaseSignOut,
+  setSupabaseAuthSession,
 } from "../services/auth";
 import { setApiToken } from "../lib/api";
+import { supabase } from "../supabaseConfig";
 
 const AuthContext = createContext(null);
 
 const TOKEN_KEY = "clearcareers_auth_token";
+const REFRESH_TOKEN_KEY = "clearcareers_refresh_token";
 const USER_KEY = "clearcareers_auth_user";
 const PROFILE_KEY = "clearcareers_auth_profile";
 const IS_REG_KEY = "clearcareers_is_registered";
@@ -78,12 +81,15 @@ export function AuthProvider({ children }) {
   }, [isRegistered]);
 
   // Unified synchronous auth completion helper
-  const handleAuthSuccess = useCallback(({ token: newToken, user: newUser, profile: newProfile, isRegistered: newIsRegistered }) => {
+  const handleAuthSuccess = useCallback(({ token: newToken, refreshToken: newRefreshToken, user: newUser, profile: newProfile, isRegistered: newIsRegistered }) => {
     if (newToken) {
       setTokenState(newToken);
       setAuthToken(newToken);
       setApiToken(newToken);
       localStorage.setItem(TOKEN_KEY, newToken);
+    }
+    if (newRefreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken);
     }
     if (newUser !== undefined) {
       setUser(newUser);
@@ -103,16 +109,59 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
+  // Listen to Supabase token refresh and auth events to automatically keep tokens fresh
+  useEffect(() => {
+    if (!supabase) return;
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.access_token) {
+        const freshToken = session.access_token;
+        setTokenState(freshToken);
+        setAuthToken(freshToken);
+        setApiToken(freshToken);
+        localStorage.setItem(TOKEN_KEY, freshToken);
+        if (session.refresh_token) {
+          localStorage.setItem(REFRESH_TOKEN_KEY, session.refresh_token);
+        }
+        if (session.user) {
+          setUser((prev) => prev || session.user);
+        }
+      } else if (event === "SIGNED_OUT") {
+        setTokenState("");
+        setUser(null);
+        setProfile(null);
+        setIsRegistered(false);
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+        localStorage.removeItem(PROFILE_KEY);
+        localStorage.removeItem(IS_REG_KEY);
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
+
   const loginWithPhone = useCallback(async ({ phone, otp }) => {
     setAuthLoading(true);
     try {
       const result = await loginWithOtp({ phone, otp });
       const newToken = result.token || "";
+      const newRefreshToken = result.refreshToken || "";
       const baseUser = result.user || null;
       const baseIsReg = Boolean(result.isRegistered);
 
+      if (newToken && newRefreshToken) {
+        await setSupabaseAuthSession(newToken, newRefreshToken);
+      }
+
       handleAuthSuccess({
         token: newToken,
+        refreshToken: newRefreshToken,
         user: baseUser,
         profile: baseUser,
         isRegistered: baseIsReg,
@@ -143,13 +192,17 @@ export function AuthProvider({ children }) {
     try {
       const result = await loginWithOAuth(code);
       const newToken = result.token || "";
-      setTokenState(newToken);
-      setUser(result.user || null);
+      const newRefreshToken = result.refreshToken || "";
+      handleAuthSuccess({
+        token: newToken,
+        refreshToken: newRefreshToken,
+        user: result.user || null,
+      });
       return result;
     } finally {
       setAuthLoading(false);
     }
-  }, []);
+  }, [handleAuthSuccess]);
 
   const completeRegistration = useCallback(async (payload) => {
     setAuthLoading(true);
@@ -189,6 +242,7 @@ export function AuthProvider({ children }) {
     setProfile(null);
     setIsRegistered(false);
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(PROFILE_KEY);
     localStorage.removeItem(IS_REG_KEY);
@@ -201,15 +255,15 @@ export function AuthProvider({ children }) {
 
     async function restore() {
       try {
-        let activeToken = token;
+        let activeToken = token || localStorage.getItem(TOKEN_KEY) || "";
 
-        // If no token in state, check Supabase session
-        if (!activeToken) {
-          const session = await getSupabaseSession();
-          activeToken = session?.access_token || "";
-          if (activeToken && mounted) {
+        // Check Supabase session for valid / auto-refreshed session
+        const session = await getSupabaseSession();
+        if (session?.access_token) {
+          activeToken = session.access_token;
+          if (mounted) {
             setTokenState(activeToken);
-            if (session?.user) setUser(session.user);
+            if (session.user) setUser((prev) => prev || session.user);
           }
         }
 
@@ -254,7 +308,7 @@ export function AuthProvider({ children }) {
     return () => {
       mounted = false;
     };
-  }, [token, logout]);
+  }, [logout]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value = useMemo(
     () => ({
@@ -276,7 +330,6 @@ export function AuthProvider({ children }) {
       isLoginOpen,
       setIsLoginOpen,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       token,
       user,

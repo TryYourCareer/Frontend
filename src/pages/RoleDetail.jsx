@@ -36,7 +36,7 @@ export default function RoleDetail({ role, onBack }) {
                 <span className="inline-block rounded-full border border-[#D3E3F5] bg-[#F0F6FC] px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-slate-700">
                   {role.category}
                 </span>
-                <h1 className="font-serif text-2xl font-bold tracking-tight text-[#0b1a36] sm:text-3xl">
+                <h1 className="font-sans text-2xl font-bold tracking-tight text-[#0b1a36] sm:text-3xl">
                   {role.title}
                 </h1>
               </div>
@@ -89,7 +89,7 @@ export default function RoleDetail({ role, onBack }) {
 
         {/* Responsibilities Section */}
         <div className="space-y-5 rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-sm sm:p-8">
-          <h2 className="flex items-center gap-2 border-b border-[#D3E3F5] pb-3 font-serif text-base font-bold uppercase tracking-wider text-[#0b1a36]">
+          <h2 className="flex items-center gap-2 border-b border-[#D3E3F5] pb-3 font-sans text-base font-bold uppercase tracking-wider text-[#0b1a36]">
             <Briefcase size={18} className="text-[#1E88E5]" />
             Key Day-to-Day Responsibilities
           </h2>
@@ -114,7 +114,7 @@ export default function RoleDetail({ role, onBack }) {
         {/* Daily Schedule Section (If Available) */}
         {role.schedule && (
           <div className="space-y-5 rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-sm sm:p-8">
-            <h2 className="flex items-center gap-2 border-b border-[#D3E3F5] pb-3 font-serif text-base font-bold uppercase tracking-wider text-[#0b1a36]">
+            <h2 className="flex items-center gap-2 border-b border-[#D3E3F5] pb-3 font-sans text-base font-bold uppercase tracking-wider text-[#0b1a36]">
               <Clock size={18} className="text-[#1E88E5]" />
               A Day In The Life (Sample Schedule)
             </h2>
@@ -135,7 +135,7 @@ export default function RoleDetail({ role, onBack }) {
 
         {/* Prerequisites & Education Route */}
         <div className="space-y-4 rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-sm sm:p-8">
-          <h2 className="flex items-center gap-2 border-b border-[#D3E3F5] pb-3 font-serif text-base font-bold uppercase tracking-wider text-[#0b1a36]">
+          <h2 className="flex items-center gap-2 border-b border-[#D3E3F5] pb-3 font-sans text-base font-bold uppercase tracking-wider text-[#0b1a36]">
             <GraduationCap size={18} className="text-[#1E88E5]" />
             Preparation & Prerequisites
           </h2>

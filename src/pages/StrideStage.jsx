@@ -171,7 +171,7 @@ export default function StrideStage() {
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl sm:text-4xl font-black font-serif tracking-tight text-[#0b1a36] dark:text-white leading-tight">
+              <h1 className="text-3xl sm:text-4xl font-black font-sans tracking-tight text-[#0b1a36] dark:text-white leading-tight">
                 {stage.title}
               </h1>
               <p className="text-base sm:text-lg font-medium text-[#1E88E5] dark:text-sky-400">

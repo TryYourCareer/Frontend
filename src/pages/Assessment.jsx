@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Sparkles, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Sparkles, ArrowRight, Check, ChevronDown, X } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { getTestProgress, getTestQuestions, startTestSession, submitQuestionAnswer, submitTestSession, saveOnboardingProfile } from "../services/discoveryTest";
 
@@ -17,6 +17,76 @@ const AVAILABLE_INTEREST_TAGS = [
   "Leadership",
 ];
 
+const GRADE_STREAM_OPTIONS = {
+  "Class 8": [
+    { value: "General / All Subjects", label: "General / All Subjects (CBSE / ICSE / State)" },
+    { value: "Science & Math Focus", label: "Science & Math Focus" },
+    { value: "Social Studies & Languages", label: "Social Studies & Languages" },
+    { value: "Undecided / Exploring", label: "Undecided / Exploring" },
+  ],
+  "Class 9": [
+    { value: "General / All Subjects", label: "General / All Subjects (CBSE / ICSE / State)" },
+    { value: "Science & Math Focus", label: "Science & Math Focus" },
+    { value: "Social Studies & Languages", label: "Social Studies & Languages" },
+    { value: "Undecided / Exploring", label: "Undecided / Exploring" },
+  ],
+  "Class 10": [
+    { value: "General / All Subjects", label: "General / All Subjects (Pre-Boarding)" },
+    { value: "Aspiring Science (PCM/PCB)", label: "Planning for Science (PCM / PCB)" },
+    { value: "Aspiring Commerce", label: "Planning for Commerce & Business" },
+    { value: "Aspiring Humanities", label: "Planning for Humanities & Arts" },
+    { value: "Undecided / Exploring", label: "Undecided / Exploring Stream" },
+  ],
+  "Class 11": [
+    { value: "Science (PCM)", label: "Science (PCM - Physics, Chemistry, Math)" },
+    { value: "Science (PCB)", label: "Science (PCB - Physics, Chemistry, Biology)" },
+    { value: "Science (PCMB)", label: "Science (PCMB - Math + Biology)" },
+    { value: "Commerce with Math", label: "Commerce (with Mathematics)" },
+    { value: "Commerce without Math", label: "Commerce (without Mathematics)" },
+    { value: "Humanities / Arts", label: "Humanities & Social Sciences" },
+    { value: "Vocational / Applied", label: "Vocational / Applied Skills" },
+    { value: "Undecided", label: "Undecided / Open" },
+  ],
+  "Class 12": [
+    { value: "Science (PCM)", label: "Science (PCM - Physics, Chemistry, Math)" },
+    { value: "Science (PCB)", label: "Science (PCB - Physics, Chemistry, Biology)" },
+    { value: "Science (PCMB)", label: "Science (PCMB - Math + Biology)" },
+    { value: "Commerce with Math", label: "Commerce (with Mathematics)" },
+    { value: "Commerce without Math", label: "Commerce (without Mathematics)" },
+    { value: "Humanities / Arts", label: "Humanities & Social Sciences" },
+    { value: "Vocational / Applied", label: "Vocational / Applied Skills" },
+    { value: "Undecided", label: "Undecided / Open" },
+  ],
+  "UG Year 1-2": [
+    { value: "Engineering & Technology", label: "Engineering & Tech (B.Tech / B.E. / BCA / CS)" },
+    { value: "Medicine & Health Sciences", label: "Medical & Health (MBBS / BDS / Pharma / Nursing)" },
+    { value: "Pure Sciences & Math", label: "Pure Sciences (B.Sc - Math, Physics, Chem, Bio)" },
+    { value: "Commerce & Management", label: "Business & Commerce (B.Com / BBA / BMS)" },
+    { value: "Design, Architecture & Arts", label: "Design & Arts (B.Des / B.Arch / Fine Arts)" },
+    { value: "Humanities, Law & Social Sciences", label: "Humanities, Media & Law (BA / LLB / BJMC)" },
+    { value: "Other / Interdisciplinary", label: "Other / Interdisciplinary Degree" },
+  ],
+  "UG Year 3-4": [
+    { value: "Engineering & Technology", label: "Engineering & Tech (B.Tech / B.E. / BCA / CS)" },
+    { value: "Medicine & Health Sciences", label: "Medical & Health (MBBS / BDS / Pharma / Nursing)" },
+    { value: "Pure Sciences & Math", label: "Pure Sciences (B.Sc - Math, Physics, Chem, Bio)" },
+    { value: "Commerce & Management", label: "Business & Commerce (B.Com / BBA / BMS)" },
+    { value: "Design, Architecture & Arts", label: "Design & Arts (B.Des / B.Arch / Fine Arts)" },
+    { value: "Humanities, Law & Social Sciences", label: "Humanities, Media & Law (BA / LLB / BJMC)" },
+    { value: "Other / Interdisciplinary", label: "Other / Interdisciplinary Degree" },
+  ],
+  "Working Professional": [
+    { value: "Software & Technology", label: "Software & Technology / IT" },
+    { value: "Engineering & Manufacturing", label: "Core Engineering & Manufacturing" },
+    { value: "Finance, Banking & Consulting", label: "Finance, Banking & Accounting" },
+    { value: "Marketing, Product & Sales", label: "Marketing, Product & Sales" },
+    { value: "Healthcare & Life Sciences", label: "Healthcare & Clinical Sciences" },
+    { value: "Creative, Design & Media", label: "Design, Media & Content" },
+    { value: "Education & Public Services", label: "Education, Law & Public Sector" },
+    { value: "Career Transition / Undecided", label: "Seeking Career Pivot / Transition" },
+  ],
+};
+
 export default function Assessment() {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -28,9 +98,32 @@ export default function Assessment() {
   // Stage 0 Onboarding Signals State
   const [grade, setGrade] = useState("Class 12");
   const [currentStream, setCurrentStream] = useState("Science (PCM)");
+
+  const handleGradeChange = (newGrade) => {
+    setGrade(newGrade);
+    const available = GRADE_STREAM_OPTIONS[newGrade] || [];
+    if (available.length > 0) {
+      const exists = available.some((s) => s.value === currentStream);
+      if (!exists) {
+        setCurrentStream(available[0].value);
+      }
+    }
+  };
   const [interestTags, setInterestTags] = useState(["Coding & AI", "Visual Design"]);
   const [declaredAspiration, setDeclaredAspiration] = useState("");
   const [learningStyle, setLearningStyle] = useState("Hands-on");
+  const [isDomainDropdownOpen, setIsDomainDropdownOpen] = useState(false);
+  const domainDropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (domainDropdownRef.current && !domainDropdownRef.current.contains(event.target)) {
+        setIsDomainDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -177,7 +270,7 @@ export default function Assessment() {
             <span className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-0.5 text-[10px] font-bold tracking-[0.2em] uppercase text-[#1E88E5]">
               DISCOVERY RUN
             </span>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36] mt-2">
+            <h1 className="text-2xl sm:text-3xl font-sans font-bold text-[#0b1a36] mt-2">
               Start Your Career Discovery
             </h1>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">
@@ -280,7 +373,7 @@ export default function Assessment() {
             <span className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-0.5 text-[10px] font-bold tracking-[0.2em] uppercase text-[#1E88E5]">
               STAGE 0 — ONBOARDING SIGNALS
             </span>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36]">
+            <h1 className="text-2xl sm:text-3xl font-sans font-bold text-[#0b1a36]">
               Tell Us About Yourself
             </h1>
             <p className="text-xs text-slate-600 leading-relaxed">
@@ -295,7 +388,7 @@ export default function Assessment() {
                 <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Current Education Grade</label>
                 <select
                   value={grade}
-                  onChange={(e) => setGrade(e.target.value)}
+                  onChange={(e) => handleGradeChange(e.target.value)}
                   className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400"
                 >
                   <option value="Class 8">Class 8</option>
@@ -316,40 +409,126 @@ export default function Assessment() {
                   onChange={(e) => setCurrentStream(e.target.value)}
                   className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400"
                 >
-                  <option value="Science (PCM)">Science (PCM - Math)</option>
-                  <option value="Science (PCB)">Science (PCB - Medical)</option>
-                  <option value="Commerce">Commerce & Business</option>
-                  <option value="Humanities">Humanities & Arts</option>
-                  <option value="Undecided">Undecided / Open</option>
+                  {(GRADE_STREAM_OPTIONS[grade] || GRADE_STREAM_OPTIONS["Class 12"]).map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
-            {/* Interest Tags */}
-            <div className="space-y-2.5">
+            {/* Interest Tags Dropdown */}
+            <div className="space-y-2.5 relative" ref={domainDropdownRef}>
               <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
                 Select Your Top Domain Interests (Select all that apply)
               </label>
-              <div className="flex flex-wrap gap-2 pt-1">
-                {AVAILABLE_INTEREST_TAGS.map((tag) => {
-                  const isSelected = interestTags.includes(tag);
-                  return (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => toggleInterestTag(tag)}
-                      className={`px-4 py-2 rounded-full text-xs font-semibold transition border flex items-center gap-1.5 cursor-pointer shadow-2xs ${
-                        isSelected
-                          ? "bg-[#0b1a36] text-white border-[#0b1a36]"
-                          : "bg-[#F0F6FC] text-slate-700 border-[#D3E3F5] hover:bg-white hover:border-slate-400"
-                      }`}
-                    >
-                      {isSelected && <Check size={13} />}
-                      <span>{tag}</span>
-                    </button>
-                  );
-                })}
+
+              {/* Dropdown Trigger Button */}
+              <div
+                onClick={() => setIsDomainDropdownOpen((prev) => !prev)}
+                className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400 cursor-pointer flex items-center justify-between transition-all hover:bg-white"
+              >
+                <div className="flex items-center gap-2 overflow-hidden flex-wrap">
+                  {interestTags.length === 0 ? (
+                    <span className="text-slate-400 font-normal">Choose your domain interests...</span>
+                  ) : (
+                    <span className="text-slate-800 font-bold">
+                      {interestTags.length} domain interest{interestTags.length > 1 ? "s" : ""} selected
+                    </span>
+                  )}
+                </div>
+                <ChevronDown
+                  size={16}
+                  className={`text-slate-500 transition-transform duration-200 shrink-0 ${
+                    isDomainDropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
               </div>
+
+              {/* Dropdown Menu */}
+              {isDomainDropdownOpen && (
+                <div className="absolute top-[calc(100%+4px)] left-0 right-0 z-50 rounded-2xl border border-[#D3E3F5] bg-white p-3 shadow-xl space-y-2">
+                  <div className="flex items-center justify-between px-2 pb-2 border-b border-slate-100 text-[11px]">
+                    <span className="font-bold text-slate-500">Available Domains ({AVAILABLE_INTEREST_TAGS.length})</span>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInterestTags([...AVAILABLE_INTEREST_TAGS]);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
+                      >
+                        Select All
+                      </button>
+                      <span className="text-slate-300">•</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInterestTags([]);
+                        }}
+                        className="text-slate-500 hover:text-slate-700 font-bold cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-56 overflow-y-auto pr-1">
+                    {AVAILABLE_INTEREST_TAGS.map((tag) => {
+                      const isSelected = interestTags.includes(tag);
+                      return (
+                        <div
+                          key={tag}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleInterestTag(tag);
+                          }}
+                          className={`p-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between cursor-pointer ${
+                            isSelected
+                              ? "bg-blue-50 text-blue-700 border border-blue-200"
+                              : "text-slate-700 hover:bg-[#F0F6FC] border border-transparent"
+                          }`}
+                        >
+                          <span>{tag}</span>
+                          <div
+                            className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${
+                              isSelected
+                                ? "bg-blue-600 border-blue-600 text-white"
+                                : "border-slate-300 bg-white"
+                            }`}
+                          >
+                            {isSelected && <Check size={11} strokeWidth={3} />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Selected Chips below Dropdown */}
+              {interestTags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1.5">
+                  {interestTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-sky-50 text-[#1E88E5] border border-sky-200 shadow-2xs"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => toggleInterestTag(tag)}
+                        className="hover:text-red-500 transition cursor-pointer"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Declared Aspiration */}
@@ -423,7 +602,7 @@ export default function Assessment() {
           <span className="inline-flex items-center rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[10px] font-bold tracking-wider uppercase text-emerald-800">
             ASSESSMENT COMPLETE
           </span>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36] leading-tight">Your answers are saved</h1>
+          <h1 className="text-2xl sm:text-3xl font-sans font-bold text-[#0b1a36] leading-tight">Your answers are saved</h1>
           <p className="text-xs text-slate-600 leading-relaxed max-w-xl">
             We’ve submitted your responses to our AI engine. Your matches and 6D RIASEC personality vectors are now calculated and updated.
           </p>
@@ -535,7 +714,7 @@ export default function Assessment() {
               <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase text-[#1E88E5]">
                 {currentIndex < 10 ? "PART 1: SCENARIO CHOICE" : "PART 2: STAGE 2 REFLECTION"}
               </span>
-              <h2 className="text-xl font-serif font-bold text-[#0b1a36] leading-tight">{currentQuestion.question_text}</h2>
+              <h2 className="text-xl font-sans font-bold text-[#0b1a36] leading-tight">{currentQuestion.question_text}</h2>
             </div>
             <div className="rounded-full border border-[#D3E3F5] bg-white px-3.5 py-1.5 text-xs font-bold text-[#0b1a36] shadow-2xs shrink-0">
               Q{currentIndex + 1}/{totalQuestions}
@@ -683,7 +862,7 @@ function AnalysisAnimation() {
 
         <div className="flex flex-col items-center justify-center text-center space-y-4 pt-4">
           <div className="space-y-1">
-            <h2 className="text-xl font-serif font-bold text-[#0b1a36]">
+            <h2 className="text-xl font-sans font-bold text-[#0b1a36]">
               Generating Your Career Matrix
             </h2>
             <p className="text-xs text-slate-600 font-medium h-4 transition-all duration-300">

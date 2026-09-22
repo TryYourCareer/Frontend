@@ -1,11 +1,10 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ClipboardList, Flame,
   Sparkles, ArrowRight, BarChart3, Target,
   Award, Compass, Layers,
   ChevronRight, ArrowUpRight,
-  Check, MessageSquare, Terminal
+  Check, MessageSquare, Terminal, SlidersHorizontal
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { getUserProfile } from "../services/users";
@@ -170,31 +169,49 @@ export default function StudentDashboard() {
 
     return [
       {
-        title: "Software Systems Architect",
-        sector: "Technology",
-        discipline: "Software & Cloud",
-        matchScore: 94,
-        salaryRange: "₹8 – ₹35 LPA",
-        description: "Designs fault-tolerant cloud software and scalable distributed microservices.",
-        skills: ["System Design", "Cloud Infrastructure", "Distributed Data"],
-      },
-      {
-        title: "Reliability Engineer",
-        sector: "Engineering",
-        discipline: "Industrial & Asset Engineering",
-        matchScore: 89,
+        title: "VFX Artist",
+        sector: "ARTS, MEDIA & DESIGN",
+        discipline: "Visual Effects & Animation",
+        matchScore: 98,
         salaryRange: "₹6 – ₹28 LPA",
-        description: "Prevents critical asset downtime using sensor vibration and predictive maintenance.",
-        skills: ["RCFA & FMEA", "Vibration Analysis", "CMMS Systems"],
+        description: "Your dimensional profile aligns well with competencies required for VFX Artist in Arts, Media & Design.",
+        skills: ["3D Modeling", "Compositing", "CGI Simulation"],
       },
       {
-        title: "AI Solutions Consultant",
-        sector: "Technology",
-        discipline: "Applied AI & Strategy",
-        matchScore: 86,
-        salaryRange: "₹10 – ₹40 LPA",
-        description: "Aligns machine learning model pipelines with industrial automation needs.",
-        skills: ["Machine Learning", "Model Governance", "Solution Architecture"],
+        title: "Typography Designer",
+        sector: "ARTS, MEDIA & DESIGN",
+        discipline: "Typeface & Brand Identity",
+        matchScore: 98,
+        salaryRange: "₹6 – ₹28 LPA",
+        description: "Your dimensional profile aligns well with competencies required for Typography Designer in Arts, Media & Design.",
+        skills: ["Font Geometry", "Editorial Layout", "Glyph Design"],
+      },
+      {
+        title: "E-Learning Specialist",
+        sector: "EDUCATION",
+        discipline: "Instructional Design & EdTech",
+        matchScore: 98,
+        salaryRange: "₹6 – ₹28 LPA",
+        description: "Your dimensional profile aligns well with competencies required for E-Learning Specialist in Education.",
+        skills: ["LMS Architecture", "Curriculum Mapping", "Interactive Storyboarding"],
+      },
+      {
+        title: "Character Artist",
+        sector: "ARTS, MEDIA & DESIGN",
+        discipline: "3D Digital Sculpting",
+        matchScore: 97,
+        salaryRange: "₹6 – ₹28 LPA",
+        description: "Your dimensional profile aligns well with competencies required for Character Artist in Arts, Media & Design.",
+        skills: ["ZBrush Sculpting", "Anatomy Modeling", "Texture Baking"],
+      },
+      {
+        title: "Packaging Designer",
+        sector: "ARTS, MEDIA & DESIGN",
+        discipline: "Industrial Packaging & Brand UX",
+        matchScore: 97,
+        salaryRange: "₹6 – ₹28 LPA",
+        description: "Your dimensional profile aligns well with competencies required for Packaging Designer in Arts, Media & Design.",
+        skills: ["Dieline Engineering", "Material Sustainability", "Shelf Impact UX"],
       },
     ];
   }, [reportData, featuredCareers]);
@@ -227,12 +244,12 @@ export default function StudentDashboard() {
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-black tracking-tight text-[#0b1a36] leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-black tracking-tight text-[#0b1a36] leading-tight">
                 Welcome back, {firstName} 👋
               </h1>
 
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                Your personalized career discovery ecosystem is active. Track your 6D behavioral alignment, explore verified compensation benchmarks, and practice real-world trial simulations.
+                Your personalized career discovery ecosystem is active.
               </p>
             </div>
 
@@ -333,49 +350,7 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* 4 Stat Cards Ribbon */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatHighlightCard
-            icon={<ClipboardList size={16} />}
-            label="Discovery Status"
-            value={reportData ? "Vector Mapped" : "Ready"}
-            subText={reportData ? "6D RIASEC Active" : "15-Min Assessment"}
-            color="text-blue-600"
-            bg="bg-blue-50/60"
-            border="border-blue-200"
-            action={() => navigate("/assessment")}
-          />
-          <StatHighlightCard
-            icon={<Layers size={16} />}
-            label="Reality Verification"
-            value="513 Roles"
-            subText="Real Market Salarie"
-            color="text-emerald-600"
-            bg="bg-emerald-50/60"
-            border="border-emerald-200"
-            action={() => navigate("/career-reality")}
-          />
-          <StatHighlightCard
-            icon={<Terminal size={16} />}
-            label="Trial Simulations"
-            value="3 Workspaces"
-            subText="Hands-on Role Labs"
-            color="text-purple-600"
-            bg="bg-purple-50/60"
-            border="border-purple-200"
-            action={() => navigate("/trial-mission")}
-          />
-          <StatHighlightCard
-            icon={<Flame size={16} />}
-            label="Momentum"
-            value="5-Day Streak"
-            subText="Consistent Explorer"
-            color="text-amber-600"
-            bg="bg-amber-50/60"
-            border="border-amber-200"
-            action={() => navigate("/roadmap")}
-          />
-        </div>
+
 
         {/* Dashboard Main Grid */}
         <div className="grid gap-8 lg:grid-cols-[1.85fr_1fr]">
@@ -390,7 +365,7 @@ export default function StudentDashboard() {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-0.5">
                     {reportData ? "Dynamic Cognitive Alignment" : "High-Growth Spotlight"}
                   </span>
-                  <h3 className="font-serif text-lg sm:text-xl font-bold text-[#0b1a36]">
+                  <h3 className="font-sans text-lg sm:text-xl font-bold text-[#0b1a36]">
                     {reportData ? "Your Top Career Matches" : "Recommended Career Tracks"}
                   </h3>
                 </div>
@@ -403,61 +378,70 @@ export default function StudentDashboard() {
               </div>
 
               {/* Match Cards List */}
-              <div className="space-y-3.5">
+              <div className="divide-y divide-slate-100">
                 {topMatches.map((career, idx) => (
                   <div
                     key={idx}
-                    className="p-5 rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC]/50 hover:bg-white hover:border-blue-300 hover:shadow-md transition-all duration-300 space-y-3"
+                    className="py-5 first:pt-2 last:pb-2 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors hover:bg-[#F0F6FC]/40 rounded-2xl px-3 -mx-3"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-sky-200 bg-sky-50 text-[#1E88E5]">
-                            {career.sector}
-                          </span>
-                          <span className="text-[10px] text-slate-500 font-semibold">{career.discipline}</span>
-                        </div>
-                        <h4
-                          onClick={() => navigate(`/career-details/${encodeURIComponent(career.title)}`)}
-                          className="font-serif text-base font-bold text-[#0b1a36] hover:text-blue-600 transition cursor-pointer"
-                        >
-                          {career.title}
-                        </h4>
-                      </div>
-
-                      <div className="flex flex-col items-end">
-                        <span className="text-xs font-black px-2.5 py-1 rounded-full border border-emerald-300 bg-emerald-50 text-emerald-800">
+                    {/* Left Column: Sector & Fit pills, Title, Description */}
+                    <div className="space-y-1.5 text-left max-w-xl">
+                      {/* Sector & Fit Badges */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-sky-200 bg-sky-50 text-[#1E88E5]">
+                          {career.sector}
+                        </span>
+                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700">
                           {career.matchScore}% Fit
                         </span>
-                        <span className="text-[10px] text-slate-400 font-bold mt-1">{career.salaryRange}</span>
                       </div>
+
+                      {/* Career Title */}
+                      <h4
+                        onClick={() => navigate(`/career-details/${encodeURIComponent(career.title)}`)}
+                        className="font-sans text-lg sm:text-xl font-bold text-[#0b1a36] hover:text-blue-600 transition cursor-pointer"
+                      >
+                        {career.title}
+                      </h4>
+
+                      {/* Description */}
+                      <p className="text-xs text-slate-500 leading-relaxed font-normal">
+                        {career.description}
+                      </p>
                     </div>
 
-                    <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                      {career.description}
-                    </p>
-
-                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200/60">
-                      <div className="flex flex-wrap gap-1.5">
-                        {career.skills.map((skill) => (
-                          <span key={skill} className="text-[10px] font-semibold text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-lg">
-                            {skill}
-                          </span>
-                        ))}
+                    {/* Right Column: Compensation & Actions */}
+                    <div className="flex items-center gap-4 sm:gap-6 shrink-0 justify-between md:justify-end pt-2 md:pt-0">
+                      {/* Compensation */}
+                      <div className="text-left md:text-right">
+                        <span className="text-[9.5px] uppercase font-bold text-slate-400 tracking-wider block">
+                          COMPENSATION
+                        </span>
+                        <span className="text-xs sm:text-sm font-bold text-[#0b1a36]">
+                          {career.salaryRange}
+                        </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => navigate(`/career-details/${encodeURIComponent(career.title)}`)}
-                          className="rounded-xl bg-[#0b1a36] hover:bg-[#152e5d] text-white px-3 py-1.5 text-xs font-bold transition shadow-2xs cursor-pointer"
+                          className="rounded-full bg-[#0b1a36] hover:bg-[#152e5d] text-white px-4 py-2 text-xs font-bold transition shadow-2xs cursor-pointer"
                         >
-                          Reality Check
+                          Deep-Dive
                         </button>
                         <button
                           onClick={() => navigate(`/roadmap?career=${encodeURIComponent(career.title)}`)}
-                          className="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 text-xs font-bold transition shadow-2xs cursor-pointer"
+                          className="rounded-full border border-[#D3E3F5] bg-white hover:bg-[#F0F6FC] text-[#0b1a36] px-4 py-2 text-xs font-bold transition shadow-2xs cursor-pointer"
                         >
                           Roadmap
+                        </button>
+                        <button
+                          onClick={() => navigate(`/career-reality`)}
+                          title="Filter & Compare"
+                          className="w-8 h-8 rounded-full border border-[#D3E3F5] bg-white hover:bg-[#F0F6FC] text-slate-600 flex items-center justify-center transition shadow-2xs cursor-pointer"
+                        >
+                          <SlidersHorizontal size={13} />
                         </button>
                       </div>
                     </div>
@@ -473,7 +457,7 @@ export default function StudentDashboard() {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 block mb-0.5">
                     Stage 03 Sandbox
                   </span>
-                  <h3 className="font-serif text-lg sm:text-xl font-bold text-[#0b1a36] flex items-center gap-2">
+                  <h3 className="font-sans text-lg sm:text-xl font-bold text-[#0b1a36] flex items-center gap-2">
                     <Terminal size={18} className="text-purple-600" />
                     Interactive Trial Simulations
                   </h3>
@@ -497,7 +481,7 @@ export default function StudentDashboard() {
                       <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/80 border border-slate-200 text-slate-600 inline-block">
                         {sim.badge}
                       </span>
-                      <h4 className="font-serif text-sm font-bold text-[#0b1a36] leading-snug">
+                      <h4 className="font-sans text-sm font-bold text-[#0b1a36] leading-snug">
                         {sim.title}
                       </h4>
                       <p className="text-[11px] text-slate-500">{sim.role}</p>
@@ -522,7 +506,7 @@ export default function StudentDashboard() {
             {/* Psychometric 6D RIASEC Vector Breakdown */}
             <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-serif text-sm font-bold text-[#0b1a36] flex items-center gap-1.5">
+                <h3 className="font-sans text-sm font-bold text-[#0b1a36] flex items-center gap-1.5">
                   <BarChart3 size={15} className="text-blue-600" />
                   6D RIASEC Behavioral Vector
                 </h3>
@@ -565,7 +549,7 @@ export default function StudentDashboard() {
 
             {/* Actionable Next Goals Checklist */}
             <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-4">
-              <h3 className="font-serif text-sm font-bold text-[#0b1a36] flex items-center gap-1.5">
+              <h3 className="font-sans text-sm font-bold text-[#0b1a36] flex items-center gap-1.5">
                 <Target size={15} className="text-emerald-600" />
                 Recommended Discovery Actions
               </h3>
@@ -600,7 +584,7 @@ export default function StudentDashboard() {
                 <MessageSquare size={18} />
               </div>
               <div>
-                <h4 className="font-serif text-base font-bold">Connect with Peer Communities</h4>
+                <h4 className="font-sans text-base font-bold">Connect with Peer Communities</h4>
                 <p className="text-xs text-blue-200 mt-1 leading-relaxed">
                   Join 15 verified discipline hubs to discuss career transitions, salaries, and interview tracks.
                 </p>
@@ -622,25 +606,7 @@ export default function StudentDashboard() {
   );
 }
 
-function StatHighlightCard({ icon, label, value, subText, color, bg, border, action }) {
-  return (
-    <div
-      onClick={action}
-      className={`p-5 rounded-3xl border ${border} bg-white hover:border-slate-300 transition-all hover:shadow-md cursor-pointer flex flex-col justify-between space-y-2`}
-    >
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</span>
-        <div className={`w-8 h-8 rounded-xl ${bg} ${color} flex items-center justify-center`}>
-          {icon}
-        </div>
-      </div>
-      <div>
-        <p className="text-lg font-black text-[#0b1a36]">{value}</p>
-        <p className="text-[11px] text-slate-500 font-medium">{subText}</p>
-      </div>
-    </div>
-  );
-}
+
 
 function GoalItem({ done, text, onClick }) {
   return (

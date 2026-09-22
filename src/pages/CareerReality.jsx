@@ -220,7 +220,7 @@ export default function CareerReality({ careerName = "AI/Machine Learning Engine
             <span className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-0.5 text-[10px] font-bold tracking-[0.2em] uppercase text-[#1E88E5]">
               {careerData ? careerData["Cluster"] || "Specialization Track" : "Specialization Track"}
             </span>
-            <h1 className="font-serif text-3xl font-bold tracking-tight text-[#0b1a36] sm:text-4xl">
+            <h1 className="font-sans text-3xl font-bold tracking-tight text-[#0b1a36] sm:text-4xl">
               {careerData ? careerData["Career Name"] : "Career Reality Trajectory"}
             </h1>
             <p className="max-w-3xl text-xs leading-relaxed text-slate-600 sm:text-sm">
@@ -282,7 +282,7 @@ export default function CareerReality({ careerName = "AI/Machine Learning Engine
                     </div>
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-serif text-base font-bold text-slate-900 transition group-hover:text-[#0b1a36]">
+                        <h3 className="font-sans text-base font-bold text-slate-900 transition group-hover:text-[#0b1a36]">
                           {role.title}
                         </h3>
                         <span className="rounded-full border border-slate-200 bg-[#F0F6FC] px-2.5 py-0.5 text-[10px] font-bold text-slate-600">

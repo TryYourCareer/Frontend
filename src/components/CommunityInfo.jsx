@@ -264,7 +264,7 @@ export default function CommunityInfo({ community, messages = [], onBack, onLeav
             <ArrowLeft size={16} />
           </button>
           <div>
-            <h2 className="text-sm font-serif font-bold text-[#0b1a36] flex items-center gap-2 leading-tight">
+            <h2 className="text-sm font-sans font-bold text-[#0b1a36] flex items-center gap-2 leading-tight">
               Community Details
             </h2>
             <span className="text-[10px] text-slate-500 font-medium">
@@ -310,7 +310,7 @@ export default function CommunityInfo({ community, messages = [], onBack, onLeav
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <h1 className="text-base font-serif font-extrabold text-[#0b1a36] truncate">
+              <h1 className="text-base font-sans font-extrabold text-[#0b1a36] truncate">
                 {community.name}
               </h1>
               <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-sky-50 text-[#1E88E5] border border-sky-200 text-[9px] font-bold uppercase tracking-wider">
@@ -391,7 +391,7 @@ export default function CommunityInfo({ community, messages = [], onBack, onLeav
           <div className="space-y-4">
             {/* Quick Overview Card */}
             <div className="rounded-2xl border border-[#D3E3F5] bg-white p-4 shadow-2xs space-y-3">
-              <h3 className="text-xs font-serif font-bold text-[#0b1a36] uppercase tracking-wider flex items-center gap-1.5">
+              <h3 className="text-xs font-sans font-bold text-[#0b1a36] uppercase tracking-wider flex items-center gap-1.5">
                 <Compass size={14} className="text-[#1E88E5]" />
                 Career Overview & Focus
               </h3>
@@ -413,7 +413,7 @@ export default function CommunityInfo({ community, messages = [], onBack, onLeav
 
             {/* Hub Guidelines Accordion */}
             <div className="rounded-2xl border border-[#D3E3F5] bg-white p-4 shadow-2xs space-y-2.5">
-              <h3 className="text-xs font-serif font-bold text-[#0b1a36] uppercase tracking-wider flex items-center gap-1.5">
+              <h3 className="text-xs font-sans font-bold text-[#0b1a36] uppercase tracking-wider flex items-center gap-1.5">
                 <BookOpen size={14} className="text-[#1E88E5]" />
                 Community Guidelines
               </h3>
@@ -578,7 +578,7 @@ export default function CommunityInfo({ community, messages = [], onBack, onLeav
                 <div className="h-12 w-12 rounded-2xl bg-purple-50 text-purple-600 border border-purple-200 grid place-items-center mx-auto mb-2 shadow-2xs">
                   <ImageIcon size={22} />
                 </div>
-                <h4 className="text-xs font-serif font-bold text-[#0b1a36]">No media shared yet</h4>
+                <h4 className="text-xs font-sans font-bold text-[#0b1a36]">No media shared yet</h4>
                 <p className="text-[11px] text-slate-500 mt-1 max-w-xs mx-auto">
                   Photos, design screenshots, and demo videos sent in the chat will appear here.
                 </p>
@@ -619,7 +619,7 @@ export default function CommunityInfo({ community, messages = [], onBack, onLeav
                 <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 grid place-items-center mx-auto mb-2 shadow-2xs">
                   <Link2 size={22} />
                 </div>
-                <h4 className="text-xs font-serif font-bold text-[#0b1a36]">No shared links</h4>
+                <h4 className="text-xs font-sans font-bold text-[#0b1a36]">No shared links</h4>
                 <p className="text-[11px] text-slate-500 mt-1">
                   External references, GitHub repositories, and articles posted in chat will be catalogued here.
                 </p>
@@ -681,7 +681,7 @@ export default function CommunityInfo({ community, messages = [], onBack, onLeav
                 <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 grid place-items-center mx-auto mb-2 shadow-2xs">
                   <FileText size={22} />
                 </div>
-                <h4 className="text-xs font-serif font-bold text-[#0b1a36]">No documents shared</h4>
+                <h4 className="text-xs font-sans font-bold text-[#0b1a36]">No documents shared</h4>
                 <p className="text-[11px] text-slate-500 mt-1 max-w-xs mx-auto">
                   PDF roadmaps, trial sheets, resume templates, and project notes will appear here.
                 </p>
@@ -736,7 +736,7 @@ export default function CommunityInfo({ community, messages = [], onBack, onLeav
               <LogOut size={22} />
             </div>
             <div>
-              <h3 className="font-serif text-base font-bold text-[#0b1a36]">
+              <h3 className="font-sans text-base font-bold text-[#0b1a36]">
                 Leave {community.career_name || community.name}?
               </h3>
               <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">

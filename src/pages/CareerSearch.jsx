@@ -109,7 +109,7 @@ function CareerCard({ career }) {
               {demand} Demand
             </span>
           </div>
-          <h2 className="font-serif text-base font-bold leading-snug text-[#0b1a36] group-hover:text-[#1E88E5] transition-colors">
+          <h2 className="font-sans text-base font-bold leading-snug text-[#0b1a36] group-hover:text-[#1E88E5] transition-colors">
             {title}
           </h2>
           <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{summary}</p>
@@ -255,7 +255,7 @@ export default function CareerSearch() {
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#1E88E5] block">
               Career Explorer
             </span>
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold leading-tight text-[#0b1a36]">
+            <h1 className="font-sans text-2xl sm:text-3xl font-bold leading-tight text-[#0b1a36]">
               {query ? `Results for "${query}"` : "Search Careers"}
             </h1>
           </div>
@@ -283,7 +283,7 @@ export default function CareerSearch() {
         {!loadingCSV && query && results.length === 0 && (
           <div className="rounded-3xl border border-[#D3E3F5] bg-white p-10 text-center shadow-xs">
             <Briefcase size={36} className="mx-auto mb-3 text-[#1E88E5]/70" />
-            <p className="font-serif text-base font-bold text-[#0b1a36]">No careers matched "{query}"</p>
+            <p className="font-sans text-base font-bold text-[#0b1a36]">No careers matched "{query}"</p>
             <p className="text-xs text-slate-500 mt-1">Try different keywords — e.g. "data", "design", or "healthcare"</p>
           </div>
         )}
@@ -292,7 +292,7 @@ export default function CareerSearch() {
         {!loadingCSV && !query && (
           <div className="rounded-3xl border border-[#D3E3F5] bg-white p-10 text-center shadow-xs">
             <Search size={36} className="mx-auto mb-3 text-[#1E88E5]/70" />
-            <p className="font-serif text-base font-bold text-[#0b1a36]">Start typing to explore 270+ careers</p>
+            <p className="font-sans text-base font-bold text-[#0b1a36]">Start typing to explore 270+ careers</p>
             <p className="text-xs text-slate-500 mt-1">Search by career name, skill, cluster, or industry</p>
             <div className="flex flex-wrap justify-center gap-2 mt-5">
               {["Software Engineer", "Data Science", "UX Design", "Finance", "Healthcare", "AI"].map((hint) => (
