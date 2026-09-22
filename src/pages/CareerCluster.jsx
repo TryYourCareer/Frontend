@@ -43,7 +43,7 @@ export default function CareerCluster({ onBack, onSelectCareer }) {
               <span className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-0.5 text-[10px] font-bold tracking-[0.2em] uppercase text-[#1E88E5]">
                 Domain Pathways
               </span>
-              <h1 className="font-serif text-3xl font-bold leading-tight tracking-tight text-[#0b1a36] sm:text-4xl">
+              <h1 className="font-sans text-3xl font-bold leading-tight tracking-tight text-[#0b1a36] sm:text-4xl">
                 Technology Career Cluster
               </h1>
               <p className="text-xs sm:text-sm leading-relaxed text-slate-600">
@@ -94,7 +94,7 @@ export default function CareerCluster({ onBack, onSelectCareer }) {
                     <Icon size={20} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-serif text-base font-bold text-slate-900 group-hover:text-[#0b1a36] transition-colors">
+                    <h2 className="font-sans text-base font-bold text-slate-900 group-hover:text-[#0b1a36] transition-colors">
                       {career.title}
                     </h2>
                     <p className="mt-1 text-xs leading-relaxed text-slate-600 line-clamp-2">

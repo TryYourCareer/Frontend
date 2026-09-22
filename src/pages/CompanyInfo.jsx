@@ -70,7 +70,7 @@ export default function CompanyInfo() {
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-sky-50 text-[#1E88E5] px-3.5 py-1 rounded-full border border-sky-200">
               Company Hub
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight leading-tight text-[#0b1a36]">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight leading-tight text-[#0b1a36]">
               Shaping Career Reality
             </h1>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
@@ -113,7 +113,7 @@ export default function CompanyInfo() {
               <div className="space-y-8 animate-fade-in">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                   <div className="lg:col-span-7 space-y-4">
-                    <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Fixing the Skills Gap</h2>
+                    <h2 className="text-2xl font-sans font-bold text-[#0b1a36]">Fixing the Skills Gap</h2>
                     <p className="text-sm leading-relaxed text-slate-600">
                       For years, students have graduated knowing only textbook definitions without any practical experience. We started TryYourCareers to fix this broken system.
                     </p>
@@ -143,7 +143,7 @@ export default function CompanyInfo() {
 
                 {/* Team Grid */}
                 <div className="pt-6 border-t border-[#D3E3F5] space-y-4">
-                  <h3 className="text-lg font-serif font-bold text-[#0b1a36]">The Core Team</h3>
+                  <h3 className="text-lg font-sans font-bold text-[#0b1a36]">The Core Team</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {team.map((t, idx) => (
                       <div key={idx} className="flex items-center gap-4 bg-[#F0F6FC] p-4 rounded-2xl border border-[#D3E3F5]">
@@ -164,7 +164,7 @@ export default function CompanyInfo() {
             {activeTab === "elevate" && (
               <div className="space-y-8 animate-fade-in">
                 <div className="space-y-3">
-                  <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">The Elevate Program</h2>
+                  <h2 className="text-2xl font-sans font-bold text-[#0b1a36]">The Elevate Program</h2>
                   <p className="text-sm leading-relaxed text-slate-600 max-w-3xl">
                     Elevate is our premier internship and coaching bridge that takes our top sandbox performers and turns them into job-backed professionals with formal company backing.
                   </p>
@@ -211,7 +211,7 @@ export default function CompanyInfo() {
             {activeTab === "stories" && (
               <div className="space-y-8 animate-fade-in">
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Student Success Stories</h2>
+                  <h2 className="text-2xl font-sans font-bold text-[#0b1a36]">Student Success Stories</h2>
                   <p className="text-sm text-slate-500">Read how everyday students successfully shifted their careers, mastered our practice environments, and landed real tech jobs.</p>
                 </div>
 
@@ -244,7 +244,7 @@ export default function CompanyInfo() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                   {/* Job postings */}
                   <div className="lg:col-span-7 space-y-5">
-                    <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Open Roles</h2>
+                    <h2 className="text-2xl font-sans font-bold text-[#0b1a36]">Open Roles</h2>
                     <div className="space-y-4">
                       {jobs.map((job) => (
                         <div key={job.id} className="bg-[#F0F6FC] p-5 rounded-2xl border border-[#D3E3F5] flex justify-between items-center gap-4 hover:border-slate-300 transition-all">

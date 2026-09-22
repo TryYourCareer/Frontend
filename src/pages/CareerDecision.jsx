@@ -233,7 +233,7 @@ export default function CareerDecision() {
                 <Compass size={13} />
                 <span>Decision Intelligence</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold font-serif text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-bold font-sans text-slate-900">
                 Career Decision
               </h1>
             </div>
@@ -317,7 +317,7 @@ export default function CareerDecision() {
               <Layers size={32} />
             </div>
             <div className="space-y-2">
-              <h2 className="text-xl font-bold font-serif text-slate-900">
+              <h2 className="text-xl font-bold font-sans text-slate-900">
                 No Decision Recommendations Yet
               </h2>
               <p className="text-sm text-slate-600 max-w-lg mx-auto leading-relaxed">
@@ -441,7 +441,7 @@ export default function CareerDecision() {
 
                       {/* Career Title & Code */}
                       <div>
-                        <h2 className="text-xl font-bold font-serif text-slate-900 leading-snug">
+                        <h2 className="text-xl font-bold font-sans text-slate-900 leading-snug">
                           {candidate.career_title || candidate.career_code}
                         </h2>
                         {candidate.career_code && (
@@ -560,7 +560,7 @@ export default function CareerDecision() {
                       <Columns3 size={15} />
                       <span>Career Comparison Matrix</span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-bold font-serif text-slate-900">
+                    <h2 className="text-xl sm:text-2xl font-bold font-sans text-slate-900">
                       Comparing {comparisonCandidates.length} Careers
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600">
@@ -600,7 +600,7 @@ export default function CareerDecision() {
                               <span className="inline-block px-2 py-0.5 rounded bg-slate-900 text-white font-mono text-[10px]">
                                 Rank #{candidate.rank || 1}
                               </span>
-                              <div className="text-sm font-serif font-bold text-slate-900 leading-snug">
+                              <div className="text-sm font-sans font-bold text-slate-900 leading-snug">
                                 {candidate.career_title || candidate.career_code}
                               </div>
                               {candidate.career_code && (
@@ -826,7 +826,7 @@ export default function CareerDecision() {
                       </span>
                     </div>
 
-                    <h2 id="career-detail-title" className="text-2xl sm:text-3xl font-bold font-serif text-slate-900 leading-tight">
+                    <h2 id="career-detail-title" className="text-2xl sm:text-3xl font-bold font-sans text-slate-900 leading-tight">
                       {selectedCandidate.career_title || selectedCandidate.career_code}
                     </h2>
                     
@@ -1005,7 +1005,7 @@ export default function CareerDecision() {
                         <div className="bg-[#FAF6EC] p-4 rounded-xl border border-[#e8dfc8] space-y-3 shadow-sm" data-testid="next-mission-card">
                           <div className="space-y-1">
                             {missionTitle && (
-                              <h4 className="text-sm font-bold font-serif text-slate-900" data-testid="next-mission-title">
+                              <h4 className="text-sm font-bold font-sans text-slate-900" data-testid="next-mission-title">
                                 {missionTitle}
                               </h4>
                             )}

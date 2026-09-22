@@ -134,7 +134,7 @@ export default function DiscoveryTest() {
         <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition cursor-pointer">
           <ArrowLeft size={16} /> Back
         </button>
-        <h1 className="text-2xl font-serif font-bold text-[#0b1a36]">Discovery Test</h1>
+        <h1 className="text-2xl font-sans font-bold text-[#0b1a36]">Discovery Test</h1>
         <p className="mt-4 text-red-600 font-medium">{error}</p>
       </div>
     );
@@ -157,7 +157,7 @@ export default function DiscoveryTest() {
         <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition cursor-pointer">
           <ArrowLeft size={16} /> Back
         </button>
-        <h1 className="text-2xl font-serif font-bold text-[#0b1a36]">Discovery Test</h1>
+        <h1 className="text-2xl font-sans font-bold text-[#0b1a36]">Discovery Test</h1>
         <p className="mt-4 text-slate-600">No questions were loaded. Try refreshing the page.</p>
       </div>
     );
@@ -187,7 +187,7 @@ export default function DiscoveryTest() {
               <span className="text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full bg-sky-50 text-[#1E88E5] border border-sky-200">
                 {currentIndex < 10 ? "Part 1: Behavioral Scenario" : "Part 2: Qualitative Reflection"}
               </span>
-              <h2 className="mt-3 text-lg sm:text-2xl font-serif font-bold text-[#0b1a36] leading-snug">{currentQuestion.question_text}</h2>
+              <h2 className="mt-3 text-lg sm:text-2xl font-sans font-bold text-[#0b1a36] leading-snug">{currentQuestion.question_text}</h2>
             </div>
             <div className="rounded-full border border-[#D3E3F5] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-bold text-[#0b1a36] shadow-2xs shrink-0">
               {currentIndex + 1}/{totalQuestions}

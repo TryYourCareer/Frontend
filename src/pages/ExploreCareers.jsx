@@ -453,7 +453,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
               <ArrowLeft className="h-3.5 w-3.5" />
               Back
             </button>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight mt-2 text-[#0b1a36]">Explore Careers</h1>
+            <h1 className="text-2xl sm:text-3xl font-sans font-bold tracking-tight mt-2 text-[#0b1a36]">Explore Careers</h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
               Test-drive different options and find your perfect path using real-world validation.
             </p>
@@ -484,7 +484,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
         {/* Interactive Cluster Selector Cards */}
         <section className="mb-10 text-left">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-serif text-lg font-bold flex items-center gap-2 text-[#0b1a36]">
+            <h2 className="font-sans text-lg font-bold flex items-center gap-2 text-[#0b1a36]">
               <Compass className="h-5 w-5 text-[#1E88E5]" />
               Filter by Career Cluster
             </h2>
@@ -517,7 +517,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                   <span className="text-[10px] font-bold text-slate-400 block tracking-wider uppercase">
                     {cluster.id}
                   </span>
-                  <h3 className="font-serif font-bold text-sm leading-snug mt-1 text-[#0b1a36] line-clamp-1">
+                  <h3 className="font-sans font-bold text-sm leading-snug mt-1 text-[#0b1a36] line-clamp-1">
                     {cluster.name}
                   </h3>
                   
@@ -684,7 +684,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                             </div>
 
                             {/* Title & One-line */}
-                            <h3 className="font-serif text-base font-bold text-[#0b1a36] mt-3 line-clamp-1">
+                            <h3 className="font-sans text-base font-bold text-[#0b1a36] mt-3 line-clamp-1">
                               {career.name}
                             </h3>
                             <p className="text-xs text-slate-500 mt-1 line-clamp-2 min-h-[32px] leading-relaxed">
@@ -758,7 +758,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                 {filteredCareers.length === 0 && (
                   <div className="rounded-3xl border border-dashed border-[#D3E3F5] bg-white/70 p-12 text-center text-slate-500 max-w-lg mx-auto mt-10 shadow-xs">
                     <Briefcase className="h-10 w-10 mx-auto text-slate-400 mb-2" />
-                    <h3 className="font-serif font-bold text-[#0b1a36]">No Matching Careers</h3>
+                    <h3 className="font-sans font-bold text-[#0b1a36]">No Matching Careers</h3>
                     <p className="text-xs sm:text-sm mt-1 leading-relaxed">
                       We couldn't find any career options matching your selected search query or filters. Try resetting the filters or broadening your search parameters.
                     </p>
@@ -804,7 +804,7 @@ export default function ExploreCareers({ onBack, initialSearch = "", selectedClu
                     <span className="text-[10px] font-bold bg-sky-50 text-[#1E88E5] px-2.5 py-0.5 rounded-full tracking-wider border border-sky-200 uppercase">
                       {quickViewCareer.clusterId}
                     </span>
-                    <h2 className="font-serif text-xl font-bold text-[#0b1a36] mt-1">{quickViewCareer.name}</h2>
+                    <h2 className="font-sans text-xl font-bold text-[#0b1a36] mt-1">{quickViewCareer.name}</h2>
                   </div>
                   <button
                     onClick={() => setQuickViewCareer(null)}

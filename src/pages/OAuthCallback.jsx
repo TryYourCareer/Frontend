@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { fetchCurrentUser, loginWithOAuth, setAuthToken } from "../services/auth";
+import { fetchCurrentUser, loginWithOAuth, setAuthToken, setSupabaseAuthSession } from "../services/auth";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function OAuthCallback() {
@@ -22,6 +22,7 @@ export default function OAuthCallback() {
       // Try to read an OAuth "code" or token from either query string or URL hash.
       let code = params.get("code");
       let token = params.get("access_token") || params.get("token");
+      let refreshToken = params.get("refresh_token") || "";
 
       if (!code && !token) {
         const hash = window.location.hash || "";
@@ -29,6 +30,7 @@ export default function OAuthCallback() {
           const hashParams = new URLSearchParams(hash.replace(/^#/, ""));
           code = hashParams.get("code");
           token = hashParams.get("access_token") || hashParams.get("token");
+          refreshToken = hashParams.get("refresh_token") || refreshToken;
           const hashError = hashParams.get("error_description") || hashParams.get("error");
           if (hashError) {
             setError(hashError);
@@ -49,7 +51,10 @@ export default function OAuthCallback() {
         if (!activeToken && code) {
           const result = await loginWithOAuth(code);
           activeToken = result.token || "";
+          refreshToken = result.refreshToken || refreshToken;
           authUser = result.user || null;
+        } else if (activeToken && refreshToken) {
+          await setSupabaseAuthSession(activeToken, refreshToken);
         }
 
         if (!activeToken) {

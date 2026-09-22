@@ -3,14 +3,11 @@
  *
  * Reads the current Supabase session JWT and attaches it as
  * `Authorization: Bearer <token>` on every request.
- *
- * Usage:
- *   import api from "../lib/api";
- *   const careers = await api.get("/api/careers");
- *   const msg = await api.post("/api/communities/{id}/messages", { content: "Hello!" });
+ * Automatically attempts session refresh on 401 Unauthorized before failing.
  */
 
 import BACKEND_BASE_URL from "../API/BaseURL";
+import { supabase } from "../supabaseConfig";
 
 const BASE_URL = BACKEND_BASE_URL;
 
@@ -26,15 +23,16 @@ export function setApiToken(token) {
 }
 
 /**
- * Core fetch wrapper. Automatically injects the Bearer token and
- * parses JSON responses. Throws on non-2xx status codes.
+ * Core fetch wrapper. Automatically injects the Bearer token,
+ * retries once with refreshed token if 401 is encountered,
+ * and parses JSON responses. Throws on non-2xx status codes.
  */
-async function request(method, path, body) {
+async function request(method, path, body, hasRetried = false) {
   const headers = {
     "Content-Type": "application/json",
   };
 
-  // Try to get the token from localStorage as a fallback
+  // Try to get the token from memory or localStorage
   const token = _token || localStorage.getItem("clearcareers_auth_token") || "";
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -43,6 +41,7 @@ async function request(method, path, body) {
   const init = {
     method,
     headers,
+    credentials: "include",
   };
 
   if (body !== undefined) {
@@ -50,6 +49,31 @@ async function request(method, path, body) {
   }
 
   const res = await fetch(`${BASE_URL}${path}`, init);
+
+  // If unauthorized and haven't retried yet, try refreshing the Supabase session
+  if (res.status === 401 && !hasRetried && supabase) {
+    try {
+      const { data, error } = await supabase.auth.refreshSession();
+      if (!error && data?.session?.access_token) {
+        const newToken = data.session.access_token;
+        _token = newToken;
+        localStorage.setItem("clearcareers_auth_token", newToken);
+        if (data.session.refresh_token) {
+          localStorage.setItem("clearcareers_refresh_token", data.session.refresh_token);
+        }
+        return await request(method, path, body, true);
+      } else {
+        // Refresh token is expired or session was revoked on server — clear dead tokens
+        _token = "";
+        localStorage.removeItem("clearcareers_auth_token");
+        localStorage.removeItem("clearcareers_refresh_token");
+      }
+    } catch {
+      _token = "";
+      localStorage.removeItem("clearcareers_auth_token");
+      localStorage.removeItem("clearcareers_refresh_token");
+    }
+  }
 
   if (!res.ok) {
     let detail = `HTTP ${res.status}`;
@@ -73,9 +97,10 @@ async function request(method, path, body) {
 const api = {
   get:    (path)        => request("GET",    path),
   post:   (path, body)  => request("POST",   path, body),
+  put:    (path, body)  => request("PUT",    path, body),
   patch:  (path, body)  => request("PATCH",  path, body),
   delete: (path)        => request("DELETE", path),
-  upload: async (path, formData) => {
+  upload: async (path, formData, hasRetried = false) => {
     const headers = {};
     const token = _token || localStorage.getItem("clearcareers_auth_token") || "";
     if (token) {
@@ -84,8 +109,26 @@ const api = {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
       headers,
+      credentials: "include",
       body: formData,
     });
+
+    if (res.status === 401 && !hasRetried && supabase) {
+      try {
+        const { data, error } = await supabase.auth.refreshSession();
+        if (!error && data?.session?.access_token) {
+          const newToken = data.session.access_token;
+          _token = newToken;
+          localStorage.setItem("clearcareers_auth_token", newToken);
+          if (data.session.refresh_token) {
+            localStorage.setItem("clearcareers_refresh_token", data.session.refresh_token);
+          }
+          return await api.upload(path, formData, true);
+        }
+      } catch {
+        // ignore
+      }
+    }
 
     if (!res.ok) {
       let detail = `HTTP ${res.status}`;

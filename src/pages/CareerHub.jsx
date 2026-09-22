@@ -725,7 +725,7 @@ export default function CareerHub() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <h1 className="font-serif text-2xl sm:text-3xl font-black text-[#0b1a36] tracking-tight">
+                  <h1 className="font-sans text-2xl sm:text-3xl font-black text-[#0b1a36] tracking-tight">
                     Discover hubs
                   </h1>
                   <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">

@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Menu, Search, Bell
-} from "lucide-react";
+import { Menu, Search } from "lucide-react";
+import NotificationDropdown from "./NotificationDropdown";
 
 
 export default function TopBar({
@@ -130,17 +129,8 @@ export default function TopBar({
       {/* Right: User info */}
       <div className="flex items-center gap-2 sm:gap-3">
 
-        {/* Notification bell */}
-        <button
-          type="button"
-          className={`relative rounded-xl p-2 transition cursor-pointer ${isDark
-            ? "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-            : "text-slate-600 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
-            }`}
-          aria-label="Notifications"
-        >
-          <Bell size={18} />
-        </button>
+        {/* Notification bell & dropdown */}
+        <NotificationDropdown isDark={isDark} />
 
         {/* User avatar + name or Login Option */}
         {user ? (

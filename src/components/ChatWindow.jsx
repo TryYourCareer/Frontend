@@ -516,7 +516,7 @@ export default function ChatWindow({ community, currentUserId, onBack, onMemberC
               <LogOut size={22} />
             </div>
             <div>
-              <h3 className="font-serif text-base font-bold text-[#0b1a36]">
+              <h3 className="font-sans text-base font-bold text-[#0b1a36]">
                 Leave {community.name}?
               </h3>
               <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">

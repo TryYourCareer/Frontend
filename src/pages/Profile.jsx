@@ -192,7 +192,7 @@ export default function Profile({ profile, onRestart, onSave }) {
           <div className="flex items-center gap-4">
             <div>
               <span className="text-[11px] font-bold uppercase tracking-widest text-[#1E88E5]">Account</span>
-              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36]">Personal Information</h1>
+              <h1 className="text-2xl sm:text-3xl font-sans font-bold text-[#0b1a36]">Personal Information</h1>
             </div>
             {authLoading && (
               <span className="flex items-center gap-1.5 text-xs text-[#1E88E5] font-semibold">
@@ -414,7 +414,7 @@ export default function Profile({ profile, onRestart, onSave }) {
 
         {/* ── Logout Section ── */}
         <div className="border-t border-[#D3E3F5] pt-8 space-y-4">
-          <h2 className="text-base font-serif font-bold text-[#0b1a36]">Logout</h2>
+          <h2 className="text-base font-sans font-bold text-[#0b1a36]">Logout</h2>
           <div className="flex items-start gap-3 rounded-xl bg-white p-4 border border-[#D3E3F5] text-xs text-slate-600 shadow-sm">
             <AlertCircle size={15} className="mt-0.5 shrink-0 text-slate-400" />
             <p>
