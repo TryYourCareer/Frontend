@@ -56,7 +56,7 @@ export default function CareerReport() {
             <RefreshCw className="animate-spin" size={32} />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Analyzing Your Profile</h2>
+            <h2 className="text-2xl font-sans font-bold text-[#0b1a36]">Analyzing Your Profile</h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               Matching your 6D RIASEC diagnostic responses against 150+ career vectors...
             </p>
@@ -77,7 +77,7 @@ export default function CareerReport() {
             <Compass size={28} />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-serif font-bold text-[#0b1a36]">Unable to Load Report</h2>
+            <h2 className="text-xl font-sans font-bold text-[#0b1a36]">Unable to Load Report</h2>
             <p className="text-xs sm:text-sm text-slate-600">{error || "No report found for this session."}</p>
           </div>
           <button
@@ -128,7 +128,7 @@ export default function CareerReport() {
           </div>
 
           <div className="space-y-3">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight text-[#0b1a36]">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-[#0b1a36]">
               Your Career Fit Report
             </h1>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-3xl">
@@ -144,7 +144,7 @@ export default function CareerReport() {
               <div className="p-2.5 bg-[#F0F6FC] text-[#1E88E5] rounded-2xl border border-[#D3E3F5]">
                 <BarChart2 size={20} />
               </div>
-              <h2 className="font-serif text-xl font-bold text-[#0b1a36]">Your 6D Dimension Vector</h2>
+              <h2 className="font-sans text-xl font-bold text-[#0b1a36]">Your 6D Dimension Vector</h2>
             </div>
             <span className="text-xs text-slate-500 font-medium">Normalized RIASEC Score</span>
           </div>
@@ -182,7 +182,7 @@ export default function CareerReport() {
               <div className="p-2.5 bg-[#F0F6FC] text-[#1E88E5] rounded-2xl border border-[#D3E3F5]">
                 <Briefcase size={20} />
               </div>
-              <h2 className="font-serif text-2xl font-bold text-[#0b1a36]">Top Matched Careers</h2>
+              <h2 className="font-sans text-2xl font-bold text-[#0b1a36]">Top Matched Careers</h2>
             </div>
             <span className="text-xs font-bold text-slate-500">{top_matches?.length || 0} Recommended Roles</span>
           </div>
@@ -201,7 +201,7 @@ export default function CareerReport() {
                       </span>
                       <span className="text-xs font-bold text-slate-500">{match.sector || match.cluster}</span>
                     </div>
-                    <h3 className="font-serif text-2xl font-bold text-[#0b1a36]">{match.career_name}</h3>
+                    <h3 className="font-sans text-2xl font-bold text-[#0b1a36]">{match.career_name}</h3>
                   </div>
 
                   <div className="flex items-center gap-3 text-right">
@@ -260,7 +260,7 @@ export default function CareerReport() {
                 <Sparkles size={20} />
               </div>
               <div>
-                <h3 className="font-serif text-xl font-bold text-[#0b1a36]">Stage 2 Reflection Insights</h3>
+                <h3 className="font-sans text-xl font-bold text-[#0b1a36]">Stage 2 Reflection Insights</h3>
                 <p className="text-xs text-slate-500">Qualitative themes synthesized from open-text reflection answers</p>
               </div>
             </div>
@@ -279,7 +279,7 @@ export default function CareerReport() {
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#D3E3F5] shadow-xs space-y-4">
             <div className="flex items-center gap-2.5 text-emerald-700">
               <CheckCircle2 size={22} />
-              <h3 className="font-serif text-lg font-bold text-[#0b1a36]">Key Strengths</h3>
+              <h3 className="font-sans text-lg font-bold text-[#0b1a36]">Key Strengths</h3>
             </div>
             <ul className="space-y-3">
               {strengths?.map((item, i) => (
@@ -294,7 +294,7 @@ export default function CareerReport() {
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#D3E3F5] shadow-xs space-y-4">
             <div className="flex items-center gap-2.5 text-amber-700">
               <TrendingUp size={22} />
-              <h3 className="font-serif text-lg font-bold text-[#0b1a36]">Development Areas</h3>
+              <h3 className="font-sans text-lg font-bold text-[#0b1a36]">Development Areas</h3>
             </div>
             <ul className="space-y-3">
               {development_areas?.map((item, i) => (
@@ -313,7 +313,7 @@ export default function CareerReport() {
             <div className="p-2.5 bg-[#F0F6FC] text-[#1E88E5] rounded-2xl border border-[#D3E3F5]">
               <BookOpen size={20} />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-[#0b1a36]">Recommended Next Steps</h2>
+            <h2 className="font-sans text-2xl font-bold text-[#0b1a36]">Recommended Next Steps</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

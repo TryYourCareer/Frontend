@@ -355,7 +355,7 @@ export default function InsightsFeed({ onBack }) {
         {/* Title Header & Trigger Action */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#D3E3F5]/60">
           <div className="space-y-1.5">
-            <h1 className="font-serif text-3xl font-bold tracking-tight text-[#0b1a36]">
+            <h1 className="font-sans text-3xl font-bold tracking-tight text-[#0b1a36]">
               Daily Career Insights
             </h1>
             <p className="text-xs font-semibold text-slate-500 max-w-2xl">

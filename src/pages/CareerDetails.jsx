@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, ArrowRight, DollarSign, TrendingUp, Star,
@@ -292,7 +292,7 @@ export default function CareerDetails() {
           <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 mb-4">
             <AlertCircle size={28} />
           </div>
-          <h1 className="text-2xl font-serif font-bold mb-2 text-[#0b1a36]">
+          <h1 className="text-2xl font-sans font-bold mb-2 text-[#0b1a36]">
             Career Pathway Not Found
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mb-6 leading-relaxed">
@@ -332,17 +332,16 @@ export default function CareerDetails() {
 
       <div className="mx-auto max-w-6xl space-y-8">
         
-        {/* Top Breadcrumb & Actions Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 overflow-x-auto py-1">
-            <Link to="/" className="hover:text-blue-600 transition">Home</Link>
-            <span>/</span>
-            <Link to="/career-reality" className="hover:text-blue-600 transition">Career Reality</Link>
-            <span>/</span>
-            <span className="text-slate-700 font-semibold">{career.cluster}</span>
-            <span>/</span>
-            <span className="text-blue-600 font-bold truncate max-w-[200px]">{career.title}</span>
-          </nav>
+        {/* Top Back Navigation & Actions Bar */}
+        <div className="flex flex-row items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 rounded-full border border-[#D3E3F5] bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:text-[#0b1a36] hover:bg-[#F0F6FC] hover:border-slate-300 transition shadow-2xs cursor-pointer group"
+          >
+            <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-0.5" />
+            <span>Back</span>
+          </button>
 
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <button
@@ -401,7 +400,7 @@ export default function CareerDetails() {
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-black tracking-tight text-[#0b1a36] leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-black tracking-tight text-[#0b1a36] leading-tight">
                 {career.title}
               </h1>
 
@@ -609,7 +608,7 @@ export default function CareerDetails() {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-1">
                           Technological Resilience
                         </span>
-                        <h3 className="text-base sm:text-lg font-serif font-bold text-[#0b1a36]">
+                        <h3 className="text-base sm:text-lg font-sans font-bold text-[#0b1a36]">
                           AI & Automation Impact Analysis
                         </h3>
                       </div>
@@ -770,7 +769,7 @@ export default function CareerDetails() {
             {/* Psychometric Trait Vector Alignment */}
             <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-serif text-sm font-bold text-[#0b1a36] flex items-center gap-1.5">
+                <h3 className="font-sans text-sm font-bold text-[#0b1a36] flex items-center gap-1.5">
                   <Flame size={16} className="text-orange-500" />
                   Dimensional Trait Fit
                 </h3>
@@ -814,7 +813,7 @@ export default function CareerDetails() {
 
             {/* Work Culture & Specifications */}
             <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-3.5">
-              <h3 className="font-serif text-sm font-bold text-[#0b1a36]">
+              <h3 className="font-sans text-sm font-bold text-[#0b1a36]">
                 Working Environment
               </h3>
 
@@ -844,7 +843,7 @@ export default function CareerDetails() {
                 <Sparkles size={20} />
               </div>
               <div>
-                <h4 className="font-serif text-base font-bold">Ready to master {career.title}?</h4>
+                <h4 className="font-sans text-base font-bold">Ready to master {career.title}?</h4>
                 <p className="text-xs text-blue-200 mt-1 leading-relaxed">
                   Follow a structured, 5-stage milestone roadmap with curated learning modules and certifications.
                 </p>
@@ -860,7 +859,7 @@ export default function CareerDetails() {
             {/* Related Careers */}
             {relatedCareers.length > 0 && (
               <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 shadow-xs space-y-3">
-                <h3 className="font-serif text-sm font-bold text-[#0b1a36]">
+                <h3 className="font-sans text-sm font-bold text-[#0b1a36]">
                   Related Careers in {career.cluster}
                 </h3>
                 <div className="space-y-2">

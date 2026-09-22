@@ -69,7 +69,7 @@ export default function SupportInfo() {
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-sky-50 text-[#1E88E5] px-3.5 py-1 rounded-full border border-sky-200">
               Support Center
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight leading-tight text-[#0b1a36]">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight leading-tight text-[#0b1a36]">
               We are here to help
             </h1>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
@@ -111,7 +111,7 @@ export default function SupportInfo() {
             {activeTab === "help" && (
               <div className="space-y-6 animate-fade-in">
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Frequently Asked Questions</h2>
+                  <h2 className="text-2xl font-sans font-bold text-[#0b1a36]">Frequently Asked Questions</h2>
                   <p className="text-sm text-slate-500">Quick answers to common questions about TryYourCareers dashboards, sandboxes, and cohort placements.</p>
                 </div>
 
@@ -148,7 +148,7 @@ export default function SupportInfo() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   {/* Contact form */}
                   <div className="lg:col-span-7 space-y-4">
-                    <h2 className="text-2xl font-serif font-bold text-[#0b1a36]">Submit a Ticket</h2>
+                    <h2 className="text-2xl font-sans font-bold text-[#0b1a36]">Submit a Ticket</h2>
                     <p className="text-xs sm:text-sm text-slate-500">Can't find what you're looking for? Leave a message and we'll reply shortly.</p>
 
                     {contactSubmitted ? (
@@ -260,7 +260,7 @@ export default function SupportInfo() {
             {/* 3. Privacy Policy Tab */}
             {activeTab === "privacy" && (
               <div className="space-y-6 animate-fade-in text-xs sm:text-sm leading-relaxed text-slate-600 max-w-4xl">
-                <h2 className="text-2xl font-serif font-bold text-[#0b1a36] mb-4">Privacy Policy</h2>
+                <h2 className="text-2xl font-sans font-bold text-[#0b1a36] mb-4">Privacy Policy</h2>
                 <p className="font-bold text-slate-500 mb-6">Last Updated: August 2026</p>
                 
                 <div className="space-y-4">
@@ -285,7 +285,7 @@ export default function SupportInfo() {
             {/* 4. Terms of Service Tab */}
             {activeTab === "terms" && (
               <div className="space-y-6 animate-fade-in text-xs sm:text-sm leading-relaxed text-slate-600 max-w-4xl">
-                <h2 className="text-2xl font-serif font-bold text-[#0b1a36] mb-4">Terms of Service</h2>
+                <h2 className="text-2xl font-sans font-bold text-[#0b1a36] mb-4">Terms of Service</h2>
                 <p className="font-bold text-slate-500 mb-6">Last Updated: August 2026</p>
                 
                 <div className="space-y-4">

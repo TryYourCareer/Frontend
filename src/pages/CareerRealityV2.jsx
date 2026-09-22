@@ -323,9 +323,9 @@ export default function CareerRealityV2({ onBack }) {
                   513 Verified Roles
                 </span>
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-black tracking-tight text-[#0b1a36] leading-tight">
+              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-sans font-black tracking-tight text-[#0b1a36] leading-tight">
                 Career Reality Check
-              </h1>
+              </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
                 Verify market compensation benchmarks, daily operational reality, automation resilience, and verified milestone roadmaps across 15 high-growth sectors.
               </p>
@@ -493,7 +493,7 @@ export default function CareerRealityV2({ onBack }) {
             <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center mx-auto text-blue-600">
               <Briefcase size={28} />
             </div>
-            <h3 className="font-serif text-lg font-bold text-[#0b1a36]">No careers match your current filter</h3>
+              <h3 className="font-sans text-lg font-bold text-[#0b1a36]">No careers match your current filter</h3>
             <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
               We couldn't find any roles matching "{searchQuery}" in {selectedSector}. Try clearing search or selecting "All Tracks".
             </p>
@@ -535,7 +535,7 @@ export default function CareerRealityV2({ onBack }) {
 
                   {/* Title & Description */}
                   <div>
-                    <h3 className="font-serif text-lg font-bold text-[#0b1a36] group-hover:text-blue-600 transition leading-snug">
+                    <h3 className="font-sans text-lg font-bold text-[#0b1a36] group-hover:text-blue-600 transition leading-snug">
                       {career.title}
                     </h3>
                     {career.discipline && career.discipline !== career.sector && (
@@ -623,7 +623,7 @@ export default function CareerRealityV2({ onBack }) {
                         </span>
                       )}
                     </div>
-                    <h3 className="font-serif text-base font-bold text-[#0b1a36] hover:text-blue-600 transition cursor-pointer" onClick={() => navigate(`/career-details/${encodeURIComponent(career.title)}`)}>
+                    <h3 className="font-sans text-base font-bold text-[#0b1a36] hover:text-blue-600 transition cursor-pointer" onClick={() => navigate(`/career-details/${encodeURIComponent(career.title)}`)}>
                       {career.title}
                     </h3>
                     <p className="text-xs text-slate-600 line-clamp-1">{career.description}</p>
@@ -695,7 +695,7 @@ export default function CareerRealityV2({ onBack }) {
                     <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-sky-200 bg-sky-50 text-[#1E88E5]">
                       {inspectCareer.sector}
                     </span>
-                    <h2 className="text-2xl font-serif font-black text-[#0b1a36] mt-2">
+                    <h2 className="text-2xl font-sans font-black text-[#0b1a36] mt-2">
                       {inspectCareer.title}
                     </h2>
                     <p className="text-xs text-slate-500">{inspectCareer.discipline}</p>

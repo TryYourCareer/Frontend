@@ -194,7 +194,7 @@ export default function Registration() {
             <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#1E88E5] mb-3">
               Career Profile Setup
             </span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36] leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-sans font-bold text-[#0b1a36] leading-tight">
               Complete Your Profile
             </h2>
             <p className="mt-1.5 text-sm text-slate-500">

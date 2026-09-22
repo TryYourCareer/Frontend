@@ -179,7 +179,7 @@ export default function DocumentWorkbenchWorkspace({
                   <BookOpen size={18} />
                 </div>
                 <div>
-                  <h2 className="font-serif text-lg font-bold text-slate-900">{documentTitle}</h2>
+                  <h2 className="font-sans text-lg font-bold text-slate-900">{documentTitle}</h2>
                   <p className="text-xs text-slate-500">
                     Drafting structured deliverable • {completedSectionsCount} of {sections.length} sections populated
                   </p>
@@ -223,7 +223,7 @@ export default function DocumentWorkbenchWorkspace({
                 <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700">
                   Section {currentSectionIndex + 1} of {sections.length}
                 </span>
-                <h3 className="font-serif text-xl font-bold text-slate-900">{currentSection.title}</h3>
+                <h3 className="font-sans text-xl font-bold text-slate-900">{currentSection.title}</h3>
                 <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">{currentSection.description}</p>
               </div>
               <div className="flex items-center gap-2 font-mono text-xs text-slate-500">

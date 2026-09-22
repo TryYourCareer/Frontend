@@ -1,19 +1,19 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ClipboardList, Compass, Newspaper,
-  Users, LayoutDashboard, LogIn, LogOut,
-  X, ChevronLeft, ChevronRight, Rocket,
+  ClipboardList, Newspaper, X, BookOpen,
+  LayoutDashboard, LogIn, LogOut,
+  ChevronLeft, ChevronRight, Rocket, MessageSquare,
   Brain,
 } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Dashboard", icon: LayoutDashboard, action: "student-dashboard" },
   { label: "Discovery Test", icon: ClipboardList, action: "assessment" },
-  { label: "Career Reality", icon: Compass, action: "career-reality" },
+  { label: "Career Reality", icon: BookOpen, action: "career-reality" },
   { label: "Career Intelligence", icon: Brain, action: "career-intelligence" },
   { label: "Insights Feed", icon: Newspaper, action: "insights-feed" },
-  { label: "Career Hubs", icon: Users, action: "career-hubs" },
   { label: "Trial Mission", icon: Rocket, action: "trial-mission", isLaunchingSoon: true },
+  { label: "Career Hubs", icon: MessageSquare, action: "career-hubs" },
 ];
 
 const sidebarItemVariants = {
@@ -135,8 +135,8 @@ export default function Sidebar({
                 }`}
             >
               {/* Active indicator bar */}
-              <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-r-full transition-all duration-200 ${isActive ? "bg-[#1E88E5] opacity-100" : "opacity-0"
-                }`} />
+              {/* <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-r-full transition-all duration-200 ${isActive ? "bg-[#1E88E5] opacity-100" : "opacity-0" */}
+              {/* }`} /> */}
               <Icon
                 size={17}
                 className={`shrink-0 transition-colors ${isActive ? "text-white" : isLaunchingSoon ? "text-[#1E88E5] group-hover:text-[#1E88E5]" : "text-slate-400 group-hover:text-[#1E88E5]"

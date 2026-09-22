@@ -363,7 +363,7 @@ export default function Roadmap() {
                   Interactive Curated Learning Roadmap
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#0b1a36] tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-sans font-bold text-[#0b1a36] tracking-tight leading-tight">
                 {currentPath.title} Career Roadmap
               </h1>
               <p className="max-w-2xl text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -447,7 +447,7 @@ export default function Roadmap() {
             <span className="rounded-full bg-white/15 border border-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-400">
               {currentPath.category} Track
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold font-serif tracking-tight">{currentPath.title} Syllabus</h2>
+            <h2 className="text-xl sm:text-2xl font-bold font-sans tracking-tight">{currentPath.title} Syllabus</h2>
             <p className="max-w-2xl text-xs leading-relaxed text-blue-50/85">
               {currentPath.summary}
             </p>
@@ -524,7 +524,7 @@ export default function Roadmap() {
                         <span className="text-[10px] font-bold uppercase tracking-widest text-[#1E88E5]">
                           Stage {sIdx + 1}
                         </span>
-                        <h3 className="text-base font-serif font-bold text-[#0b1a36] mt-1">{step.title}</h3>
+                        <h3 className="text-base font-sans font-bold text-[#0b1a36] mt-1">{step.title}</h3>
                       </div>
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-full px-2.5 py-1 self-start sm:self-center">
                         <Clock size={10} /> {step.estimatedTime}
@@ -593,7 +593,7 @@ export default function Roadmap() {
         {/* Dynamic final milestones / Placement Card */}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center max-w-lg mx-auto space-y-3 shadow-xs">
           <Award size={35} className="mx-auto text-emerald-500 animate-bounce" />
-          <h3 className="text-lg font-bold font-serif text-[#0b1a36]">Complete {currentPath.title} Pathway</h3>
+          <h3 className="text-lg font-bold font-sans text-[#0b1a36]">Complete {currentPath.title} Pathway</h3>
           <p className="text-xs leading-relaxed text-slate-600">
             Once you check off all milestones for the <strong>{currentPath.title}</strong> path, you unlock verified portfolio projects, simulation trials, and capstone credentials.
           </p>

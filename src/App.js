@@ -27,9 +27,11 @@ import CareerDecision from "./pages/CareerDecision";
 
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import careersData from "./data/clearcareers_data.json";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
+import CookieConsent from "./components/CookieConsent";
 
 
 
@@ -235,9 +237,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
-        <SpeedInsights />
-        <Analytics />
+        <NotificationProvider>
+          <AppRoutes />
+          <CookieConsent />
+          <SpeedInsights />
+          <Analytics />
+        </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
   );
