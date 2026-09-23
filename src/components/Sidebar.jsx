@@ -3,7 +3,7 @@ import {
   ClipboardList, Newspaper, X, BookOpen,
   LayoutDashboard, LogIn, LogOut,
   ChevronLeft, ChevronRight, Rocket, MessageSquare,
-  Brain,
+  Brain, FileText,
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { label: "Insights Feed", icon: Newspaper, action: "insights-feed" },
   { label: "Trial Mission", icon: Rocket, action: "trial-mission", isLaunchingSoon: true },
   { label: "Career Hubs", icon: MessageSquare, action: "career-hubs" },
+  { label: "Reports", icon: FileText, action: "reports", isNew: true },
 ];
 
 const sidebarItemVariants = {
@@ -75,7 +76,6 @@ export default function Sidebar({
               alt="Try Your Career"
               className="h-7 w-7 aspect-square object-contain drop-shadow-xs"
             />
-            {/* <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" /> */}
           </div>
           {!isCollapsed && (
             <motion.div
@@ -116,7 +116,7 @@ export default function Sidebar({
         animate="show"
         className="flex-1 overflow-y-auto px-3 py-4 space-y-1"
       >
-        {NAV_LINKS.map(({ label, icon: Icon, action, isLaunchingSoon }) => {
+        {NAV_LINKS.map(({ label, icon: Icon, action, isLaunchingSoon, isNew }) => {
           const isActive = activePage === action;
           return (
             <motion.button
@@ -126,30 +126,35 @@ export default function Sidebar({
               whileTap={{ scale: 0.97 }}
               onClick={() => handleNav(action)}
               title={isCollapsed ? (isLaunchingSoon ? `${label} (Launching Soon)` : label) : undefined}
-              className={`sidebar-nav-item group flex w-full items-center gap-3 rounded-2xl py-2.5 text-left text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${isCollapsed ? "justify-center px-0" : "px-3.5"
+              className={`sidebar-nav-item group flex w-full items-center gap-3 rounded-2xl py-2.5 text-left text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer relative ${isCollapsed ? "justify-center px-0" : "px-3.5"
                 } ${isActive
                   ? "bg-[#0b1a36] text-white shadow-xs"
-                  : isLaunchingSoon
-                    ? "text-slate-650 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
-                    : "text-slate-650 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
+                  : "text-slate-650 hover:bg-[#F0F6FC] hover:text-[#0b1a36]"
                 }`}
             >
-              {/* Active indicator bar */}
-              {/* <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-r-full transition-all duration-200 ${isActive ? "bg-[#1E88E5] opacity-100" : "opacity-0" */}
-              {/* }`} /> */}
               <Icon
                 size={17}
-                className={`shrink-0 transition-colors ${isActive ? "text-white" : isLaunchingSoon ? "text-[#1E88E5] group-hover:text-[#1E88E5]" : "text-slate-400 group-hover:text-[#1E88E5]"
+                className={`shrink-0 transition-colors ${isActive
+                    ? "text-white"
+                    : isLaunchingSoon || isNew
+                      ? "text-[#1E88E5] group-hover:text-[#1E88E5]"
+                      : "text-slate-400 group-hover:text-[#1E88E5]"
                   }`}
               />
               {!isCollapsed && (
                 <div className="flex items-center justify-between w-full min-w-0">
                   <span className="truncate">{label}</span>
-                  {/* {isLaunchingSoon && (
-                    <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full ml-auto border border-amber-200 shrink-0">
-                      Soon
+                  {isNew && (
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full ml-auto border border-emerald-200 shrink-0">
+                      New
                     </span>
-                  )} */}
+                  )}
+                </div>
+              )}
+              {isCollapsed && isNew && (
+                <div className="absolute top-1 right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </div>
               )}
               {isCollapsed && isLaunchingSoon && (

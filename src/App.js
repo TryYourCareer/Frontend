@@ -23,8 +23,7 @@ import SupportInfo from "./pages/SupportInfo";
 import CareerReport from "./pages/CareerReport";
 import CareerIntelligence from "./pages/CareerIntelligence";
 import CareerDecision from "./pages/CareerDecision";
-
-
+import Report from "./pages/Report"; // Your actual hardcoded report component
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
@@ -33,19 +32,15 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
 import CookieConsent from "./components/CookieConsent";
 
-
-
 function AppLoadingSkeleton() {
   return (
     <div className="min-h-screen bg-[#FAF6EC] flex flex-col">
-      {/* Nav skeleton */}
       <div className="h-14 bg-white border-b border-[#e2d9c8] flex items-center px-6 gap-4 animate-pulse">
         <div className="h-7 w-28 rounded-lg bg-[#e8dfc8]" />
         <div className="flex-1" />
         <div className="h-7 w-20 rounded-full bg-[#e8dfc8]" />
         <div className="h-7 w-7 rounded-full bg-[#e8dfc8]" />
       </div>
-      {/* Content skeleton */}
       <div className="flex-1 px-6 py-10 mx-auto w-full max-w-6xl space-y-8 animate-pulse">
         <div className="space-y-3">
           <div className="h-4 w-24 rounded-full bg-[#e8dfc8]" />
@@ -95,6 +90,8 @@ function AppShell({ children }) {
     if (path === "/trial-mission") return "trial-mission";
     if (path.startsWith("/career-intelligence")) return "career-intelligence";
     if (path === "/career-decision") return "career-decision";
+    if (path === "/reports") return "reports";
+    if (path === "/decision-report") return "reports";
     return "landing";
   }, [location.pathname]);
 
@@ -103,7 +100,6 @@ function AppShell({ children }) {
     []
   );
 
-  // Filter careers by title match — returns career names for the dropdown
   const clusterResults = useMemo(() => {
     const query = String(careerSearchQuery || "").trim().toLowerCase();
     if (!query) return [];
@@ -112,7 +108,6 @@ function AppShell({ children }) {
       .map((career) => career.title)
       .slice(0, 8);
   }, [careers, careerSearchQuery]);
-
 
   const handleNavigate = (action) => {
     const map = {
@@ -129,6 +124,8 @@ function AppShell({ children }) {
       "trial-mission": "/trial-mission",
       "career-intelligence": "/career-intelligence",
       "career-decision": "/career-decision",
+      reports: "/reports",
+      "decision-report": "/decision-report",
     };
     if (action === "login") {
       setIsLoginOpen(true);
@@ -179,7 +176,6 @@ function AppRoutes() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If Supabase redirects directly to root "/" with tokens or code, forward to /oauth/callback
     const hash = window.location.hash || "";
     const search = window.location.search || "";
     if (
@@ -191,13 +187,13 @@ function AppRoutes() {
       }
     }
   }, [navigate]);
+
   return (
     <>
       <Routes>
         <Route path="/" element={<Landing onStartDiscovery={() => setIsLoginOpen(true)} onExploreCareers={() => navigate("/explore-careers")} onOpenAuth={() => setIsLoginOpen(true)} theme="light" />} />
         <Route path="/login" element={<Login onBack={() => window.history.back()} />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
-        {/* /register now redirects to / — the Registration modal is rendered globally below */}
         <Route path="/register" element={<Navigate to="/" replace />} />
         <Route path="/profile" element={<ProtectedRoute><AppShell><Profile profile={profile} /></AppShell></ProtectedRoute>} />
         <Route path="/assessment" element={<ProtectedRoute requireRegistration><AppShell><Assessment user={profile} /></AppShell></ProtectedRoute>} />
@@ -211,6 +207,12 @@ function AppRoutes() {
         <Route path="/career-search" element={<AppShell><CareerSearch /></AppShell>} />
         <Route path="/career-details/:careerName" element={<AppShell><CareerDetails /></AppShell>} />
         <Route path="/career-report/:sessionId" element={<ProtectedRoute requireRegistration><AppShell><CareerReport /></AppShell></ProtectedRoute>} />
+        
+        {/* Points directly to your Report component */}
+        <Route path="/decision-report" element={<ProtectedRoute requireRegistration><AppShell><Report /></AppShell></ProtectedRoute>} />
+        
+        <Route path="/reports" element={<ProtectedRoute requireRegistration><AppShell><Report /></AppShell></ProtectedRoute>} />
+
         <Route path="/trial-mission" element={<ProtectedRoute><AppShell><TrialMission /></AppShell></ProtectedRoute>} />
         <Route path="/career-intelligence" element={<ProtectedRoute><AppShell><CareerIntelligence /></AppShell></ProtectedRoute>} />
         <Route path="/career-intelligence/family/:familyKey" element={<ProtectedRoute><AppShell><CareerIntelligence /></AppShell></ProtectedRoute>} />
@@ -220,14 +222,9 @@ function AppRoutes() {
         <Route path="/company/:tabId" element={<CompanyInfo />} />
         <Route path="/support/:tabId" element={<SupportInfo />} />
         <Route path="*" element={<Navigate to="/" replace />} />
-
-
       </Routes>
 
-      {/* Login modal overlay */}
       {isLoginOpen && <Login onBack={() => setIsLoginOpen(false)} />}
-
-      {/* Registration modal overlay — shown only after auth resolves and user is not registered */}
       {!loading && token && !isRegistered && <Registration />}
     </>
   );
@@ -247,4 +244,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

@@ -44,7 +44,7 @@ export default function CareerIntelligenceDetail({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-slate-700 hover:text-slate-900 bg-white/80 px-3 py-1.5 rounded-xl border border-[#e2d9c8] transition hover:bg-white"
+          className="inline-flex items-center gap-1.5 text-slate-700 hover:text-[#0b1a36] bg-white/90 px-3.5 py-1.5 rounded-full border border-[#D3E3F5] transition hover:bg-white shadow-2xs cursor-pointer"
         >
           <ArrowLeft size={14} />
           <span>Back</span>
@@ -56,7 +56,7 @@ export default function CareerIntelligenceDetail({
             <button
               type="button"
               onClick={() => onNavigateFamily?.(classification.family_key)}
-              className="text-slate-700 hover:text-[#0b1a36] hover:underline"
+              className="text-slate-700 hover:text-[#0b1a36] hover:underline cursor-pointer"
             >
               {classification.family_name || classification.family_key}
             </button>
@@ -64,19 +64,19 @@ export default function CareerIntelligenceDetail({
         )}
 
         <span className="text-slate-400">/</span>
-        <span className="text-slate-900 font-bold">{career.name}</span>
+        <span className="text-[#0b1a36] font-bold">{career.name}</span>
       </div>
 
       {/* Section A: Career Identity Header */}
-      <div className="bg-white/80 rounded-3xl p-8 border border-[#e2d9c8] shadow-sm space-y-4">
+      <div className="bg-white/90 backdrop-blur-md rounded-3xl p-8 border border-[#D3E3F5] shadow-xs space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="space-y-2 max-w-3xl">
+          <div className="space-y-2 max-w-3xl text-left">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#FAF2DB] text-slate-800 border border-[#e2d9c8]">
+              <span className="px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-[#1E88E5] border border-sky-200">
                 Career Profile
               </span>
               {career.sector_name && (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#F0F6FC] text-slate-700 border border-[#D3E3F5]">
                   {career.sector_name}
                 </span>
               )}
@@ -85,57 +85,57 @@ export default function CareerIntelligenceDetail({
               )}
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
+            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#0b1a36]">
               {career.name}
             </h1>
 
             {career.one_liner && (
-              <p className="text-base font-semibold text-slate-800">
+              <p className="text-sm sm:text-base font-semibold text-slate-700">
                 {career.one_liner}
               </p>
             )}
 
             {career.description && (
-              <p className="text-sm text-slate-600 leading-relaxed pt-1">
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed pt-1">
                 {career.description}
               </p>
             )}
           </div>
 
-          <div className="flex flex-col sm:items-end gap-2 text-xs font-mono text-slate-500 bg-[#FAF2DB]/40 px-3 py-2 rounded-xl border border-[#e2d9c8]">
+          <div className="flex flex-col sm:items-end gap-2 text-xs font-mono text-slate-500 bg-[#F0F6FC] px-3 py-2 rounded-2xl border border-[#D3E3F5] shadow-2xs">
             <span>slug: {career.slug}</span>
             {career.id && <span className="text-[10px] text-slate-400">id: {career.id}</span>}
           </div>
         </div>
 
         {/* Action Block: Trial Mission Connection */}
-        <div className="pt-4 border-t border-slate-200/80" data-testid="trial-mission-action-block">
+        <div className="pt-4 border-t border-[#D3E3F5]" data-testid="trial-mission-action-block">
           {publishedMission ? (
             /* Case 1: Published Mission Exists */
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#fbf9f4] border border-[#e8dfc8]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] shadow-2xs text-left">
               <div className="space-y-0.5">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
                   <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
                   Live Simulation Available
                 </span>
-                <p className="text-sm font-semibold text-slate-800" data-testid="published-mission-title">
+                <p className="text-xs sm:text-sm font-bold text-[#0b1a36]" data-testid="published-mission-title">
                   Mission: {publishedMission.title}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => navigate(`/trial-mission?missionId=${encodeURIComponent(publishedMission.id)}`)}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#0b1a36] text-white text-sm font-bold shadow-sm transition hover:bg-[#142447] focus:outline-none focus:ring-2 focus:ring-[#0b1a36]/30"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#0b1a36] text-white text-xs font-bold shadow-xs transition hover:bg-[#122b59] focus:outline-none focus:ring-2 focus:ring-[#0b1a36]/30 cursor-pointer"
                 aria-label={`Try a Trial Mission: ${publishedMission.title}`}
                 data-testid="try-trial-mission-cta"
               >
-                <Rocket size={16} />
+                <Rocket size={15} />
                 <span>Try a Trial Mission</span>
               </button>
             </div>
           ) : missionLookupError ? (
             /* Case 3: Mission Lookup Failed / Unavailable */
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-600">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] text-slate-600 text-left shadow-2xs">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-1.5 text-slate-700">
                   <AlertCircle size={15} className="text-slate-500" />
@@ -150,7 +150,7 @@ export default function CareerIntelligenceDetail({
             </div>
           ) : (
             /* Case 2: Mission Lookup Succeeded & No Published Mission */
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-600">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] text-slate-600 text-left shadow-2xs">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-1.5 text-slate-700">
                   <Clock size={15} />
@@ -169,15 +169,15 @@ export default function CareerIntelligenceDetail({
 
       {/* Unclassified Notice if applicable */}
       {isUnclassified ? (
-        <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-6 text-center space-y-3" data-testid="unclassified-state-box">
+        <div className="bg-amber-50/70 border border-amber-200 rounded-3xl p-8 text-center space-y-3 shadow-xs" data-testid="unclassified-state-box">
           <div className="flex justify-center text-amber-600">
             <HelpCircle size={32} />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="font-serif text-lg font-bold text-[#0b1a36]">
               Career Intelligence Pending
             </h3>
-            <p className="text-xs text-slate-600 max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
               Career intelligence (Family Classification, Work DNA, and empirical Professional Activities) is not yet available for this career.
             </p>
           </div>
@@ -187,17 +187,17 @@ export default function CareerIntelligenceDetail({
           {/* 2-Column Section for Family & Work DNA */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             {/* Section B: Career Family Classification */}
-            <div className="bg-white/90 rounded-2xl p-6 border border-[#e2d9c8] shadow-sm space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+            <div className="bg-white/90 backdrop-blur-md rounded-3xl p-6 border border-[#D3E3F5] shadow-xs space-y-5 text-left">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#D3E3F5] pb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-xl bg-[#FAF2DB] border border-[#e2d9c8] flex items-center justify-center text-slate-800">
+                  <div className="h-10 w-10 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] flex items-center justify-center text-[#1E88E5] shadow-2xs">
                     <Layers size={18} />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900">
+                    <h3 className="font-serif text-base font-bold text-[#0b1a36]">
                       Career Family
                     </h3>
-                    <p className="text-xs text-slate-500">Taxonomy Domain Classification</p>
+                    <p className="text-[11px] font-medium text-slate-500">Taxonomy Domain Classification</p>
                   </div>
                 </div>
 
@@ -208,16 +208,16 @@ export default function CareerIntelligenceDetail({
 
               {classification ? (
                 <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-[#fbf9f4] border border-[#e8dfc8] space-y-2">
+                  <div className="p-4 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] space-y-2 shadow-2xs">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-base font-bold text-slate-900">
+                      <h4 className="font-serif text-base font-bold text-[#0b1a36]">
                         {classification.family_name || classification.family_key}
                       </h4>
                       {classification.family_key && onNavigateFamily && (
                         <button
                           type="button"
                           onClick={() => onNavigateFamily(classification.family_key)}
-                          className="text-xs font-semibold text-[#0b1a36] hover:underline"
+                          className="text-xs font-bold text-[#1E88E5] hover:underline cursor-pointer"
                         >
                           View Family
                         </button>
@@ -231,8 +231,8 @@ export default function CareerIntelligenceDetail({
                   </div>
 
                   {classification.rationale && (
-                    <div className="p-4 rounded-xl bg-[#FAF2DB]/50 border border-[#e2d9c8] space-y-1">
-                      <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                    <div className="p-4 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] space-y-1 shadow-2xs">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         Classification Rationale
                       </p>
                       <p className="text-xs text-slate-700 leading-relaxed">
@@ -258,7 +258,7 @@ export default function CareerIntelligenceDetail({
             {work_dna ? (
               <WorkDNACard workDna={work_dna} />
             ) : (
-              <div className="bg-white/90 rounded-2xl p-6 border border-[#e2d9c8] shadow-sm text-center">
+              <div className="bg-white/90 backdrop-blur-md rounded-3xl p-6 border border-[#D3E3F5] shadow-xs text-center">
                 <p className="text-xs text-slate-500 italic">
                   Work DNA profile not yet completed for this career.
                 </p>

@@ -20,18 +20,18 @@ export default function CareerFamilyList({ families = [], onSelectFamily }) {
   return (
     <div className="space-y-8" data-testid="career-family-list-view">
       {/* Page Header */}
-      <div className="bg-white/80 rounded-3xl p-8 border border-[#e2d9c8] shadow-sm space-y-4">
+      <div className="bg-white/90 backdrop-blur-md rounded-3xl p-8 border border-[#D3E3F5] shadow-xs space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-1.5 max-w-2xl">
+          <div className="space-y-1.5 max-w-2xl text-left">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#FAF2DB] text-slate-800 border border-[#e2d9c8]">
+              <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-[#1E88E5] border border-sky-200">
                 Occupational Taxonomy & Architecture
               </span>
             </div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="font-serif text-3xl font-bold text-[#0b1a36] tracking-tight">
               Career Intelligence
             </h1>
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               Explore the 12 canonical Career Families, 5-dimension Work DNA cognitive profiles, and empirical professional activities across modern careers.
             </p>
           </div>
@@ -39,15 +39,15 @@ export default function CareerFamilyList({ families = [], onSelectFamily }) {
           {/* Search Bar */}
           <div className="w-full sm:w-72 relative">
             <Search
-              size={16}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              size={15}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
             />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search career families..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-[#fcfaf5] border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0b1a36]/20 focus:border-slate-500 transition"
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl text-xs sm:text-sm bg-[#F0F6FC] border border-[#D3E3F5] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b1a36]/15 focus:border-slate-400 focus:bg-white transition shadow-2xs"
               data-testid="family-search-input"
             />
           </div>
