@@ -159,97 +159,121 @@ export default function CareerIntelligence() {
   // View 3: Career Detail
   if (careerSlug) {
     if (detailLoading) {
-      return <IntelligenceLoadingSkeleton type="detail" />;
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8">
+          <IntelligenceLoadingSkeleton type="detail" />
+        </div>
+      );
     }
     if (detailError) {
       return (
-        <IntelligenceEmptyState
-          title="Career Intelligence Error"
-          description={detailError}
-          type="error"
-          onRetry={() => fetchCareerDetail(careerSlug)}
-          onBack={handleBackFromDetail}
-          backLabel="Back"
-        />
+        <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 flex items-center justify-center">
+          <IntelligenceEmptyState
+            title="Career Intelligence Error"
+            description={detailError}
+            type="error"
+            onRetry={() => fetchCareerDetail(careerSlug)}
+            onBack={handleBackFromDetail}
+            backLabel="Back"
+          />
+        </div>
       );
     }
     return (
-      <>
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 sm:px-6 lg:px-10">
         <SEO
           title={careerDetail?.career?.name ? `${careerDetail.career.name} — Career Intelligence` : "Career Intelligence Detail"}
           description={careerDetail?.career?.description || "In-depth intelligence, competencies, industry metrics, and simulator missions for this career."}
           url={`/career-intelligence/career/${careerSlug}`}
         />
-        <CareerIntelligenceDetail
-          detailData={careerDetail}
-          publishedMission={publishedMission}
-          missionLookupError={missionLookupError}
-          onBack={handleBackFromDetail}
-          onNavigateFamily={handleSelectFamily}
-        />
-      </>
+        <div className="mx-auto max-w-6xl">
+          <CareerIntelligenceDetail
+            detailData={careerDetail}
+            publishedMission={publishedMission}
+            missionLookupError={missionLookupError}
+            onBack={handleBackFromDetail}
+            onNavigateFamily={handleSelectFamily}
+          />
+        </div>
+      </div>
     );
   }
 
   // View 2: Family Careers
   if (familyKey) {
     if (familyLoading) {
-      return <IntelligenceLoadingSkeleton type="careers" />;
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8">
+          <IntelligenceLoadingSkeleton type="careers" />
+        </div>
+      );
     }
     if (familyError) {
       return (
-        <IntelligenceEmptyState
-          title="Family Error"
-          description={familyError}
-          type="error"
-          onRetry={() => fetchFamilyCareers(familyKey)}
-          onBack={handleBackToFamilies}
-          backLabel="Back to All Families"
-        />
+        <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 flex items-center justify-center">
+          <IntelligenceEmptyState
+            title="Family Error"
+            description={familyError}
+            type="error"
+            onRetry={() => fetchFamilyCareers(familyKey)}
+            onBack={handleBackToFamilies}
+            backLabel="Back to All Families"
+          />
+        </div>
       );
     }
     return (
-      <>
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 sm:px-6 lg:px-10">
         <SEO
           title={familyData?.family_name ? `${familyData.family_name} Careers — Career Intelligence` : "Career Family Intelligence"}
           description={familyData?.tagline || "Explore career options, salary potential, and trial missions within this industry cluster."}
           url={`/career-intelligence/family/${familyKey}`}
         />
-        <FamilyCareersList
-          familyData={familyData}
-          onSelectCareer={handleSelectCareer}
-          onBack={handleBackToFamilies}
-        />
-      </>
+        <div className="mx-auto max-w-6xl">
+          <FamilyCareersList
+            familyData={familyData}
+            onSelectCareer={handleSelectCareer}
+            onBack={handleBackToFamilies}
+          />
+        </div>
+      </div>
     );
   }
 
   // View 1: Families Catalog
   if (familiesLoading) {
-    return <IntelligenceLoadingSkeleton type="families" />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8">
+        <IntelligenceLoadingSkeleton type="families" />
+      </div>
+    );
   }
   if (familiesError) {
     return (
-      <IntelligenceEmptyState
-        title="Failed to load Career Intelligence"
-        description={familiesError}
-        type="error"
-        onRetry={fetchFamilies}
-      />
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 flex items-center justify-center">
+        <IntelligenceEmptyState
+          title="Failed to load Career Intelligence"
+          description={familiesError}
+          type="error"
+          onRetry={fetchFamilies}
+        />
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-8 sm:px-6 lg:px-10">
       <SEO
         title="Career Intelligence & Industry Clusters"
         description="Comprehensive career intelligence library, taxonomy clusters, demand insights, and interactive real-world work simulators."
         url="/career-intelligence"
       />
-      <CareerFamilyList
-        families={families}
-        onSelectFamily={handleSelectFamily}
-      />
-    </>
+      <div className="mx-auto max-w-6xl">
+        <CareerFamilyList
+          families={families}
+          onSelectFamily={handleSelectFamily}
+        />
+      </div>
+    </div>
   );
 }

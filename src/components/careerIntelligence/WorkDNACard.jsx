@@ -59,7 +59,7 @@ function OrdinalScaleIndicator({ value }) {
           />
         );
       })}
-      <span className="ml-2 font-mono text-xs font-bold text-slate-900 bg-[#FAF2DB] px-2 py-0.5 rounded border border-[#e2d9c8]">
+      <span className="ml-2 font-mono text-xs font-bold text-[#0b1a36] bg-[#F0F6FC] px-2.5 py-0.5 rounded-lg border border-[#D3E3F5] shadow-2xs">
         {numValue > 0 ? `${numValue}/4` : "N/A"}
       </span>
     </div>
@@ -90,15 +90,15 @@ export default function WorkDNACard({ workDna }) {
   };
 
   return (
-    <div className="bg-white/90 rounded-2xl p-6 border border-[#e2d9c8] shadow-sm space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+    <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 border border-[#D3E3F5] shadow-xs space-y-6 text-left">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#D3E3F5] pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-xl bg-[#FAF2DB] border border-[#e2d9c8] flex items-center justify-center text-slate-800">
+          <div className="h-10 w-10 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] flex items-center justify-center text-[#1E88E5] shadow-2xs">
             <Dna size={18} />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900">Work DNA Profile</h3>
-            <p className="text-xs text-slate-500">5-dimension occupational cognitive and operational profile</p>
+            <h3 className="font-serif text-base font-bold text-[#0b1a36]">Work DNA Profile</h3>
+            <p className="text-[11px] font-medium text-slate-500">5-dimension occupational cognitive and operational profile</p>
           </div>
         </div>
 
@@ -114,20 +114,20 @@ export default function WorkDNACard({ workDna }) {
           return (
             <div
               key={key}
-              className="p-4 rounded-xl bg-[#fbf9f4] border border-[#e8dfc8]/80 hover:border-slate-300 transition space-y-2"
+              className="p-4 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] hover:border-slate-300 transition space-y-2 shadow-2xs"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <Icon size={16} className="text-slate-600 shrink-0" />
-                  <span className="text-sm font-bold text-slate-900">{label}</span>
+                  <Icon size={16} className="text-[#1E88E5] shrink-0" />
+                  <span className="text-xs sm:text-sm font-bold text-[#0b1a36]">{label}</span>
                 </div>
                 <OrdinalScaleIndicator value={val} />
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
-                <span>{description}</span>
+                <span className="leading-relaxed">{description}</span>
                 {levelText && (
-                  <span className="font-semibold text-slate-800 italic bg-white/80 px-2 py-0.5 rounded border border-[#e2d9c8]">
+                  <span className="font-bold text-slate-800 italic bg-white px-2.5 py-0.5 rounded-xl border border-[#D3E3F5] shadow-2xs text-[11px]">
                     {levelText}
                   </span>
                 )}
@@ -139,15 +139,15 @@ export default function WorkDNACard({ workDna }) {
 
       {/* General Rationale if present */}
       {rationale && (
-        <div className="p-4 rounded-xl bg-[#FAF2DB]/50 border border-[#e2d9c8] space-y-1">
-          <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">Assessment Rationale</p>
+        <div className="p-4 rounded-2xl bg-[#F0F6FC] border border-[#D3E3F5] space-y-1 shadow-2xs">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assessment Rationale</p>
           <p className="text-xs text-slate-700 leading-relaxed">{rationale}</p>
         </div>
       )}
 
       {/* Scale Notice & Provenance */}
       <div className="pt-2 space-y-3">
-        <p className="text-[11px] text-slate-500 italic">
+        <p className="text-[11px] text-slate-400 font-semibold italic">
           * Ordinal scale (1–4) derived from occupational domain analysis. Does not calculate a psychometric composite.
         </p>
 

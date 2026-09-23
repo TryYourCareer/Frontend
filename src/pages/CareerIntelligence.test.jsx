@@ -159,7 +159,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
   test("loads and renders career families catalog dynamically from API", async () => {
     careerIntelligenceService.listCareerFamilies.mockResolvedValueOnce(MOCK_FAMILIES);
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     expect(screen.getByTestId("intelligence-skeleton-families")).toBeInTheDocument();
 
@@ -177,7 +181,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
       .mockRejectedValueOnce(new Error("Network error connecting to API"))
       .mockResolvedValueOnce(MOCK_FAMILIES);
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Failed to load Career Intelligence")).toBeInTheDocument();
@@ -196,7 +204,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
   test("filters career families client-side through search input", async () => {
     careerIntelligenceService.listCareerFamilies.mockResolvedValueOnce(MOCK_FAMILIES);
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Software Engineering & Cloud Systems")).toBeInTheDocument();
@@ -213,7 +225,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
   test("clicking a family navigates to the family careers route", async () => {
     careerIntelligenceService.listCareerFamilies.mockResolvedValueOnce(MOCK_FAMILIES);
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Software Engineering & Cloud Systems")).toBeInTheDocument();
@@ -232,7 +248,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
     mockParams = { familyKey: "software_engineering_cloud_systems" };
     careerIntelligenceService.getFamilyCareers.mockResolvedValueOnce(MOCK_FAMILY_CAREERS);
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     expect(screen.getByTestId("intelligence-skeleton-careers")).toBeInTheDocument();
 
@@ -250,7 +270,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
     mockParams = { familyKey: "software_engineering_cloud_systems" };
     careerIntelligenceService.getFamilyCareers.mockResolvedValueOnce(MOCK_FAMILY_CAREERS);
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Cloud Solutions Architect")).toBeInTheDocument();
@@ -269,7 +293,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
     mockParams = { careerSlug: "cloud-solutions-architect" };
     careerIntelligenceService.getCareerIntelligence.mockResolvedValueOnce(MOCK_CLASSIFIED_CAREER_DETAIL);
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     expect(screen.getByTestId("intelligence-skeleton-detail")).toBeInTheDocument();
 
@@ -303,7 +331,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
     mockParams = { careerSlug: "cloud-solutions-architect" };
     careerIntelligenceService.getCareerIntelligence.mockResolvedValueOnce(MOCK_CLASSIFIED_CAREER_DETAIL);
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Cloud Solutions Architect" })).toBeInTheDocument();
@@ -328,7 +360,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
     mockParams = { careerSlug: "unclassified-novel-career" };
     careerIntelligenceService.getCareerIntelligence.mockResolvedValueOnce(MOCK_UNCLASSIFIED_CAREER_DETAIL);
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Unclassified Novel Career" })).toBeInTheDocument();
@@ -349,7 +385,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
     careerIntelligenceService.getCareerIntelligence.mockResolvedValueOnce(MOCK_CLASSIFIED_CAREER_DETAIL);
     trialMissionService.getTrialMissions.mockResolvedValueOnce(MOCK_PUBLISHED_MISSIONS);
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Cloud Solutions Architect" })).toBeInTheDocument();
@@ -375,7 +415,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
     careerIntelligenceService.getCareerIntelligence.mockResolvedValueOnce(MOCK_CLASSIFIED_CAREER_DETAIL);
     trialMissionService.getTrialMissions.mockResolvedValueOnce([]); // No published mission for this career
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Cloud Solutions Architect" })).toBeInTheDocument();
@@ -399,7 +443,11 @@ describe("Phase 12E — Career Intelligence Frontend/UI", () => {
     careerIntelligenceService.getCareerIntelligence.mockResolvedValueOnce(MOCK_CLASSIFIED_CAREER_DETAIL);
     trialMissionService.getTrialMissions.mockRejectedValueOnce(new Error("Trial mission service unavailable"));
 
-    render(<CareerIntelligence />);
+    render(
+      <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7]">
+        <CareerIntelligence />
+      </div>
+    );
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Cloud Solutions Architect" })).toBeInTheDocument();

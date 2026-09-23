@@ -137,7 +137,7 @@ export default function StudentDashboard() {
     }).sort((a, b) => b.percent - a.percent);
   }, [reportData]);
 
-  // Dynamic Top Career Matches (from real assessment or spotlight DB)
+  // Dynamic Top Career Matches
   const topMatches = useMemo(() => {
     if (reportData?.top_matches && reportData.top_matches.length > 0) {
       return reportData.top_matches.slice(0, 3).map((m) => ({
@@ -216,7 +216,6 @@ export default function StudentDashboard() {
     ];
   }, [reportData, featuredCareers]);
 
-  // Overall Clarity Score
   const clarityScore = reportData ? 88 : 45;
 
   return (
@@ -351,6 +350,61 @@ export default function StudentDashboard() {
         </div>
 
 
+        {/* YOUR CAREER REPORTS BANNER CARD */}
+        <div className="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-indigo-100 rounded-[28px] p-6 shadow-sm relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="flex items-start space-x-4">
+            <div className="p-3.5 bg-indigo-600 text-white rounded-2xl shadow-md shrink-0 flex items-center justify-center">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <span className="text-[10px] font-bold text-indigo-600 tracking-wider uppercase bg-indigo-100/60 px-2.5 py-0.5 rounded-full">
+                YOUR CAREER REPORTS
+              </span>
+              <h3 className="text-lg font-bold text-slate-900 mt-1">Your Career Reports are Ready!</h3>
+              <p className="text-xs text-slate-600 mt-1 max-w-xl leading-relaxed">
+                You've completed the Discovery Test and Trial Mission. Explore your personalized reports with detailed insights, career outlook, AI impact and next steps.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {/* View Decision Report For You (Navigates to Student View) */}
+            <button 
+              onClick={() => navigate('/decision-report')}
+              className="bg-[#0b1a36] hover:bg-[#122b59] text-white px-4 py-3 rounded-2xl text-xs font-bold flex items-center space-x-2 transition shadow-sm cursor-pointer"
+            >
+              <span>View Decision Report For You</span>
+              <span className="text-sky-400">&rarr;</span>
+            </button>
+
+            {/* View Parent Report For Your Parents (Navigates to Parent View via state) */}
+            <button 
+              onClick={() => navigate('/decision-report', { state: { defaultView: 'parent' } })}
+              className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 px-4 py-3 rounded-2xl text-xs font-bold flex items-center space-x-2 transition shadow-2xs cursor-pointer"
+            >
+              <span>View Parent Report For Your Parents</span>
+              <span className="text-indigo-600">&rarr;</span>
+            </button>
+
+            {/* Share Report Button */}
+            <button 
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: 'Career Report', url: window.location.origin + '/decision-report' }).catch(() => {});
+                } else {
+                  alert("Report link copied to clipboard!");
+                }
+              }}
+              className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 px-4 py-3 rounded-2xl text-xs font-bold flex items-center space-x-2 transition shadow-2xs cursor-pointer"
+            >
+              <span>Share Report</span>
+              <span className="text-indigo-600">&rarr;</span>
+            </button>
+          </div>
+        </div>
+
 
         {/* Dashboard Main Grid */}
         <div className="grid gap-8 lg:grid-cols-[1.85fr_1fr]">
@@ -384,9 +438,7 @@ export default function StudentDashboard() {
                     key={idx}
                     className="py-5 first:pt-2 last:pb-2 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors hover:bg-[#F0F6FC]/40 rounded-2xl px-3 -mx-3"
                   >
-                    {/* Left Column: Sector & Fit pills, Title, Description */}
                     <div className="space-y-1.5 text-left max-w-xl">
-                      {/* Sector & Fit Badges */}
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-sky-200 bg-sky-50 text-[#1E88E5]">
                           {career.sector}
@@ -396,7 +448,6 @@ export default function StudentDashboard() {
                         </span>
                       </div>
 
-                      {/* Career Title */}
                       <h4
                         onClick={() => navigate(`/career-details/${encodeURIComponent(career.title)}`)}
                         className="font-sans text-lg sm:text-xl font-bold text-[#0b1a36] hover:text-blue-600 transition cursor-pointer"
@@ -404,15 +455,12 @@ export default function StudentDashboard() {
                         {career.title}
                       </h4>
 
-                      {/* Description */}
                       <p className="text-xs text-slate-500 leading-relaxed font-normal">
                         {career.description}
                       </p>
                     </div>
 
-                    {/* Right Column: Compensation & Actions */}
                     <div className="flex items-center gap-4 sm:gap-6 shrink-0 justify-between md:justify-end pt-2 md:pt-0">
-                      {/* Compensation */}
                       <div className="text-left md:text-right">
                         <span className="text-[9.5px] uppercase font-bold text-slate-400 tracking-wider block">
                           COMPENSATION
@@ -422,7 +470,6 @@ export default function StudentDashboard() {
                         </span>
                       </div>
 
-                      {/* Action Buttons */}
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => navigate(`/career-details/${encodeURIComponent(career.title)}`)}
@@ -605,8 +652,6 @@ export default function StudentDashboard() {
     </section>
   );
 }
-
-
 
 function GoalItem({ done, text, onClick }) {
   return (
