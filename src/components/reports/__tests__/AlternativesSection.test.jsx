@@ -123,26 +123,24 @@ describe("AlternativesSection", () => {
     expect(container.textContent).not.toContain("WORK_DNA_OVERLAP");
   });
 
-  test("11. provides navigation link using existing supported routing", () => {
+  test("11. provides navigation link to trial mission experience using existing supported routing", () => {
     render(<AlternativesSection alternatives={fullAlternativesData} />);
 
-    const links = screen.getAllByRole("link", { name: /View Career Report/i });
+    const links = screen.getAllByRole("link", { name: /View Career/i });
     expect(links.length).toBe(3);
-    expect(links[0]).toHaveAttribute("href", "/careers/fermentation-scientist/decision-report");
+    expect(links[0]).toHaveAttribute("href", "/trial-mission?careerId=fermentation-scientist");
   });
 
   test("12. handles missing career_id safely without rendering broken links", () => {
     const noIdData = [
       {
-        career_name: "Agritech Specialist",
         relation_type: "RELATED_CAREER",
       },
     ];
     render(<AlternativesSection alternatives={noIdData} />);
 
-    expect(screen.getByText("Agritech Specialist")).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /View Career Report/i })).not.toBeInTheDocument();
-    expect(screen.getByText("Report link not available")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /View Career/i })).not.toBeInTheDocument();
+    expect(screen.getByText("Career link not available")).toBeInTheDocument();
   });
 
   test("13. does NOT calculate similarity scores or rank alternatives", () => {

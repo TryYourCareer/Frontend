@@ -135,17 +135,28 @@ export default function MarketOutlookSection({ marketOutlook }) {
   const hasGrowthData = growth_rate || growth_trend || projected_growth;
 
   return (
-    <section aria-labelledby="market-outlook-heading" className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-8 shadow-sm">
+    <section
+      aria-labelledby="market-outlook-heading"
+      className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xs space-y-6"
+      data-testid="market-outlook-section"
+    >
       {/* ------------------------------------------------------------------ */}
       {/* Header                                                             */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-5">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold uppercase tracking-wider">
-            <DollarSign size={13} />
-            <span>06 — Market Outlook</span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+              06
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              06 — Market Outlook
+            </span>
           </div>
-          <h2 id="market-outlook-heading" className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight">
+          <h2
+            id="market-outlook-heading"
+            className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight"
+          >
             External Market Outlook & Compensation
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
@@ -154,7 +165,7 @@ export default function MarketOutlookSection({ marketOutlook }) {
         </div>
 
         {trend && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-xs font-bold text-blue-900 shrink-0">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200/80 text-xs font-bold text-blue-900 shrink-0">
             <TrendingUp size={14} className="text-[#1E88E5]" />
             <span>Demand Trend: {trend}</span>
           </div>
@@ -162,16 +173,18 @@ export default function MarketOutlookSection({ marketOutlook }) {
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 1. Market Demand & Hiring Landscape                                */}
+      {/* 1. Market Demand & Hiring Landscape Inner Box                      */}
       {/* ------------------------------------------------------------------ */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <TrendingUp size={16} className="text-[#1E88E5]" />
-          Industry Demand & Hiring Dynamics
-        </h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">
+            Industry Demand & Hiring Dynamics
+          </h3>
+        </div>
 
         {hasDemandData ? (
-          <div className="bg-gradient-to-br from-[#F0F6FC] to-[#e8f1fa] border border-[#D3E3F5] rounded-2xl p-5 sm:p-6 space-y-3">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -183,7 +196,7 @@ export default function MarketOutlookSection({ marketOutlook }) {
               </div>
               <div className="flex items-center gap-2">
                 {score !== undefined && score !== null && (
-                  <span className="inline-block px-2.5 py-0.5 rounded-full bg-white border border-[#D3E3F5] text-xs font-bold text-slate-800">
+                  <span className="inline-block px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-xs font-bold text-slate-800 shadow-2xs">
                     Demand Index: {score}/100
                   </span>
                 )}
@@ -198,28 +211,30 @@ export default function MarketOutlookSection({ marketOutlook }) {
             ) : null}
           </div>
         ) : (
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-500">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 text-xs text-slate-500">
             Market demand data is not currently available for this career.
           </div>
         )}
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 2. Compensation & Salary Benchmarks                                */}
+      {/* 2. Compensation & Salary Benchmarks Inner Boxes                    */}
       {/* ------------------------------------------------------------------ */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
           <DollarSign size={16} className="text-[#1E88E5]" />
-          Compensation Benchmarks
-        </h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">
+            Compensation Benchmarks
+          </h3>
+        </div>
 
         {hasSalaryData ? (
           <div className="grid gap-4 md:grid-cols-2">
             {/* India Salary Tiers */}
-            <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-5 space-y-4 shadow-2xs">
+            <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1E88E5] flex items-center justify-center font-bold text-xs border border-blue-200">
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1E88E5] flex items-center justify-center font-bold text-xs border border-blue-200/70">
                     ₹
                   </div>
                   <div>
@@ -235,7 +250,7 @@ export default function MarketOutlookSection({ marketOutlook }) {
               </div>
 
               {indiaTiers && indiaTiers.length > 0 ? (
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {indiaTiers.map((tier, idx) => (
                     <div
                       key={idx}
@@ -251,17 +266,17 @@ export default function MarketOutlookSection({ marketOutlook }) {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white/80 border border-slate-200 rounded-xl p-3 text-xs text-slate-500">
+                <div className="bg-white border border-slate-200/80 rounded-xl p-3 text-xs text-slate-500">
                   No India compensation data is available yet.
                 </div>
               )}
             </div>
 
             {/* Global Salary Tiers */}
-            <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-5 space-y-4 shadow-2xs">
+            <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs border border-emerald-200">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs border border-emerald-200/70">
                     <Globe size={14} />
                   </div>
                   <div>
@@ -277,7 +292,7 @@ export default function MarketOutlookSection({ marketOutlook }) {
               </div>
 
               {globalTiers && globalTiers.length > 0 ? (
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {globalTiers.map((tier, idx) => (
                     <div
                       key={idx}
@@ -293,32 +308,34 @@ export default function MarketOutlookSection({ marketOutlook }) {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white/80 border border-slate-200 rounded-xl p-3 text-xs text-slate-500">
+                <div className="bg-white border border-slate-200/80 rounded-xl p-3 text-xs text-slate-500">
                   Global compensation data is not currently available.
                 </div>
               )}
             </div>
           </div>
         ) : (
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-500">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 text-xs text-slate-500">
             No salary data is available yet for this career.
           </div>
         )}
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 3. Industry Sectors & Growth Dynamics                              */}
+      {/* 3. Industry Sectors & Growth Dynamics Inner Box                    */}
       {/* ------------------------------------------------------------------ */}
       {(sectorList.length > 0 || hasGrowthData || geography) && (
-        <div className="space-y-4">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
             <Building2 size={16} className="text-[#1E88E5]" />
-            Industry Sectors & Growth Context
-          </h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">
+              Industry Sectors & Growth Context
+            </h3>
+          </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             {sectorList.length > 0 && (
-              <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 space-y-2">
+              <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 space-y-2">
                 <span className="text-xs font-bold text-[#0b1a36] block">
                   Primary Hiring Sectors ({sectorList.length})
                 </span>
@@ -326,7 +343,7 @@ export default function MarketOutlookSection({ marketOutlook }) {
                   {sectorList.map((sec, idx) => (
                     <span
                       key={idx}
-                      className="bg-white text-slate-800 font-semibold text-xs px-2.5 py-1 rounded-lg border border-slate-200"
+                      className="bg-white text-slate-800 font-semibold text-xs px-2.5 py-1 rounded-lg border border-slate-200/80"
                     >
                       {typeof sec === "string" ? sec : sec?.name || JSON.stringify(sec)}
                     </span>
@@ -336,7 +353,7 @@ export default function MarketOutlookSection({ marketOutlook }) {
             )}
 
             {hasGrowthData && (
-              <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 space-y-2">
+              <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 space-y-2">
                 <span className="text-xs font-bold text-[#0b1a36] block">
                   Projected Growth Dynamics
                 </span>
@@ -347,7 +364,7 @@ export default function MarketOutlookSection({ marketOutlook }) {
             )}
 
             {geography && (
-              <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 space-y-2">
+              <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 space-y-2">
                 <span className="text-xs font-bold text-[#0b1a36] block">
                   Geographic Scope
                 </span>

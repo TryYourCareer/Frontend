@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Compass,
   GraduationCap,
   BookOpen,
   Clock,
@@ -30,41 +29,6 @@ function formatCategory(category) {
     .toLowerCase()
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-/**
- * Format stream feasibility status into clean badges and labels.
- */
-function getFeasibilityInfo(feasibility, studentStream) {
-  const norm = String(feasibility || "").toUpperCase();
-  if (norm === "ELIGIBLE" || norm === "DIRECT") {
-    return {
-      label: "Directly Eligible",
-      badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-200",
-    };
-  }
-  if (norm === "BRIDGE_REQUIRED" || norm === "BRIDGE") {
-    return {
-      label: "Bridge Required • Cross-Disciplinary Route",
-      badgeClass: "bg-amber-50 text-amber-800 border-amber-200",
-    };
-  }
-  if (norm === "DIFFERENT_STREAM" || norm === "LATERAL_ENTRY") {
-    return {
-      label: "Different Stream • Lateral Transition Pathway",
-      badgeClass: "bg-blue-50 text-blue-800 border-blue-200",
-    };
-  }
-  if (studentStream) {
-    return {
-      label: "Cross-Stream Pathway Available",
-      badgeClass: "bg-blue-50 text-[#1E88E5] border-blue-200",
-    };
-  }
-  return {
-    label: "Pathway Information Available",
-    badgeClass: "bg-slate-100 text-slate-700 border-slate-200",
-  };
 }
 
 /**
@@ -186,17 +150,21 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
   return (
     <section
       aria-labelledby="path-forward-heading"
-      className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-10 shadow-xs space-y-8"
+      className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xs space-y-6"
       data-testid="path-forward-section"
     >
       {/* ------------------------------------------------------------------ */}
       {/* Header                                                             */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-5">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold uppercase tracking-wider">
-            <Compass size={13} />
-            <span>08 — Path Forward</span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+              08
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              08 — Path Forward
+            </span>
           </div>
           <h2
             id="path-forward-heading"
@@ -218,10 +186,10 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
       {/* 1. Pathway Feasibility & Educational Requirements                   */}
       {/* ------------------------------------------------------------------ */}
       {pathForward ? (
-        <div className="bg-gradient-to-br from-[#F0F6FC] to-[#e8f1fa] border border-[#D3E3F5] rounded-2xl p-5 sm:p-6 space-y-4">
+        <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-4 shadow-2xs">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="space-y-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Academic &amp; Stream Feasibility
               </span>
               <h3 className="text-base sm:text-lg font-bold text-[#0b1a36]">
@@ -231,7 +199,7 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
 
             <div className="flex flex-wrap items-center gap-2">
               {student_stream && (
-                <div className="bg-white/90 border border-[#D3E3F5] rounded-xl px-3 py-1.5 text-xs text-slate-700 font-medium">
+                <div className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-medium">
                   <span className="text-slate-400 text-[11px] mr-1">Your Stream:</span>
                   <span className="font-bold text-[#0b1a36]">{student_stream}</span>
                 </div>
@@ -240,7 +208,7 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
           </div>
 
           {guidance && (
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed pt-2 border-t border-[#D3E3F5]/80">
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed pt-2 border-t border-slate-200/80">
               {guidance}
             </p>
           )}
@@ -249,7 +217,7 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
           {(hasRequiredStreams || hasDegrees) && (
             <div className="pt-2 grid gap-3 sm:grid-cols-2">
               {hasRequiredStreams && (
-                <div className="p-3.5 bg-white/80 rounded-xl border border-[#D3E3F5] space-y-1.5">
+                <div className="p-3.5 bg-white rounded-xl border border-slate-200/80 space-y-1.5">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block flex items-center gap-1.5">
                     <BookOpen size={12} className="text-[#1E88E5]" />
                     Eligible Academic Streams
@@ -268,7 +236,7 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
               )}
 
               {hasDegrees && (
-                <div className="p-3.5 bg-white/80 rounded-xl border border-[#D3E3F5] space-y-1.5">
+                <div className="p-3.5 bg-white rounded-xl border border-slate-200/80 space-y-1.5">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block flex items-center gap-1.5">
                     <GraduationCap size={12} className="text-[#1E88E5]" />
                     Relevant Degree Pathways
@@ -292,7 +260,7 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
           {(hasExamsOrCerts || hasDuration || hasCost) && (
             <div className="pt-2 grid gap-3 sm:grid-cols-2">
               {hasExamsOrCerts && (
-                <div className="p-3.5 bg-white/80 rounded-xl border border-[#D3E3F5] space-y-1.5" data-testid="exams-certs-container">
+                <div className="p-3.5 bg-white rounded-xl border border-slate-200/80 space-y-1.5" data-testid="exams-certs-container">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block flex items-center gap-1.5">
                     <Award size={12} className="text-[#1E88E5]" />
                     Entrance Exams &amp; Key Certifications
@@ -319,7 +287,7 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
               )}
 
               {hasDuration && (
-                <div className="p-3.5 bg-white/80 rounded-xl border border-[#D3E3F5] space-y-1.5" data-testid="duration-container">
+                <div className="p-3.5 bg-white rounded-xl border border-slate-200/80 space-y-1.5" data-testid="duration-container">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block flex items-center gap-1.5">
                     <Clock size={12} className="text-[#1E88E5]" />
                     Typical Duration / Timeline
@@ -331,7 +299,7 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
               )}
 
               {hasCost && (
-                <div className="p-3.5 bg-white/80 rounded-xl border border-[#D3E3F5] space-y-1.5" data-testid="cost-container">
+                <div className="p-3.5 bg-white rounded-xl border border-slate-200/80 space-y-1.5" data-testid="cost-container">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block flex items-center gap-1.5">
                     <DollarSign size={12} className="text-[#1E88E5]" />
                     Estimated Tuition &amp; Program Cost
@@ -346,7 +314,7 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
 
           {/* Alternative & Lateral Entry Pathways */}
           {hasAlternativePathways && (
-            <div className="pt-2 p-3.5 bg-white/80 rounded-xl border border-[#D3E3F5] space-y-1.5" data-testid="alternative-pathways-container">
+            <div className="pt-2 p-3.5 bg-white rounded-xl border border-slate-200/80 space-y-1.5" data-testid="alternative-pathways-container">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block flex items-center gap-1.5">
                 <GitFork size={12} className="text-[#1E88E5]" />
                 Alternative &amp; Lateral Entry Routes
@@ -369,13 +337,13 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
       )}
 
       {/* ------------------------------------------------------------------ */}
-      {/* 2. Ordered Next Steps & Actions (Persistent Checklist)              */}
+      {/* 2. Ordered Next Steps & Actions (Connected Stepper Timeline)        */}
       {/* ------------------------------------------------------------------ */}
       <div className="space-y-4" data-testid="action-checklist-container">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Layers size={16} className="text-[#1E88E5]" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Recommended Next Steps {hasSteps ? `(${ordered_steps.length})` : ""}
             </h3>
           </div>
@@ -389,7 +357,7 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
         </div>
 
         {hasSteps ? (
-          <div className="space-y-3" role="list">
+          <div className="relative pl-8 sm:pl-10 space-y-4 before:absolute before:top-4 before:bottom-4 before:left-3.5 sm:before:left-4 before:w-0.5 before:bg-slate-200" role="list">
             {ordered_steps.map((step, idx) => {
               const title = step.title || step.growth_action || step.action || "Recommended Action Step";
               const category = formatCategory(step.category || step.phase);
@@ -403,32 +371,34 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
                 <div
                   key={stepKey}
                   role="listitem"
-                  className={`border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start gap-3.5 transition-all shadow-2xs ${
-                    isCompleted
-                      ? "bg-emerald-50/40 border-emerald-200"
-                      : "bg-[#F8FAFC] border-slate-200 hover:bg-white hover:border-[#D3E3F5]"
-                  }`}
+                  className="relative group"
                   data-testid="action-checklist-item"
                 >
-                  {/* Interactive Checkbox Control */}
+                  {/* Stepper Node on the vertical connector */}
                   <button
                     type="button"
                     role="checkbox"
                     aria-checked={isCompleted}
                     aria-label={`Mark "${title}" as ${isCompleted ? "incomplete" : "complete"}`}
                     onClick={() => toggleStep(stepKey)}
-                    className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black shrink-0 mt-0.5 transition cursor-pointer ${
+                    className={`absolute -left-8 sm:-left-10 top-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 transition cursor-pointer z-10 border-2 ${
                       isCompleted
-                        ? "bg-emerald-600 text-white shadow-xs border border-emerald-700"
-                        : "bg-blue-50 text-[#1E88E5] border border-blue-200 hover:bg-blue-100"
+                        ? "bg-emerald-600 text-white border-white ring-2 ring-emerald-600"
+                        : "bg-white text-[#1E88E5] border-[#1E88E5] ring-2 ring-blue-50 hover:bg-blue-50"
                     }`}
                     data-testid={`checklist-toggle-${idx}`}
                   >
                     {isCompleted ? <Check size={14} strokeWidth={3} /> : idx + 1}
                   </button>
 
-                  {/* Step Content */}
-                  <div className="space-y-1.5 flex-1 min-w-0">
+                  {/* Inner Step Box */}
+                  <div
+                    className={`border rounded-2xl p-4 sm:p-5 space-y-2 transition-all shadow-2xs ${
+                      isCompleted
+                        ? "bg-emerald-50/40 border-emerald-200"
+                        : "bg-[#F8FAFC] border-slate-200/80 hover:bg-white hover:border-[#D3E3F5]"
+                    }`}
+                  >
                     <div className="flex flex-wrap items-center gap-2">
                       <span
                         className={`text-xs sm:text-sm font-bold transition-all ${

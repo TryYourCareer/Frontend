@@ -114,19 +114,24 @@ export default function ParentEvidenceSection({ evidence }) {
   return (
     <section
       aria-labelledby="parent-evidence-heading"
-      className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-10 shadow-sm space-y-8"
+      className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xs space-y-6"
     >
       {/* ------------------------------------------------------------------ */}
       {/* Section Header                                                     */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-5">
         <div className="space-y-1.5">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-            02 — Evidence, Not Just Enthusiasm
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+              02
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              02 — Evidence, Not Just Enthusiasm
+            </span>
+          </div>
           <h2
             id="parent-evidence-heading"
-            className="text-xl sm:text-2xl font-bold text-[#0b1a36]"
+            className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight"
           >
             Evidence, Not Just Enthusiasm
           </h2>
@@ -144,7 +149,7 @@ export default function ParentEvidenceSection({ evidence }) {
       {/* Plain-Language Overview Narrative                                  */}
       {/* ------------------------------------------------------------------ */}
       {what_the_evidence_shows && (
-        <div className="bg-gradient-to-br from-[#F0F6FC] to-[#e8f1fa] border border-[#D3E3F5] rounded-2xl p-5 space-y-1.5">
+        <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 space-y-1.5">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <Sparkles size={13} className="text-[#1E88E5]" />
             <span>What the Evidence Shows</span>

@@ -98,10 +98,9 @@ export default function AlternativesSection({ alternatives = [] }) {
           const careerId = alt.career_id || alt.id;
           const slug = alt.slug;
 
-          const targetRoute = careerId
-            ? `/careers/${encodeURIComponent(careerId)}/decision-report`
-            : slug
-            ? `/career-intelligence/career/${encodeURIComponent(slug)}`
+          const careerIdentifier = careerId || slug || alt.career_name || alt.name || null;
+          const targetRoute = careerIdentifier
+            ? `/trial-mission?careerId=${encodeURIComponent(careerIdentifier)}`
             : null;
 
           return (
@@ -152,12 +151,12 @@ export default function AlternativesSection({ alternatives = [] }) {
                     to={targetRoute}
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1E88E5] hover:text-blue-700 transition"
                   >
-                    <span>View Career Report</span>
+                    <span>View Career</span>
                     <ArrowRight size={13} />
                   </Link>
                 ) : (
                   <span className="text-xs text-slate-400 italic">
-                    Report link not available
+                    Career link not available
                   </span>
                 )}
               </div>

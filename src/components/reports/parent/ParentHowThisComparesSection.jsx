@@ -129,17 +129,21 @@ export default function ParentHowThisComparesSection({ howThisCompares, comparis
   return (
     <section
       aria-labelledby="parent-how-compares-heading"
-      className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-10 shadow-xs space-y-8"
+      className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xs space-y-6"
       data-testid="parent-how-compares-section"
     >
       {/* ------------------------------------------------------------------ */}
       {/* Header                                                             */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-5">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold uppercase tracking-wider">
-            <Compass size={13} />
-            <span>03 &bull; Occupational Context</span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+              03
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              03 • Occupational Context
+            </span>
           </div>
           <h2
             id="parent-how-compares-heading"

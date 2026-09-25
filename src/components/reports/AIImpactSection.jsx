@@ -1,14 +1,11 @@
 import React from "react";
 import {
-  Cpu,
   ShieldCheck,
   Sparkles,
-  Clock,
   CheckCircle2,
   Info,
   BrainCircuit,
-  Target,
-  ArrowRight
+  Target
 } from "lucide-react";
 import DataProvenanceTag from "./DataProvenanceTag";
 
@@ -127,27 +124,42 @@ export default function AIImpactSection({ aiImpact, realityCheck }) {
   const caveatText = limitations || caveats || null;
 
   return (
-    <section aria-labelledby="ai-impact-heading" className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-8 shadow-sm">
+    <section
+      aria-labelledby="ai-impact-heading"
+      className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xs space-y-6"
+      data-testid="ai-impact-section"
+    >
       {/* ------------------------------------------------------------------ */}
       {/* Header                                                             */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-5">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold uppercase tracking-wider">
-            <Cpu size={13} />
-            <span>07 — AI Impact</span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+              07
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              07 — AI Impact
+            </span>
           </div>
-          <h2 id="ai-impact-heading" className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight">
+          <h2
+            id="ai-impact-heading"
+            className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight"
+          >
             How AI Will Reshape This Career
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-            Evidence-based evaluation of task automation, technological augmentation, human capabilities, and horizon outlook.
+            Evidence-based evaluation of task automation, technological augmentation, human capabilities, and horizon progression.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           {risk && (
-            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold shrink-0 ${getRiskBadgeClasses(risk)}`}>
+            <div
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold shrink-0 ${getRiskBadgeClasses(
+                risk
+              )}`}
+            >
               <ShieldCheck size={14} />
               <span>{formatAutomationRisk(risk)}</span>
             </div>
@@ -157,9 +169,9 @@ export default function AIImpactSection({ aiImpact, realityCheck }) {
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 1. AI Impact Overview                                              */}
+      {/* 1. Overview Inner Box                                              */}
       {/* ------------------------------------------------------------------ */}
-      <div className="bg-gradient-to-br from-[#F0F6FC] to-[#e8f1fa] border border-[#D3E3F5] rounded-2xl p-5 sm:p-6 space-y-4">
+      <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="space-y-1">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
@@ -171,7 +183,7 @@ export default function AIImpactSection({ aiImpact, realityCheck }) {
           </div>
 
           {score !== undefined && score !== null && (
-            <div className="bg-white/95 border border-[#D3E3F5] rounded-2xl px-4 py-2.5 flex items-center gap-3 shrink-0 shadow-2xs">
+            <div className="bg-white border border-slate-200/90 rounded-2xl px-4 py-2.5 flex items-center gap-3 shrink-0 shadow-2xs">
               <div className="space-y-0.5 text-right">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                   Future-Proof Score
@@ -185,89 +197,172 @@ export default function AIImpactSection({ aiImpact, realityCheck }) {
         </div>
 
         {sustainability_note && (
-          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed pt-1 border-t border-[#D3E3F5]/80">
+          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed pt-2 border-t border-slate-200/70">
             {sustainability_note}
           </p>
         )}
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 2. Tasks Affected & Current Automation Context                      */}
+      {/* 2. Connected Progression Timeline: Today → Near-term → Long-term    */}
       {/* ------------------------------------------------------------------ */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <BrainCircuit size={16} className="text-[#1E88E5]" />
-          Current Automation & Augmentation Dynamics (Today)
-        </h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">
+            AI Evolution Horizon & Impact Stages
+          </h3>
+        </div>
 
-        {hasExposure ? (
-          <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-5 space-y-2">
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-              {formatExposureDynamics(exposure)}
-            </p>
+        <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-3 before:top-4 before:bottom-4 before:w-0.5 before:bg-blue-200/80">
+          {/* Stage 1: Today */}
+          <div className="relative">
+            <div className="absolute -left-6 sm:-left-8 top-1.5 w-6 h-6 rounded-full bg-[#1E88E5] text-white flex items-center justify-center font-bold text-[11px] ring-4 ring-white shadow-2xs">
+              1
+            </div>
+            <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-[#0b1a36]">Today</span>
+                  <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200/80 px-2 py-0.5 rounded-md">
+                    Current Landscape
+                  </span>
+                </div>
+                {risk && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-200/70">
+                    Status: {formatAutomationRisk(risk)}
+                  </span>
+                )}
+              </div>
+              {hasExposure ? (
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  {formatExposureDynamics(exposure)}
+                </p>
+              ) : (
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  No task-level AI exposure data is currently recorded for this career.
+                </p>
+              )}
+            </div>
           </div>
-        ) : (
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-500">
-            No task-level AI exposure data is currently recorded for this career.
+
+          {/* Stage 2: Near-Term (1-3 Years) */}
+          <div className="relative">
+            <div className="absolute -left-6 sm:-left-8 top-1.5 w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-[11px] ring-4 ring-white shadow-2xs">
+              2
+            </div>
+            <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-[#0b1a36]">Near-Term (1–3 Years)</span>
+                  <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200/80 px-2 py-0.5 rounded-md">
+                    Emerging Augmentation
+                  </span>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${nearTermAvailable ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-slate-200/80 text-slate-600"}`}>
+                  {nearTermAvailable ? "Available" : "Not Yet Available"}
+                </span>
+              </div>
+              {nearTermAvailable ? (
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  {nearTermContent}
+                </p>
+              ) : (
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Specific near-term outlook has not been established yet.
+                </p>
+              )}
+            </div>
           </div>
-        )}
+
+          {/* Stage 3: Long-Term (5-10 Years) */}
+          <div className="relative">
+            <div className="absolute -left-6 sm:-left-8 top-1.5 w-6 h-6 rounded-full bg-slate-400 text-white flex items-center justify-center font-bold text-[11px] ring-4 ring-white shadow-2xs">
+              3
+            </div>
+            <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-[#0b1a36]">Long-Term (5–10 Years)</span>
+                  <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200/80 px-2 py-0.5 rounded-md">
+                    Future Structural Shift
+                  </span>
+                </div>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${longTermAvailable ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-slate-200/80 text-slate-600"}`}>
+                  {longTermAvailable ? "Available" : "Not Yet Available"}
+                </span>
+              </div>
+              {longTermAvailable && longTermContent ? (
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  {longTermContent}
+                </p>
+              ) : (
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Specific long-term outlook has not been established yet. Longer-range AI changes are inherently uncertain.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 3. Human Skills Identified in the AI Assessment                     */}
+      {/* 3. Human Skills Identified in AI Assessment                        */}
       {/* ------------------------------------------------------------------ */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <Sparkles size={16} className="text-[#1E88E5]" />
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Sparkles size={16} className="text-[#1E88E5]" />
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">
             Human Skills Identified in the AI Assessment ({skillsList.length})
           </h3>
         </div>
 
         {hasSkills ? (
-          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-            {skillsList.map((skill, idx) => (
-              <div
-                key={idx}
-                className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-3.5 flex items-start gap-2.5 hover:bg-white hover:border-[#D3E3F5] transition"
-              >
-                <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 shrink-0 mt-0.5 border border-emerald-200">
-                  <CheckCircle2 size={13} />
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5">
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              {skillsList.map((skill, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white border border-slate-200/80 rounded-xl p-3.5 flex items-start gap-2.5 hover:border-slate-300 transition"
+                >
+                  <div className="p-1 rounded-lg bg-emerald-50 text-emerald-700 shrink-0 mt-0.5 border border-emerald-200/80">
+                    <CheckCircle2 size={13} />
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-[#0b1a36] block">
+                      {typeof skill === "string" ? skill : skill?.name || skill?.title || JSON.stringify(skill)}
+                    </span>
+                    {typeof skill === "object" && skill?.description && (
+                      <p className="text-[11px] text-slate-500 leading-tight">
+                        {skill.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-[#0b1a36] block">
-                    {typeof skill === "string" ? skill : (skill?.name || skill?.title || JSON.stringify(skill))}
-                  </span>
-                  {typeof skill === "object" && skill?.description && (
-                    <p className="text-[11px] text-slate-500 leading-tight">
-                      {skill.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         ) : (
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-500">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 text-xs text-slate-500">
             Human-skill analysis is not currently available for this career.
           </div>
         )}
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 4. Bridging to Reality Check Gaps (Spec Requirement)                */}
+      {/* 4. Bridging to Reality Check Gaps                                  */}
       {/* ------------------------------------------------------------------ */}
       {developmentGaps.length > 0 && (
         <div
           data-testid="ai-reality-check-bridge"
-          className="bg-gradient-to-r from-blue-50/70 via-indigo-50/50 to-white border border-blue-200/90 rounded-2xl p-5 sm:p-6 space-y-3 shadow-2xs"
+          className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 space-y-3"
         >
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1E88E5]">
               <Target size={15} />
               <span>Connects to your Reality Check</span>
             </div>
-            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
               AI Skill Synergy
             </span>
           </div>
@@ -282,61 +377,7 @@ export default function AIImpactSection({ aiImpact, realityCheck }) {
       )}
 
       {/* ------------------------------------------------------------------ */}
-      {/* 5. Time Horizon Outlook (Today, Near-Term, Long-Term)              */}
-      {/* ------------------------------------------------------------------ */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-          <Clock size={16} className="text-[#1E88E5]" />
-          Horizon Outlook & Forecasting
-        </h3>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          {/* Near-Term (1-3 Years) */}
-          <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#0b1a36]">
-                Near-Term (1–3 Years)
-              </span>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-200 text-slate-600">
-                {nearTermAvailable ? "Available" : "Not Yet Available"}
-              </span>
-            </div>
-            {nearTermAvailable ? (
-              <p className="text-xs text-slate-700 leading-relaxed">
-                {nearTermContent}
-              </p>
-            ) : (
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Specific near-term outlook has not been established yet.
-              </p>
-            )}
-          </div>
-
-          {/* Long-Term (5-10 Years) */}
-          <div className="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700">
-                Long-Term (5–10 Years)
-              </span>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-200 text-slate-600">
-                {longTermAvailable ? "Available" : "Not Yet Available"}
-              </span>
-            </div>
-            {longTermAvailable && longTermContent ? (
-              <p className="text-xs text-slate-700 leading-relaxed">
-                {longTermContent}
-              </p>
-            ) : (
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Specific long-term outlook has not been established yet. Longer-range AI changes are inherently uncertain.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* 5. Provenance & Limitations (Rendered only if backend provides)     */}
+      {/* 5. Provenance & Limitations                                        */}
       {/* ------------------------------------------------------------------ */}
       <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-500">
         <div className="flex items-center gap-2">

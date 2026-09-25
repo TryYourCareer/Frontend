@@ -4,19 +4,16 @@ import { MessageSquare, HeartHandshake, Sparkles, CheckCircle2 } from "lucide-re
 export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
   if (!whatChildNeeds) {
     return (
-      <section className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center font-bold text-xs border border-slate-200">
+      <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 text-center space-y-2 shadow-xs">
+        <div className="flex items-center justify-center gap-2">
+          <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
             08
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-[#0b1a36]">
-              What Your Child Needs From You
-            </h2>
-            <p className="text-xs text-slate-500 font-medium">Family Discussion & Support Guidance</p>
-          </div>
+          </span>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+            What Your Child Needs From You
+          </h2>
         </div>
-        <p className="text-sm text-slate-500 italic">
+        <p className="text-xs text-slate-400">
           Guidance on family discussion prompts is not currently available in the parent report.
         </p>
       </section>
@@ -30,18 +27,18 @@ export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
     : [];
 
   return (
-    <section className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+    <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 space-y-6 shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-slate-100 pb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#1E88E5]/10 text-[#1E88E5] flex items-center justify-center font-bold text-xs">
+        <div className="flex items-center gap-2">
+          <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
             08
-          </div>
+          </span>
           <div>
-            <h2 className="text-xl font-bold text-[#0b1a36]">
+            <h2 className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight">
               What Your Child Needs From You
             </h2>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
               Guided Family Discussion Prompts & Practical Support
             </p>
           </div>
@@ -53,15 +50,15 @@ export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
         </div>
       </div>
 
-      {/* Discussion Prompts */}
-      <div className="space-y-4">
+      {/* Discussion Prompts Inner Box */}
+      <div className="space-y-3">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1E88E5]">
           <MessageSquare size={14} />
           <span>Recommended Discussion Prompts</span>
         </div>
 
         {prompts.length > 0 ? (
-          <div className="space-y-3">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3">
             {prompts.map((p, idx) => {
               const categoryLabel = p.category ? p.category.replace(/_/g, " ") : "Discussion Topic";
               const question = p.question;
@@ -70,10 +67,10 @@ export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
               return (
                 <div
                   key={p.prompt_id || idx}
-                  className="p-5 bg-gradient-to-br from-blue-50/30 to-indigo-50/20 border border-[#D3E3F5] rounded-2xl space-y-2"
+                  className="p-4 bg-white border border-slate-200/80 rounded-xl space-y-2"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1E88E5]/10 text-[#1E88E5] uppercase tracking-wider">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-[#1E88E5] border border-blue-200/70 uppercase tracking-wider">
                       {categoryLabel}
                     </span>
                   </div>
@@ -90,7 +87,7 @@ export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
             })}
           </div>
         ) : (
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500 italic">
+          <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200/80 text-xs text-slate-500 italic">
             No specific discussion prompts generated for this report.
           </div>
         )}
@@ -104,11 +101,11 @@ export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
             <span>Supportive Next Steps</span>
           </div>
 
-          <div className="space-y-2">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-2">
             {recommendations.map((rec, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/80"
+                className="flex items-start gap-3 p-3.5 bg-white rounded-xl border border-slate-200/80"
               >
                 <CheckCircle2 size={16} className="text-[#1E88E5] shrink-0 mt-0.5" />
                 <span className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">

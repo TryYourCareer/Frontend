@@ -86,17 +86,28 @@ export default function NextSixToTwelveMonthsSection({ actionPlan, realityCheck 
   }
 
   return (
-    <section aria-labelledby="future-horizon-heading" className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-8 shadow-sm">
+    <section
+      aria-labelledby="future-horizon-heading"
+      className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xs space-y-6"
+      data-testid="next-6-12-months-section"
+    >
       {/* ------------------------------------------------------------------ */}
       {/* Header                                                             */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-5">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold uppercase tracking-wider">
-            <Calendar size={13} />
-            <span>10 — Forward Horizon</span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+              10
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              10 — Forward Horizon
+            </span>
           </div>
-          <h2 id="future-horizon-heading" className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight">
+          <h2
+            id="future-horizon-heading"
+            className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight"
+          >
             Your Next 6–12 Months
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
@@ -110,18 +121,20 @@ export default function NextSixToTwelveMonthsSection({ actionPlan, realityCheck 
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* CASE A: Explicit Backend Timeframes (Only when explicitly provided) */}
+      {/* CASE A: Explicit Backend Timeframes                                */}
       {/* ------------------------------------------------------------------ */}
       {hasExplicitTimeframes ? (
-        <div className="space-y-4">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
             <Calendar size={16} className="text-[#1E88E5]" />
-            Explicit Timeline Milestones
-          </h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">
+              Structured Timeline Milestones
+            </h3>
+          </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {hasItems(timeframes.next_30_days) && (
-              <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
+              <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#1E88E5] block">
                   Next 30 Days
                 </span>
@@ -137,7 +150,7 @@ export default function NextSixToTwelveMonthsSection({ actionPlan, realityCheck 
             )}
 
             {hasItems(timeframes.next_60_days) && (
-              <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
+              <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#1E88E5] block">
                   Next 60 Days
                 </span>
@@ -153,7 +166,7 @@ export default function NextSixToTwelveMonthsSection({ actionPlan, realityCheck 
             )}
 
             {hasItems(timeframes.next_90_days) && (
-              <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
+              <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#1E88E5] block">
                   Next 90 Days
                 </span>
@@ -169,7 +182,7 @@ export default function NextSixToTwelveMonthsSection({ actionPlan, realityCheck 
             )}
 
             {hasItems(timeframes.next_6_12_months) && (
-              <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
+              <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#1E88E5] block">
                   Next 6–12 Months
                 </span>
@@ -188,76 +201,84 @@ export default function NextSixToTwelveMonthsSection({ actionPlan, realityCheck 
       ) : null}
 
       {/* ------------------------------------------------------------------ */}
-      {/* CASE B: Evidence-Building Actions & Development Priorities         */}
+      {/* CASE B: Evidence-Building Actions Inner Box                        */}
       {/* ------------------------------------------------------------------ */}
       {hasOrderedSteps && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Layers size={16} className="text-[#1E88E5]" />
-              Evidence-Building Actions
-            </h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">
+                Evidence-Building Actions
+              </h3>
+            </div>
             <span className="text-xs text-slate-400 font-medium">
               Supported developmental focus
             </span>
           </div>
 
-          <div className="grid gap-3.5 sm:grid-cols-2">
-            {ordered_steps.map((step, idx) => {
-              const title = step.title || step.growth_action || step.action || "Development Step";
-              const categoryLabel = formatCategoryLabel(step.category || step.phase);
-              const rationale = step.rationale || step.description;
-              const source = step.source;
-              const timeframe = step.timeframe;
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5">
+            <div className="space-y-2.5">
+              {ordered_steps.map((step, idx) => {
+                const title = step.title || step.growth_action || step.action || "Development Step";
+                const categoryLabel = formatCategoryLabel(step.category || step.phase);
+                const rationale = step.rationale || step.description;
+                const source = step.source;
+                const timeframe = step.timeframe;
 
-              return (
-                <div
-                  key={idx}
-                  className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:bg-white hover:border-[#D3E3F5] transition shadow-2xs"
-                >
-                  <div className="space-y-2">
+                return (
+                  <div
+                    key={idx}
+                    className="bg-white border border-slate-200/80 rounded-xl p-4 space-y-2 hover:border-slate-300 transition"
+                  >
                     <div className="flex flex-wrap items-center justify-between gap-1.5">
-                      {categoryLabel && (
-                        <span className="px-2.5 py-0.5 rounded-md bg-blue-50 text-[#1E88E5] border border-blue-200 text-[10px] font-bold">
-                          {categoryLabel}
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-md bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-[10px]">
+                          {idx + 1}
                         </span>
-                      )}
-                      {timeframe && (
-                        <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
-                          {timeframe}
-                        </span>
-                      )}
+                        <h4 className="text-xs sm:text-sm font-bold text-[#0b1a36]">
+                          {title}
+                        </h4>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {categoryLabel && (
+                          <span className="px-2 py-0.5 rounded-md bg-blue-50 text-[#1E88E5] border border-blue-200/70 text-[10px] font-bold">
+                            {categoryLabel}
+                          </span>
+                        )}
+                        {timeframe && (
+                          <span className="text-[10px] font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md">
+                            {timeframe}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <h4 className="text-xs sm:text-sm font-bold text-[#0b1a36] leading-snug">
-                      {title}
-                    </h4>
-
                     {rationale && (
-                      <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                      <p className="text-xs text-slate-600 leading-relaxed font-normal pl-7">
                         {rationale}
                       </p>
                     )}
-                  </div>
 
-                  {source && (
-                    <div className="text-[10px] text-slate-400 flex items-center gap-1 pt-2 border-t border-slate-100">
-                      <span>Source:</span>
-                      <span className="font-medium text-slate-500">{source}</span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                    {source && (
+                      <div className="text-[10px] text-slate-400 flex items-center gap-1 pt-1.5 pl-7 border-t border-slate-100">
+                        <span>Source:</span>
+                        <span className="font-medium text-slate-500">{source}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
 
       {/* ------------------------------------------------------------------ */}
-      {/* Competencies to Strengthen / Development Gaps (if present)         */}
+      {/* Competencies to Strengthen / Development Gaps                      */}
       {/* ------------------------------------------------------------------ */}
       {hasGaps && (
-        <div className="bg-gradient-to-br from-[#F8FAFC] to-[#f1f5f9] border border-slate-200 rounded-2xl p-5 space-y-3.5">
+        <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 space-y-3">
           <div className="flex items-center gap-2">
             <Target size={15} className="text-[#1E88E5]" />
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">
@@ -273,7 +294,7 @@ export default function NextSixToTwelveMonthsSection({ actionPlan, realityCheck 
               return (
                 <div
                   key={idx}
-                  className="bg-white border border-slate-200/90 rounded-xl p-3.5 space-y-1"
+                  className="bg-white border border-slate-200/80 rounded-xl p-3.5 space-y-1"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#0b1a36]">

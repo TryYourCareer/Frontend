@@ -177,8 +177,8 @@ describe("ParentReport Page", () => {
       // Section 6: Alternatives
       expect(screen.getByText("What If It Doesn't Work Out?")).toBeInTheDocument();
 
-      // Section 7: Parent FAQ
-      expect(screen.getByText("Frequently Asked Questions")).toBeInTheDocument();
+      // Section 7: Parent FAQ / Common Parent Questions
+      expect(screen.getByText(/Common Parent Questions|Frequently Asked Questions/i)).toBeInTheDocument();
 
       // Section 8: What Your Child Needs From You
       expect(screen.getByText("What Your Child Needs From You")).toBeInTheDocument();

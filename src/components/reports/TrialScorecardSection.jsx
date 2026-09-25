@@ -60,7 +60,7 @@ function formatOrdinal(num) {
 export default function TrialScorecardSection({ trialScorecard }) {
   if (!trialScorecard) {
     return (
-      <div className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 text-center space-y-2 shadow-sm">
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 text-center space-y-2 shadow-xs">
         <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
           05 — Trial Mission Scorecard
         </h3>
@@ -106,20 +106,38 @@ export default function TrialScorecardSection({ trialScorecard }) {
   const hasTrialStrengths = Array.isArray(trial_strengths) && trial_strengths.length > 0;
   const hasDeliverable = deliverable_output && typeof deliverable_output === "object" && Object.keys(deliverable_output).length > 0;
 
+  const rawScore = typeof trialScorecard.score === "number"
+    ? trialScorecard.score
+    : typeof trialScorecard.overall_score === "number"
+    ? trialScorecard.overall_score
+    : null;
+  const displayScore = rawScore !== null
+    ? (rawScore <= 1.0 && rawScore > 0 ? Math.round(rawScore * 100) : Math.round(rawScore))
+    : null;
+
   return (
     <section
       aria-labelledby="trial-scorecard-heading"
-      className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-10 shadow-sm space-y-8"
+      className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 space-y-6 shadow-xs"
       data-testid="trial-scorecard-section"
     >
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-6">
+      {/* ------------------------------------------------------------------ */}
+      {/* Section Header                                                      */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-5">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold uppercase tracking-wider">
-            <Award size={13} />
-            <span>05 — Trial Scorecard</span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+              05
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              05 — Trial Scorecard
+            </span>
           </div>
-          <h2 id="trial-scorecard-heading" className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight">
+          <h2
+            id="trial-scorecard-heading"
+            className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight"
+          >
             Trial Mission Scorecard
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
@@ -148,21 +166,63 @@ export default function TrialScorecardSection({ trialScorecard }) {
         </div>
       )}
 
-      {/* 1. Mission Overview & Execution Stats */}
-      <div className="bg-gradient-to-br from-[#F0F6FC] to-[#e8f1fa] border border-[#D3E3F5] rounded-2xl p-5 sm:p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Evaluated Simulation
-            </span>
-            <h3 className="text-base sm:lg font-bold text-[#0b1a36]">
-              {mission_title || "Career Simulation Mission"}
-            </h3>
+      {/* ------------------------------------------------------------------ */}
+      {/* 1. Overall Performance Inner Box                                   */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-4 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {displayScore !== null ? (
+              <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="14"
+                    fill="none"
+                    stroke="#E2E8F0"
+                    strokeWidth="3.5"
+                  />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="14"
+                    fill="none"
+                    stroke="#1E88E5"
+                    strokeWidth="3.5"
+                    strokeDasharray={88}
+                    strokeDashoffset={88 - (88 * Math.min(100, Math.max(0, displayScore))) / 100}
+                    strokeLinecap="round"
+                    className="transition-all duration-700 ease-out motion-reduce:transition-none"
+                  />
+                </svg>
+                <span className="absolute text-sm font-black text-[#0b1a36]">
+                  {displayScore}%
+                </span>
+              </div>
+            ) : (
+              <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200/70 text-[#1E88E5] flex items-center justify-center shrink-0 font-black text-sm">
+                <Award size={26} />
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                Evaluated Simulation
+              </span>
+              <h3 className="text-base sm:text-lg font-bold text-[#0b1a36]">
+                {mission_title || "Career Simulation Mission"}
+              </h3>
+              <p className="text-xs text-slate-600 leading-snug">
+                Overall performance calculated across observed decisions and technical findings.
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-[#D3E3F5]/80">
-          <div className="bg-white/90 border border-[#D3E3F5] rounded-xl p-3 space-y-1">
+        {/* Telemetry Summary Stats Row */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-3 border-t border-slate-200/80">
+          <div className="bg-white border border-slate-200/70 rounded-xl p-3 space-y-0.5">
             <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium">
               <Clock size={13} className="text-[#1E88E5]" />
               <span>Active Duration</span>
@@ -172,7 +232,7 @@ export default function TrialScorecardSection({ trialScorecard }) {
             </p>
           </div>
 
-          <div className="bg-white/90 border border-[#D3E3F5] rounded-xl p-3 space-y-1">
+          <div className="bg-white border border-slate-200/70 rounded-xl p-3 space-y-0.5">
             <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium">
               <ListChecks size={13} className="text-[#1E88E5]" />
               <span>Findings</span>
@@ -182,7 +242,7 @@ export default function TrialScorecardSection({ trialScorecard }) {
             </p>
           </div>
 
-          <div className="bg-white/90 border border-[#D3E3F5] rounded-xl p-3 space-y-1">
+          <div className="bg-white border border-slate-200/70 rounded-xl p-3 space-y-0.5">
             <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium">
               <Activity size={13} className="text-[#1E88E5]" />
               <span>Decisions</span>
@@ -192,7 +252,7 @@ export default function TrialScorecardSection({ trialScorecard }) {
             </p>
           </div>
 
-          <div className="bg-white/90 border border-[#D3E3F5] rounded-xl p-3 space-y-1">
+          <div className="bg-white border border-slate-200/70 rounded-xl p-3 space-y-0.5">
             <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium">
               <Sparkles size={13} className="text-[#1E88E5]" />
               <span>Competencies</span>
@@ -203,8 +263,8 @@ export default function TrialScorecardSection({ trialScorecard }) {
           </div>
         </div>
 
-        {/* Cohort Benchmark Indicator (Section 5 Requirement) */}
-        <div className="pt-2 border-t border-[#D3E3F5]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        {/* Cohort Benchmark Indicator */}
+        <div className="pt-2 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
           <span className="font-bold text-slate-600 flex items-center gap-1.5">
             <TrendingUp size={14} className="text-[#1E88E5]" />
             Cohort Benchmark:
@@ -217,22 +277,24 @@ export default function TrialScorecardSection({ trialScorecard }) {
         </div>
       </div>
 
-      {/* 2. Evaluated Competencies */}
-      <div className="space-y-4">
+      {/* ------------------------------------------------------------------ */}
+      {/* 2. Evaluated Competencies List/Rows                                */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <Award size={16} className="text-[#1E88E5]" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <Award size={15} className="text-[#1E88E5]" />
             Demonstrated Competencies ({compEntries.length})
           </h3>
           {compEntries.length > 0 && (
-            <span className="text-xs text-slate-500 font-medium">
+            <span className="text-xs text-slate-400 font-medium">
               Observable telemetry from simulation
             </span>
           )}
         </div>
 
         {compEntries.length > 0 ? (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl divide-y divide-slate-200/60 overflow-hidden">
             {compEntries.map((comp, idx) => {
               const title = comp?.title || comp?.name || "Demonstrated Competency";
               const level = comp?.evaluated_level !== undefined && comp?.evaluated_level !== null
@@ -247,14 +309,14 @@ export default function TrialScorecardSection({ trialScorecard }) {
               return (
                 <div
                   key={idx}
-                  className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 space-y-3 hover:bg-white hover:border-[#D3E3F5] transition shadow-2xs"
+                  className="p-4 sm:p-5 space-y-2 hover:bg-white transition"
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <h4 className="text-sm font-bold text-[#0b1a36] leading-snug">
                       {title}
                     </h4>
                     {level !== null && (
-                      <span className="inline-block px-2.5 py-0.5 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold shrink-0">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold shrink-0 self-start sm:self-auto">
                         Level {typeof level === "number" ? level.toFixed(1) : level}
                       </span>
                     )}
@@ -266,7 +328,7 @@ export default function TrialScorecardSection({ trialScorecard }) {
                     </p>
                   )}
 
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px] text-slate-400">
+                  <div className="flex flex-wrap items-center justify-between pt-1 text-[11px] text-slate-400 gap-2">
                     {evidenceCount !== undefined ? (
                       <span>{evidenceCount} contributing evidence signals recorded</span>
                     ) : (
@@ -275,7 +337,7 @@ export default function TrialScorecardSection({ trialScorecard }) {
                     {compEvidence.length > 0 && (
                       <div className="flex flex-wrap gap-1 text-[10px] text-slate-500">
                         {compEvidence.map((evItem, evIdx) => (
-                          <span key={evIdx} className="bg-slate-100 px-1.5 py-0.5 rounded">
+                          <span key={evIdx} className="bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
                             {typeof evItem === "string" ? evItem : JSON.stringify(evItem)}
                           </span>
                         ))}
@@ -293,15 +355,17 @@ export default function TrialScorecardSection({ trialScorecard }) {
         )}
       </div>
 
-      {/* 3. Demonstrated Trial Strengths */}
+      {/* ------------------------------------------------------------------ */}
+      {/* 3. Demonstrated Trial Strengths                                     */}
+      {/* ------------------------------------------------------------------ */}
       {hasTrialStrengths && (
         <div className="space-y-3">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <Sparkles size={16} className="text-[#1E88E5]" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <Sparkles size={15} className="text-[#1E88E5]" />
             Demonstrated Simulation Strengths
           </h3>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-2.5">
             {trial_strengths.map((str, idx) => {
               const title = typeof str === "string" ? str : (str?.title || str?.name || JSON.stringify(str));
               const rationale = str?.rationale || str?.description;
@@ -309,19 +373,19 @@ export default function TrialScorecardSection({ trialScorecard }) {
               return (
                 <div
                   key={idx}
-                  className="bg-emerald-50/40 border border-emerald-200 rounded-2xl p-4 space-y-1.5"
+                  className="flex items-start gap-2.5 p-2 rounded-xl bg-white border border-emerald-200/60 shadow-2xs"
                 >
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                  <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
                     <h4 className="text-xs sm:text-sm font-bold text-emerald-950">
                       {title}
                     </h4>
+                    {rationale && (
+                      <p className="text-xs text-emerald-900/80 leading-relaxed">
+                        {rationale}
+                      </p>
+                    )}
                   </div>
-                  {rationale && (
-                    <p className="text-xs text-emerald-900/80 leading-relaxed pl-6">
-                      {rationale}
-                    </p>
-                  )}
                 </div>
               );
             })}
@@ -329,25 +393,24 @@ export default function TrialScorecardSection({ trialScorecard }) {
         </div>
       )}
 
-      {/* 4. Recorded Observations & Findings */}
+      {/* ------------------------------------------------------------------ */}
+      {/* 4. Recorded Observations & Findings                                 */}
+      {/* ------------------------------------------------------------------ */}
       {hasFindings && (
         <div className="space-y-3">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <ListChecks size={16} className="text-[#1E88E5]" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <ListChecks size={15} className="text-[#1E88E5]" />
             Recorded Findings ({findings.length})
           </h3>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl divide-y divide-slate-200/60 overflow-hidden">
             {findings.map((f, idx) => {
               const title = f?.title || `Finding ${idx + 1}`;
               const desc = f?.description || f?.statement || f?.content;
               const imp = f?.implication;
 
               return (
-                <div
-                  key={idx}
-                  className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 space-y-1.5"
-                >
+                <div key={idx} className="p-4 space-y-1 hover:bg-white transition">
                   <h4 className="text-xs font-bold text-[#0b1a36]">
                     {title}
                   </h4>
@@ -368,26 +431,25 @@ export default function TrialScorecardSection({ trialScorecard }) {
         </div>
       )}
 
-      {/* 5. Executed Decisions */}
+      {/* ------------------------------------------------------------------ */}
+      {/* 5. Executed Decisions                                              */}
+      {/* ------------------------------------------------------------------ */}
       {hasDecisions && (
         <div className="space-y-3">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <Activity size={16} className="text-[#1E88E5]" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <Activity size={15} className="text-[#1E88E5]" />
             Simulation Decisions ({decisions.length})
           </h3>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl divide-y divide-slate-200/60 overflow-hidden">
             {decisions.map((d, idx) => {
               const dType = d?.decision_type || d?.title || `Decision ${idx + 1}`;
               const dChoice = d?.choice || d?.decision;
               const dRationale = d?.rationale;
 
               return (
-                <div
-                  key={idx}
-                  className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 space-y-2"
-                >
-                  <div className="flex items-start justify-between gap-2">
+                <div key={idx} className="p-4 space-y-1.5 hover:bg-white transition">
+                  <div className="flex items-center justify-between gap-2">
                     <h4 className="text-xs font-bold text-[#0b1a36]">
                       {dType.replace(/_/g, " ")}
                     </h4>
@@ -409,15 +471,17 @@ export default function TrialScorecardSection({ trialScorecard }) {
         </div>
       )}
 
-      {/* 6. Deliverable Output */}
+      {/* ------------------------------------------------------------------ */}
+      {/* 6. Deliverable Output                                              */}
+      {/* ------------------------------------------------------------------ */}
       {hasDeliverable && (
         <div className="space-y-3">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <FileCheck2 size={16} className="text-[#1E88E5]" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <FileCheck2 size={15} className="text-[#1E88E5]" />
             Simulation Deliverable Output
           </h3>
 
-          <div className="bg-[#F0F6FC] border border-[#D3E3F5] rounded-2xl p-5 space-y-2">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 space-y-2">
             {deliverable_output.title && (
               <h4 className="text-sm font-bold text-[#0b1a36]">
                 {deliverable_output.title}
@@ -429,7 +493,7 @@ export default function TrialScorecardSection({ trialScorecard }) {
               </p>
             )}
             {deliverable_output.status && (
-              <div className="pt-2 flex items-center gap-2 text-xs text-slate-600">
+              <div className="pt-2 flex items-center gap-2 text-xs text-slate-600 border-t border-slate-200/60">
                 <span className="font-semibold">Deliverable Status:</span>
                 <span className="font-bold text-[#1E88E5]">{deliverable_output.status}</span>
               </div>

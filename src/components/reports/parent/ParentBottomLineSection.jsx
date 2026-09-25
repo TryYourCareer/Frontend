@@ -4,17 +4,16 @@ import { Award, Info } from "lucide-react";
 export default function ParentBottomLineSection({ bottomLine }) {
   if (!bottomLine) {
     return (
-      <section className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center font-bold text-xs border border-slate-200">
+      <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 text-center space-y-2 shadow-xs">
+        <div className="flex items-center justify-center gap-2">
+          <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
             09
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-[#0b1a36]">The Bottom Line</h2>
-            <p className="text-xs text-slate-500 font-medium">Executive Summary & Next Actions</p>
-          </div>
+          </span>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+            The Bottom Line
+          </h2>
         </div>
-        <p className="text-sm text-slate-500 italic">
+        <p className="text-xs text-slate-400">
           Summary takeaway is not currently available in the parent report.
         </p>
       </section>
@@ -25,16 +24,16 @@ export default function ParentBottomLineSection({ bottomLine }) {
   const steps = Array.isArray(next_steps) ? next_steps : [];
 
   return (
-    <section className="bg-gradient-to-br from-white via-blue-50/20 to-slate-50/50 border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+    <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 space-y-6 shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-slate-100 pb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#1E88E5]/10 text-[#1E88E5] flex items-center justify-center font-bold text-xs">
+        <div className="flex items-center gap-2">
+          <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
             09
-          </div>
+          </span>
           <div>
-            <h2 className="text-xl font-bold text-[#0b1a36]">The Bottom Line</h2>
-            <p className="text-xs text-slate-500 font-medium">
+            <h2 className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight">The Bottom Line</h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
               Evidence-Based Synthesis for Parents
             </p>
           </div>
@@ -46,35 +45,33 @@ export default function ParentBottomLineSection({ bottomLine }) {
         </div>
       </div>
 
-      {/* Summary Narrative */}
+      {/* Summary Narrative Inner Box */}
       {evidence_summary && (
-        <div className="p-5 bg-white border border-[#D3E3F5] rounded-2xl shadow-xs">
+        <div className="p-5 sm:p-6 bg-[#F8FAFC] border border-slate-200/80 rounded-2xl">
           <p className="text-sm sm:text-base font-semibold text-[#0b1a36] leading-relaxed">
             {evidence_summary}
           </p>
         </div>
       )}
 
-      {/* Recommended Actionable Next Steps (Guidance Cards without misleading click semantics) */}
+      {/* Recommended Actionable Next Steps */}
       {steps.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
             Recommended Actionable Next Steps
           </h3>
-          <div className="space-y-2.5">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-2.5">
             {steps.map((step, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-slate-200/90 shadow-2xs"
+                className="flex items-start gap-3 p-3.5 bg-white rounded-xl border border-slate-200/80"
               >
-                <div className="w-6 h-6 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                <div className="w-5 h-5 rounded-md bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
                   {idx + 1}
                 </div>
-                <div className="space-y-0.5">
-                  <span className="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium block">
-                    {step}
-                  </span>
-                </div>
+                <span className="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium block">
+                  {step}
+                </span>
               </div>
             ))}
           </div>

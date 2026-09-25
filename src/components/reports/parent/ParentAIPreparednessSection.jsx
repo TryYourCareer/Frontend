@@ -71,16 +71,20 @@ export default function ParentAIPreparednessSection({ aiPreparedness }) {
   return (
     <section
       aria-labelledby="parent-ai-heading"
-      className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-10 shadow-sm space-y-8"
+      className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xs space-y-6"
     >
       {/* ------------------------------------------------------------------ */}
       {/* Header                                                             */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-5">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold uppercase tracking-wider">
-            <Bot size={13} />
-            <span>04 — AI Preparedness</span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+              04
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              04 — AI Preparedness
+            </span>
           </div>
           <h2
             id="parent-ai-heading"
@@ -102,7 +106,7 @@ export default function ParentAIPreparednessSection({ aiPreparedness }) {
       {/* Plain-Language Guidance Narrative                                  */}
       {/* ------------------------------------------------------------------ */}
       {hasGuidance && (
-        <div className="bg-gradient-to-br from-[#F0F6FC] to-[#e8f1fa] border border-[#D3E3F5] rounded-2xl p-5 space-y-1.5">
+        <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 space-y-1.5">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
             Parent Guidance on AI Impact
           </span>

@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Briefcase,
   Clock,
   Globe2,
   CheckCircle2,
@@ -121,15 +120,22 @@ export default function JobRealitySection({ jobReality }) {
     : [];
 
   return (
-    <section aria-labelledby="job-reality-heading" className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-8 shadow-sm">
+    <section
+      aria-labelledby="job-reality-heading"
+      className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 space-y-6 shadow-xs"
+    >
       {/* ------------------------------------------------------------------ */}
       {/* Header                                                             */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-5">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold uppercase tracking-wider">
-            <Briefcase size={13} />
-            <span>04 — Job Reality</span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+              04
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              04 — Job Reality
+            </span>
           </div>
           <h2 id="job-reality-heading" className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight">
             What the Job Actually Looks Like
@@ -151,20 +157,20 @@ export default function JobRealitySection({ jobReality }) {
       {/* 1. Real-World Impact & Role Overview                               */}
       {/* ------------------------------------------------------------------ */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-          <Globe2 size={16} className="text-[#1E88E5]" />
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+          <Globe2 size={15} className="text-[#1E88E5]" />
           Real-World Impact & Purpose
         </h3>
 
         {real_world_impact || description || one_liner ? (
-          <div className="bg-gradient-to-br from-[#F0F6FC] to-[#e8f1fa] border border-[#D3E3F5] rounded-2xl p-5 sm:p-6 space-y-3">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-3 shadow-2xs">
             {one_liner && (
               <p className="text-sm sm:text-base font-bold text-[#0b1a36] leading-snug">
                 {one_liner}
               </p>
             )}
             {real_world_impact && (
-              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
                 {real_world_impact}
               </p>
             )}
@@ -184,25 +190,25 @@ export default function JobRealitySection({ jobReality }) {
       {/* ------------------------------------------------------------------ */}
       {/* 2. Day in the Life                                                 */}
       {/* ------------------------------------------------------------------ */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-          <Clock size={16} className="text-[#1E88E5]" />
+      <div className="space-y-3">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+          <Clock size={15} className="text-[#1E88E5]" />
           Day-to-Day Workflow & Schedule
         </h3>
 
         {parsedDaySchedule.length > 0 ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl divide-y divide-slate-200/60 overflow-hidden">
             {parsedDaySchedule.map((item, idx) => {
               const isObj = typeof item === 'object' && item !== null;
               const timeLabel = isObj ? (item.time || item.period || item.hour || item.phase || `Step ${idx + 1}`) : null;
               const textContent = isObj ? (item.activity || item.task || item.description || item.title || JSON.stringify(item)) : String(item);
 
               return (
-                <div key={idx} className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2 hover:border-[#D3E3F5] transition shadow-2xs">
+                <div key={idx} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-white transition">
                   {timeLabel && (
-                    <div className="inline-block px-2.5 py-0.5 rounded-full bg-blue-50 text-[#1E88E5] text-[11px] font-bold">
+                    <span className="inline-block px-2.5 py-0.5 rounded-lg bg-blue-50 text-[#1E88E5] border border-blue-200/70 text-[11px] font-bold shrink-0 self-start sm:self-auto">
                       {timeLabel}
-                    </div>
+                    </span>
                   )}
                   <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">
                     {textContent}
@@ -212,7 +218,7 @@ export default function JobRealitySection({ jobReality }) {
             })}
           </div>
         ) : dayNarrative ? (
-          <div className="bg-[#F0F6FC] border border-[#D3E3F5] rounded-2xl p-5 text-xs sm:text-sm text-slate-700 leading-relaxed">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 text-xs sm:text-sm text-slate-700 leading-relaxed">
             {dayNarrative}
           </div>
         ) : (
@@ -223,16 +229,16 @@ export default function JobRealitySection({ jobReality }) {
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 3. Common Occupational Activities                                  */}
+      {/* 3. Common Occupational Activities (Vertically Stacked Rows)        */}
       {/* ------------------------------------------------------------------ */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-          <Layers size={16} className="text-[#1E88E5]" />
+      <div className="space-y-3">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+          <Layers size={15} className="text-[#1E88E5]" />
           Key Work Activities ({activitiesList.length})
         </h3>
 
         {activitiesList.length > 0 ? (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl divide-y divide-slate-200/60 overflow-hidden">
             {activitiesList.map((act, idx) => {
               const title = act?.title || act?.activity_name || act?.name || `Occupational Task ${idx + 1}`;
               const desc = act?.description || null;
@@ -244,21 +250,21 @@ export default function JobRealitySection({ jobReality }) {
               return (
                 <div
                   key={idx}
-                  className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-2 hover:bg-white hover:border-[#D3E3F5] transition shadow-2xs"
+                  className="p-4 sm:p-5 space-y-2 hover:bg-white transition"
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="space-y-0.5">
                       <h4 className="text-xs sm:text-sm font-bold text-[#0b1a36] leading-snug">
                         {title}
                       </h4>
                       {category && (
-                        <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                           {category}
                         </span>
                       )}
                     </div>
                     {isTrialable && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0 self-start sm:self-auto">
                         <CheckCircle2 size={11} />
                         <span>Simulated in Mission</span>
                       </span>
@@ -272,7 +278,7 @@ export default function JobRealitySection({ jobReality }) {
                   )}
 
                   {(importance || frequency) && (
-                    <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-200/60 text-[11px] text-slate-600">
+                    <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-slate-600">
                       {importance && (
                         <span className="bg-white px-2 py-0.5 rounded-lg border border-slate-200 font-medium">
                           Importance: <strong className="text-slate-800">{importance}</strong>
@@ -300,12 +306,12 @@ export default function JobRealitySection({ jobReality }) {
       {/* 4. Trialable Activities / Hands-on Exposure                         */}
       {/* ------------------------------------------------------------------ */}
       {trialableList.length > 0 && (
-        <div className="space-y-3 bg-emerald-50/60 border border-emerald-200 rounded-2xl p-5">
-          <div className="flex items-center gap-2 text-emerald-900 font-bold text-sm">
-            <Sparkles size={16} className="text-emerald-700" />
+        <div className="space-y-3 bg-emerald-50/40 border border-emerald-200/80 rounded-2xl p-4 sm:p-5">
+          <div className="flex items-center gap-2 text-emerald-950 font-bold text-xs sm:text-sm">
+            <Sparkles size={15} className="text-emerald-700" />
             <span>Hands-On Trialable Tasks ({trialableList.length})</span>
           </div>
-          <p className="text-xs text-emerald-800 leading-relaxed">
+          <p className="text-xs text-emerald-900/80 leading-relaxed">
             The following activities represent core operational tasks that are directly trialable within our simulation environment:
           </p>
           <div className="flex flex-wrap gap-2 pt-1">
@@ -330,19 +336,16 @@ export default function JobRealitySection({ jobReality }) {
       {/* ------------------------------------------------------------------ */}
       {workDnaEntries.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <Dna size={16} className="text-[#1E88E5]" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <Dna size={15} className="text-[#1E88E5]" />
             Occupational Work DNA Profile
           </h3>
-          <p className="text-xs text-slate-600">
-            Authoritative cognitive and operational demands defined for this discipline:
-          </p>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {workDnaEntries.map(([key, val]) => (
               <div
                 key={key}
-                className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-3.5 space-y-1.5"
+                className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-3.5 space-y-1.5"
               >
                 <span className="text-xs font-bold text-[#0b1a36] block">
                   {formatWorkDnaName(key)}
@@ -364,8 +367,8 @@ export default function JobRealitySection({ jobReality }) {
       {/* ------------------------------------------------------------------ */}
       {compList.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <Award size={16} className="text-[#1E88E5]" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <Award size={15} className="text-[#1E88E5]" />
             Core Required Competencies ({compList.length})
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -374,7 +377,7 @@ export default function JobRealitySection({ jobReality }) {
               return (
                 <span
                   key={idx}
-                  className="bg-[#F0F6FC] text-[#0b1a36] font-bold text-xs px-3 py-1.5 rounded-xl border border-[#D3E3F5] inline-flex items-center gap-1.5"
+                  className="bg-[#F8FAFC] text-[#0b1a36] font-bold text-xs px-3 py-1.5 rounded-xl border border-slate-200/80 inline-flex items-center gap-1.5"
                 >
                   <Award size={13} className="text-[#1E88E5]" />
                   {title}

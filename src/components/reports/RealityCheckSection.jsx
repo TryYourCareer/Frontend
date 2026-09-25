@@ -60,7 +60,7 @@ function formatCoverageRatio(ratio) {
 export default function RealityCheckSection({ realityCheck }) {
   if (!realityCheck) {
     return (
-      <div className="bg-white border border-[#D3E3F5] rounded-3xl p-6 text-center space-y-2">
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 text-center space-y-2 shadow-xs">
         <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
           03 — Reality Check
         </h3>
@@ -122,20 +122,25 @@ export default function RealityCheckSection({ realityCheck }) {
   const formattedCoverage = formatCoverageRatio(uncertainty?.evidence_coverage_ratio);
 
   return (
-    <section className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-10 shadow-sm space-y-8">
+    <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xs space-y-6">
       {/* Section Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-5">
-        <div className="space-y-1">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-            03 — Evidence Synthesis
-          </span>
-          <h2 className="text-xl sm:text-2xl font-bold text-[#0b1a36]">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+              03
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              03 — Evidence Synthesis
+            </span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight">
             Reality Check
           </h2>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {explorationMaturity && (
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#F0F6FC] text-[#1E88E5] border border-[#D3E3F5]">
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#1E88E5] border border-blue-200">
               Maturity: {explorationMaturity}
             </span>
           )}
@@ -147,9 +152,9 @@ export default function RealityCheckSection({ realityCheck }) {
         </div>
       </div>
 
-      {/* Headline & Narrative Summary */}
+      {/* 1. Main Evidence Synthesis Inner Box */}
       {(headline || narrative) ? (
-        <div className="bg-gradient-to-br from-[#F0F6FC] to-white border border-[#D3E3F5] rounded-2xl p-5 sm:p-6 space-y-3">
+        <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-3 shadow-2xs">
           {headline && (
             <h3 className="text-base sm:text-lg font-bold text-[#0b1a36] flex items-center gap-2">
               <Sparkles size={18} className="text-[#1E88E5] shrink-0" />
@@ -170,17 +175,17 @@ export default function RealityCheckSection({ realityCheck }) {
         </div>
       )}
 
-      {/* Discovery vs. Trial Mission Demonstrated Evidence (if provided) */}
+      {/* 2. Authoritative Evidence Comparison */}
       {(hasDiscovery || hasTrialEvidence) && (
         <div className="space-y-3">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Authoritative Evidence Comparison
           </h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {/* Discovery Evidence Card */}
-            <div className="bg-[#F0F6FC]/60 border border-[#D3E3F5] rounded-2xl p-5 space-y-3">
+          <div className="grid gap-3.5 sm:grid-cols-2">
+            {/* Discovery Evidence Box */}
+            <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1E88E5]">
-                <Compass size={16} />
+                <Compass size={15} />
                 <span>Discovery Evidence</span>
               </div>
               {discovery_interest?.interest_summary && (
@@ -190,14 +195,14 @@ export default function RealityCheckSection({ realityCheck }) {
               )}
               {Array.isArray(discovery_interest?.defining_dimensions) && discovery_interest.defining_dimensions.length > 0 && (
                 <div className="space-y-1.5 pt-1">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                     Defining Dimensions
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {discovery_interest.defining_dimensions.map((dim, idx) => (
                       <span
                         key={idx}
-                        className="px-2.5 py-1 rounded-full bg-white border border-[#D3E3F5] text-xs font-bold text-[#0b1a36]"
+                        className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-[#0b1a36]"
                       >
                         {dim}
                       </span>
@@ -207,20 +212,20 @@ export default function RealityCheckSection({ realityCheck }) {
               )}
             </div>
 
-            {/* Trial Mission Demonstrated Evidence Card */}
-            <div className="bg-[#F0F6FC]/60 border border-[#D3E3F5] rounded-2xl p-5 space-y-3">
+            {/* Trial Mission Demonstrated Evidence Box */}
+            <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1E88E5]">
-                <ShieldCheck size={16} />
+                <ShieldCheck size={15} />
                 <span>Demonstrated Evidence</span>
               </div>
               {trialStrengths.length > 0 ? (
                 <div className="space-y-2">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                     Demonstrated Competencies
                   </span>
                   <ul className="space-y-1.5 text-xs text-slate-700">
                     {trialStrengths.map((st, idx) => (
-                      <li key={idx} className="flex items-start justify-between gap-2 bg-white border border-[#D3E3F5] rounded-xl px-3 py-2">
+                      <li key={idx} className="flex items-start justify-between gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2">
                         <span className="font-bold text-[#0b1a36]">
                           {st.title || "Demonstrated Competency"}
                         </span>
@@ -243,23 +248,23 @@ export default function RealityCheckSection({ realityCheck }) {
         </div>
       )}
 
-      {/* Career Requirements (if provided) */}
+      {/* 3. Career Requirements */}
       {hasCareerReqs && (
-        <div className="bg-[#F0F6FC]/60 border border-[#D3E3F5] rounded-2xl p-5 space-y-3">
+        <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1E88E5]">
-            <Briefcase size={16} />
+            <Briefcase size={15} />
             <span>Career Requirements</span>
           </div>
           {requiredCompetencies.length > 0 && (
             <div className="space-y-1.5">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 Required Core Skills
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {requiredCompetencies.map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-2.5 py-1 rounded-full bg-white border border-[#D3E3F5] text-xs font-medium text-slate-800"
+                    className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   >
                     {skill}
                   </span>
@@ -269,7 +274,7 @@ export default function RealityCheckSection({ realityCheck }) {
           )}
           {keyActivities.length > 0 && (
             <div className="space-y-1.5 pt-1">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 Key Work Activities
               </span>
               <ul className="space-y-1 text-xs text-slate-700">
@@ -285,7 +290,7 @@ export default function RealityCheckSection({ realityCheck }) {
         </div>
       )}
 
-      {/* Areas of Alignment */}
+      {/* 4. Areas of Alignment */}
       {hasAlignment && (
         <div className="space-y-3">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
@@ -296,7 +301,7 @@ export default function RealityCheckSection({ realityCheck }) {
             {areas_of_alignment.map((item, idx) => (
               <div
                 key={idx}
-                className="bg-emerald-50/40 border border-emerald-200 rounded-2xl p-4 space-y-1"
+                className="bg-emerald-50/40 border border-emerald-200/80 rounded-2xl p-4 space-y-1"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs sm:text-sm font-bold text-emerald-950">
@@ -319,14 +324,14 @@ export default function RealityCheckSection({ realityCheck }) {
         </div>
       )}
 
-      {/* Development Gaps (DevelopmentGapItem list) */}
+      {/* 5. Development Gaps (Grouped Compact Rows in One Inner Box) */}
       {(hasGaps || hasNeedingDev) && (
         <div className="space-y-3">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <Target size={15} className="text-amber-600" />
             <span>Development Gaps</span>
           </h3>
-          <div className="space-y-3">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl divide-y divide-slate-200/60 overflow-hidden">
             {(hasGaps ? development_gaps : areas_needing_development).map((gap, idx) => {
               const title = gap.title || "Development Area";
               const state = gap.state;
@@ -337,7 +342,7 @@ export default function RealityCheckSection({ realityCheck }) {
               return (
                 <div
                   key={idx}
-                  className="bg-white border border-[#D3E3F5] rounded-2xl p-4 sm:p-5 space-y-2 hover:border-amber-300 transition-colors"
+                  className="p-4 sm:p-5 space-y-2 hover:bg-white transition"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-xs sm:text-sm font-bold text-[#0b1a36]">
@@ -370,18 +375,18 @@ export default function RealityCheckSection({ realityCheck }) {
         </div>
       )}
 
-      {/* Untested Areas */}
+      {/* 6. Untested Areas */}
       {hasNotTested && (
         <div className="space-y-3">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <HelpCircle size={15} className="text-slate-400" />
             <span>Areas Not Yet Tested</span>
           </h3>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl divide-y divide-slate-200/60 overflow-hidden">
             {areas_not_yet_tested.map((item, idx) => (
               <div
                 key={idx}
-                className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-1"
+                className="p-4 space-y-1 hover:bg-white transition"
               >
                 <span className="text-xs sm:text-sm font-bold text-slate-800 block">
                   {item.title || "Untested Area"}
@@ -397,9 +402,9 @@ export default function RealityCheckSection({ realityCheck }) {
         </div>
       )}
 
-      {/* Uncertainty & Evidence Limitations */}
+      {/* 7. Uncertainty & Evidence Limitations */}
       {(uncertainty || resolvedLimitations) && (
-        <div className="bg-[#F0F6FC]/60 border border-[#D3E3F5] rounded-2xl p-5 space-y-3">
+        <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-2.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
               <AlertTriangle size={14} className="text-amber-500" />

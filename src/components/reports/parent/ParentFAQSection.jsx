@@ -2,13 +2,7 @@ import React, { useState } from "react";
 import {
   HelpCircle,
   ChevronDown,
-  ChevronUp,
-  Sparkles,
-  Send,
-  FileText,
-  AlertCircle,
-  CheckCircle2,
-  RotateCcw
+  ChevronUp
 } from "lucide-react";
 
 /**
@@ -428,10 +422,7 @@ export function answerParentQuestion(query, parentReport = {}, reportData = {}) 
 }
 
 export default function ParentFAQSection({ parentFaq, faq, parentReport, reportData }) {
-  const [openIndices, setOpenIndices] = useState({ 0: true, 1: true });
-  const [questionInput, setQuestionInput] = useState("");
-  const [currentAnswer, setCurrentAnswer] = useState(null);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [openIndices, setOpenIndices] = useState({ 0: true });
 
   const toggle = (idx) => {
     setOpenIndices((prev) => ({
@@ -466,32 +457,10 @@ export default function ParentFAQSection({ parentFaq, faq, parentReport, reportD
   const providedFaqs = Array.isArray(parentFaq) ? parentFaq : Array.isArray(faq) ? faq : [];
   const faqs = providedFaqs.length > 0 ? providedFaqs : defaultFaqs;
 
-  const handleAsk = (queryText) => {
-    const textToAsk = (queryText || questionInput).trim();
-    if (!textToAsk) return;
-    setHasSearched(true);
-    const result = answerParentQuestion(textToAsk, parentReport, reportData);
-    setCurrentAnswer(result);
-  };
-
-  const handleClear = () => {
-    setQuestionInput("");
-    setCurrentAnswer(null);
-    setHasSearched(false);
-  };
-
-  const exampleQuestions = [
-    "Why was this career identified for my child?",
-    "What strengths did the trial mission demonstrate?",
-    "What skills need further development?",
-    "Will AI or automation impact this role?",
-    "What are the backup career options?",
-  ];
-
   return (
     <section
       aria-labelledby="parent-faq-heading"
-      className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-8 shadow-sm"
+      className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm"
       data-testid="parent-faq-section"
     >
       {/* ------------------------------------------------------------------ */}
@@ -504,172 +473,25 @@ export default function ParentFAQSection({ parentFaq, faq, parentReport, reportD
           </div>
           <div>
             <h2 id="parent-faq-heading" className="text-xl font-bold text-[#0b1a36]">
-              Frequently Asked Questions
+              Common Parent Questions
             </h2>
             <p className="text-xs text-slate-500 font-medium">
-              Verified Evidence Answers & Interactive Parent Inquiry
+              Verified Evidence Answers Grounded in Report Data
             </p>
           </div>
         </div>
 
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-800 text-xs font-bold">
           <HelpCircle size={14} />
-          <span>Parent Q&A</span>
+          <span>Parent FAQ</span>
         </div>
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Interactive Parent Q&A Card                                        */}
+      {/* Predefined FAQ Accordion                                           */}
       {/* ------------------------------------------------------------------ */}
-      <div
-        className="bg-gradient-to-br from-indigo-50/60 via-white to-blue-50/40 border border-[#D3E3F5] rounded-2xl p-5 sm:p-6 space-y-5 shadow-2xs"
-        data-testid="parent-ai-qa-card"
-      >
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
-              <Sparkles size={15} />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-[#0b1a36]">
-                Ask About This Report
-              </h3>
-              <p className="text-xs text-slate-500 font-normal">
-                Instant answers grounded strictly in verified assessment evidence.
-              </p>
-            </div>
-          </div>
-
-          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200">
-            Evidence-Grounded AI
-          </span>
-        </div>
-
-        {/* Example Query Prompts */}
-        <div className="space-y-1.5" data-testid="parent-qa-examples">
-          <span className="text-[11px] font-semibold text-slate-400 block">
-            Suggested questions:
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {exampleQuestions.map((q, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => {
-                  setQuestionInput(q);
-                  handleAsk(q);
-                }}
-                className="text-xs font-medium px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:border-[#1E88E5] hover:text-[#1E88E5] transition shadow-2xs text-left cursor-pointer"
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Input & Search Box */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleAsk();
-          }}
-          className="flex flex-col sm:flex-row gap-2 pt-1"
-          data-testid="parent-qa-form"
-        >
-          <div className="relative flex-1">
-            <input
-              type="text"
-              value={questionInput}
-              onChange={(e) => setQuestionInput(e.target.value)}
-              placeholder="Ask a question about fit, strengths, AI risks, salary, or backup plans..."
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-[#0b1a36] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1E88E5] focus:border-transparent transition"
-              data-testid="parent-qa-input"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="submit"
-              className="px-4 py-2.5 rounded-xl bg-[#1E88E5] hover:bg-blue-600 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer w-full sm:w-auto"
-              data-testid="parent-qa-submit"
-            >
-              <Send size={13} />
-              <span>Ask</span>
-            </button>
-
-            {hasSearched && (
-              <button
-                type="button"
-                onClick={handleClear}
-                className="px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs transition cursor-pointer"
-                title="Clear answer"
-                data-testid="parent-qa-clear"
-              >
-                <RotateCcw size={13} />
-              </button>
-            )}
-          </div>
-        </form>
-
-        {/* Answer Box */}
-        {hasSearched && currentAnswer && (
-          <div
-            className={`border rounded-2xl p-4 sm:p-5 space-y-3 transition-all ${
-              currentAnswer.isGrounded
-                ? "bg-white border-[#D3E3F5] shadow-2xs"
-                : "bg-amber-50/60 border-amber-200"
-            }`}
-            data-testid="parent-qa-answer-container"
-          >
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2">
-                {currentAnswer.isGrounded ? (
-                  <CheckCircle2 size={16} className="text-emerald-600" />
-                ) : (
-                  <AlertCircle size={16} className="text-amber-600" />
-                )}
-                <span className="text-xs font-bold text-[#0b1a36]">
-                  {currentAnswer.headline || (currentAnswer.isGrounded ? "Grounded Answer" : "Insufficient Report Evidence")}
-                </span>
-              </div>
-
-              {currentAnswer.sourceSection && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
-                  <FileText size={10} />
-                  <span>Source: {currentAnswer.sourceSection}</span>
-                </span>
-              )}
-            </div>
-
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
-              {currentAnswer.answer}
-            </p>
-
-            {currentAnswer.keyPoints && currentAnswer.keyPoints.length > 0 && (
-              <ul className="space-y-1 pt-1 border-t border-slate-100">
-                {currentAnswer.keyPoints.map((point, idx) => (
-                  <li
-                    key={idx}
-                    className="text-xs text-slate-600 flex items-start gap-2"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#1E88E5] mt-1.5 shrink-0" />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Deterministic FAQ Items                                             */}
-      {/* ------------------------------------------------------------------ */}
-      {faqs.length > 0 && (
+      {faqs.length > 0 ? (
         <div className="space-y-3" data-testid="parent-faq-accordion">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-            Standard Reference Inquiries
-          </h3>
           {faqs.map((faqItem, idx) => {
             const isOpen = !!openIndices[idx];
             const question = faqItem.question || "Question";
@@ -678,26 +500,34 @@ export default function ParentFAQSection({ parentFaq, faq, parentReport, reportD
             return (
               <div
                 key={idx}
-                className="border border-[#D3E3F5] rounded-2xl overflow-hidden transition-all duration-200 bg-slate-50/40"
+                className="border border-[#D3E3F5] rounded-2xl overflow-hidden transition-all duration-200 bg-slate-50/40 shadow-2xs"
               >
                 <button
+                  type="button"
                   onClick={() => toggle(idx)}
                   className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 hover:bg-slate-50 transition cursor-pointer"
+                  aria-expanded={isOpen}
                 >
-                  <span className="text-sm font-bold text-[#0b1a36]">{question}</span>
-                  <span className="text-slate-400 shrink-0">
-                    {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  <span className="text-sm sm:text-base font-bold text-[#0b1a36] leading-snug">
+                    {question}
+                  </span>
+                  <span className="text-[#1E88E5] shrink-0 p-1.5 rounded-xl bg-blue-50">
+                    {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </span>
                 </button>
 
                 {isOpen && (
-                  <div className="px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 bg-white">
+                  <div className="px-4 sm:px-5 pb-5 pt-2 text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 bg-white">
                     {answer}
                   </div>
                 )}
               </div>
             );
           })}
+        </div>
+      ) : (
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-500">
+          No common questions are currently available.
         </div>
       )}
     </section>

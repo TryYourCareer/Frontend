@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Users,
   Award,
   Sparkles,
   BookCheck,
@@ -66,15 +65,19 @@ export default function ParentSnapshotSection({ snapshot }) {
   return (
     <section
       aria-labelledby="parent-snapshot-heading"
-      className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-10 shadow-sm space-y-6"
+      className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xs space-y-6"
     >
       {/* ------------------------------------------------------------------ */}
       {/* Section Tag & Scope Header                                         */}
       {/* ------------------------------------------------------------------ */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-5">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#1E88E5] border border-blue-200 text-xs font-bold uppercase tracking-wider">
-          <Users size={13} />
-          <span>01 — Snapshot for Parents</span>
+        <div className="flex items-center gap-2">
+          <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
+            01
+          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            01 — Snapshot for Parents
+          </span>
         </div>
 
         <div className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
@@ -103,11 +106,11 @@ export default function ParentSnapshotSection({ snapshot }) {
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Key Overview Cards                                                 */}
+      {/* Key Overview Inner Boxes                                           */}
       {/* ------------------------------------------------------------------ */}
       <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 pt-2">
         {/* Child & Career Focus */}
-        <div className="bg-[#F0F6FC] border border-[#D3E3F5] rounded-2xl p-4 space-y-1.5">
+        <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Student & Career
@@ -125,7 +128,7 @@ export default function ParentSnapshotSection({ snapshot }) {
         </div>
 
         {/* Evaluation Maturity */}
-        <div className="bg-[#F0F6FC] border border-[#D3E3F5] rounded-2xl p-4 space-y-1.5">
+        <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Evidence Maturity
@@ -133,14 +136,14 @@ export default function ParentSnapshotSection({ snapshot }) {
             <Sparkles size={16} className="text-[#1E88E5]" />
           </div>
           <div>
-            <span className="inline-block px-2.5 py-0.5 rounded-full border text-xs font-bold bg-white text-[#0b1a36] border-[#D3E3F5]">
+            <span className="inline-block px-2.5 py-0.5 rounded-full border text-xs font-bold bg-white text-[#0b1a36] border-slate-200 shadow-2xs">
               {maturityLabel}
             </span>
           </div>
         </div>
 
-        {/* Alignment / Fit Tier (When supplied) */}
-        <div className="bg-[#F0F6FC] border border-[#D3E3F5] rounded-2xl p-4 space-y-1.5">
+        {/* Alignment / Fit Tier */}
+        <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Alignment Level
@@ -153,7 +156,7 @@ export default function ParentSnapshotSection({ snapshot }) {
                 {fitTierLabel}
               </span>
             ) : (
-              <span className="inline-block px-2.5 py-0.5 rounded-full border text-xs font-semibold bg-slate-100 text-slate-500 border-slate-200">
+              <span className="inline-block px-2.5 py-0.5 rounded-full border text-xs font-semibold bg-white text-slate-500 border-slate-200">
                 In Review
               </span>
             )}

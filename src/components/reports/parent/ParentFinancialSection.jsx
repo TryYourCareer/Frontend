@@ -4,19 +4,16 @@ import { TrendingUp, Info, Globe, MapPin } from "lucide-react";
 export default function ParentFinancialSection({ financialOutlook }) {
   if (!financialOutlook) {
     return (
-      <section className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center font-bold text-xs border border-slate-200">
+      <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 text-center space-y-2 shadow-xs">
+        <div className="flex items-center justify-center gap-2">
+          <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
             05
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-[#0b1a36]">
-              What It Will Cost and When It Pays Off
-            </h2>
-            <p className="text-xs text-slate-500 font-medium">Financial & Compensation Outlook</p>
-          </div>
+          </span>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+            What It Will Cost and When It Pays Off
+          </h2>
         </div>
-        <p className="text-sm text-slate-500 italic">
+        <p className="text-xs text-slate-400">
           Market salary and financial outlook data is not currently available in the parent report.
         </p>
       </section>
@@ -35,18 +32,18 @@ export default function ParentFinancialSection({ financialOutlook }) {
   const hasSalaryData = hasIndiaTiers || hasGlobalTiers;
 
   return (
-    <section className="bg-white border border-[#D3E3F5] rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+    <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 space-y-6 shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-slate-100 pb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#1E88E5]/10 text-[#1E88E5] flex items-center justify-center font-bold text-xs">
+        <div className="flex items-center gap-2">
+          <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
             05
-          </div>
+          </span>
           <div>
-            <h2 className="text-xl font-bold text-[#0b1a36]">
+            <h2 className="text-xl sm:text-2xl font-black text-[#0b1a36] tracking-tight">
               What It Will Cost and When It Pays Off
             </h2>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
               Verified Market Compensation & Progression
             </p>
           </div>
@@ -58,10 +55,10 @@ export default function ParentFinancialSection({ financialOutlook }) {
         </div>
       </div>
 
-      {/* Narrative */}
+      {/* Narrative Inner Box */}
       {narrative && (
-        <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
-          <p className="text-sm text-slate-700 leading-relaxed font-medium">
+        <div className="p-4 sm:p-5 bg-[#F8FAFC] border border-slate-200/80 rounded-2xl">
+          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
             {narrative}
           </p>
         </div>
@@ -72,7 +69,7 @@ export default function ParentFinancialSection({ financialOutlook }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* India LPA */}
           {hasIndiaTiers && (
-            <div className="p-5 bg-gradient-to-br from-blue-50/40 to-slate-50/40 border border-[#D3E3F5] rounded-2xl space-y-3">
+            <div className="p-5 bg-[#F8FAFC] border border-slate-200/80 rounded-2xl space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1E88E5]">
                 <MapPin size={14} />
                 <span>India Compensation (LPA)</span>
@@ -81,7 +78,7 @@ export default function ParentFinancialSection({ financialOutlook }) {
                 {Object.entries(indiaSal).map(([tierKey, val]) => (
                   <div
                     key={tierKey}
-                    className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-100"
+                    className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200/80"
                   >
                     <span className="text-xs font-semibold text-slate-600 capitalize">
                       {tierKey.replace(/_/g, " ")}
@@ -99,8 +96,8 @@ export default function ParentFinancialSection({ financialOutlook }) {
 
           {/* Global USD */}
           {hasGlobalTiers && (
-            <div className="p-5 bg-gradient-to-br from-indigo-50/40 to-slate-50/40 border border-indigo-100 rounded-2xl space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-600">
+            <div className="p-5 bg-[#F8FAFC] border border-slate-200/80 rounded-2xl space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1E88E5]">
                 <Globe size={14} />
                 <span>Global Compensation (USD)</span>
               </div>
@@ -108,7 +105,7 @@ export default function ParentFinancialSection({ financialOutlook }) {
                 {Object.entries(globalSal).map(([tierKey, val]) => (
                   <div
                     key={tierKey}
-                    className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-100"
+                    className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200/80"
                   >
                     <span className="text-xs font-semibold text-slate-600 capitalize">
                       {tierKey.replace(/_/g, " ")}
@@ -125,43 +122,43 @@ export default function ParentFinancialSection({ financialOutlook }) {
           )}
         </div>
       ) : (
-        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500 italic">
+        <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200/80 text-xs text-slate-500 italic">
           Authoritative salary tiers are currently pending verification.
         </div>
       )}
 
       {/* Degree Cost Range & Investment Recovery Analysis */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-testid="parent-education-cost-cards">
-        <div className="p-5 bg-[#F8FAFC] border border-slate-200 rounded-2xl space-y-3">
+        <div className="p-5 bg-[#F8FAFC] border border-slate-200/80 rounded-2xl space-y-3">
           <div className="text-xs font-bold uppercase tracking-wider text-slate-700">
             Estimated Degree & Skill Prep Cost Range
           </div>
           <div className="space-y-2 text-xs text-slate-600">
-            <div className="flex justify-between items-center p-2 bg-white rounded-xl border border-slate-100">
+            <div className="flex justify-between items-center p-2.5 bg-white rounded-xl border border-slate-200/80">
               <span className="font-medium text-slate-700">Government Institutions (IIT/NIT/State):</span>
               <span className="font-bold text-[#0b1a36]">₹1–2L / yr (₹4–8L total)</span>
             </div>
-            <div className="flex justify-between items-center p-2 bg-white rounded-xl border border-slate-100">
+            <div className="flex justify-between items-center p-2.5 bg-white rounded-xl border border-slate-200/80">
               <span className="font-medium text-slate-700">Reputed Private Universities:</span>
               <span className="font-bold text-[#0b1a36]">₹2–4L / yr (₹8–16L total)</span>
             </div>
-            <div className="flex justify-between items-center p-2 bg-white rounded-xl border border-slate-100">
+            <div className="flex justify-between items-center p-2.5 bg-white rounded-xl border border-slate-200/80">
               <span className="font-medium text-slate-700">Target Skill Prep / Practical Portfolios:</span>
               <span className="font-bold text-[#0b1a36]">₹5,000–₹15,000 one-time</span>
             </div>
           </div>
         </div>
 
-        <div className="p-5 bg-[#F8FAFC] border border-slate-200 rounded-2xl space-y-3">
+        <div className="p-5 bg-[#F8FAFC] border border-slate-200/80 rounded-2xl space-y-3">
           <div className="text-xs font-bold uppercase tracking-wider text-slate-700">
             Investment Recovery Timeline
           </div>
           <div className="space-y-2 text-xs text-slate-600">
-            <div className="flex justify-between items-center p-2 bg-white rounded-xl border border-slate-100">
+            <div className="flex justify-between items-center p-2.5 bg-white rounded-xl border border-slate-200/80">
               <span className="font-medium text-slate-700">Government Route:</span>
               <span className="font-bold text-emerald-700">1–2 years of employment</span>
             </div>
-            <div className="flex justify-between items-center p-2 bg-white rounded-xl border border-slate-100">
+            <div className="flex justify-between items-center p-2.5 bg-white rounded-xl border border-slate-200/80">
               <span className="font-medium text-slate-700">Private Route:</span>
               <span className="font-bold text-blue-700">3–4 years of employment</span>
             </div>
@@ -172,7 +169,7 @@ export default function ParentFinancialSection({ financialOutlook }) {
         </div>
       </div>
 
-      {/* Cost & ROI Notice (Strict: Disclaimer only, no fake ROI) */}
+      {/* Cost & ROI Notice */}
       <div className="p-4 bg-amber-50/60 border border-amber-200/80 rounded-2xl space-y-1.5">
         <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
           <Info size={14} />
