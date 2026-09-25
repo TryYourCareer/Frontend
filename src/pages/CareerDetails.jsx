@@ -6,9 +6,10 @@ import {
   Award, BookOpen, Compass, CheckCircle2, ShieldAlert,
   AlertCircle, Sparkles, ChevronRight, Zap, ShieldCheck,
   Cpu, Share2, Check, RefreshCw, Layers, BarChart3,
-  Clock, Flame, HelpCircle
+  Clock, Flame, HelpCircle, Terminal
 } from "lucide-react";
 import SEO from "../components/SEO";
+import { getTrialMissions } from "../services/trialMission";
 import BACKEND_BASE_URL from "../API/BaseURL";
 
 const DEMAND_COLOR = {
@@ -167,7 +168,47 @@ export default function CareerDetails() {
   const [career, setCareer] = useState(null);
   const [allCareers, setAllCareers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currency, setCurrency] = useState("INR"); // INR or USD
+  const [currency, setCurrency] = useState("INR");
+  const [matchingMission, setMatchingMission] = useState(null);
+
+  // Look up matching interactive trial mission if available
+  useEffect(() => {
+    let isMounted = true;
+    async function lookupMission() {
+      if (!career?.title) return;
+      try {
+        const missions = await getTrialMissions();
+        if (isMounted && Array.isArray(missions)) {
+          const titleLower = (career.title || "").toLowerCase().trim();
+          const found = missions.find((m) => {
+            // 1. Prefer canonical career ID match if available
+            if (career.id && m.career_id && String(m.career_id).toLowerCase() === String(career.id).toLowerCase()) {
+              return true;
+            }
+            if (career.id && m.career?.id && String(m.career.id).toLowerCase() === String(career.id).toLowerCase()) {
+              return true;
+            }
+            // 2. Safe fallback to normalized title / career name match
+            const mCareerName = (m.career?.name || m.career_name || "").toLowerCase().trim();
+            const mTitle = (m.title || "").toLowerCase().trim();
+            const mSlug = (m.slug || "").toLowerCase().replace(/-/g, " ").trim();
+            return (
+              (mCareerName && mCareerName === titleLower) ||
+              (mTitle && mTitle.includes(titleLower)) ||
+              (mSlug && mSlug.includes(titleLower)) ||
+              (mCareerName && titleLower.includes(mCareerName))
+            );
+          });
+          setMatchingMission(found || null);
+        }
+      } catch (err) {
+        if (isMounted) setMatchingMission(null);
+      }
+    }
+    lookupMission();
+    return () => { isMounted = false; };
+  }, [career?.title]);
+ // INR or USD
   const [activeTab, setActiveTab] = useState("overview"); // overview, market, myths, pathways, skills
   const [copied, setCopied] = useState(false);
 
@@ -351,6 +392,17 @@ export default function CareerDetails() {
               {copied ? <Check size={13} className="text-emerald-600" /> : <Share2 size={13} />}
               {copied ? "Link Copied!" : "Share"}
             </button>
+            {matchingMission && (
+              <button
+                type="button"
+                onClick={() => navigate(`/trial-mission?missionId=${encodeURIComponent(matchingMission.id)}`)}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white px-4 py-2 text-xs font-bold shadow-md shadow-emerald-600/20 transition-all hover:scale-[1.02] cursor-pointer"
+                data-testid="career-details-trial-mission-cta"
+              >
+                <Terminal size={14} className="text-emerald-200" />
+                <span>Try Hands-on Simulator</span>
+              </button>
+            )}
             <button
               onClick={() => navigate(`/roadmap?career=${encodeURIComponent(career.title)}`)}
               className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white px-4 py-2 text-xs font-bold shadow-md shadow-blue-600/20 transition-all hover:scale-[1.02] cursor-pointer"

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ClipboardList, Newspaper, X, BookOpen,
+  ClipboardList, Newspaper, X, BookOpen, FileText,
   LayoutDashboard, LogIn, LogOut,
   ChevronLeft, ChevronRight, Rocket, MessageSquare,
   Brain,
@@ -10,9 +10,11 @@ const NAV_LINKS = [
   { label: "Dashboard", icon: LayoutDashboard, action: "student-dashboard" },
   { label: "Discovery Test", icon: ClipboardList, action: "assessment" },
   { label: "Career Reality", icon: BookOpen, action: "career-reality" },
-  { label: "Career Intelligence", icon: Brain, action: "career-intelligence" },
+  // { label: "Career Intelligence", icon: Brain, action: "career-intelligence" },
   { label: "Insights Feed", icon: Newspaper, action: "insights-feed" },
   { label: "Trial Mission", icon: Rocket, action: "trial-mission", isLaunchingSoon: true },
+    { label: "Report Engine", icon: FileText, action: "reports" },
+
   { label: "Career Hubs", icon: MessageSquare, action: "career-hubs" },
 ];
 

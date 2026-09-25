@@ -51,7 +51,7 @@ const defaultMockSessionHook = {
   evaluationData: null,
   evaluationLoading: false,
   evaluationError: null,
-  accessedResourceIds: [],
+  accessedResourceIds: new Set(),
   activeResource: null,
   setActiveResource: jest.fn(),
   loading: false,
@@ -184,6 +184,31 @@ describe("Gap #1 — Step 2: Trial Mission completion screen CTA", () => {
     fireEvent.click(dashboardBtn);
     expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
   });
+
+  test("renders View My Decision Report button when career_id is present, and clicking navigates to /careers/:careerId/decision-report", async () => {
+    useTrialMissionSession.mockReturnValue({
+      ...defaultMockSessionHook,
+      session: {
+        id: "test-session-completed",
+        career_id: "software-engineer",
+        state: "SESSION_COMPLETED",
+        mission_title: "Investigate Checkout Abandonment",
+      },
+      evaluationData: {
+        status: "completed",
+        career_id: "software-engineer",
+      },
+    });
+
+    render(<TrialMission />);
+
+    const reportBtn = await screen.findByRole("button", { name: /view my decision report/i });
+    expect(reportBtn).toBeInTheDocument();
+
+    fireEvent.click(reportBtn);
+    expect(mockNavigate).toHaveBeenCalledWith("/careers/software-engineer/decision-report");
+  });
+
 });
 
 describe("Gap #2A — User-facing Trial Mission Activity Summary", () => {
@@ -399,5 +424,56 @@ describe("Trial Mission UI Refinement — Full-Screen Shell & Stopwatch Header",
     expect(screen.getByText("You've completed this Trial Mission")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /explore more missions/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /return to dashboard/i })).toBeInTheDocument();
+  });
+
+  test("renders process_workflow workspace with valid process configuration from mission_configuration", async () => {
+    mockSearchParams = new URLSearchParams("mission=mission-pw-1");
+
+    useTrialMissionSession.mockReturnValue({
+      ...defaultMockSessionHook,
+      session: {
+        id: "session-pw-123",
+        mission_id: "mission-pw-1",
+        state: "PHASE_ACTIVE",
+        current_phase: "investigate",
+        workspace_type: "process_workflow",
+        mission_configuration: {
+          role: { title: "Supply Chain Analyst" },
+          workspace: {
+            type: "process_workflow",
+            process: {
+              process_name: "Supply Chain Bottleneck Pipeline",
+              description: "End-to-end routing analysis and SLA tracking.",
+              stages: [
+                {
+                  id: "stage_1",
+                  name: "Assess Inbound Freight",
+                  owner: "Logistics Lead",
+                  latency_minutes: 20,
+                  sla_target_minutes: 30,
+                  risk_flag: false,
+                  inputs: ["Freight Manifest"],
+                  outputs: ["Inbound Verification"],
+                  dependencies: [],
+                },
+              ],
+            },
+          },
+          resources: [{ id: "res_1", title: "Freight Manifest", type: "document" }],
+          investigation: {
+            completion: { required_findings: 0, required_resource_access: ["res_1"] },
+          },
+        },
+      },
+    });
+
+    render(<TrialMission />);
+
+    const startBtn = await screen.findByRole("button", { name: /start investigating/i });
+    fireEvent.click(startBtn);
+
+    expect(await screen.findByText(/Supply Chain Bottleneck Pipeline/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Assess Inbound Freight/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText(/Process Configuration Unavailable/i)).not.toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Database,
   Check,
@@ -13,7 +13,6 @@ import {
   FileSpreadsheet,
   AlertCircle,
   Info,
-  History,
 } from "lucide-react";
 
 /**
@@ -21,89 +20,154 @@ import {
  * Returns { isTabular: boolean, columns: string[], rows: object[], raw: string }
  */
 export function parseDatasetContent(content, metadata) {
-  if (!content && !metadata?.data) {
-    return { isTabular: false, columns: [], rows: [], raw: "" };
-  }
+  let columns = [];
+  let rows = [];
+  let isTabular = false;
 
-  // If metadata explicitly contains structured data rows
-  if (Array.isArray(metadata?.data) && metadata.data.length > 0) {
-    const rows = metadata.data;
-    const columns = Array.isArray(metadata.columns) && metadata.columns.length > 0
-      ? metadata.columns
-      : Object.keys(rows[0] || {});
-    return { isTabular: true, columns, rows, raw: content || "" };
-  }
+  // 1. Extract columns from metadata if explicitly provided
+  if (metadata && typeof metadata === "object") {
+    if (Array.isArray(metadata.columns) && metadata.columns.length > 0) {
+      columns = metadata.columns
+        .map((c) => (typeof c === "string" ? c : c?.name || c?.id || c?.title || String(c)))
+        .filter(Boolean);
+    } else if (Array.isArray(metadata.fields) && metadata.fields.length > 0) {
+      columns = metadata.fields
+        .map((f) => (typeof f === "string" ? f : f?.name || f?.id || f?.title || String(f)))
+        .filter(Boolean);
+    } else if (metadata.schema && Array.isArray(metadata.schema.fields)) {
+      columns = metadata.schema.fields
+        .map((f) => (typeof f === "string" ? f : f?.name || f?.id || f?.title || String(f)))
+        .filter(Boolean);
+    }
 
-  const trimmed = (typeof content === "string" ? content : "").trim();
-  if (!trimmed) {
-    return { isTabular: false, columns: [], rows: [], raw: "" };
-  }
-
-  // Check for JSON table
-  if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === "object" && parsed[0] !== null) {
-        const columns = Object.keys(parsed[0]);
-        return { isTabular: true, columns, rows: parsed, raw: trimmed };
+    if (Array.isArray(metadata.data) && metadata.data.length > 0) {
+      rows = metadata.data;
+      if (columns.length === 0 && typeof rows[0] === "object" && rows[0] !== null) {
+        columns = Object.keys(rows[0]);
       }
-      if (parsed && Array.isArray(parsed.rows) && parsed.rows.length > 0) {
-        const columns = Array.isArray(parsed.columns) ? parsed.columns : Object.keys(parsed.rows[0] || {});
-        return { isTabular: true, columns, rows: parsed.rows, raw: trimmed };
+      isTabular = true;
+    } else if (Array.isArray(metadata.rows) && metadata.rows.length > 0) {
+      rows = metadata.rows;
+      if (columns.length === 0 && typeof rows[0] === "object" && rows[0] !== null) {
+        columns = Object.keys(rows[0]);
       }
-    } catch {
-      // Not JSON, continue to CSV parsing
+      isTabular = true;
     }
   }
 
-  // Check for CSV format
-  const lines = trimmed.split(/\r?\n/).filter((line) => line.trim().length > 0);
-  if (lines.length >= 2 && lines[0].includes(",")) {
-    const parseCsvLine = (line) => {
-      const result = [];
-      let current = "";
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === "," && !inQuotes) {
-          result.push(current.trim());
-          current = "";
-        } else {
-          current += char;
+  // 2. Parse from content if provided
+  const trimmed = (typeof content === "string" ? content : "").trim();
+
+  if (trimmed) {
+    // Try JSON
+    if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === "object" && parsed[0] !== null) {
+          if (columns.length === 0) columns = Object.keys(parsed[0]);
+          rows = parsed;
+          isTabular = true;
+        } else if (parsed && typeof parsed === "object") {
+          const parsedRows = Array.isArray(parsed.rows) ? parsed.rows : Array.isArray(parsed.data) ? parsed.data : null;
+          if (parsedRows && parsedRows.length > 0) {
+            if (columns.length === 0) {
+              columns = Array.isArray(parsed.columns) ? parsed.columns : Object.keys(parsedRows[0] || {});
+            }
+            rows = parsedRows;
+            isTabular = true;
+          }
+        }
+      } catch {
+        // Not JSON, continue
+      }
+    }
+
+    // Try Markdown table
+    if (!isTabular && trimmed.includes("|") && trimmed.includes("\n")) {
+      const mdLines = trimmed.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.startsWith("|") && l.endsWith("|"));
+      if (mdLines.length >= 2) {
+        const splitMdLine = (line) => line.slice(1, -1).split("|").map((s) => s.trim());
+        const headerCols = splitMdLine(mdLines[0]);
+        const dataStartIndex = (mdLines[1].includes("---") || mdLines[1].includes(":---")) ? 2 : 1;
+        const mdRows = [];
+        for (let i = dataStartIndex; i < mdLines.length; i++) {
+          const vals = splitMdLine(mdLines[i]);
+          const rowObj = {};
+          headerCols.forEach((col, idx) => {
+            let v = vals[idx] !== undefined ? vals[idx] : "";
+            if (v !== "" && !isNaN(Number(v))) v = Number(v);
+            rowObj[col] = v;
+          });
+          mdRows.push(rowObj);
+        }
+        if (headerCols.length > 0) {
+          if (columns.length === 0) columns = headerCols;
+          rows = mdRows;
+          isTabular = true;
         }
       }
-      result.push(current.trim());
-      return result;
-    };
+    }
 
-    const columns = parseCsvLine(lines[0]);
-    if (columns.length > 0) {
-      const rows = [];
-      for (let i = 1; i < lines.length; i++) {
-        const values = parseCsvLine(lines[i]);
-        const row = {};
-        columns.forEach((col, idx) => {
-          let val = values[idx] !== undefined ? values[idx] : "";
-          if (val !== "" && !isNaN(val) && !isNaN(parseFloat(val))) {
-            val = Number(val);
-          } else if (typeof val === "string" && val.toLowerCase() === "true") {
-            val = true;
-          } else if (typeof val === "string" && val.toLowerCase() === "false") {
-            val = false;
+    // Try CSV / TSV / Semicolon
+    if (!isTabular) {
+      const lines = trimmed.split(/\r?\n/).filter((l) => l.trim().length > 0);
+      if (lines.length >= 1) {
+        const firstLine = lines[0];
+        const delimiter = firstLine.includes("\t") ? "\t" : firstLine.includes(";") ? ";" : firstLine.includes(",") ? "," : null;
+        if (delimiter) {
+          const parseDelimitedLine = (line) => {
+            const result = [];
+            let current = "";
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+              const char = line[i];
+              if (char === '"') {
+                inQuotes = !inQuotes;
+              } else if (char === delimiter && !inQuotes) {
+                result.push(current.trim());
+                current = "";
+              } else {
+                current += char;
+              }
+            }
+            result.push(current.trim());
+            return result;
+          };
+
+          const headerCols = parseDelimitedLine(lines[0]);
+          if (headerCols.length > 0) {
+            const csvRows = [];
+            for (let i = 1; i < lines.length; i++) {
+              const values = parseDelimitedLine(lines[i]);
+              const row = {};
+              headerCols.forEach((col, idx) => {
+                let val = values[idx] !== undefined ? values[idx] : "";
+                if (val !== "" && !isNaN(val) && !isNaN(parseFloat(val))) {
+                  val = Number(val);
+                } else if (typeof val === "string" && val.toLowerCase() === "true") {
+                  val = true;
+                } else if (typeof val === "string" && val.toLowerCase() === "false") {
+                  val = false;
+                }
+                row[col] = val;
+              });
+              csvRows.push(row);
+            }
+            if (columns.length === 0) columns = headerCols;
+            rows = csvRows;
+            isTabular = true;
           }
-          row[col] = val;
-        });
-        rows.push(row);
-      }
-      if (rows.length > 0) {
-        return { isTabular: true, columns, rows, raw: trimmed };
+        }
       }
     }
   }
 
-  return { isTabular: false, columns: [], rows: [], raw: trimmed };
+  // If columns exist from metadata/schema
+  if (columns.length > 0) {
+    isTabular = true;
+  }
+
+  return { isTabular, columns, rows, raw: trimmed };
 }
 
 /**
@@ -317,17 +381,17 @@ export function executeAnalyticalOperation(rows, operation, params = {}) {
 
 export default function DataNotebookWorkspace({
   session,
-  manager,
-  briefing,
-  resources,
-  accessedResourceIds,
+  manager = {},
+  briefing = {},
+  resources = [],
+  accessedResourceIds = new Set(),
   activeResource,
   setActiveResource,
   handleAccessResource,
   notesValue,
   setNotesValue,
   notesStatus,
-  findings,
+  findings = [],
   workspaceLoading,
   showFindingForm,
   setShowFindingForm,
@@ -341,8 +405,8 @@ export default function DataNotebookWorkspace({
   setFindingUncertainty,
   handleSaveNewFinding,
   handleCompleteInvestigation,
-  requiredFindingsCount,
-  requiredResourceAccess,
+  requiredFindingsCount = 1,
+  requiredResourceAccess = [],
   actionLoading,
   isInvestigationPhase,
 }) {
@@ -363,20 +427,68 @@ export default function DataNotebookWorkspace({
 
   const [activeAnalysisResult, setActiveAnalysisResult] = useState(null);
   const [analysisError, setAnalysisError] = useState(null);
-  const [analysisHistory, setAnalysisHistory] = useState([]);
+
+  // Resolve active dataset resource object (by ID or matching from resources list)
+  const resolvedActiveResource = useMemo(() => {
+    if (!activeResource) return null;
+    const resId = typeof activeResource === "string" ? activeResource : activeResource?.id;
+    const fromList = Array.isArray(resources) ? resources.find((r) => r.id === resId) : null;
+    if (fromList) {
+      return {
+        ...fromList,
+        ...(typeof activeResource === "object" ? activeResource : {}),
+        content: (typeof activeResource === "object" && activeResource?.content) || fromList.content || "",
+        metadata: {
+          ...(fromList.metadata || {}),
+          ...(typeof activeResource === "object" ? activeResource?.metadata || {} : {}),
+        },
+      };
+    }
+    return typeof activeResource === "object" ? activeResource : null;
+  }, [activeResource, resources]);
 
   // Active resource parsed dataset
   const parsedData = useMemo(() => {
-    if (!activeResource) return { isTabular: false, columns: [], rows: [], raw: "" };
-    return parseDatasetContent(activeResource.content, activeResource.metadata);
-  }, [activeResource]);
+    if (!resolvedActiveResource) return { isTabular: false, columns: [], rows: [], raw: "" };
+    return parseDatasetContent(resolvedActiveResource.content, resolvedActiveResource.metadata);
+  }, [resolvedActiveResource]);
+
+  // Synchronize and reset column selections when active resource or columns change
+  useEffect(() => {
+    if (parsedData.columns.length > 0) {
+      setFilterColumn((prev) => (parsedData.columns.includes(prev) ? prev : parsedData.columns[0]));
+      setAggMetricCol((prev) => (parsedData.columns.includes(prev) ? prev : parsedData.columns[0]));
+      setAggGroupByCol((prev) => (parsedData.columns.includes(prev) ? prev : ""));
+      setCompareSplitCol((prev) => (parsedData.columns.includes(prev) ? prev : parsedData.columns[0]));
+      setCompareMetricCol((prev) =>
+        parsedData.columns.includes(prev) ? prev : parsedData.columns[1] || parsedData.columns[0]
+      );
+    } else {
+      setFilterColumn("");
+      setAggMetricCol("");
+      setAggGroupByCol("");
+      setCompareSplitCol("");
+      setCompareMetricCol("");
+    }
+    setActiveAnalysisResult(null);
+    setAnalysisError(null);
+  }, [parsedData.columns, resolvedActiveResource?.id]);
+
+  const handleSelectResource = (res) => {
+    if (typeof handleAccessResource === "function") {
+      handleAccessResource(res.id);
+    }
+    if (typeof setActiveResource === "function") {
+      setActiveResource(res);
+    }
+  };
 
   // Handle running bounded analytical operation
   const handleRunAnalysis = (e) => {
     if (e) e.preventDefault();
     setAnalysisError(null);
 
-    if (!activeResource) {
+    if (!resolvedActiveResource) {
       setAnalysisError("Select a dataset resource from the left panel first.");
       return;
     }
@@ -414,31 +526,17 @@ export default function DataNotebookWorkspace({
       setActiveAnalysisResult(null);
     } else {
       setActiveAnalysisResult(res);
-      setAnalysisHistory((prev) => [
-        {
-          id: Date.now().toString(),
-          timestamp: new Date().toLocaleTimeString(),
-          resourceTitle: activeResource.title,
-          resourceId: activeResource.id,
-          operation: selectedOp,
-          summary: res.summary,
-          result: res,
-        },
-        ...prev.slice(0, 9), // keep last 10
-      ]);
     }
   };
 
-  // Pin Analysis Result to Finding Form
-  const handlePinAsFinding = (resultToPin) => {
-    const resObj = resultToPin || activeAnalysisResult;
+  const handlePinAsFinding = (resObj) => {
     if (!resObj) return;
 
     setShowFindingForm(true);
-    setFindingResource(activeResource?.id || "");
+    setFindingResource(resolvedActiveResource?.id || "");
     setFindingStatement(resObj.summary || "");
     setFindingExplanation(
-      `Analytical finding derived from ${activeResource?.title || "dataset"}: ${resObj.summary}`
+      `Analytical finding derived from ${resolvedActiveResource?.title || "dataset"}: ${resObj.summary}`
     );
   };
 
@@ -506,17 +604,20 @@ export default function DataNotebookWorkspace({
               ) : (
                 resources.map((res) => {
                   const isAccessed = accessedResourceIds.has(res.id);
-                  const isSelected = activeResource?.id === res.id;
+                  const isSelected = resolvedActiveResource?.id === res.id;
                   const isDataset =
                     res.type === "dataset_table" ||
                     res.type === "dataset" ||
                     res.metadata?.format === "csv" ||
-                    res.metadata?.format === "json";
+                    res.metadata?.format === "json" ||
+                    (Array.isArray(res.metadata?.columns) && res.metadata.columns.length > 0);
 
                   return (
                     <div
                       key={res.id}
-                      className={`rounded-2xl border p-3.5 transition-all duration-200 ${
+                      onClick={() => handleSelectResource(res)}
+                      data-testid={`dataset-card-${res.id}`}
+                      className={`rounded-2xl border p-3.5 transition-all duration-200 cursor-pointer ${
                         isSelected
                           ? "border-blue-500 bg-blue-50/70 shadow-sm ring-1 ring-blue-400"
                           : "border-slate-200 bg-slate-50/80 hover:bg-slate-100"
@@ -545,16 +646,12 @@ export default function DataNotebookWorkspace({
                         <button
                           type="button"
                           disabled={actionLoading}
-                          onClick={() => {
-                            handleAccessResource(res.id);
-                            // Pre-fill filter/agg column defaults if empty
-                            if (!filterColumn && res.metadata?.columns?.length > 0) {
-                              setFilterColumn(res.metadata.columns[0]);
-                              setAggMetricCol(res.metadata.columns[0]);
-                              setCompareSplitCol(res.metadata.columns[0]);
-                            }
+                          data-testid={`inspect-resource-${res.id}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectResource(res);
                           }}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline disabled:opacity-50 transition-colors"
+                          className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline disabled:opacity-50 transition-colors cursor-pointer"
                         >
                           <Eye size={12} /> {isAccessed ? "Inspect" : "Load & Inspect"}
                         </button>
@@ -567,16 +664,16 @@ export default function DataNotebookWorkspace({
           </div>
 
           {/* ACTIVE RESOURCE SCHEMA & PREVIEW */}
-          {activeResource && (
+          {resolvedActiveResource && (
             <div className="rounded-3xl border border-indigo-200 bg-indigo-50/40 p-5 shadow-sm space-y-3">
               <div className="flex items-center justify-between border-b border-indigo-200 pb-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-indigo-950 truncate max-w-[200px]">
-                  {activeResource.title}
+                  {resolvedActiveResource.title}
                 </span>
                 <button
                   type="button"
                   onClick={() => setActiveResource(null)}
-                  className="text-xs text-slate-400 hover:text-slate-600"
+                  className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
                   aria-label="Close active resource"
                 >
                   ✕
@@ -606,7 +703,7 @@ export default function DataNotebookWorkspace({
                     <Info size={12} /> Non-tabular document evidence
                   </div>
                   <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap max-h-48 overflow-y-auto bg-white/80 p-3 rounded-xl border border-slate-200">
-                    {activeResource.content || "No raw content provided."}
+                    {resolvedActiveResource.content || "No raw content provided."}
                   </div>
                 </div>
               )}
@@ -628,7 +725,7 @@ export default function DataNotebookWorkspace({
                 </p>
               </div>
               <span className="rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-1 font-mono text-[11px] font-semibold text-indigo-800">
-                {activeResource ? activeResource.title : "No Dataset Loaded"}
+                {resolvedActiveResource ? resolvedActiveResource.title : "No Dataset Loaded"}
               </span>
             </div>
 
@@ -660,18 +757,22 @@ export default function DataNotebookWorkspace({
                       <label htmlFor="filter-column-select" className="text-xs font-bold text-slate-700">Column</label>
                       <select
                         id="filter-column-select"
+                        data-testid="filter-column-select"
+                        disabled={!resolvedActiveResource || parsedData.columns.length === 0}
                         value={filterColumn || (parsedData.columns[0] || "")}
                         onChange={(e) => setFilterColumn(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       >
-                        {parsedData.columns.length > 0 ? (
+                        {!resolvedActiveResource ? (
+                          <option value="">(Select dataset first)</option>
+                        ) : parsedData.columns.length === 0 ? (
+                          <option value="">(No columns available)</option>
+                        ) : (
                           parsedData.columns.map((c) => (
                             <option key={c} value={c}>
                               {c}
                             </option>
                           ))
-                        ) : (
-                          <option value="">(Select dataset first)</option>
                         )}
                       </select>
                     </div>
@@ -701,15 +802,23 @@ export default function DataNotebookWorkspace({
                       <label htmlFor="agg-metric-select" className="text-xs font-bold text-slate-700">Metric Column</label>
                       <select
                         id="agg-metric-select"
+                        data-testid="agg-metric-select"
+                        disabled={!resolvedActiveResource || parsedData.columns.length === 0}
                         value={aggMetricCol || (parsedData.columns[0] || "")}
                         onChange={(e) => setAggMetricCol(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       >
-                        {parsedData.columns.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
+                        {!resolvedActiveResource ? (
+                          <option value="">(Select dataset first)</option>
+                        ) : parsedData.columns.length === 0 ? (
+                          <option value="">(No columns available)</option>
+                        ) : (
+                          parsedData.columns.map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))
+                        )}
                       </select>
                     </div>
 
@@ -717,9 +826,11 @@ export default function DataNotebookWorkspace({
                       <label htmlFor="agg-group-select" className="text-xs font-bold text-slate-700">Group By (Optional)</label>
                       <select
                         id="agg-group-select"
+                        data-testid="agg-group-select"
+                        disabled={!resolvedActiveResource || parsedData.columns.length === 0}
                         value={aggGroupByCol}
                         onChange={(e) => setAggGroupByCol(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       >
                         <option value="">(None - Overall)</option>
                         {parsedData.columns.map((c) => (
@@ -739,15 +850,23 @@ export default function DataNotebookWorkspace({
                       <label htmlFor="compare-split-select" className="text-xs font-bold text-slate-700">Split Column</label>
                       <select
                         id="compare-split-select"
+                        data-testid="compare-split-select"
+                        disabled={!resolvedActiveResource || parsedData.columns.length === 0}
                         value={compareSplitCol || (parsedData.columns[0] || "")}
                         onChange={(e) => setCompareSplitCol(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       >
-                        {parsedData.columns.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
+                        {!resolvedActiveResource ? (
+                          <option value="">(Select dataset first)</option>
+                        ) : parsedData.columns.length === 0 ? (
+                          <option value="">(No columns available)</option>
+                        ) : (
+                          parsedData.columns.map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))
+                        )}
                       </select>
                     </div>
 
@@ -755,15 +874,23 @@ export default function DataNotebookWorkspace({
                       <label htmlFor="compare-metric-select" className="text-xs font-bold text-slate-700">Metric Column</label>
                       <select
                         id="compare-metric-select"
+                        data-testid="compare-metric-select"
+                        disabled={!resolvedActiveResource || parsedData.columns.length === 0}
                         value={compareMetricCol || (parsedData.columns[0] || "")}
                         onChange={(e) => setCompareMetricCol(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       >
-                        {parsedData.columns.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
+                        {!resolvedActiveResource ? (
+                          <option value="">(Select dataset first)</option>
+                        ) : parsedData.columns.length === 0 ? (
+                          <option value="">(No columns available)</option>
+                        ) : (
+                          parsedData.columns.map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))
+                        )}
                       </select>
                     </div>
                   </>
@@ -818,8 +945,8 @@ export default function DataNotebookWorkspace({
               <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="submit"
-                  disabled={actionLoading || !activeResource || !parsedData.isTabular}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-700 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-800 disabled:opacity-40"
+                  disabled={actionLoading || !resolvedActiveResource || !parsedData.isTabular}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-700 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-800 disabled:opacity-40 cursor-pointer"
                 >
                   <BarChart2 size={13} /> Run Analysis
                 </button>
@@ -844,252 +971,135 @@ export default function DataNotebookWorkspace({
                   <button
                     type="button"
                     onClick={() => handlePinAsFinding(activeAnalysisResult)}
-                    className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 transition-all"
+                    className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 transition-all cursor-pointer"
                   >
                     <BookmarkPlus size={11} /> Pin as Finding
                   </button>
                 </div>
 
-                <p className="text-xs font-medium text-slate-800 bg-white p-2.5 rounded-xl border border-indigo-100">
+                <p className="text-xs font-mono text-indigo-900 leading-relaxed">
                   {activeAnalysisResult.summary}
                 </p>
 
-                {/* RESULT TABLE VIEW */}
-                {activeAnalysisResult.operation === "filter_cohort" && (
-                  <div className="space-y-2">
-                    <div className="text-[11px] font-semibold text-slate-600">
-                      Matched {activeAnalysisResult.data.matchedRows} of {activeAnalysisResult.data.totalRows} rows ({activeAnalysisResult.data.matchPercent}%):
-                    </div>
-                    <div className="max-h-52 overflow-auto rounded-xl border border-slate-200 bg-white">
-                      <table className="min-w-full divide-y divide-slate-200 text-left text-[11px]">
-                        <thead className="bg-slate-50 sticky top-0">
-                          <tr>
-                            {parsedData.columns.slice(0, 6).map((c) => (
-                              <th key={c} className="px-3 py-1.5 font-bold text-slate-700 uppercase">
-                                {c}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {activeAnalysisResult.data.rows.slice(0, 20).map((r, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50/80">
-                              {parsedData.columns.slice(0, 6).map((c) => (
-                                <td key={c} className="px-3 py-1 text-slate-800 font-mono">
-                                  {String(r[c] !== undefined ? r[c] : "")}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    {activeAnalysisResult.data.rows.length > 20 && (
-                      <p className="text-[10px] text-slate-400 italic text-right">
-                        Showing first 20 rows
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {activeAnalysisResult.operation === "aggregate_metrics" && (
-                  <div className="space-y-2">
-                    {activeAnalysisResult.data.groups ? (
-                      <div className="max-h-52 overflow-auto rounded-xl border border-slate-200 bg-white">
-                        <table className="min-w-full divide-y divide-slate-200 text-left text-[11px]">
-                          <thead className="bg-slate-50 sticky top-0">
-                            <tr>
-                              <th className="px-3 py-1.5 font-bold text-slate-700">Cohort / Group</th>
-                              <th className="px-3 py-1.5 font-bold text-slate-700">Count</th>
-                              <th className="px-3 py-1.5 font-bold text-slate-700">Mean</th>
-                              <th className="px-3 py-1.5 font-bold text-slate-700">Median</th>
-                              <th className="px-3 py-1.5 font-bold text-slate-700">Min</th>
-                              <th className="px-3 py-1.5 font-bold text-slate-700">Max</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100">
-                            {activeAnalysisResult.data.groups.map((g, idx) => (
-                              <tr key={idx} className="hover:bg-slate-50/80">
-                                <td className="px-3 py-1 font-bold text-slate-900">{g.group}</td>
-                                <td className="px-3 py-1 font-mono text-slate-700">{g.count}</td>
-                                <td className="px-3 py-1 font-mono text-slate-700">{g.mean}</td>
-                                <td className="px-3 py-1 font-mono text-slate-700">{g.median}</td>
-                                <td className="px-3 py-1 font-mono text-slate-700">{g.min}</td>
-                                <td className="px-3 py-1 font-mono text-slate-700">{g.max}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 bg-white p-3 rounded-xl border border-slate-200 text-xs">
-                        <div>
-                          <span className="text-slate-500 text-[10px] uppercase font-bold">Count</span>
-                          <p className="font-mono font-bold text-slate-800">{activeAnalysisResult.data.stats.count}</p>
-                        </div>
-                        <div>
-                          <span className="text-slate-500 text-[10px] uppercase font-bold">Mean</span>
-                          <p className="font-mono font-bold text-slate-800">{activeAnalysisResult.data.stats.mean}</p>
-                        </div>
-                        <div>
-                          <span className="text-slate-500 text-[10px] uppercase font-bold">Median</span>
-                          <p className="font-mono font-bold text-slate-800">{activeAnalysisResult.data.stats.median}</p>
-                        </div>
-                        <div>
-                          <span className="text-slate-500 text-[10px] uppercase font-bold">Min / Max</span>
-                          <p className="font-mono font-bold text-slate-800">
-                            {activeAnalysisResult.data.stats.min} / {activeAnalysisResult.data.stats.max}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeAnalysisResult.operation === "compare_distributions" && (
-                  <div className="max-h-52 overflow-auto rounded-xl border border-slate-200 bg-white">
-                    <table className="min-w-full divide-y divide-slate-200 text-left text-[11px]">
-                      <thead className="bg-slate-50 sticky top-0">
+                {/* VISUAL BREAKDOWN TABLE */}
+                {selectedOp === "filter_cohort" && activeAnalysisResult.data?.rows && (
+                  <div className="max-h-48 overflow-y-auto rounded-xl border border-indigo-200 bg-white">
+                    <table className="w-full text-left text-[11px] font-mono">
+                      <thead className="bg-indigo-50 text-indigo-900 sticky top-0">
                         <tr>
-                          <th className="px-3 py-1.5 font-bold text-slate-700">Cohort</th>
-                          <th className="px-3 py-1.5 font-bold text-slate-700">Sample Size</th>
-                          <th className="px-3 py-1.5 font-bold text-slate-700">Mean</th>
-                          <th className="px-3 py-1.5 font-bold text-slate-700">Median</th>
-                          <th className="px-3 py-1.5 font-bold text-slate-700">Range (Min - Max)</th>
+                          {parsedData.columns.map((c) => (
+                            <th key={c} className="p-2 border-b border-indigo-100">
+                              {c}
+                            </th>
+                          ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody>
+                        {activeAnalysisResult.data.rows.slice(0, 10).map((r, i) => (
+                          <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                            {parsedData.columns.map((c) => (
+                              <td key={c} className="p-2 text-slate-700">
+                                {r[c] !== undefined ? String(r[c]) : "—"}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {selectedOp === "aggregate_metrics" && activeAnalysisResult.data?.groups && (
+                  <div className="max-h-48 overflow-y-auto rounded-xl border border-indigo-200 bg-white p-2">
+                    <table className="w-full text-left text-[11px] font-mono">
+                      <thead className="bg-indigo-50 text-indigo-900">
                         <tr>
-                          <td className="px-3 py-1 font-bold text-slate-900">{activeAnalysisResult.data.cohortA.name}</td>
-                          <td className="px-3 py-1 font-mono text-slate-700">{activeAnalysisResult.data.cohortA.count}</td>
-                          <td className="px-3 py-1 font-mono text-slate-700">{activeAnalysisResult.data.cohortA.mean}</td>
-                          <td className="px-3 py-1 font-mono text-slate-700">{activeAnalysisResult.data.cohortA.median}</td>
-                          <td className="px-3 py-1 font-mono text-slate-700">
-                            {activeAnalysisResult.data.cohortA.min} - {activeAnalysisResult.data.cohortA.max}
-                          </td>
+                          <th className="p-2">Cohort</th>
+                          <th className="p-2">Count</th>
+                          <th className="p-2">Mean</th>
+                          <th className="p-2">Median</th>
+                          <th className="p-2">Min - Max</th>
                         </tr>
-                        <tr>
-                          <td className="px-3 py-1 font-bold text-slate-900">{activeAnalysisResult.data.cohortB.name}</td>
-                          <td className="px-3 py-1 font-mono text-slate-700">{activeAnalysisResult.data.cohortB.count}</td>
-                          <td className="px-3 py-1 font-mono text-slate-700">{activeAnalysisResult.data.cohortB.mean}</td>
-                          <td className="px-3 py-1 font-mono text-slate-700">{activeAnalysisResult.data.cohortB.median}</td>
-                          <td className="px-3 py-1 font-mono text-slate-700">
-                            {activeAnalysisResult.data.cohortB.min} - {activeAnalysisResult.data.cohortB.max}
-                          </td>
-                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeAnalysisResult.data.groups.map((g, i) => (
+                          <tr key={i} className="border-b border-slate-100 last:border-0">
+                            <td className="p-2 font-bold text-slate-900">{g.group}</td>
+                            <td className="p-2 text-slate-700">{g.count}</td>
+                            <td className="p-2 text-slate-700">{g.mean ?? "—"}</td>
+                            <td className="p-2 text-slate-700">{g.median ?? "—"}</td>
+                            <td className="p-2 text-slate-700">
+                              {g.min !== null ? `${g.min} - ${g.max}` : "—"}
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
                 )}
               </div>
             )}
-
-            {/* ANALYSIS HISTORY LOG */}
-            {analysisHistory.length > 0 && (
-              <div className="pt-3 border-t border-slate-100 space-y-2">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  <History size={12} /> Recent Analyses ({analysisHistory.length})
-                </div>
-                <div className="space-y-1.5 max-h-36 overflow-y-auto">
-                  {analysisHistory.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs"
-                    >
-                      <div className="truncate">
-                        <span className="font-semibold text-slate-800">{item.operation}:</span>{" "}
-                        <span className="text-slate-600 font-mono text-[11px]">{item.summary}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handlePinAsFinding(item.result)}
-                        className="shrink-0 text-[10px] font-bold text-[#7B4A28] hover:underline"
-                      >
-                        Pin Finding
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* WORKING NOTES SCRATCHPAD */}
-          <div className="rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm space-y-3">
-            <div className="flex items-center justify-between">
+          {/* FINDINGS NOTEBOOK / EVIDENCE REGISTER */}
+          <div className="rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h2 className="text-base font-bold text-slate-900">Analysis Scratchpad</h2>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">
+                  Recorded Findings ({findings.length}/{requiredFindingsCount})
+                </h3>
                 <p className="text-xs text-slate-500">
-                  Private analytical notes, hypotheses, and queries (autosaved to server).
+                  Synthesize data insights into permanent investigative findings.
                 </p>
               </div>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 font-mono text-[11px] text-slate-600">
-                {notesValue?.length || 0} chars
-              </span>
-            </div>
 
-            <textarea
-              rows={5}
-              value={notesValue}
-              onChange={(e) => setNotesValue(e.target.value)}
-              placeholder="Record feature hypotheses, distribution shifts, or modeling notes here..."
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-            />
-          </div>
-
-          {/* RECORDED FINDINGS */}
-          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm backdrop-blur-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-slate-900">Recorded Findings</h2>
-                <p className="text-xs text-slate-500">
-                  Evidence-backed empirical findings submitted for your decision.
-                </p>
-              </div>
               {!showFindingForm && (
                 <button
                   type="button"
-                  onClick={() => setShowFindingForm(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 transition-all"
+                  onClick={() => {
+                    setShowFindingForm(true);
+                    setFindingResource(resolvedActiveResource?.id || "");
+                  }}
+                  className="inline-flex items-center gap-1 rounded-xl bg-blue-50 border border-blue-200 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors cursor-pointer"
                 >
-                  <Plus size={14} /> Add Finding
+                  <Plus size={13} /> Add Finding
                 </button>
               )}
             </div>
 
-            {/* FINDING FORM */}
+            {/* NEW FINDING FORM */}
             {showFindingForm && (
               <form
                 onSubmit={handleSaveNewFinding}
-                className="rounded-2xl border border-blue-200 bg-blue-50/40 p-5 space-y-4"
+                className="rounded-2xl border border-blue-200 bg-blue-50/60 p-4 space-y-3"
               >
-                <h3 className="text-xs font-bold uppercase tracking-wider text-blue-900">
-                  Record Empirical Finding
-                </h3>
-
                 <div className="space-y-1">
-                  <label htmlFor="finding-statement-input" className="text-xs font-bold text-slate-700">Statement *</label>
+                  <label htmlFor="finding-statement-input" className="text-xs font-bold text-slate-700">
+                    Finding Statement *
+                  </label>
                   <input
                     id="finding-statement-input"
                     type="text"
                     required
                     value={findingStatement}
                     onChange={(e) => setFindingStatement(e.target.value)}
-                    placeholder="e.g. Model drift detected on iOS cohort with 34% drop in precision."
+                    placeholder="e.g. Model inference latency spikes 40% on iOS v2.1 client devices."
                     className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1">
-                    <label htmlFor="finding-resource-select" className="text-xs font-bold text-slate-700">Supporting Resource</label>
+                    <label htmlFor="finding-resource-select" className="text-xs font-bold text-slate-700">
+                      Attributed Dataset Resource
+                    </label>
                     <select
                       id="finding-resource-select"
                       value={findingResource}
                       onChange={(e) => setFindingResource(e.target.value)}
                       className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
                     >
-                      <option value="">Select Resource...</option>
+                      <option value="">(None)</option>
                       {resources.map((r) => (
                         <option key={r.id} value={r.id}>
                           {r.title}
@@ -1099,20 +1109,24 @@ export default function DataNotebookWorkspace({
                   </div>
 
                   <div className="space-y-1">
-                    <label htmlFor="finding-uncertainty-input" className="text-xs font-bold text-slate-700">Uncertainty Note</label>
+                    <label htmlFor="finding-uncertainty-input" className="text-xs font-bold text-slate-700">
+                      Uncertainty / Confidence Note (Optional)
+                    </label>
                     <input
                       id="finding-uncertainty-input"
                       type="text"
                       value={findingUncertainty}
                       onChange={(e) => setFindingUncertainty(e.target.value)}
-                      placeholder="e.g. Small sample size in European region"
+                      placeholder="e.g. Sample size limited to 500 requests."
                       className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label htmlFor="finding-explanation-input" className="text-xs font-bold text-slate-700">Evidence Explanation</label>
+                  <label htmlFor="finding-explanation-input" className="text-xs font-bold text-slate-700">
+                    Evidence Rationale & Observation *
+                  </label>
                   <textarea
                     id="finding-explanation-input"
                     rows={2}
@@ -1127,14 +1141,14 @@ export default function DataNotebookWorkspace({
                   <button
                     type="button"
                     onClick={() => setShowFindingForm(false)}
-                    className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                    className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={actionLoading || !findingStatement.trim()}
-                    className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all"
+                    className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all cursor-pointer"
                   >
                     {actionLoading ? (
                       <Loader2 size={13} className="animate-spin" />
@@ -1207,6 +1221,20 @@ export default function DataNotebookWorkspace({
             </div>
           </div>
 
+          {/* WORKING NOTES */}
+          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-sm backdrop-blur-sm space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
+              Working Notes
+            </h3>
+            <textarea
+              rows={4}
+              value={notesValue || ""}
+              onChange={(e) => setNotesValue?.(e.target.value)}
+              placeholder="Record feature hypotheses, data anomalies, and calculation scratchnotes..."
+              className="w-full rounded-2xl border border-slate-300 bg-slate-50/60 p-3 text-xs text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none transition"
+            />
+          </div>
+
           {/* COMPLETION CHECKLIST */}
           <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-sm backdrop-blur-sm space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
@@ -1253,7 +1281,7 @@ export default function DataNotebookWorkspace({
                 type="button"
                 disabled={actionLoading || !isInvestigationPhase}
                 onClick={handleCompleteInvestigation}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
               >
                 {actionLoading ? (
                   <>

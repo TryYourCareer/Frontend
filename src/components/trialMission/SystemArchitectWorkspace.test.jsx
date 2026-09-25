@@ -399,7 +399,7 @@ describe("SystemArchitectWorkspace Component", () => {
     expect(onCompletePhase).toHaveBeenCalledTimes(1);
   });
 
-  test("gracefully handles empty or missing optional canvas configuration without crashing", () => {
+  test("gracefully handles empty or missing canvas configuration with Topology Unavailable badge", () => {
     const emptySession = {
       id: "empty-session",
       workspace_type: "system_architect",
@@ -430,5 +430,161 @@ describe("SystemArchitectWorkspace Component", () => {
 
     expect(screen.getByTestId("system-architect-workspace")).toBeInTheDocument();
     expect(screen.getByText("System Topology Canvas")).toBeInTheDocument();
+    expect(screen.getByText("Topology Unavailable")).toBeInTheDocument();
+    expect(screen.queryByText("Topology Valid")).not.toBeInTheDocument();
+    expect(screen.getByText("No Topology Configuration Available")).toBeInTheDocument();
+  });
+
+  test("renders domain-specific Bioprocess Engineer topology canvas, components, and connections", () => {
+    const bioprocessSession = {
+      id: "session-bioprocess-1",
+      workspace_type: "system_architect",
+      mission_configuration: {
+        workspace: {
+          type: "system_architect",
+          canvas: {
+            regions: [
+              { id: "reg_upstream", name: "Upstream Feed & Media Prep", status: "active", location: "upstream" },
+              { id: "reg_core", name: "Core Production Cell", status: "active", location: "core" },
+            ],
+            components: [
+              {
+                id: "comp_seed_feed",
+                name: "Seed Train Inoculum Skid",
+                type: "feed_controller",
+                zone: "Inoculation Suite",
+                region: "reg_upstream",
+                status: "healthy",
+                properties: { operating_state: "nominal" },
+                description: "Primary seed feed.",
+              },
+              {
+                id: "comp_production_vessel",
+                name: "Primary Production Bioreactor (2000L)",
+                type: "bioreactor_vessel",
+                zone: "Production Hall",
+                region: "reg_core",
+                status: "healthy",
+                properties: { working_volume: "2000L" },
+                description: "Scale-up production vessel.",
+              },
+            ],
+            connections: [
+              {
+                id: "conn_seed_to_prod",
+                source: "comp_seed_feed",
+                target: "comp_production_vessel",
+                protocol: "Aseptic Feed Stream",
+                latency_ms: 8,
+                status: "active",
+              },
+            ],
+          },
+          simulations: [],
+          validation_rules: [],
+        },
+      },
+    };
+
+    render(
+      <SystemArchitectWorkspace
+        session={bioprocessSession}
+        manager={mockManager}
+        briefing={mockBriefing}
+        resources={mockResources}
+        accessedResourceIds={new Set(["res-arch-spec"])}
+        activeResource={null}
+        setActiveResource={jest.fn()}
+        handleAccessResource={jest.fn()}
+        notesValue=""
+        setNotesValue={jest.fn()}
+        notesStatus="ready"
+        findings={[]}
+      />
+    );
+
+    // Regions rendered
+    expect(screen.getByText("Upstream Feed & Media Prep")).toBeInTheDocument();
+    expect(screen.getByText("Core Production Cell")).toBeInTheDocument();
+
+    // Components rendered
+    expect(screen.getByText("Seed Train Inoculum Skid")).toBeInTheDocument();
+    expect(screen.getByText("Primary Production Bioreactor (2000L)")).toBeInTheDocument();
+
+    // Connection rendered
+    expect(screen.getByText("comp_seed_feed")).toBeInTheDocument();
+    expect(screen.getByText("comp_production_vessel")).toBeInTheDocument();
+    expect(screen.getByText("8ms")).toBeInTheDocument();
+
+    // Topology Valid
+    expect(screen.getByText("Topology Valid")).toBeInTheDocument();
+  });
+  test("standard TrialMission props handleSaveNewFinding, handleCompleteInvestigation, and actionLoading work properly", () => {
+    const handleSaveNewFinding = jest.fn();
+    const handleCompleteInvestigation = jest.fn();
+
+    const { rerender } = render(
+      <SystemArchitectWorkspace
+        session={mockSession}
+        manager={mockManager}
+        briefing={mockBriefing}
+        resources={mockResources}
+        accessedResourceIds={new Set(["res-arch-spec"])}
+        activeResource={null}
+        setActiveResource={jest.fn()}
+        handleAccessResource={jest.fn()}
+        notesValue=""
+        setNotesValue={jest.fn()}
+        notesStatus="ready"
+        findings={[]}
+        showFindingForm={true}
+        setShowFindingForm={jest.fn()}
+        findingStatement="Critical single point of failure in DB router"
+        setFindingStatement={jest.fn()}
+        handleSaveNewFinding={handleSaveNewFinding}
+        handleCompleteInvestigation={handleCompleteInvestigation}
+        actionLoading={false}
+      />
+    );
+
+    // 1. Pin Finding invokes handleSaveNewFinding
+    const pinBtn = screen.getByRole("button", { name: /Pin Finding/i });
+    expect(pinBtn).not.toBeDisabled();
+    fireEvent.click(pinBtn);
+    expect(handleSaveNewFinding).toHaveBeenCalledTimes(1);
+
+    // 2. Complete Investigation invokes handleCompleteInvestigation
+    const completeBtn = screen.getByRole("button", { name: /Complete Investigation/i });
+    expect(completeBtn).not.toBeDisabled();
+    fireEvent.click(completeBtn);
+    expect(handleCompleteInvestigation).toHaveBeenCalledTimes(1);
+
+    // 3. actionLoading disables buttons and renders loading indicators
+    rerender(
+      <SystemArchitectWorkspace
+        session={mockSession}
+        manager={mockManager}
+        briefing={mockBriefing}
+        resources={mockResources}
+        accessedResourceIds={new Set(["res-arch-spec"])}
+        activeResource={null}
+        setActiveResource={jest.fn()}
+        handleAccessResource={jest.fn()}
+        notesValue=""
+        setNotesValue={jest.fn()}
+        notesStatus="ready"
+        findings={[]}
+        showFindingForm={true}
+        setShowFindingForm={jest.fn()}
+        findingStatement="Critical single point of failure in DB router"
+        setFindingStatement={jest.fn()}
+        handleSaveNewFinding={handleSaveNewFinding}
+        handleCompleteInvestigation={handleCompleteInvestigation}
+        actionLoading={true}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: /Saving Finding.../i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Completing.../i })).toBeDisabled();
   });
 });
