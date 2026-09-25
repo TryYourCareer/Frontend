@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
+  FileCheck2,
   Layers,
   HelpCircle,
   Rocket,
@@ -102,9 +103,21 @@ export default function CareerIntelligenceDetail({
             )}
           </div>
 
-          <div className="flex flex-col sm:items-end gap-2 text-xs font-mono text-slate-500 bg-[#FAF2DB]/40 px-3 py-2 rounded-xl border border-[#e2d9c8]">
-            <span>slug: {career.slug}</span>
-            {career.id && <span className="text-[10px] text-slate-400">id: {career.id}</span>}
+          <div className="flex flex-col sm:items-end gap-2 text-xs">
+            {career.id && (
+              <button
+                type="button"
+                onClick={() => navigate(`/careers/${career.id}/decision-report`)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-[#1E88E5] hover:bg-blue-100 transition border border-blue-200 text-xs font-bold"
+                data-testid="intelligence-decision-report-cta"
+              >
+                <FileCheck2 size={13} />
+                <span>Decision Report</span>
+              </button>
+            )}
+            <div className="font-mono text-slate-500 bg-[#FAF2DB]/40 px-3 py-1.5 rounded-xl border border-[#e2d9c8]">
+              <span>slug: {career.slug}</span>
+            </div>
           </div>
         </div>
 

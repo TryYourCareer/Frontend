@@ -7,6 +7,7 @@ import {
   AlertCircle,
   Pause,
   Play,
+  FileCheck2,
   XCircle,
   Briefcase,
   ShieldAlert,
@@ -151,9 +152,25 @@ export default function TrialMission() {
   const reflectionDirtyRef = useRef(false);
   const reflectionEditVersionRef = useRef(0);
   const reflectionSaveTimerRef = useRef(null);
+  const reflectionInitializedSessionIdRef = useRef(null);
+  const latestReflectionFormRef = useRef({
+    what_felt_natural: "",
+    hardest_part: "",
+    investigate_next: "",
+  });
+
   const memoDirtyRef = useRef(false);
   const memoEditVersionRef = useRef(0);
   const memoSaveTimerRef = useRef(null);
+  const memoInitializedSessionIdRef = useRef(null);
+  const latestMemoFormRef = useRef({
+    executive_summary: "",
+    key_findings: "",
+    evidence: "",
+    recommendation: "",
+    risks_limitations: "",
+    next_steps: "",
+  });
 
   // Memo form state
   const [memoForm, setMemoForm] = useState({
@@ -279,122 +296,97 @@ export default function TrialMission() {
     delay: 800,
   });
 
-  // Sync memo draft from backend outputData
+  // Sync memo draft from backend outputData - only initializes when session changes or when finalised
   useEffect(() => {
+    const isNewSession = session?.id && memoInitializedSessionIdRef.current !== session.id;
+    const isFinalised = outputData?.status === "finalised" || outputData?.status === "submitted";
+
     if (outputData) {
+      // If memo is finalised, keep in sync with server. If unfinalised, only initialize once per session.
+      if (isFinalised || isNewSession || !memoInitializedSessionIdRef.current) {
+        if (memoDirtyRef.current && !isFinalised && !isNewSession) {
+          return;
+        }
+        if (session?.id) {
+          memoInitializedSessionIdRef.current = session.id;
+        }
+        setMemoForm((prev) => {
+          const nextForm = {
+            executive_summary: outputData.executive_summary ?? prev.executive_summary ?? "",
+            key_findings: outputData.key_findings ?? prev.key_findings ?? "",
+            evidence: outputData.evidence ?? prev.evidence ?? "",
+            recommendation: outputData.recommendation ?? prev.recommendation ?? "",
+            risks_limitations: outputData.risks_limitations ?? prev.risks_limitations ?? "",
+            next_steps: outputData.next_steps ?? prev.next_steps ?? "",
+          };
+          latestMemoFormRef.current = nextForm;
+          return nextForm;
+        });
+      }
+    } else if (currentDecision && (isNewSession || !memoInitializedSessionIdRef.current)) {
+      if (session?.id) {
+        memoInitializedSessionIdRef.current = session.id;
+      }
       setMemoForm((prev) => {
         if (memoDirtyRef.current) {
           return prev;
         }
-
-        const nextExecutive = outputData.executive_summary ?? prev.executive_summary ?? "";
-        const nextFindings = outputData.key_findings ?? prev.key_findings ?? "";
-        const nextEvidence = outputData.evidence ?? prev.evidence ?? "";
-        const nextRec = outputData.recommendation ?? prev.recommendation ?? "";
-        const nextRisks = outputData.risks_limitations ?? prev.risks_limitations ?? "";
-        const nextSteps = outputData.next_steps ?? prev.next_steps ?? "";
-
-        if (
-          prev.executive_summary === nextExecutive &&
-          prev.key_findings === nextFindings &&
-          prev.evidence === nextEvidence &&
-          prev.recommendation === nextRec &&
-          prev.risks_limitations === nextRisks &&
-          prev.next_steps === nextSteps
-        ) {
-          return prev;
-        }
-
-        return {
-          executive_summary: nextExecutive,
-          key_findings: nextFindings,
-          evidence: nextEvidence,
-          recommendation: nextRec,
-          risks_limitations: nextRisks,
-          next_steps: nextSteps,
-        };
-      });
-    } else if (currentDecision) {
-      // Pre-fill recommendation from decision if empty
-      setMemoForm((prev) => {
-        if (memoDirtyRef.current) {
-          return prev;
-        }
-
         const nextRec = prev.recommendation || currentDecision.selected_option || "";
         const nextEvidence = prev.evidence || currentDecision.why || "";
         const nextRisks = prev.risks_limitations || currentDecision.uncertainty || "";
-
-        if (
-          prev.recommendation === nextRec &&
-          prev.evidence === nextEvidence &&
-          prev.risks_limitations === nextRisks
-        ) {
-          return prev;
-        }
-
-        return {
+        const nextForm = {
           ...prev,
           recommendation: nextRec,
           evidence: nextEvidence,
           risks_limitations: nextRisks,
         };
+        latestMemoFormRef.current = nextForm;
+        return nextForm;
       });
     }
-  }, [outputData, currentDecision]);
+  }, [outputData, currentDecision, session?.id]);
 
-  // Sync reflection draft from backend reflectionData
+  // Sync reflection draft from backend reflectionData - only initializes once per session
   useEffect(() => {
-    if (reflectionData) {
+    const isNewSession = session?.id && reflectionInitializedSessionIdRef.current !== session.id;
+    const isCompleted = session?.state === "SESSION_COMPLETED" || session?.state === "COMPLETED";
+
+    if (reflectionData && (isCompleted || isNewSession || !reflectionInitializedSessionIdRef.current)) {
+      if (reflectionDirtyRef.current && !isCompleted && !isNewSession) {
+        return;
+      }
+      if (session?.id) {
+        reflectionInitializedSessionIdRef.current = session.id;
+      }
       setReflectionForm((prev) => {
-        if (reflectionDirtyRef.current) {
-          return prev;
-        }
-
-        const nextWhat =
-          reflectionData.what_felt_natural ??
-          reflectionData.natural ??
-          prev.what_felt_natural ??
-          "";
-        const nextHardest =
-          reflectionData.hardest_part ??
-          reflectionData.hardest ??
-          prev.hardest_part ??
-          "";
-        const nextInvestigate =
-          reflectionData.investigate_next ??
-          reflectionData.next_investigation ??
-          prev.investigate_next ??
-          "";
-
-        if (
-          prev.what_felt_natural === nextWhat &&
-          prev.hardest_part === nextHardest &&
-          prev.investigate_next === nextInvestigate
-        ) {
-          return prev;
-        }
-        return {
-          what_felt_natural: nextWhat,
-          hardest_part: nextHardest,
-          investigate_next: nextInvestigate,
+        const nextForm = {
+          what_felt_natural:
+            reflectionData.what_felt_natural ??
+            reflectionData.natural ??
+            prev.what_felt_natural ??
+            "",
+          hardest_part:
+            reflectionData.hardest_part ??
+            reflectionData.hardest ??
+            prev.hardest_part ??
+            "",
+          investigate_next:
+            reflectionData.investigate_next ??
+            reflectionData.next_investigation ??
+            prev.investigate_next ??
+            "",
         };
+        latestReflectionFormRef.current = nextForm;
+        return nextForm;
       });
     }
-  }, [reflectionData]);
+  }, [reflectionData, session?.id, session?.state]);
 
   // Derive allowed actions from server session
   const allowedActions = Array.isArray(session?.allowed_actions)
     ? session.allowed_actions
     : [];
 
-  const canPause =
-    allowedActions.includes("pause") ||
-    allowedActions.includes("transition:SESSION_PAUSED");
-  const canResume =
-    allowedActions.includes("resume") ||
-    allowedActions.includes("transition:PHASE_ACTIVE") ||
-    session?.state === "SESSION_PAUSED";
   const canAbandon =
     allowedActions.includes("abandon") ||
     allowedActions.includes("transition:SESSION_ABANDONED");
@@ -571,16 +563,17 @@ export default function TrialMission() {
     if (!memoDirtyRef.current) return;
 
     const savingVersion = memoEditVersionRef.current;
-    const snapshot = memoForm;
+    const snapshot = { ...latestMemoFormRef.current };
 
     setMemoSaveStatus("saving");
     const timer = setTimeout(async () => {
       try {
         await handleSaveOutput(snapshot);
+        // Only mark clean if no new keystrokes occurred while the save request was in flight
         if (memoEditVersionRef.current === savingVersion) {
           memoDirtyRef.current = false;
+          setMemoSaveStatus("saved");
         }
-        setMemoSaveStatus("saved");
       } catch {
         memoDirtyRef.current = true;
         setMemoSaveStatus("error");
@@ -744,7 +737,11 @@ export default function TrialMission() {
     if (isMemoFinalised) return;
     memoDirtyRef.current = true;
     memoEditVersionRef.current += 1;
-    setMemoForm((prev) => ({ ...prev, [field]: value }));
+    setMemoForm((prev) => {
+      const nextForm = { ...prev, [field]: value };
+      latestMemoFormRef.current = nextForm;
+      return nextForm;
+    });
   };
 
   const handleReviewMemoClick = async () => {
@@ -871,48 +868,48 @@ export default function TrialMission() {
     <div
       className={`cc-trial-mission-root ${
         session
-          ? "fixed inset-0 z-[100] flex h-screen w-screen flex-col overflow-hidden bg-gradient-to-br from-[#f8fafc] via-[#edf3fa] to-[#e4eef9]"
+          ? "fixed inset-0 z-[100] flex h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-gradient-to-br from-[#f8fafc] via-[#edf3fa] to-[#e4eef9]"
           : "min-h-screen bg-gradient-to-br from-[#f7fafd] via-[#eef4fc] to-[#e4eef9] px-4 py-8 text-[#0b1a36] sm:px-8"
       }`}
     >
       {session && (
-        <header className="sticky top-0 z-50 flex shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-6 py-3.5 shadow-sm">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-500/20">
-              <Rocket size={18} />
+        <header className="sticky top-0 z-50 flex shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-3.5 py-2.5 sm:px-6 sm:py-3.5 shadow-sm">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-500/20 shrink-0">
+              <Rocket size={16} className="sm:w-4 sm:h-4" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-base font-black text-[#0b1a36] tracking-tight">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-xs sm:text-base font-black text-[#0b1a36] tracking-tight truncate max-w-[110px] sm:max-w-xs">
                   Trial Mission
                 </span>
                 {session?.state === "SESSION_PAUSED" && (
-                  <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-amber-800">
+                  <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-800 shrink-0">
                     Paused
                   </span>
                 )}
                 {isCompletedStage && (
-                  <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-emerald-800">
-                    Completed
+                  <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800 shrink-0">
+                    Done
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 font-medium">
-                {session?.mission_title || "Competitive Mission Workspace"}
+              <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate max-w-[120px] sm:max-w-xs md:max-w-md">
+                {session?.mission_title || "Mission Workspace"}
                 {currentStageDisplay ? ` • ${currentStageDisplay}` : ""}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Stopwatch with live indicator */}
-            <div className="flex items-center gap-2 rounded-full border border-blue-200/80 bg-blue-50/70 px-4 py-1.5 shadow-inner">
+            <div className="flex items-center gap-1.5 sm:gap-2 rounded-full border border-blue-200/80 bg-blue-50/70 px-2.5 py-1 sm:px-4 sm:py-1.5 shadow-inner">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
               </span>
-              <Timer size={14} className="text-blue-700" />
-              <span className="font-mono text-sm font-black tracking-wider text-blue-900">
+              <Timer size={12} className="text-blue-700 sm:w-3.5 sm:h-3.5" />
+              <span className="font-mono text-xs sm:text-sm font-black tracking-wider text-blue-900">
                 {formattedStopwatch || "00:00"}
               </span>
             </div>
@@ -924,18 +921,20 @@ export default function TrialMission() {
                   type="button"
                   onClick={handleResume}
                   disabled={actionLoading}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-sm"
+                  className="inline-flex items-center gap-1 rounded-lg sm:rounded-xl border border-emerald-300 bg-emerald-50 px-2.5 py-1 sm:px-3.5 sm:py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-sm"
+                  title="Resume simulation"
                 >
-                  <Play size={13} /> Resume
+                  <Play size={12} /> <span className="hidden sm:inline">Resume</span>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={handlePause}
                   disabled={actionLoading}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors shadow-sm"
+                  className="inline-flex items-center gap-1 rounded-lg sm:rounded-xl border border-slate-200 bg-slate-100 px-2.5 py-1 sm:px-3.5 sm:py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors shadow-sm"
+                  title="Pause simulation"
                 >
-                  <Pause size={13} /> Pause
+                  <Pause size={12} /> <span className="hidden sm:inline">Pause</span>
                 </button>
               )
             )}
@@ -944,16 +943,16 @@ export default function TrialMission() {
             <button
               type="button"
               onClick={resetToCatalog}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all shadow-sm"
+              className="inline-flex items-center gap-1 rounded-lg sm:rounded-xl border border-slate-200 bg-white px-2.5 py-1 sm:px-3.5 sm:py-1.5 text-xs font-bold text-slate-600 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all shadow-sm"
               title="Exit Trial Mission workspace"
             >
-              <LogOut size={13} /> Exit
+              <LogOut size={12} /> <span className="hidden sm:inline">Exit</span>
             </button>
           </div>
         </header>
       )}
 
-      <div className={session ? "flex-1 overflow-y-auto px-4 py-6 sm:px-8" : ""}>
+      <div className={session ? "flex-1 overflow-y-auto px-3 py-4 sm:px-8 sm:py-6 overscroll-contain" : ""}>
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Navigation & Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -979,26 +978,6 @@ export default function TrialMission() {
                 </span>
 
                 {/* Lifecycle Controls */}
-                {canPause && (
-                  <button
-                    type="button"
-                    disabled={actionLoading}
-                    onClick={handlePause}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
-                  >
-                    <Pause size={13} /> Pause
-                  </button>
-                )}
-                {canResume && (
-                  <button
-                    type="button"
-                    disabled={actionLoading}
-                    onClick={handleResume}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-amber-700 disabled:opacity-50"
-                  >
-                    <Play size={13} /> Resume
-                  </button>
-                )}
                 {canAbandon && (
                   <button
                     type="button"
@@ -1220,6 +1199,7 @@ export default function TrialMission() {
                               type="button"
                               disabled={actionLoading}
                               onClick={() => startSession(m.id)}
+                              aria-label="Try this career"
                               className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
                             >
                               {actionLoading && startingMissionId === m.id ? (
@@ -1432,6 +1412,7 @@ export default function TrialMission() {
             WorkspaceComponent ? (
               <WorkspaceComponent
                 session={session}
+                configuration={config}
                 manager={manager}
                 briefing={briefing}
                 resources={resources}
@@ -1483,31 +1464,32 @@ export default function TrialMission() {
             <div className="space-y-6">
               <form
                 onSubmit={handleRecommendationSubmit}
-                className="rounded-3xl border border-slate-200/80 bg-white/95 p-8 shadow-sm sm:p-10 backdrop-blur-sm space-y-8"
+                className="rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-8 md:p-10 shadow-sm backdrop-blur-sm space-y-6 sm:space-y-8"
               >
-                <div className="space-y-2 border-b border-slate-100 pb-6">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-blue-900">
-                    <Sparkles size={12} className="text-blue-600" /> Decision Formulation Stage
+                <div className="space-y-2 border-b border-slate-100 pb-4 sm:pb-6">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-900">
+                    <Sparkles size={12} className="text-blue-600" /> Step 2: Decision Formulation
                   </span>
-                  <h1 className="text-3xl font-black text-[#0b1a36]">
+                  <h1 className="text-xl sm:text-3xl font-black text-[#0b1a36]">
                     Make your recommendation
                   </h1>
-                  <p className="text-xs text-slate-600">
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                     Based on the evidence you've investigated, select an intervention to propose to {manager.name || "Sarah"}.
                   </p>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Select Intervention *
+                {/* 1. Decision Options */}
+                <div className="space-y-2.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                    1. Select Recommended Intervention *
                   </label>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-2.5 sm:grid-cols-2">
                     {decisionOptions.map((opt) => {
                       const isSelected = selectedOption === opt;
                       return (
                         <label
                           key={opt}
-                          className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition-all duration-200 select-none ${
+                          className={`flex items-start gap-3 rounded-xl sm:rounded-2xl border p-3.5 sm:p-4 cursor-pointer transition-all duration-200 select-none ${
                             isSelected
                               ? "border-blue-500 bg-blue-50/70 shadow-sm ring-1 ring-blue-400"
                               : "border-slate-200 bg-slate-50/60 hover:bg-slate-100/80"
@@ -1519,32 +1501,19 @@ export default function TrialMission() {
                             value={opt}
                             checked={isSelected}
                             onChange={(e) => setSelectedOption(e.target.value)}
-                            className="mt-0.5 text-blue-600 focus:ring-blue-500"
+                            className="mt-0.5 text-blue-600 focus:ring-blue-500 shrink-0"
                           />
-                          <span className="text-xs font-bold text-[#0b1a36]">{opt}</span>
+                          <span className="text-xs sm:text-sm font-bold text-[#0b1a36] leading-snug">{opt}</span>
                         </label>
                       );
                     })}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Why are you recommending this? *
-                  </label>
-                  <textarea
-                    required
-                    rows={4}
-                    value={whyRecommendation}
-                    onChange={(e) => setWhyRecommendation(e.target.value)}
-                    placeholder="Explain the root cause identified in the data and why this intervention will solve it..."
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-xs text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Which evidence supports your recommendation?
+                {/* 2. Supporting Evidence */}
+                <div className="space-y-2.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                    2. Supporting Evidence & Findings
                   </label>
                   <div className="grid gap-2 sm:grid-cols-2">
                     {resources.map((res) => {
@@ -1562,33 +1531,50 @@ export default function TrialMission() {
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => toggleEvidenceResource(res.id, false)}
-                            className="rounded text-blue-600 focus:ring-blue-500"
+                            className="rounded text-blue-600 focus:ring-blue-500 shrink-0"
                           />
-                          <span>{res.title}</span>
+                          <span className="truncate">{res.title}</span>
                         </label>
                       );
                     })}
                   </div>
                 </div>
 
+                {/* 3. Strategic Rationale */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                    What are you uncertain about?
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                    3. Why are you recommending this? *
                   </label>
                   <textarea
+                    required
                     rows={3}
-                    value={recommendationUncertainty}
-                    onChange={(e) => setRecommendationUncertainty(e.target.value)}
-                    placeholder="Highlight any data gaps, latency dependencies, or alternative explanations..."
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-xs text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    value={whyRecommendation}
+                    onChange={(e) => setWhyRecommendation(e.target.value)}
+                    placeholder="Explain the root cause identified in the data and why this intervention will solve it..."
+                    className="w-full rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 sm:p-4 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                {/* 4. Uncertainty & Risks */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                    4. What are you uncertain about? (Optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={recommendationUncertainty}
+                    onChange={(e) => setRecommendationUncertainty(e.target.value)}
+                    placeholder="Highlight any data gaps, latency dependencies, or alternative explanations..."
+                    className="w-full rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 sm:p-4 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
+
+                {/* Submit Decision Action */}
+                <div className="pt-3 sm:pt-4 border-t border-slate-100 flex justify-end">
                   <button
                     type="submit"
                     disabled={actionLoading || !selectedOption || !whyRecommendation.trim()}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-40"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-40"
                   >
                     {actionLoading ? (
                       <>
@@ -1621,7 +1607,7 @@ export default function TrialMission() {
                       Simulating Decision Impact...
                     </h3>
                     <p className="text-xs text-slate-600">
-                      Evaluating consequences and preparing incoming reality event telemetry.
+                      Evaluating consequences and preparing incoming reality event data.
                     </p>
                   </div>
                 </div>
@@ -1702,7 +1688,7 @@ export default function TrialMission() {
                         onClick={handleKeepRecommendation}
                         className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50 transition-colors"
                       >
-                        Keep my original recommendation
+                        Keep my recommendation
                       </button>
                       <button
                         type="button"
@@ -1866,7 +1852,7 @@ export default function TrialMission() {
             /* 7. Professional Memo / Output Workflow                     */
             /* ========================================================= */
             <div className="space-y-6">
-              <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-8 shadow-sm sm:p-10 backdrop-blur-sm space-y-8">
+              <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-8 md:p-10 shadow-sm backdrop-blur-sm space-y-6 sm:space-y-8">
                 {/* Header & Status Banner */}
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-6">
                   <div className="space-y-1">
@@ -2138,7 +2124,7 @@ export default function TrialMission() {
                           rows={4}
                           value={reflectionForm[canonicalKey] ?? reflectionForm[q.id] ?? ""}
                           onChange={(e) => handleReflectionFieldChange(q.id, e.target.value)}
-                          placeholder="Share your reflections and takeaways..."
+                          placeholder="Share your analytical reflections..."
                           className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-xs text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                         />
                       </div>
@@ -2166,8 +2152,8 @@ export default function TrialMission() {
             /* 9. Mission Completion Screen                              */
             /* ========================================================= */
             <div className="space-y-6">
-              <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-8 shadow-sm sm:p-10 backdrop-blur-sm space-y-8">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 border-b border-slate-100 pb-6">
+              <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-8 md:p-10 shadow-sm backdrop-blur-sm space-y-6 sm:space-y-8">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 border-b border-slate-100 pb-4 sm:pb-6">
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 shadow-sm">
                     <CheckCircle2 size={36} />
                   </div>
@@ -2484,29 +2470,55 @@ export default function TrialMission() {
                     </div>
                   )}
 
-                <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={resetToCatalog}
-                    className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-                  >
-                    Explore More Missions
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/dashboard")}
-                    className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-                  >
-                    Return to Dashboard
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/career-decision")}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 transition-all"
-                  >
-                    View Career Decision & Fit
-                  </button>
-                </div>
+{(() => {
+                  const activeMission = missions?.find((m) => m.id === session?.mission_id);
+                  const completedCareerId =
+                    session?.career_id ||
+                    session?.career?.id ||
+                    evaluationData?.career_id ||
+                    evaluationData?.career?.id ||
+                    activeMission?.career_id ||
+                    activeMission?.career?.id ||
+                    session?.mission?.career_id ||
+                    session?.mission?.career?.id;
+
+                  return (
+                    <div className="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3">
+                      <button
+                        type="button"
+                        onClick={resetToCatalog}
+                        className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+                      >
+                        Explore More Missions
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/dashboard")}
+                        className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+                      >
+                        Return to Dashboard
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/career-decision")}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+                      >
+                        View Career Decision & Fit
+                      </button>
+                      {completedCareerId ? (
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/careers/${completedCareerId}/decision-report`)}
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-[#1E88E5] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-all"
+                          data-testid="view-decision-report-button"
+                        >
+                          <FileCheck2 size={16} />
+                          <span>View My Decision Report</span>
+                        </button>
+                      ) : null}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           ) : null}

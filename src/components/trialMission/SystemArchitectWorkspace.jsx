@@ -124,11 +124,18 @@ export default function SystemArchitectWorkspace({
   setFindingCategory,
   findingResourceRef,
   setFindingResourceRef,
+  handleSaveNewFinding,
   handleCreateFinding,
-  creatingFinding,
+  handleCompleteInvestigation,
   onCompletePhase,
+  actionLoading = false,
+  creatingFinding,
   completingInvestigation,
 }) {
+  const onSaveFinding = handleSaveNewFinding || handleCreateFinding;
+  const onComplete = handleCompleteInvestigation || onCompletePhase;
+  const isSavingFinding = creatingFinding ?? actionLoading;
+  const isCompleting = completingInvestigation ?? actionLoading;
   // Extract workspace configuration from session
   const workspaceConfig = useMemo(() => {
     return (
@@ -368,16 +375,23 @@ export default function SystemArchitectWorkspace({
             </div>
 
             {/* Validation Pill */}
-            <span
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                validationReport.passed
-                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                  : "bg-amber-50 text-amber-800 border border-amber-200"
-              }`}
-            >
-              {validationReport.passed ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-              {validationReport.passed ? "Topology Valid" : "Constraint Warning"}
-            </span>
+            {components.length === 0 ? (
+              <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                <AlertCircle size={12} />
+                Topology Unavailable
+              </span>
+            ) : (
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  validationReport.passed
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-amber-50 text-amber-800 border border-amber-200"
+                }`}
+              >
+                {validationReport.passed ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+                {validationReport.passed ? "Topology Valid" : "Constraint Warning"}
+              </span>
+            )}
           </div>
 
           {/* Active Simulation Notification Banner */}
@@ -402,7 +416,17 @@ export default function SystemArchitectWorkspace({
 
           {/* Topology Canvas Graph View */}
           <div className="rounded-2xl border border-slate-200 bg-slate-900/5 p-4 min-h-[380px] space-y-4">
-            {Object.entries(componentsByRegion).map(([regId, { region, components: regComponents }]) => {
+            {components.length === 0 ? (
+              <div className="flex flex-col items-center justify-center min-h-[340px] text-center p-6 space-y-2 text-slate-400">
+                <Layers size={36} className="opacity-40 text-slate-500" />
+                <p className="text-xs font-bold text-slate-600">No Topology Configuration Available</p>
+                <p className="text-[11px] text-slate-500 max-w-sm">
+                  This system architect mission does not have active component topology or boundary definitions configured.
+                </p>
+              </div>
+            ) : (
+              <>
+                {Object.entries(componentsByRegion).map(([regId, { region, components: regComponents }]) => {
               if (regComponents.length === 0) return null;
 
               return (
@@ -530,6 +554,8 @@ export default function SystemArchitectWorkspace({
                   })}
                 </div>
               </div>
+            )}
+              </>
             )}
           </div>
 
@@ -704,11 +730,11 @@ export default function SystemArchitectWorkspace({
               />
               <button
                 type="button"
-                disabled={creatingFinding || !findingStatement?.trim()}
-                onClick={handleCreateFinding}
+                disabled={isSavingFinding || !findingStatement?.trim()}
+                onClick={onSaveFinding}
                 className="w-full rounded-xl bg-indigo-600 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50 transition"
               >
-                {creatingFinding ? "Saving Finding..." : "Pin Finding"}
+                {isSavingFinding ? "Saving Finding..." : "Pin Finding"}
               </button>
             </div>
           )}
@@ -739,11 +765,11 @@ export default function SystemArchitectWorkspace({
 
           <button
             type="button"
-            disabled={!allRequiredAccessed || completingInvestigation}
-            onClick={onCompletePhase}
+            disabled={!allRequiredAccessed || isCompleting}
+            onClick={onComplete}
             className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
           >
-            {completingInvestigation ? (
+            {isCompleting ? (
               <>
                 <Loader2 size={16} className="animate-spin" /> Completing...
               </>

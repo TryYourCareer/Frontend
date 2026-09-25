@@ -322,7 +322,24 @@ export function useTrialMissionSession(initialSessionId = null) {
       setSession(updated);
       return updated;
     } catch (err) {
-      setError(err?.message || "Failed to complete investigation.");
+      // Convert backend 400 validation failures and exceptions into human-readable messages
+      let message = "Please complete the required investigation tasks before continuing.";
+      const rawMsg = err?.message || "";
+      if (typeof rawMsg === "string" && rawMsg.trim()) {
+        if (
+          rawMsg.includes("requires at least") ||
+          rawMsg.includes("requires inspecting") ||
+          rawMsg.includes("investigation phase") ||
+          rawMsg.includes("requirements are")
+        ) {
+          message = rawMsg;
+        } else if (rawMsg.includes("Network Error") || rawMsg.includes("Failed to fetch")) {
+          message = "Network error while completing investigation. Please check your connection and try again.";
+        } else if (!rawMsg.startsWith("HTTP") && !rawMsg.startsWith("{") && !rawMsg.startsWith("[")) {
+          message = rawMsg;
+        }
+      }
+      setError(message);
       throw err;
     } finally {
       setActionLoading(false);

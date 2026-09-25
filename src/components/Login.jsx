@@ -191,14 +191,24 @@ export default function Login({ onBack }) {
 
         {/* Disclaimer */}
         <p className="mt-6 text-center text-xs leading-normal text-slate-400">
-          By creating this account, you agree to our{" "}
-          <button type="button" className="font-semibold text-slate-600 hover:underline">
+          By continuing you are accepting the{" "}
+          <a
+            href="/support/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-slate-600 hover:underline"
+          >
             Privacy Policy
-          </button>{" "}
-          &{" "}
-          <button type="button" className="font-semibold text-slate-600 hover:underline">
-            Cookie Policy
-          </button>
+          </a>{" "}
+          and{" "}
+          <a
+            href="/support/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-slate-600 hover:underline"
+          >
+            Terms of Service
+          </a>
           .
         </p>
       </div>

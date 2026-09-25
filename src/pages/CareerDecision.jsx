@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
+  FileCheck2,
   Compass, 
   RefreshCw, 
   AlertCircle, 
@@ -533,12 +534,22 @@ export default function CareerDecision() {
                       <button
                         type="button"
                         onClick={() => setSelectedCandidate(candidate)}
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-white text-slate-800 hover:bg-slate-50 border border-slate-300 transition shadow-sm"
+                        className="w-1/2 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-white text-slate-800 hover:bg-slate-50 border border-slate-300 transition shadow-sm"
                         aria-label={`View evidence details for ${candidate.career_title || candidate.career_code}`}
                         data-testid={`select-candidate-${candidate.career_id}`}
                       >
-                        <span>View Evidence Details</span>
+                        <span>Evidence Details</span>
                         <ChevronRight size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/careers/${candidate.career_id}/decision-report`)}
+                        className="w-1/2 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-blue-50 text-[#1E88E5] hover:bg-blue-100 transition border border-blue-200"
+                        aria-label={`View Decision Report for ${candidate.career_title || candidate.career_code}`}
+                        data-testid={`decision-report-btn-${candidate.career_id}`}
+                      >
+                        <FileCheck2 size={13} />
+                        <span>Decision Report</span>
                       </button>
                     </div>
                   </div>
@@ -849,14 +860,27 @@ export default function CareerDecision() {
                 </div>
 
                 {/* Recommendation Interpretation Banner */}
-                <div className="bg-[#FAF6EC] p-4 rounded-xl border border-[#e8dfc8] space-y-1">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                    <Info size={14} className="text-[#7B4A28]" />
-                    <span>Evidence Assessment</span>
+                <div className="bg-[#FAF6EC] p-4 rounded-xl border border-[#e8dfc8] space-y-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                      <Info size={14} className="text-[#7B4A28]" />
+                      <span>Evidence Assessment</span>
+                    </div>
+                    <p className="text-xs text-slate-700 leading-relaxed italic">
+                      {getRecommendationCategoryMessage(selectedCandidate.recommendation_category)}
+                    </p>
                   </div>
-                  <p className="text-xs text-slate-700 leading-relaxed italic">
-                    {getRecommendationCategoryMessage(selectedCandidate.recommendation_category)}
-                  </p>
+                  {selectedCandidate.career_id && (
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/careers/${selectedCandidate.career_id}/decision-report`)}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E88E5] text-white text-xs sm:text-sm font-bold shadow-sm hover:bg-blue-600 transition"
+                      data-testid="drawer-decision-report-button"
+                    >
+                      <FileCheck2 size={15} />
+                      <span>View Comprehensive Decision Report</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Metrics Breakdown */}

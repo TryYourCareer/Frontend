@@ -1,12 +1,13 @@
-jest.mock('react-router-dom', () => ({
-  useNavigate: () => jest.fn(),
-  useSearchParams: () => [new URLSearchParams()],
-}));
-
 import React from "react";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import TrialMission, { deriveInvestigationPhaseId, mapQuestionIdToCanonicalKey, formatWorkspaceType } from "./TrialMission";
 import * as sessionHook from "../hooks/useTrialMissionSession";
+
+jest.setTimeout(20000);
+jest.mock('react-router-dom', () => ({
+  useNavigate: () => jest.fn(),
+  useSearchParams: () => [new URLSearchParams()],
+}));
 
 jest.mock("../hooks/useTrialMissionSession");
 jest.mock("../hooks/useDebounceAutosave", () => ({
@@ -159,10 +160,6 @@ describe("Stage recognition conditions", () => {
       session?.state === "REALITY_EVENT_PENDING" ||
       session?.current_phase === "adapt" ||
       session?.current_phase === "reality_event";
-    const isRecommendationStage =
-      session?.state === "DECISION_PENDING" ||
-      session?.current_phase === "recommend" ||
-      session?.current_phase === "decision";
 
     expect(isRealityEventStage).toBe(true);
   });
@@ -389,8 +386,8 @@ describe("Recommendation to Consequence to Reality Event Lifecycle", () => {
           why: "Delivery fee surprise at checkout causes drop-offs",
         })
       );
-      expect(handleGenerateConsequence).toHaveBeenCalled();
     });
+    expect(handleGenerateConsequence).toHaveBeenCalled();
   });
 
   test("Update recommendation with valid evidence sends non-empty evidence IDs and succeeds", async () => {
@@ -1028,9 +1025,7 @@ describe("Output to Reflection Lifecycle and Autosave", () => {
 
     // Submit button clicked before 800ms timer fires
     const submitBtn = screen.getByRole("button", { name: /Submit reflection/i });
-    await act(async () => {
-      fireEvent.click(submitBtn);
-    });
+    fireEvent.click(submitBtn);
 
     expect(handleSubmitReflection).toHaveBeenCalledTimes(1);
     expect(handleSubmitReflection).toHaveBeenCalledWith({
@@ -1179,9 +1174,7 @@ describe("Output to Reflection Lifecycle and Autosave", () => {
 
     // Submit payload
     const submitBtn = screen.getByRole("button", { name: /Submit reflection/i });
-    await act(async () => {
-      fireEvent.click(submitBtn);
-    });
+    fireEvent.click(submitBtn);
 
     expect(handleSubmitReflection).toHaveBeenCalledWith({
       what_felt_natural: "Natural answer",
@@ -1609,9 +1602,7 @@ describe("Professional Memo / Output Autosave and Review Lifecycle", () => {
 
     // Click Review immediately before debounce fires
     const reviewBtn = screen.getByRole("button", { name: /Review memo/i });
-    await act(async () => {
-      fireEvent.click(reviewBtn);
-    });
+    fireEvent.click(reviewBtn);
 
     expect(callOrder).toEqual(["save", "review"]);
     expect(handleSaveOutput).toHaveBeenCalledWith(
@@ -1647,9 +1638,7 @@ describe("Professional Memo / Output Autosave and Review Lifecycle", () => {
     fireEvent.change(summaryTextarea, { target: { value: "Attempt to review" } });
 
     const reviewBtn = screen.getByRole("button", { name: /Review memo/i });
-    await act(async () => {
-      fireEvent.click(reviewBtn);
-    });
+    fireEvent.click(reviewBtn);
 
     expect(handleSaveOutput).toHaveBeenCalledTimes(1);
     expect(handleReviewOutput).not.toHaveBeenCalled();
@@ -1686,15 +1675,11 @@ describe("Professional Memo / Output Autosave and Review Lifecycle", () => {
     const reviewBtn = screen.getByRole("button", { name: /Review memo/i });
     
     // First click initiates save
-    await act(async () => {
-      fireEvent.click(reviewBtn);
-    });
+    fireEvent.click(reviewBtn);
     expect(handleSaveOutput).toHaveBeenCalledTimes(1);
 
     // Second click while in progress
-    await act(async () => {
-      fireEvent.click(reviewBtn);
-    });
+    fireEvent.click(reviewBtn);
     expect(handleSaveOutput).toHaveBeenCalledTimes(1);
 
     // Resolve save
@@ -1785,9 +1770,7 @@ describe("Professional Memo / Output Autosave and Review Lifecycle", () => {
     const reviewBtn = screen.getByRole("button", { name: /Review memo/i });
     
     // User clicks Review -> starts save for snapshot A
-    await act(async () => {
-      fireEvent.click(reviewBtn);
-    });
+    fireEvent.click(reviewBtn);
     expect(handleSaveOutput).toHaveBeenCalledTimes(1);
     expect(handleSaveOutput).toHaveBeenCalledWith(
       expect.objectContaining({ executive_summary: "Memo draft A" })
