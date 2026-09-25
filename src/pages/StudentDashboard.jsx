@@ -4,11 +4,12 @@ import {
   Sparkles, ArrowRight, BarChart3, Target,
   Award, Compass, Layers,
   ChevronRight, ArrowUpRight,
-  Check, MessageSquare, Terminal, SlidersHorizontal
+  Check, MessageSquare, Terminal, SlidersHorizontal, FileText
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { getUserProfile } from "../services/users";
 import { getCareerFitReport } from "../services/discoveryTest";
+import { getLatestRecommendation } from "../services/decisionIntelligence";
 import SEO from "../components/SEO";
 import BACKEND_BASE_URL from "../API/BaseURL";
 
@@ -61,6 +62,36 @@ export default function StudentDashboard() {
   const [userData, setUserData] = useState(() => authProfile || null);
   const [reportData, setReportData] = useState(null);
   const [featuredCareers, setFeaturedCareers] = useState([]);
+  const [decisionReports, setDecisionReports] = useState([]);
+  const [decisionReportsLoading, setDecisionReportsLoading] = useState(false);
+  const [decisionReportsError, setDecisionReportsError] = useState(null);
+
+  // Load evaluated decision recommendations / completed reports
+  useEffect(() => {
+    let isMounted = true;
+    async function loadDecisionReports() {
+      setDecisionReportsLoading(true);
+      setDecisionReportsError(null);
+      try {
+        const snap = await getLatestRecommendation();
+        const list = snap?.ranked_career_candidates || snap?.candidates || [];
+        if (isMounted && Array.isArray(list)) {
+          setDecisionReports(list);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setDecisionReports([]);
+        }
+      } finally {
+        if (isMounted) {
+          setDecisionReportsLoading(false);
+        }
+      }
+    }
+    loadDecisionReports();
+    return () => { isMounted = false; };
+  }, []);
+
 
   // Sync auth profile
   useEffect(() => {
@@ -73,7 +104,7 @@ export default function StudentDashboard() {
         .then((u) => setUserData(u))
         .catch(() => setUserData(null));
     }
-  }, [authProfile, authLoading, userData]);
+  }, [authProfile, authLoading]);
 
   // Load real assessment report and featured database careers
   useEffect(() => {
@@ -357,6 +388,108 @@ export default function StudentDashboard() {
 
           {/* LEFT COLUMN: Top Matches, Dimensional Traits & Simulation Sandbox */}
           <div className="space-y-8">
+
+
+            {/* Your Decision Reports Section */}
+            <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 sm:p-7 shadow-xs space-y-5" data-testid="dashboard-decision-reports-section">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-0.5">
+                    Evidence-Backed Dossiers
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-lg bg-blue-50 text-blue-600">
+                      <Award size={16} />
+                    </span>
+                    <h3 className="font-sans text-lg sm:text-xl font-bold text-[#0b1a36]">
+                      Your Decision Reports
+                    </h3>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/career-decision")}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition self-start sm:self-auto cursor-pointer"
+                  data-testid="explore-all-decisions-link"
+                >
+                  Explore All Decisions <ChevronRight size={13} />
+                </button>
+              </div>
+
+              {decisionReportsLoading ? (
+                <div className="py-6 flex items-center justify-center text-xs text-slate-400">
+                  Loading decision reports...
+                </div>
+              ) : decisionReportsError ? (
+                <div className="py-4 text-xs text-slate-500 bg-slate-50 rounded-2xl p-4">
+                  Unable to load decision reports.
+                </div>
+              ) : decisionReports.length === 0 ? (
+                <div className="py-6 text-center rounded-2xl bg-slate-50/70 border border-dashed border-slate-200 p-6 space-y-2" data-testid="dashboard-reports-empty-state">
+                  <p className="text-xs font-semibold text-slate-700">No Completed Decision Reports Yet</p>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                    Complete a hands-on Trial Mission to generate your personalized, evidence-based Decision Report.
+                  </p>
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/trial-mission")}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                      data-testid="start-trial-from-empty-reports"
+                    >
+                      <Terminal size={13} />
+                      <span>Start Trial Simulation</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="dashboard-reports-grid">
+                  {decisionReports.map((rep) => (
+                    <div
+                      key={rep.career_id}
+                      className="rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-4 sm:p-5 flex flex-col justify-between hover:border-blue-300 hover:shadow-md transition group"
+                      data-testid={`dashboard-report-card-${rep.career_id}`}
+                    >
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                            {rep.recommendation_category ? rep.recommendation_category.replace(/_/g, " ") : "Decision Report"}
+                          </span>
+                          {(rep.fit_tier || rep.fit_index !== undefined) && (
+                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                              {rep.fit_tier ? rep.fit_tier.replace(/_/g, " ") : `${Math.round(rep.fit_index)}% Fit`}
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition line-clamp-1">
+                            {rep.career_title || rep.career_name || rep.career_code || "Career Decision Report"}
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
+                            {rep.rationale_summary || "Comprehensive decision dossier backed by your simulation evidence."}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="pt-3.5 mt-3.5 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-slate-500">
+                          Canonical Report
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/careers/${rep.career_id}/decision-report`)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0b1a36] hover:bg-blue-600 text-white text-xs font-bold transition shadow-2xs cursor-pointer"
+                          data-testid={`view-decision-report-${rep.career_id}`}
+                        >
+                          <span>View Report</span>
+                          <ArrowUpRight size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Top Recommended Career Matches Section */}
             <div className="rounded-3xl border border-[#D3E3F5] bg-white p-6 sm:p-7 shadow-xs space-y-5">

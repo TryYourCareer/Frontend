@@ -184,6 +184,31 @@ describe("Gap #1 — Step 2: Trial Mission completion screen CTA", () => {
     fireEvent.click(dashboardBtn);
     expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
   });
+
+  test("renders View My Decision Report button when career_id is present, and clicking navigates to /careers/:careerId/decision-report", async () => {
+    useTrialMissionSession.mockReturnValue({
+      ...defaultMockSessionHook,
+      session: {
+        id: "test-session-completed",
+        career_id: "software-engineer",
+        state: "SESSION_COMPLETED",
+        mission_title: "Investigate Checkout Abandonment",
+      },
+      evaluationData: {
+        status: "completed",
+        career_id: "software-engineer",
+      },
+    });
+
+    render(<TrialMission />);
+
+    const reportBtn = await screen.findByRole("button", { name: /view my decision report/i });
+    expect(reportBtn).toBeInTheDocument();
+
+    fireEvent.click(reportBtn);
+    expect(mockNavigate).toHaveBeenCalledWith("/careers/software-engineer/decision-report");
+  });
+
 });
 
 describe("Gap #2A — User-facing Trial Mission Activity Summary", () => {

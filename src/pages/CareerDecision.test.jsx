@@ -270,6 +270,40 @@ describe("Phase 15G — Career Decision Product: C1-C5 Tests", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/trial-mission");
   });
 
+
+  test("C1-6. Candidate cards render Decision Report CTA navigating to /careers/:careerId/decision-report", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    const reportBtn = screen.getByTestId("decision-report-btn-career-1");
+    expect(reportBtn).toBeInTheDocument();
+    fireEvent.click(reportBtn);
+    expect(mockNavigate).toHaveBeenCalledWith("/careers/career-1/decision-report");
+  });
+
+  test("C1-7. Career detail drawer renders Comprehensive Decision Report CTA", async () => {
+    const { getLatestRecommendation } = require("../services/decisionIntelligence");
+    getLatestRecommendation.mockResolvedValueOnce(MOCK_SNAPSHOT_MULTI_CANDIDATES);
+
+    render(<CareerDecision />);
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-snapshot-view")).toBeInTheDocument();
+    });
+
+    const selectBtn = screen.getByTestId("select-candidate-career-1");
+    fireEvent.click(selectBtn);
+
+    const drawerReportBtn = screen.getByTestId("drawer-decision-report-button");
+    expect(drawerReportBtn).toBeInTheDocument();
+    fireEvent.click(drawerReportBtn);
+    expect(mockNavigate).toHaveBeenCalledWith("/careers/career-1/decision-report");
+  });
+
   test("C1-5. Displays error state on API failure and enables retry", async () => {
     const { getLatestRecommendation } = require("../services/decisionIntelligence");
     getLatestRecommendation.mockRejectedValueOnce(new Error("Network connection failure"));

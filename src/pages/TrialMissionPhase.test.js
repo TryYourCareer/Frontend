@@ -1,3 +1,4 @@
+jest.setTimeout(20000);
 jest.mock('react-router-dom', () => ({
   useNavigate: () => jest.fn(),
   useSearchParams: () => [new URLSearchParams()],

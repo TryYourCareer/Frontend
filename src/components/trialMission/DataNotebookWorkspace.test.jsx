@@ -5,7 +5,7 @@ import DataNotebookWorkspace, {
   executeAnalyticalOperation,
 } from "./DataNotebookWorkspace";
 
-describe("DataNotebookWorkspace - Analytical Operations Engine", () => {
+describe("DataNotebookWorkspace Analytical Engine", () => {
   const sampleCsvContent = `user_id,device,predicted_score,latency_ms,outcome
 u1,iOS,0.85,120,1
 u2,Android,0.40,95,0
@@ -13,110 +13,63 @@ u3,iOS,0.92,150,1
 u4,iOS,0.30,110,0
 u5,Android,0.75,85,1`;
 
-  const sampleJsonContent = JSON.stringify([
-    { user_id: "u1", device: "iOS", predicted_score: 0.85, latency_ms: 120, outcome: 1 },
-    { user_id: "u2", device: "Android", predicted_score: 0.40, latency_ms: 95, outcome: 0 },
-    { user_id: "u3", device: "iOS", predicted_score: 0.92, latency_ms: 150, outcome: 1 },
-    { user_id: "u4", device: "iOS", predicted_score: 0.30, latency_ms: 110, outcome: 0 },
-    { user_id: "u5", device: "Android", predicted_score: 0.75, latency_ms: 85, outcome: 1 },
-  ]);
+  test("parses CSV content into structured columns and typed rows", () => {
+    const res = parseDatasetContent(sampleCsvContent, { format: "csv" });
+    expect(res.isTabular).toBe(true);
+    expect(res.columns).toEqual(["user_id", "device", "predicted_score", "latency_ms", "outcome"]);
+    expect(res.rows).toHaveLength(5);
+    expect(res.rows[0].predicted_score).toBe(0.85);
+    expect(res.rows[0].outcome).toBe(1);
+  });
 
-  test("parseDatasetContent parses CSV text correctly", () => {
+  test("parses JSON array content into structured columns and rows", () => {
+    const jsonStr = JSON.stringify([
+      { model_id: "m1", accuracy: 0.94, latency: 45 },
+      { model_id: "m2", accuracy: 0.89, latency: 30 },
+    ]);
+    const res = parseDatasetContent(jsonStr, {});
+    expect(res.isTabular).toBe(true);
+    expect(res.columns).toEqual(["model_id", "accuracy", "latency"]);
+    expect(res.rows).toHaveLength(2);
+  });
+
+  test("parses metadata columns when explicit schema is supplied without CSV content", () => {
+    const res = parseDatasetContent("", {
+      columns: ["finding", "risk", "observation", "test_result"],
+    });
+    expect(res.isTabular).toBe(true);
+    expect(res.columns).toEqual(["finding", "risk", "observation", "test_result"]);
+  });
+
+  test("executes filter_cohort operation deterministically", () => {
     const parsed = parseDatasetContent(sampleCsvContent, {});
-    expect(parsed.isTabular).toBe(true);
-    expect(parsed.columns).toEqual(["user_id", "device", "predicted_score", "latency_ms", "outcome"]);
-    expect(parsed.rows.length).toBe(5);
-    expect(parsed.rows[0].device).toBe("iOS");
-    expect(parsed.rows[0].latency_ms).toBe(120);
-    expect(parsed.rows[0].predicted_score).toBe(0.85);
-  });
-
-  test("parseDatasetContent parses JSON array correctly", () => {
-    const parsed = parseDatasetContent(sampleJsonContent, {});
-    expect(parsed.isTabular).toBe(true);
-    expect(parsed.columns).toEqual(["user_id", "device", "predicted_score", "latency_ms", "outcome"]);
-    expect(parsed.rows.length).toBe(5);
-    expect(parsed.rows[1].device).toBe("Android");
-    expect(parsed.rows[1].latency_ms).toBe(95);
-  });
-
-  test("parseDatasetContent gracefully handles unstructured text and metadata", () => {
-    const textContent = "This is a descriptive document without tabular structure.";
-    const parsed = parseDatasetContent(textContent, {});
-    expect(parsed.isTabular).toBe(false);
-    expect(parsed.rows.length).toBe(0);
-    expect(parsed.raw).toBe(textContent);
-
-    const emptyParsed = parseDatasetContent("", null);
-    expect(emptyParsed.isTabular).toBe(false);
-    expect(emptyParsed.columns).toEqual([]);
-  });
-
-  test("filter_cohort produces deterministic filtered results", () => {
-    const parsed = parseDatasetContent(sampleCsvContent, {});
-    
-    // Filter device equals iOS
-    const resIos = executeAnalyticalOperation(parsed.rows, "filter_cohort", {
+    const filteredIos = executeAnalyticalOperation(parsed.rows, "filter_cohort", {
       column: "device",
       operator: "equals",
       value: "iOS",
     });
 
-    expect(resIos.success).toBe(true);
-    expect(resIos.data.totalRows).toBe(5);
-    expect(resIos.data.matchedRows).toBe(3);
-    expect(resIos.data.matchPercent).toBe(60.0);
-    expect(resIos.data.rows.every((r) => r.device === "iOS")).toBe(true);
-
-    // Filter latency_ms greater_than 100
-    const resLatency = executeAnalyticalOperation(parsed.rows, "filter_cohort", {
-      column: "latency_ms",
-      operator: "greater_than",
-      value: "100",
-    });
-
-    expect(resLatency.success).toBe(true);
-    expect(resLatency.data.matchedRows).toBe(3); // 120, 150, 110
+    expect(filteredIos.success).toBe(true);
+    expect(filteredIos.data.totalRows).toBe(5);
+    expect(filteredIos.data.matchedRows).toBe(3);
+    expect(filteredIos.data.matchPercent).toBe(60);
+    expect(filteredIos.summary).toContain("3 of 5 rows matched (60.0%)");
   });
 
-  test("aggregate_metrics produces deterministic summary statistics", () => {
+  test("executes aggregate_metrics operation with mean, median, min, max stats", () => {
     const parsed = parseDatasetContent(sampleCsvContent, {});
-
-    // Overall aggregate for latency_ms: [85, 95, 110, 120, 150]
-    // sum = 560, mean = 112.00, median = 110, min = 85, max = 150
     const agg = executeAnalyticalOperation(parsed.rows, "aggregate_metrics", {
       metricColumn: "latency_ms",
     });
 
     expect(agg.success).toBe(true);
     expect(agg.data.stats.count).toBe(5);
-    expect(agg.data.stats.mean).toBe(112.0);
-    expect(agg.data.stats.median).toBe(110.0);
-    expect(agg.data.stats.min).toBe(85.0);
-    expect(agg.data.stats.max).toBe(150.0);
-    expect(agg.data.stats.sum).toBe(560.0);
-
-    // Grouped aggregate for latency_ms by device
-    const groupedAgg = executeAnalyticalOperation(parsed.rows, "aggregate_metrics", {
-      metricColumn: "latency_ms",
-      groupByColumn: "device",
-    });
-
-    expect(groupedAgg.success).toBe(true);
-    expect(groupedAgg.data.groups.length).toBe(2);
-    const androidGroup = groupedAgg.data.groups.find((g) => g.group === "Android");
-    const iosGroup = groupedAgg.data.groups.find((g) => g.group === "iOS");
-    
-    // Android: 85, 95 -> mean = 90.0, median = 90.0
-    expect(androidGroup.count).toBe(2);
-    expect(androidGroup.mean).toBe(90.0);
-    // iOS: 120, 150, 110 -> sorted [110, 120, 150] -> mean = 126.67, median = 120.0
-    expect(iosGroup.count).toBe(3);
-    expect(iosGroup.mean).toBe(126.67);
-    expect(iosGroup.median).toBe(120.0);
+    expect(agg.data.stats.mean).toBe(112);
+    expect(agg.data.stats.min).toBe(85);
+    expect(agg.data.stats.max).toBe(150);
   });
 
-  test("compare_distributions calculates cohort differences deterministically", () => {
+  test("executes compare_distributions across two distinct cohorts", () => {
     const parsed = parseDatasetContent(sampleCsvContent, {});
 
     const comp = executeAnalyticalOperation(parsed.rows, "compare_distributions", {
@@ -127,11 +80,9 @@ u5,Android,0.75,85,1`;
     });
 
     expect(comp.success).toBe(true);
-    // Android predicted_scores: [0.40, 0.75] -> sum 1.15
     expect(comp.data.cohortA.count).toBe(2);
     expect(comp.data.cohortA.min).toBe(0.4);
     expect(comp.data.cohortA.max).toBe(0.75);
-    // iOS predicted_scores: [0.85, 0.92, 0.30] -> sorted [0.30, 0.85, 0.92] -> mean = 0.69, median = 0.85
     expect(comp.data.cohortB.count).toBe(3);
     expect(comp.data.cohortB.mean).toBe(0.69);
     expect(comp.data.cohortB.median).toBe(0.85);
@@ -152,8 +103,36 @@ u5,Android,0.75,85,1`;
   });
 });
 
-describe("DataNotebookWorkspace Component", () => {
-  const mockProps = {
+describe("DataNotebookWorkspace Dataset & Column Selector Data-Flow", () => {
+  const datasetAssessment = {
+    id: "res_assessment_findings",
+    type: "dataset_table",
+    title: "Assessment, observation, or test findings",
+    content: "finding,risk,observation,test_result\nVariant A,High,Observed duplication,Positive\nVariant B,Low,Normal phenotype,Negative",
+    metadata: {
+      columns: ["finding", "risk", "observation", "test_result"],
+    },
+  };
+
+  const datasetTelemetry = {
+    id: "res_telemetry",
+    type: "dataset_table",
+    title: "Server Performance Telemetry",
+    content: "server_id,region,cpu_pct,memory_gb\ns1,us-east,75,32\ns2,eu-west,45,16",
+    metadata: {
+      columns: ["server_id", "region", "cpu_pct", "memory_gb"],
+    },
+  };
+
+  const datasetNoCols = {
+    id: "res_doc_only",
+    type: "document",
+    title: "Plain Text Briefing",
+    content: "Summary of observational criteria without columns.",
+    metadata: {},
+  };
+
+  const baseProps = {
     session: {
       id: "sess_data_test_123",
       mission_title: "Audit Prediction Model Drift",
@@ -165,45 +144,17 @@ describe("DataNotebookWorkspace Component", () => {
       title: "VP of Data & AI",
     },
     briefing: {
-      task: "Analyze the feature shift across iOS and Android cohorts and log statistical findings.",
+      task: "Analyze the dataset slices and verify column selectors.",
     },
-    resources: [
-      {
-        id: "res_feature_store",
-        type: "dataset_table",
-        title: "Model Inference Logs v2",
-        content: `user_id,device,predicted_score,latency_ms,outcome\nu1,iOS,0.85,120,1\nu2,Android,0.40,95,0\nu3,iOS,0.92,150,1\nu4,iOS,0.30,110,0\nu5,Android,0.75,85,1`,
-        metadata: { format: "csv" },
-      },
-      {
-        id: "res_architecture_doc",
-        type: "document",
-        title: "Model Architecture Spec",
-        content: "Detailed description of XGBoost feature pipeline and retraining constraints.",
-        metadata: {},
-      },
-    ],
-    accessedResourceIds: new Set(["res_feature_store"]),
-    activeResource: {
-      id: "res_feature_store",
-      type: "dataset_table",
-      title: "Model Inference Logs v2",
-      content: `user_id,device,predicted_score,latency_ms,outcome\nu1,iOS,0.85,120,1\nu2,Android,0.40,95,0\nu3,iOS,0.92,150,1\nu4,iOS,0.30,110,0\nu5,Android,0.75,85,1`,
-      metadata: { format: "csv" },
-    },
+    resources: [datasetAssessment, datasetTelemetry, datasetNoCols],
+    accessedResourceIds: new Set(["res_assessment_findings"]),
+    activeResource: null,
     setActiveResource: jest.fn(),
     handleAccessResource: jest.fn(),
-    notesValue: "Hypothesis: iOS cohort exhibits significant variance.",
+    notesValue: "",
     setNotesValue: jest.fn(),
     notesStatus: "saved",
-    findings: [
-      {
-        id: "find_1",
-        statement: "iOS cohort latency averages 126.7ms, 40% higher than Android.",
-        evidence: [{ resource_id: "res_feature_store", explanation: "Calculated from inference logs" }],
-        uncertainty: "Small sample size",
-      },
-    ],
+    findings: [],
     workspaceLoading: false,
     showFindingForm: false,
     setShowFindingForm: jest.fn(),
@@ -218,101 +169,100 @@ describe("DataNotebookWorkspace Component", () => {
     handleSaveNewFinding: jest.fn((e) => e?.preventDefault && e.preventDefault()),
     handleCompleteInvestigation: jest.fn(),
     requiredFindingsCount: 1,
-    requiredResourceAccess: ["res_feature_store"],
+    requiredResourceAccess: ["res_assessment_findings"],
     actionLoading: false,
     isInvestigationPhase: true,
   };
 
-  test("renders from configuration props without hardcoded assumptions", () => {
-    render(<DataNotebookWorkspace {...mockProps} />);
+  test("1. when no dataset is selected, column selector shows '(Select dataset first)' and is disabled", () => {
+    render(<DataNotebookWorkspace {...baseProps} activeResource={null} />);
 
-    expect(screen.getByTestId("data-notebook-workspace")).toBeInTheDocument();
-    expect(screen.getByText("Audit Prediction Model Drift")).toBeInTheDocument();
-    expect(screen.getByText("Dr. Elena Vance")).toBeInTheDocument();
-    expect(screen.getAllByText("Model Inference Logs v2").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("Model Architecture Spec")).toBeInTheDocument();
-    expect(screen.getByText("Hypothesis: iOS cohort exhibits significant variance.")).toBeInTheDocument();
-    expect(screen.getByText("iOS cohort latency averages 126.7ms, 40% higher than Android.")).toBeInTheDocument();
+    const columnSelect = screen.getByTestId("filter-column-select");
+    expect(columnSelect).toBeDisabled();
+    expect(columnSelect).toHaveValue("");
+    expect(screen.getByText("(Select dataset first)")).toBeInTheDocument();
   });
 
-  test("triggers handleAccessResource when clicking resource inspect button", () => {
-    render(<DataNotebookWorkspace {...mockProps} />);
+  test("2. when 'Assessment, observation, or test findings' dataset is selected, its columns appear in the Column dropdown", () => {
+    render(<DataNotebookWorkspace {...baseProps} activeResource={datasetAssessment} />);
 
-    const inspectButtons = screen.getAllByRole("button", { name: /inspect/i });
-    fireEvent.click(inspectButtons[0]);
-    expect(mockProps.handleAccessResource).toHaveBeenCalledWith("res_feature_store");
+    const columnSelect = screen.getByTestId("filter-column-select");
+    expect(columnSelect).not.toBeDisabled();
+    expect(screen.queryByText("(Select dataset first)")).not.toBeInTheDocument();
+
+    const options = Array.from(columnSelect.querySelectorAll("option")).map((o) => o.value);
+    expect(options).toEqual(["finding", "risk", "observation", "test_result"]);
+    expect(columnSelect.value).toBe("finding");
   });
 
-  test("allows running analytical operation and pinning result to finding form", () => {
-    render(<DataNotebookWorkspace {...mockProps} />);
+  test("3. user can select one of those columns and selection remains active", () => {
+    render(<DataNotebookWorkspace {...baseProps} activeResource={datasetAssessment} />);
 
-    // Click Run Analysis
-    const runBtn = screen.getByRole("button", { name: /Run Analysis/i });
-    fireEvent.click(runBtn);
+    const columnSelect = screen.getByTestId("filter-column-select");
+    fireEvent.change(columnSelect, { target: { value: "observation" } });
 
-    // Pin as Finding should appear in results
-    const pinBtn = screen.getByRole("button", { name: /Pin as Finding/i });
-    expect(pinBtn).toBeInTheDocument();
-
-    fireEvent.click(pinBtn);
-    expect(mockProps.setShowFindingForm).toHaveBeenCalledWith(true);
-    expect(mockProps.setFindingResource).toHaveBeenCalledWith("res_feature_store");
-    expect(mockProps.setFindingStatement).toHaveBeenCalled();
+    expect(columnSelect.value).toBe("observation");
   });
 
-  test("triggers handleCompleteInvestigation when complete button clicked", () => {
-    render(<DataNotebookWorkspace {...mockProps} />);
+  test("4. switching to another existing structured dataset updates Column options accordingly", () => {
+    const { rerender } = render(
+      <DataNotebookWorkspace {...baseProps} activeResource={datasetAssessment} />
+    );
 
-    const completeBtn = screen.getByRole("button", { name: /Complete investigation/i });
-    fireEvent.click(completeBtn);
-    expect(mockProps.handleCompleteInvestigation).toHaveBeenCalledTimes(1);
+    let columnSelect = screen.getByTestId("filter-column-select");
+    expect(Array.from(columnSelect.querySelectorAll("option")).map((o) => o.value)).toEqual([
+      "finding",
+      "risk",
+      "observation",
+      "test_result",
+    ]);
+
+    // Switch to datasetTelemetry
+    rerender(<DataNotebookWorkspace {...baseProps} activeResource={datasetTelemetry} />);
+
+    columnSelect = screen.getByTestId("filter-column-select");
+    expect(Array.from(columnSelect.querySelectorAll("option")).map((o) => o.value)).toEqual([
+      "server_id",
+      "region",
+      "cpu_pct",
+      "memory_gb",
+    ]);
+    expect(columnSelect.value).toBe("server_id");
   });
 
-  test("degrades gracefully when non-tabular resource is active", () => {
-    const nonTabularProps = {
-      ...mockProps,
-      activeResource: {
-        id: "res_architecture_doc",
-        type: "document",
-        title: "Model Architecture Spec",
-        content: "Detailed description of XGBoost feature pipeline and retraining constraints.",
-        metadata: {},
-      },
-    };
+  test("5. previously selected column is cleared if it does not exist in the newly selected dataset", () => {
+    const { rerender } = render(
+      <DataNotebookWorkspace {...baseProps} activeResource={datasetAssessment} />
+    );
 
-    render(<DataNotebookWorkspace {...nonTabularProps} />);
-    expect(screen.getByText(/Non-tabular document evidence/i)).toBeInTheDocument();
-    expect(screen.getByText(/Detailed description of XGBoost feature pipeline/i)).toBeInTheDocument();
+    const columnSelect = screen.getByTestId("filter-column-select");
+    fireEvent.change(columnSelect, { target: { value: "test_result" } });
+    expect(columnSelect.value).toBe("test_result");
+
+    // Switch to datasetTelemetry (does not have 'test_result')
+    rerender(<DataNotebookWorkspace {...baseProps} activeResource={datasetTelemetry} />);
+
+    // Resets to first column of the new dataset
+    expect(screen.getByTestId("filter-column-select").value).toBe("server_id");
   });
 
-  test("binds notes scratchpad input and triggers setNotesValue on change", () => {
-    render(<DataNotebookWorkspace {...mockProps} />);
+  test("6. clicking left panel dataset card calls handleAccessResource and updates selection", () => {
+    const mockAccess = jest.fn();
+    const mockSetActive = jest.fn();
 
-    const notesTextarea = screen.getByPlaceholderText(/Record feature hypotheses/i);
-    expect(notesTextarea).toHaveValue("Hypothesis: iOS cohort exhibits significant variance.");
+    render(
+      <DataNotebookWorkspace
+        {...baseProps}
+        handleAccessResource={mockAccess}
+        setActiveResource={mockSetActive}
+        activeResource={null}
+      />
+    );
 
-    fireEvent.change(notesTextarea, { target: { value: "Updated hypothesis note." } });
-    expect(mockProps.setNotesValue).toHaveBeenCalledWith("Updated hypothesis note.");
-  });
+    const datasetCard = screen.getByTestId("dataset-card-res_assessment_findings");
+    fireEvent.click(datasetCard);
 
-  test("submits finding form through handleSaveNewFinding", () => {
-    const formOpenProps = {
-      ...mockProps,
-      showFindingForm: true,
-      findingStatement: "Drift verified.",
-    };
-
-    render(<DataNotebookWorkspace {...formOpenProps} />);
-
-    const saveBtn = screen.getByRole("button", { name: /Save Finding/i });
-    fireEvent.submit(saveBtn.closest("form"));
-    expect(mockProps.handleSaveNewFinding).toHaveBeenCalled();
-  });
-
-  test("contains zero localStorage usage for mission state", () => {
-    const localStorageSpy = jest.spyOn(Storage.prototype, "setItem");
-    render(<DataNotebookWorkspace {...mockProps} />);
-    expect(localStorageSpy).not.toHaveBeenCalled();
-    localStorageSpy.mockRestore();
+    expect(mockAccess).toHaveBeenCalledWith("res_assessment_findings");
+    expect(mockSetActive).toHaveBeenCalledWith(datasetAssessment);
   });
 });

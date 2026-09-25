@@ -23,8 +23,10 @@ import SupportInfo from "./pages/SupportInfo";
 import CareerReport from "./pages/CareerReport";
 import CareerIntelligence from "./pages/CareerIntelligence";
 import CareerDecision from "./pages/CareerDecision";
-
-
+import DecisionReport from "./pages/DecisionReport";
+import ParentReport from "./pages/ParentReport";
+import SharedParentReport from "./pages/SharedParentReport";
+import ReportsHub from "./pages/ReportsHub";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
@@ -32,8 +34,6 @@ import careersData from "./data/clearcareers_data.json";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
 import CookieConsent from "./components/CookieConsent";
-
-
 
 function AppLoadingSkeleton() {
   return (
@@ -43,25 +43,16 @@ function AppLoadingSkeleton() {
         <div className="h-7 w-28 rounded-lg bg-[#e8dfc8]" />
         <div className="flex-1" />
         <div className="h-7 w-20 rounded-full bg-[#e8dfc8]" />
-        <div className="h-7 w-7 rounded-full bg-[#e8dfc8]" />
       </div>
-      {/* Content skeleton */}
-      <div className="flex-1 px-6 py-10 mx-auto w-full max-w-6xl space-y-8 animate-pulse">
-        <div className="space-y-3">
-          <div className="h-4 w-24 rounded-full bg-[#e8dfc8]" />
-          <div className="h-8 w-64 rounded-xl bg-[#e8dfc8]" />
-          <div className="h-3 w-80 rounded-full bg-[#e8dfc8]" />
+      {/* Hero skeleton */}
+      <div className="max-w-4xl mx-auto w-full px-6 py-12 flex flex-col gap-6 animate-pulse">
+        <div className="h-10 w-2/3 rounded-xl bg-[#e8dfc8]" />
+        <div className="h-5 w-1/2 rounded-lg bg-[#ede5d4]" />
+        <div className="grid grid-cols-3 gap-4 mt-6">
+          <div className="h-32 rounded-2xl bg-[#ede5d4]" />
+          <div className="h-32 rounded-2xl bg-[#ede5d4]" />
+          <div className="h-32 rounded-2xl bg-[#ede5d4]" />
         </div>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 rounded-2xl bg-[#f0e9d8] border border-[#e8dfc8]" />
-          ))}
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className="h-44 rounded-2xl bg-[#f0e9d8] border border-[#e8dfc8]" />
-          <div className="h-44 rounded-2xl bg-[#f0e9d8] border border-[#e8dfc8]" />
-        </div>
-        <div className="h-48 rounded-2xl bg-[#f0e9d8] border border-[#e8dfc8]" />
       </div>
     </div>
   );
@@ -95,6 +86,8 @@ function AppShell({ children }) {
     if (path === "/trial-mission") return "trial-mission";
     if (path.startsWith("/career-intelligence")) return "career-intelligence";
     if (path === "/career-decision") return "career-decision";
+    if (path === "/reports" || path === "/reports/") return "reports";
+    if (path.startsWith("/careers/") && (path.includes("/decision-report") || path.includes("/parent-report"))) return "career-decision";
     return "landing";
   }, [location.pathname]);
 
@@ -113,7 +106,6 @@ function AppShell({ children }) {
       .slice(0, 8);
   }, [careers, careerSearchQuery]);
 
-
   const handleNavigate = (action) => {
     const map = {
       landing: "/",
@@ -129,6 +121,8 @@ function AppShell({ children }) {
       "trial-mission": "/trial-mission",
       "career-intelligence": "/career-intelligence",
       "career-decision": "/career-decision",
+      reports: "/reports",
+      "report-engine": "/reports",
     };
     if (action === "login") {
       setIsLoginOpen(true);
@@ -191,6 +185,7 @@ function AppRoutes() {
       }
     }
   }, [navigate]);
+
   return (
     <>
       <Routes>
@@ -216,12 +211,16 @@ function AppRoutes() {
         <Route path="/career-intelligence/family/:familyKey" element={<ProtectedRoute><AppShell><CareerIntelligence /></AppShell></ProtectedRoute>} />
         <Route path="/career-intelligence/career/:careerSlug" element={<ProtectedRoute><AppShell><CareerIntelligence /></AppShell></ProtectedRoute>} />
         <Route path="/career-decision" element={<ProtectedRoute><AppShell><CareerDecision /></AppShell></ProtectedRoute>} />
+        <Route path="/reports" element={<ProtectedRoute requireRegistration><AppShell><ReportsHub /></AppShell></ProtectedRoute>} />
+        <Route path="/careers/:careerId/report" element={<ProtectedRoute requireRegistration><AppShell><DecisionReport /></AppShell></ProtectedRoute>} />\n        <Route path="/careers/:careerId/decision-report" element={<ProtectedRoute requireRegistration><AppShell><DecisionReport /></AppShell></ProtectedRoute>} />
+        <Route path="/careers/:careerId/parent-report" element={<ProtectedRoute requireRegistration><AppShell><ParentReport /></AppShell></ProtectedRoute>} />
+        <Route path="/reports/shared/:token" element={<SharedParentReport />} />
+        <Route path="/shared/parent/:token" element={<SharedParentReport />} />
+        <Route path="/shared/:token" element={<SharedParentReport />} />
         <Route path="/stride-journey/:stageId" element={<AppShell><StrideStage /></AppShell>} />
         <Route path="/company/:tabId" element={<CompanyInfo />} />
         <Route path="/support/:tabId" element={<SupportInfo />} />
         <Route path="*" element={<Navigate to="/" replace />} />
-
-
       </Routes>
 
       {/* Login modal overlay */}
@@ -247,4 +246,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

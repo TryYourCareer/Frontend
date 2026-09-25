@@ -7,6 +7,7 @@ import {
   AlertCircle,
   Pause,
   Play,
+  FileCheck2,
   XCircle,
   Briefcase,
   ShieldAlert,
@@ -2476,29 +2477,55 @@ export default function TrialMission() {
                     </div>
                   )}
 
-                <div className="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3">
-                  <button
-                    type="button"
-                    onClick={resetToCatalog}
-                    className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-                  >
-                    Explore More Missions
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/dashboard")}
-                    className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-                  >
-                    Return to Dashboard
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/career-decision")}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 transition-all"
-                  >
-                    View Career Decision & Fit
-                  </button>
-                </div>
+{(() => {
+                  const activeMission = missions?.find((m) => m.id === session?.mission_id);
+                  const completedCareerId =
+                    session?.career_id ||
+                    session?.career?.id ||
+                    evaluationData?.career_id ||
+                    evaluationData?.career?.id ||
+                    activeMission?.career_id ||
+                    activeMission?.career?.id ||
+                    session?.mission?.career_id ||
+                    session?.mission?.career?.id;
+
+                  return (
+                    <div className="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3">
+                      <button
+                        type="button"
+                        onClick={resetToCatalog}
+                        className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+                      >
+                        Explore More Missions
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/dashboard")}
+                        className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+                      >
+                        Return to Dashboard
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/career-decision")}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+                      >
+                        View Career Decision & Fit
+                      </button>
+                      {completedCareerId ? (
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/careers/${completedCareerId}/decision-report`)}
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-[#1E88E5] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-all"
+                          data-testid="view-decision-report-button"
+                        >
+                          <FileCheck2 size={16} />
+                          <span>View My Decision Report</span>
+                        </button>
+                      ) : null}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           ) : null}
