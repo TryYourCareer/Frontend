@@ -3,7 +3,6 @@ import {
   ClipboardList, Newspaper, X, BookOpen, FileText,
   LayoutDashboard, LogIn, LogOut,
   ChevronLeft, ChevronRight, Rocket, MessageSquare,
-  Brain,
 } from "lucide-react";
 
 const NAV_LINKS = [

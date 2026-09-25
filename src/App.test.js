@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import App from "./App";
 
 jest.mock("react-router-dom", () => ({
   BrowserRouter: ({ children }) => <div>{children}</div>,
@@ -25,8 +26,6 @@ jest.mock("@vercel/speed-insights/react", () => ({
 jest.mock("@vercel/analytics/react", () => ({
   Analytics: () => null,
 }), { virtual: true });
-
-import App from "./App";
 
 test("renders App without crashing", () => {
   const { container } = render(<App />);

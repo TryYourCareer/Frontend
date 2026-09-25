@@ -387,13 +387,6 @@ export default function TrialMission() {
     ? session.allowed_actions
     : [];
 
-  const canPause =
-    allowedActions.includes("pause") ||
-    allowedActions.includes("transition:SESSION_PAUSED");
-  const canResume =
-    allowedActions.includes("resume") ||
-    allowedActions.includes("transition:PHASE_ACTIVE") ||
-    session?.state === "SESSION_PAUSED";
   const canAbandon =
     allowedActions.includes("abandon") ||
     allowedActions.includes("transition:SESSION_ABANDONED");
