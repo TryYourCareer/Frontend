@@ -137,4 +137,58 @@ describe("ProcessWorkflowWorkspace & WorkspaceRegistry Integration", () => {
     expect(screen.getByText(/No valid process workflow pipeline was provided/i)).toBeInTheDocument();
     expect(screen.queryByText(/Standard Operational Workflow/i)).not.toBeInTheDocument();
   });
+  test("supports controlled finding composer props and handles finding submission", () => {
+    const mockSaveFinding = jest.fn((e) => {
+      if (e && e.preventDefault) e.preventDefault();
+    });
+    const mockSetShowFindingForm = jest.fn();
+    const mockSetFindingStatement = jest.fn();
+
+    const mockFindings = [
+      {
+        id: "finding-1",
+        statement: "Customs bottleneck is adding 50 minutes to shipping latency.",
+        evidence: [{ resource_id: "sop_doc", explanation: "Verified via warehouse SLA guidelines." }],
+        uncertainty: "Minor uncertainty around holiday peak traffic."
+      }
+    ];
+
+    render(
+      <ProcessWorkflowWorkspace
+        session={mockSession}
+        configuration={mockConfig}
+        activeResource={null}
+        notesValue=""
+        setNotesValue={() => {}}
+        notesStatus="Saved"
+        findings={mockFindings}
+        showFindingForm={true}
+        setShowFindingForm={mockSetShowFindingForm}
+        findingStatement="Customs bottleneck is critical"
+        setFindingStatement={mockSetFindingStatement}
+        findingResource="sop_doc"
+        setFindingResource={() => {}}
+        findingExplanation="Exceeds 30 min SLA"
+        setFindingExplanation={() => {}}
+        findingUncertainty="Need further shift audit"
+        setFindingUncertainty={() => {}}
+        handleSaveNewFinding={mockSaveFinding}
+        handleCompleteInvestigation={() => {}}
+        isCompletingInvestigation={false}
+      />
+    );
+
+    // Assert existing finding is displayed
+    expect(screen.getByText(/Customs bottleneck is adding 50 minutes to shipping latency./i)).toBeInTheDocument();
+    expect(screen.getByText(/Finding #1/i)).toBeInTheDocument();
+
+    // Assert form is open with statement
+    expect(screen.getByDisplayValue(/Customs bottleneck is critical/i)).toBeInTheDocument();
+
+    // Click Save Finding button
+    const saveBtn = screen.getByRole("button", { name: /Save Finding/i });
+    fireEvent.click(saveBtn);
+
+    expect(mockSaveFinding).toHaveBeenCalled();
+  });
 });

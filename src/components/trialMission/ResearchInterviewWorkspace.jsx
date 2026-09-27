@@ -12,11 +12,24 @@ export default function ResearchInterviewWorkspace({
   notesValue,
   setNotesValue,
   notesStatus,
-  findingsList = [],
+  findings = [],
+  findingsList,
   handleAccessResource,
+  showFindingForm: externalShowFindingForm,
+  setShowFindingForm: externalSetShowFindingForm,
+  findingStatement: externalFindingStatement,
+  setFindingStatement: externalSetFindingStatement,
+  findingResource: externalFindingResource,
+  setFindingResource: externalSetFindingResource,
+  findingExplanation: externalFindingExplanation,
+  setFindingExplanation: externalSetFindingExplanation,
+  findingUncertainty: externalFindingUncertainty,
+  setFindingUncertainty: externalSetFindingUncertainty,
   handleSaveNewFinding,
   handleCompleteInvestigation,
   isCompletingInvestigation,
+  actionLoading = false,
+  workspaceLoading = false,
 }) {
   const rawInterview = configuration?.workspace?.interview;
 
@@ -58,12 +71,29 @@ export default function ResearchInterviewWorkspace({
   );
   const [selectedTopicId, setSelectedTopicId] = useState("");
 
-  // Finding composer state
-  const [showFindingForm, setShowFindingForm] = useState(false);
-  const [findingStatement, setFindingStatement] = useState("");
-  const [findingResource, setFindingResource] = useState("");
-  const [findingExplanation, setFindingExplanation] = useState("");
-  const [findingUncertainty, setFindingUncertainty] = useState("");
+  const effectiveFindings = findingsList !== undefined ? findingsList : (findings || []);
+
+  // Finding composer state (supports external controlled props from TrialMission or internal fallback)
+  const [localShowFindingForm, setLocalShowFindingForm] = useState(false);
+  const [localFindingStatement, setLocalFindingStatement] = useState("");
+  const [localFindingResource, setLocalFindingResource] = useState("");
+  const [localFindingExplanation, setLocalFindingExplanation] = useState("");
+  const [localFindingUncertainty, setLocalFindingUncertainty] = useState("");
+
+  const showFindingForm = externalShowFindingForm !== undefined ? externalShowFindingForm : localShowFindingForm;
+  const setShowFindingForm = externalSetShowFindingForm || setLocalShowFindingForm;
+
+  const findingStatement = externalFindingStatement !== undefined ? externalFindingStatement : localFindingStatement;
+  const setFindingStatement = externalSetFindingStatement || setLocalFindingStatement;
+
+  const findingResource = externalFindingResource !== undefined ? externalFindingResource : localFindingResource;
+  const setFindingResource = externalSetFindingResource || setLocalFindingResource;
+
+  const findingExplanation = externalFindingExplanation !== undefined ? externalFindingExplanation : localFindingExplanation;
+  const setFindingExplanation = externalSetFindingExplanation || setLocalFindingExplanation;
+
+  const findingUncertainty = externalFindingUncertainty !== undefined ? externalFindingUncertainty : localFindingUncertainty;
+  const setFindingUncertainty = externalSetFindingUncertainty || setLocalFindingUncertainty;
 
   const activeStakeholder = useMemo(() => {
     if (!interviewConfig) return null;
@@ -320,7 +350,7 @@ export default function ResearchInterviewWorkspace({
 
               {/* Finding Composer */}
               <FindingComposer
-                findings={findingsList}
+                findings={effectiveFindings}
                 resources={resourcesList}
                 showFindingForm={showFindingForm}
                 setShowFindingForm={setShowFindingForm}
@@ -333,6 +363,8 @@ export default function ResearchInterviewWorkspace({
                 findingUncertainty={findingUncertainty}
                 setFindingUncertainty={setFindingUncertainty}
                 handleSaveNewFinding={handleSaveNewFinding}
+                actionLoading={actionLoading}
+                workspaceLoading={workspaceLoading}
               />
 
               {/* Checklist & Complete Investigation */}
