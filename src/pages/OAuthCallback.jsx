@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { fetchCurrentUser, loginWithOAuth, setAuthToken, setSupabaseAuthSession } from "../services/auth";
+import { fetchCurrentUser, loginWithOAuth, setAuthToken, setSupabaseAuthSession, getAuthToken } from "../services/auth";
 import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../supabaseConfig";
 
 export default function OAuthCallback() {
   const [params] = useSearchParams();
@@ -19,14 +20,14 @@ export default function OAuthCallback() {
         return;
       }
 
-      // Try to read an OAuth "code" or token from either query string or URL hash.
+      // 1. Try to read an OAuth "code" or token from query string or URL hash.
       let code = params.get("code");
       let token = params.get("access_token") || params.get("token");
       let refreshToken = params.get("refresh_token") || "";
 
       if (!code && !token) {
         const hash = window.location.hash || "";
-        if (hash) {
+        if (hash && hash !== "#") {
           const hashParams = new URLSearchParams(hash.replace(/^#/, ""));
           code = hashParams.get("code");
           token = hashParams.get("access_token") || hashParams.get("token");
@@ -39,6 +40,33 @@ export default function OAuthCallback() {
         }
       }
 
+      // 2. If Supabase client already consumed the hash, retrieve session from Supabase
+      let authUser = null;
+      if (!code && !token && supabase) {
+        for (let i = 0; i < 4; i++) {
+          try {
+            const { data } = await supabase.auth.getSession();
+            if (data?.session?.access_token) {
+              token = data.session.access_token;
+              refreshToken = data.session.refresh_token || refreshToken;
+              authUser = data.session.user || null;
+              break;
+            }
+          } catch {
+            // continue polling
+          }
+          await new Promise((r) => setTimeout(r, 250));
+        }
+      }
+
+      // 3. Fallback to existing stored token if Supabase onAuthStateChange already stored it
+      if (!code && !token) {
+        const storedToken = getAuthToken();
+        if (storedToken) {
+          token = storedToken;
+        }
+      }
+
       if (!code && !token) {
         setError("Missing OAuth code.");
         return;
@@ -46,7 +74,6 @@ export default function OAuthCallback() {
 
       try {
         let activeToken = token;
-        let authUser = null;
 
         if (!activeToken && code) {
           const result = await loginWithOAuth(code);
@@ -103,9 +130,13 @@ export default function OAuthCallback() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] grid place-items-center">
       {error ? (
-        <div className="text-center space-y-3">
-          <p className="text-sm font-bold text-red-600">{error}</p>
-          <button onClick={() => navigate("/login", { replace: true })} className="text-xs text-slate-500 underline">Back to login</button>
+        <div className="text-center space-y-4 max-w-sm px-6">
+          <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500 font-bold text-lg">!</div>
+          <p className="text-sm font-semibold text-slate-700">{error}</p>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button onClick={() => navigate("/dashboard", { replace: true })} className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm transition-all">Go to Dashboard</button>
+            <button onClick={() => navigate("/", { replace: true })} className="px-4 py-2 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all">Back to Home</button>
+          </div>
         </div>
       ) : (
         <div className="text-center space-y-4">

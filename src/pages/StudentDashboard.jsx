@@ -4,7 +4,7 @@ import {
   Sparkles, ArrowRight, BarChart3, Target,
   Award, Compass, Layers,
   ChevronRight, ArrowUpRight,
-  Check, MessageSquare, Terminal, SlidersHorizontal, FileText
+  Check, MessageSquare, Terminal, SlidersHorizontal
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { getUserProfile } from "../services/users";
@@ -104,7 +104,7 @@ export default function StudentDashboard() {
         .then((u) => setUserData(u))
         .catch(() => setUserData(null));
     }
-  }, [authProfile, authLoading]);
+  }, [authProfile, authLoading, userData]);
 
   // Load real assessment report and featured database careers
   useEffect(() => {

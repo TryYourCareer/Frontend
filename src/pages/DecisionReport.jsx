@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -51,7 +51,7 @@ export default function DecisionReport({ initialView = "student" }) {
     }
   }, [initialView]);
 
-  const fetchReport = async () => {
+  const fetchReport = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -92,13 +92,13 @@ export default function DecisionReport({ initialView = "student" }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [careerId, activeView]);
 
   useEffect(() => {
     if (careerId) {
       fetchReport();
     }
-  }, [careerId]);
+  }, [careerId, fetchReport]);
 
   // Loading State
   if (loading) {

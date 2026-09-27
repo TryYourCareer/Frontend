@@ -207,7 +207,7 @@ export default function CareerDetails() {
     }
     lookupMission();
     return () => { isMounted = false; };
-  }, [career?.title]);
+  }, [career?.title, career?.id]);
  // INR or USD
   const [activeTab, setActiveTab] = useState("overview"); // overview, market, myths, pathways, skills
   const [copied, setCopied] = useState(false);
