@@ -20,6 +20,7 @@ import ParentIfItDoesntWorkOutSection from "../components/reports/parent/ParentI
 import ParentFAQSection from "../components/reports/parent/ParentFAQSection";
 import ParentWhatChildNeedsSection from "../components/reports/parent/ParentWhatChildNeedsSection";
 import ParentBottomLineSection from "../components/reports/parent/ParentBottomLineSection";
+import SEO from "../components/SEO";
 
 export default function SharedParentReport() {
   const { token } = useParams();
@@ -99,6 +100,11 @@ export default function SharedParentReport() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 font-sans selection:bg-indigo-500 selection:text-white" data-testid="shared-parent-report-container">
+      <SEO
+        title={`Career Brief: ${careerName}`}
+        description="Private student career report shared securely."
+        noindex={true}
+      />
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* Security & Access Banner */}

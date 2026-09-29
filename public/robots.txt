@@ -2,25 +2,39 @@
 User-agent: *
 Allow: /
 Allow: /explore-careers
-Allow: /career-hubs
-Allow: /career-details/*
-Allow: /career-search
-Allow: /insights-feed
-Allow: /discovery-test
+Allow: /career-details/
 Allow: /roadmap
-Allow: /career-reality
-Allow: /career-intelligence
-Allow: /career-decision
-Allow: /company/*
-Allow: /support/*
+Allow: /company/
+Allow: /support/
 
-# Block private user dashboards, authentication, and API endpoints
+# Disallow Internal Auth & Redirects
+Disallow: /login
 Disallow: /oauth/
+Disallow: /register
+
+# Disallow Protected Application Surfaces
 Disallow: /dashboard
 Disallow: /profile
-Disallow: /register
+Disallow: /assessment
+Disallow: /discovery-test
+Disallow: /career-reality
+Disallow: /insights-feed
+Disallow: /career-hubs
+Disallow: /career-intelligence
+Disallow: /career-decision
+Disallow: /reports
+Disallow: /reports/
+Disallow: /careers/*/report
+Disallow: /careers/*/decision-report
+Disallow: /careers/*/parent-report
+Disallow: /career-report/
 Disallow: /trial-mission
 Disallow: /stride-journey/
+Disallow: /shared/
+
+# Disallow Internal Search Query Traps
+Disallow: /career-search
 
 # Sitemap location
 Sitemap: https://tryyourcareer.com/sitemap.xml
+
