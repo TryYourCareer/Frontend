@@ -123,7 +123,7 @@ export default function PathForwardSection({ pathForward, actionPlan, careerId, 
   const hasCost = Boolean(cost_estimate && typeof cost_estimate === "object" && Object.keys(cost_estimate).length > 0);
 
   // Feasibility status badge
-  let feasibilityLabel = "Pathway Status Unknown";
+  let feasibilityLabel = ""
   if (stream_feasibility === "ELIGIBLE") {
     feasibilityLabel = "Eligible";
   } else if (stream_feasibility === "BRIDGE_REQUIRED") {

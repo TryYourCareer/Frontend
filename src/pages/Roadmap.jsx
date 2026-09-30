@@ -334,8 +334,10 @@ export default function Roadmap() {
   return (
     <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 py-6 sm:px-6 lg:px-10 font-sans text-left">
       <SEO
-        title={`${currentPath.title} Learning Roadmap - ClearCareers`}
-        description={`Interactive career roadmap for ${currentPath.title}. Master domain foundations, technical competencies, certifications, and portfolio capstones.`}
+        title={`${currentPath?.title || "Career"} Learning Roadmap`}
+        description={`Interactive career roadmap for ${currentPath?.title || "tech careers"}. Master domain foundations, technical competencies, certifications, and portfolio capstones on Try Your Career.`}
+        keywords="career roadmap, learning path, skills roadmap, tech careers, certifications"
+        url="/roadmap"
       />
 
       <div className="mx-auto max-w-6xl">

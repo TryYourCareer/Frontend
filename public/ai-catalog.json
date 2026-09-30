@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Try Your Career",
+  "version": "1.0.0",
+  "description": "AI-Powered Career Guidance, Exploration, and Interactive Simulation Platform",
+  "url": "https://tryyourcareer.com",
+  "canonical_domain": "https://tryyourcareer.com",
+  "logo": "https://tryyourcareer.com/logo512.png",
+  "category": "Education & Career Intelligence",
+  "public_endpoints": [
+    {
+      "path": "/",
+      "name": "Landing Page",
+      "description": "Platform introduction, interactive RIASEC mini-assessment overview, and feature ecosystem.",
+      "auth_required": false
+    },
+    {
+      "path": "/explore-careers",
+      "name": "Career Explorer",
+      "description": "Directory of verified career clusters with salary metrics, demand trends, and skill benchmarks.",
+      "auth_required": false
+    },
+    {
+      "path": "/roadmap",
+      "name": "Career Roadmaps",
+      "description": "Milestone-based technical competency pathways and certification guides.",
+      "auth_required": false
+    },
+    {
+      "path": "/company/about",
+      "name": "About Us",
+      "description": "Mission statement, pedagogy, core team, and student success stories.",
+      "auth_required": false
+    },
+    {
+      "path": "/company/careers",
+      "name": "Company Careers",
+      "description": "Open career and internship listings at Try Your Career.",
+      "auth_required": false
+    },
+    {
+      "path": "/support/help",
+      "name": "Help Center & FAQ",
+      "description": "Frequently asked questions and guides on assessments and simulator sandboxes.",
+      "auth_required": false
+    },
+    {
+      "path": "/support/contact",
+      "name": "Contact Support",
+      "description": "Student and partner support inquiry channel.",
+      "auth_required": false
+    },
+    {
+      "path": "/support/privacy",
+      "name": "Privacy Policy",
+      "description": "Student data privacy principles and terms.",
+      "auth_required": false
+    },
+    {
+      "path": "/support/terms",
+      "name": "Terms of Service",
+      "description": "Platform usage agreement and guidelines.",
+      "auth_required": false
+    }
+  ],
+  "capabilities": {
+    "career_discovery": {
+      "methodology": "RIASEC cognitive and behavioral alignment",
+      "supported_dimensions": [
+        "Investigative",
+        "Technical",
+        "Social",
+        "Entrepreneurial",
+        "Leadership",
+        "Creative"
+      ]
+    },
+    "market_benchmarks": {
+      "currencies_supported": ["INR", "USD"],
+      "metrics": [
+        "entry_level_salary",
+        "mid_level_salary",
+        "senior_level_salary",
+        "growth_outlook",
+        "automation_exposure_index"
+      ]
+    },
+    "simulation_environments": {
+      "format": "Hands-on browser-based trial missions and interactive task sandboxes",
+      "purpose": "Day-in-the-life workplace validation before career commitment"
+    }
+  },
+  "contact": {
+    "support_url": "https://tryyourcareer.com/support/contact",
+    "social": {
+      "twitter": "https://twitter.com/tryyourcareer",
+      "linkedin": "https://linkedin.com/company/tryyourcareer"
+    }
+  }
+}

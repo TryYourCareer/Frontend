@@ -237,9 +237,10 @@ export default function CareerSearch() {
     <section className="min-h-screen bg-[#FAF6EC] px-4 sm:px-6 py-8">
       <SEO
         title={query ? `Search: "${query}" Careers` : "Search 100+ Careers & Job Roles"}
-        description={query ? `Explore job paths, salaries, and roadmaps matching "${query}" on Try Your Careers.` : "Search across 100+ high-growth careers, industries, and skill requirements."}
+        description={query ? `Explore job paths, salaries, and roadmaps matching "${query}" on Try Your Career.` : "Search across 100+ high-growth careers, industries, and skill requirements."}
         keywords="career search, job explorer, find careers by skill, tech jobs salary"
-        url={`/career-search${query ? `?q=${encodeURIComponent(query)}` : ""}`}
+        url="/career-search"
+        noindex={true}
       />
       <div className="mx-auto max-w-5xl space-y-6">
 

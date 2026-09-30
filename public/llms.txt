@@ -1,0 +1,30 @@
+# Try Your Career
+
+> AI-powered career guidance, exploration, interactive simulation sandboxes, and verified career intelligence platform.
+
+Try Your Career helps students, early-career professionals, and career switchers eliminate career uncertainty. By combining RIASEC-based cognitive profiling, verified salary benchmarks in India and globally, AI automation risk indices, and hands-on trial mission simulations, the platform enables learners to experience real-world career paths before making high-stakes decisions.
+
+## Public Pages & Resources
+
+- [Try Your Career Home](https://tryyourcareer.com/): AI-powered career discovery, interactive assessments overview, and career ecosystem.
+- [Explore Careers](https://tryyourcareer.com/explore-careers): Search and filter 100+ verified career options across tech, design, data, business, and engineering by salary bracket, education requirement, and industry growth.
+- [Career Roadmaps](https://tryyourcareer.com/roadmap): Comprehensive step-by-step learning roadmaps detailing technical competencies, certifications, and portfolio projects from beginner to senior levels.
+- [About Try Your Career](https://tryyourcareer.com/company/about): Our mission to eliminate the experience barrier, core team, educational values, and student success stories.
+- [Careers at Try Your Career](https://tryyourcareer.com/company/careers): Open job opportunities, internship tracks, and company culture.
+- [Help Center & FAQ](https://tryyourcareer.com/support/help): Answers to common questions regarding diagnostics, simulators, career hubs, and placement tracks.
+- [Contact Support](https://tryyourcareer.com/support/contact): Inquiries and direct assistance for students, educators, and partners.
+- [Privacy Policy](https://tryyourcareer.com/support/privacy): Our transparent commitment to student data privacy and security.
+- [Terms of Service](https://tryyourcareer.com/support/terms): Platform usage terms and conditions.
+
+## Key Platform Features
+
+- **Cognitive Profiling**: Matches personality traits, problem-solving preferences, and work style with high-alignment career archetypes.
+- **Career Reality Benchmarks**: Up-to-date entry, mid, and senior salary ranges in INR (LPA) and USD, verified against industry hiring data.
+- **AI Automation Index**: Evaluates potential automation exposure and human-centric skill resilience for modern career paths.
+- **Trial Missions**: Interactive workplace simulations and coding/design sandboxes enabling users to test-drive daily job tasks.
+- **Structured Learning Roadmaps**: Milestone-based pathways outlining specific tools, certifications, and project benchmarks.
+
+## Access & Integration
+
+- All public career exploration, roadmaps, company information, and support documentation are accessible without authentication.
+- Personalized diagnostic tests, user dashboards, progress tracking, and customized reports require standard student authentication.

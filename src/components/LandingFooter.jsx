@@ -1,9 +1,7 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function LandingFooter({ isDark }) {
-  const navigate = useNavigate();
-
   return (
     <footer
       className={`w-full transition-colors duration-300 ${
@@ -17,9 +15,9 @@ export default function LandingFooter({ isDark }) {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-12 items-start">
           {/* Brand Info (Left Column) */}
           <div className="md:col-span-6 lg:col-span-6 flex flex-col items-start gap-4 text-left">
-            <div
+            <Link
+              to="/"
               className="flex items-center gap-3 group cursor-pointer"
-              onClick={() => navigate("/")}
             >
               <div
                 className={`relative flex items-center justify-center h-10 w-10 rounded-2xl shadow-2xs transition-transform group-hover:scale-105 ${
@@ -31,11 +29,14 @@ export default function LandingFooter({ isDark }) {
                 <img
                   src="/assets/logo/logo-mark.png"
                   alt="Try Your Career"
+                  width="28"
+                  height="28"
+                  loading="lazy"
                   className="h-7 w-7 aspect-square object-contain drop-shadow-xs"
                 />
               </div>
               <div className="flex flex-col text-left">
-                <h3
+                <span
                   className={`text-lg font-black font-sans tracking-tight leading-none ${
                     isDark ? "text-slate-100" : "text-[#0b1a36]"
                   }`}
@@ -44,13 +45,13 @@ export default function LandingFooter({ isDark }) {
                   <span className="bg-gradient-to-r from-blue-600 via-[#1E88E5] to-indigo-600 bg-clip-text text-transparent">
                     Career
                   </span>
-                </h3>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mt-0.5 leading-tight">
                   Career Intelligence
                 </span>
               </div>
-            </div>
-            <p className="text-xs sm:text-sm leading-relaxed max-w-md text-slate-500 dark:text-slate-400">
+            </Link>
+            <p className="text-xs sm:text-sm leading-relaxed max-w-md text-slate-600 dark:text-slate-300">
               Your personalized path to lasting success. We combine interactive simulator sandboxes, real market data, and validated career assessments to build your career confidence.
             </p>
           </div>
@@ -59,63 +60,75 @@ export default function LandingFooter({ isDark }) {
           <div className="md:col-span-6 lg:col-span-6 grid grid-cols-2 sm:grid-cols-2 gap-8 md:justify-items-end">
             {/* Column 1: Explore */}
             <div className="flex flex-col gap-3 text-left w-full md:max-w-[160px]">
-              <h4
+              <h3
                 className={`text-xs font-bold uppercase tracking-widest ${
                   isDark ? "text-slate-200" : "text-[#0b1a36]"
                 }`}
               >
                 Explore
-              </h4>
+              </h3>
               <div className="flex flex-col gap-2.5 text-xs sm:text-sm">
-                <button
-                  onClick={() => navigate("/assessment")}
-                  className="hover:text-[#1E88E5] transition text-left cursor-pointer"
-                >
-                  Discovery Test
-                </button>
-                <button
-                  onClick={() => navigate("/explore-careers")}
-                  className="hover:text-[#1E88E5] transition text-left cursor-pointer"
+                <Link
+                  to="/explore-careers"
+                  className="hover:text-[#1E88E5] transition text-left"
                 >
                   Explore Careers
-                </button>
-                <button
-                  onClick={() => navigate("/career-hubs")}
-                  className="hover:text-[#1E88E5] transition text-left cursor-pointer"
+                </Link>
+                <Link
+                  to="/roadmap"
+                  className="hover:text-[#1E88E5] transition text-left"
                 >
-                  Career Hubs
-                </button>
+                  Career Roadmaps
+                </Link>
+                <Link
+                  to="/company/about"
+                  className="hover:text-[#1E88E5] transition text-left"
+                >
+                  About Us
+                </Link>
+                <Link
+                  to="/company/careers"
+                  className="hover:text-[#1E88E5] transition text-left"
+                >
+                  Careers & Jobs
+                </Link>
               </div>
             </div>
 
             {/* Column 2: Support */}
             <div className="flex flex-col gap-3 text-left w-full md:max-w-[160px]">
-              <h4
+              <h3
                 className={`text-xs font-bold uppercase tracking-widest ${
                   isDark ? "text-slate-200" : "text-[#0b1a36]"
                 }`}
               >
                 Support
-              </h4>
+              </h3>
               <div className="flex flex-col gap-2.5 text-xs sm:text-sm">
-                <button
-                  onClick={() => navigate("/support/contact")}
-                  className="hover:text-[#1E88E5] transition text-left cursor-pointer"
+                <Link
+                  to="/support/help"
+                  className="hover:text-[#1E88E5] transition text-left"
+                >
+                  Help Center
+                </Link>
+                <Link
+                  to="/support/contact"
+                  className="hover:text-[#1E88E5] transition text-left"
                 >
                   Contact Support
-                </button>
-                <button
-                  onClick={() => navigate("/support/privacy")}
-                  className="hover:text-[#1E88E5] transition text-left cursor-pointer"
+                </Link>
+                <Link
+                  to="/support/privacy"
+                  className="hover:text-[#1E88E5] transition text-left"
                 >
                   Privacy Policy
-                </button>
-                <button
-                  onClick={() => navigate("/support/terms")}
-                  className="hover:text-[#1E88E5] transition text-left cursor-pointer"
+                </Link>
+                <Link
+                  to="/support/terms"
+                  className="hover:text-[#1E88E5] transition text-left"
                 >
                   Terms of Service
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -131,24 +144,24 @@ export default function LandingFooter({ isDark }) {
         >
           <p>© 2026 Try Your Career. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <button
-              onClick={() => navigate("/support/privacy")}
-              className="hover:text-[#1E88E5] transition cursor-pointer"
+            <Link
+              to="/support/privacy"
+              className="hover:text-[#1E88E5] transition"
             >
               Privacy Policy
-            </button>
-            <button
-              onClick={() => navigate("/support/terms")}
-              className="hover:text-[#1E88E5] transition cursor-pointer"
+            </Link>
+            <Link
+              to="/support/terms"
+              className="hover:text-[#1E88E5] transition"
             >
               Terms of Service
-            </button>
-            <button
-              onClick={() => navigate("/support/contact")}
-              className="hover:text-[#1E88E5] transition cursor-pointer"
+            </Link>
+            <Link
+              to="/support/contact"
+              className="hover:text-[#1E88E5] transition"
             >
               Contact
-            </button>
+            </Link>
           </div>
         </div>
       </div>

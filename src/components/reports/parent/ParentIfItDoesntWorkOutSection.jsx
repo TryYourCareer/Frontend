@@ -1,8 +1,9 @@
 import React from "react";
 import { ShieldCheck, CheckCircle2 } from "lucide-react";
 
-export default function ParentIfItDoesntWorkOutSection({ ifItDoesntWorkOut }) {
-  if (!ifItDoesntWorkOut) {
+export default function ParentIfItDoesntWorkOutSection({ ifItDoesntWorkOut, backupPathways }) {
+  const data = ifItDoesntWorkOut || backupPathways;
+  if (!data) {
     return (
       <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 text-center space-y-2 shadow-xs">
         <div className="flex items-center justify-center gap-2">
@@ -20,7 +21,7 @@ export default function ParentIfItDoesntWorkOutSection({ ifItDoesntWorkOut }) {
     );
   }
 
-  const { safe_pivot_alternatives } = ifItDoesntWorkOut;
+  const { safe_pivot_alternatives } = data;
   const alternatives = Array.isArray(safe_pivot_alternatives)
     ? safe_pivot_alternatives
     : [];

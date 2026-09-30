@@ -1,8 +1,9 @@
 import React from "react";
 import { TrendingUp, Info, Globe, MapPin } from "lucide-react";
 
-export default function ParentFinancialSection({ financialOutlook }) {
-  if (!financialOutlook) {
+export default function ParentFinancialSection({ financialOutlook, financial, financialRealities }) {
+  const data = financialOutlook || financial || financialRealities;
+  if (!data) {
     return (
       <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 text-center space-y-2 shadow-xs">
         <div className="flex items-center justify-center gap-2">
@@ -20,7 +21,7 @@ export default function ParentFinancialSection({ financialOutlook }) {
     );
   }
 
-  const { salary_progression, cost_and_roi_note: rootNote } = financialOutlook;
+  const { salary_progression, cost_and_roi_note: rootNote } = data;
   const progression = salary_progression || {};
   const indiaSal = progression.india_lpa || {};
   const globalSal = progression.global_usd || {};

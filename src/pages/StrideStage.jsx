@@ -5,6 +5,7 @@ import {
   Sparkles, TrendingUp, Terminal, Users, 
   Clock, ArrowRight, CheckCircle2, Lock, Loader2 
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 const STAGES_DATA = {
   discover: {
@@ -106,6 +107,12 @@ export default function StrideStage() {
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] dark:bg-slate-950 px-6 py-10 text-[#0b1a36] dark:text-slate-100">
+      <SEO
+        title={stage?.title ? `${stage.title} Simulation` : "Stride Stage"}
+        description="Experience hands-on career simulations and test drive daily workplace tasks on Try Your Career."
+        url={`/stride-journey/${stageId || ""}`}
+        noindex={true}
+      />
       <div className="mx-auto max-w-5xl">
         
         {/* Guest Warning Banner */}

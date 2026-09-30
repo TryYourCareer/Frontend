@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -51,8 +51,8 @@ export default function LandingNavbar({ isDark }) {
         {/* Mobile Header Row */}
         <div className="flex items-center justify-between w-full md:w-auto shrink-0">
           {/* Logo & Brand Header */}
-          <div 
-            onClick={() => navigate("/")} 
+          <Link 
+            to="/" 
             className="flex items-center gap-3 cursor-pointer group select-none"
           >
             <div className={`relative flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 rounded-2xl transition-all duration-300 shadow-2xs group-hover:shadow-xs group-hover:scale-105 ${isDark
@@ -62,6 +62,9 @@ export default function LandingNavbar({ isDark }) {
               <img
                 src="/assets/logo/logo-mark.png"
                 alt="Try Your Career"
+                width="32"
+                height="32"
+                fetchPriority="high"
                 className="h-7 w-7 sm:h-8 sm:w-8 aspect-square object-contain drop-shadow-xs"
               />
               {/* <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" /> */}
@@ -75,20 +78,30 @@ export default function LandingNavbar({ isDark }) {
                   Career
                 </span>
               </span>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mt-0.5 leading-tight">
                 Career Intelligence
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* Action Button (Mobile only) */}
           <div className="md:hidden">
-            <button
-              onClick={() => authUser ? navigate("/dashboard") : setIsLoginOpen(true)}
-              className="rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold px-4 py-2 text-xs shadow-2xs transition cursor-pointer"
-            >
-              {authUser ? "Dashboard" : "Find career"}
-            </button>
+            {authUser ? (
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center justify-center rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold px-4 py-2 text-xs shadow-2xs transition cursor-pointer"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsLoginOpen(true)}
+                className="rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold px-4 py-2 text-xs shadow-2xs transition cursor-pointer"
+              >
+                Find career
+              </button>
+            )}
           </div>
         </div>
 
@@ -161,14 +174,15 @@ export default function LandingNavbar({ isDark }) {
         {/* Action Button (Desktop only) */}
         <div className="hidden md:block shrink-0">
           {authUser ? (
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold px-5 py-2.5 text-xs shadow-xs transition cursor-pointer"
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center justify-center rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold px-5 py-2.5 text-xs shadow-xs transition cursor-pointer"
             >
               Go to Dashboard
-            </button>
+            </Link>
           ) : (
             <button
+              type="button"
               onClick={() => setIsLoginOpen(true)}
               className="rounded-full bg-[#0b1a36] hover:bg-[#122b59] text-white font-bold px-5 py-2.5 text-xs shadow-xs transition cursor-pointer"
             >

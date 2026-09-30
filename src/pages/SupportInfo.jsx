@@ -54,8 +54,26 @@ export default function SupportInfo() {
   return (
     <div className="min-h-screen transition-colors duration-300 flex flex-col bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36]">
       <SEO
-        title={activeTab === "faq" ? "Frequently Asked Questions" : activeTab === "contact" ? "Contact Support" : activeTab === "guidelines" ? "Community Guidelines" : "Support Center"}
-        description="Get answers to frequently asked questions about Try Your Careers assessments, simulators, hubs, or get in touch with our student support team."
+        title={
+          activeTab === "help" || activeTab === "faq"
+            ? "Help Center & FAQ"
+            : activeTab === "contact"
+            ? "Contact Support"
+            : activeTab === "privacy"
+            ? "Privacy Policy"
+            : activeTab === "terms"
+            ? "Terms of Service"
+            : "Support Center"
+        }
+        description={
+          activeTab === "help" || activeTab === "faq"
+            ? "Find answers to frequently asked questions about Try Your Career assessments, diagnostic testing, practice sandboxes, and learning roadmaps."
+            : activeTab === "contact"
+            ? "Get in touch with the Try Your Career student support team for assistance with accounts, simulator tools, or partnerships."
+            : activeTab === "privacy"
+            ? "Read Try Your Career's privacy policy and data protection principles for students and educators."
+            : "Read the Terms of Service for using the Try Your Career platform, assessments, and learning roadmaps."
+        }
         url={`/support/${activeTab}`}
       />
       {/* Landing Navbar */}

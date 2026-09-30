@@ -311,6 +311,11 @@ export default function CareerDetails() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#f6f9fd] via-[#eef4fb] to-[#e4eef9] flex items-center justify-center p-6 font-sans">
+        <SEO
+          title={careerName ? `${decodeURIComponent(careerName)} Career Guide` : "Career Details"}
+          description="Fetching verified salary benchmarks, skill requirements, and learning roadmaps on Try Your Career."
+          url={`/career-details/${encodeURIComponent(careerName || "")}`}
+        />
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
             <div className="w-16 h-16 rounded-3xl bg-blue-600/10 border border-blue-200 animate-pulse flex items-center justify-center">
@@ -329,6 +334,11 @@ export default function CareerDetails() {
   if (!career) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#f6f9fd] via-[#eef4fb] to-[#e4eef9] px-4 py-16 flex flex-col items-center justify-center text-center font-sans">
+        <SEO
+          title="Career Not Found"
+          description="The requested career pathway could not be found on Try Your Career."
+          noindex={true}
+        />
         <div className="rounded-3xl border border-[#D3E3F5] bg-white p-8 sm:p-10 max-w-md w-full shadow-lg shadow-blue-900/5 flex flex-col items-center">
           <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 mb-4">
             <AlertCircle size={28} />
@@ -347,7 +357,7 @@ export default function CareerDetails() {
               <ArrowLeft size={14} /> Go Back
             </button>
             <button
-              onClick={() => navigate("/career-reality")}
+              onClick={() => navigate("/explore-careers")}
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0b1a36] hover:bg-[#152e5d] text-white px-4 py-2.5 text-xs font-bold shadow-xs transition cursor-pointer"
             >
               Explore All <ChevronRight size={14} />
@@ -362,13 +372,36 @@ export default function CareerDetails() {
   const autoInfo = AUTOMATION_BADGE[career.automationExposure] || AUTOMATION_BADGE["low"];
   const currentSalaries = currency === "INR" ? career.salaries.inr : career.salaries.usd;
 
+  const careerSchema = {
+    "@context": "https://schema.org",
+    "@type": "Occupation",
+    "name": career.title,
+    "description": career.summary || `Comprehensive guide to becoming a ${career.title}, including salary benchmarks, required competencies, and roadmap pathways.`,
+    "occupationalCategory": career.cluster || career.discipline || "General",
+    "skills": Array.isArray(career.skills) ? career.skills.join(", ") : "",
+    "estimatedSalary": [
+      {
+        "@type": "MonetaryAmountDistribution",
+        "name": "Annual Salary Range (INR)",
+        "currency": "INR",
+        "minValue": career.salaries?.inr?.entry || "₹4 LPA",
+        "maxValue": career.salaries?.inr?.senior || "₹25 LPA"
+      }
+    ],
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://tryyourcareer.com/career-details/${encodeURIComponent(career.title || careerName || "")}`
+    }
+  };
+
   return (
     <section className="min-h-screen bg-gradient-to-br from-[#f7fafd] via-[#eef4fc] to-[#e4eef9] px-4 sm:px-6 lg:px-8 py-8 text-slate-800 font-sans">
       <SEO
-        title={`${career.title} Career Guide: Salary, AI Impact, Skills & Roadmap | ClearCareers`}
-        description={career.summary || `Comprehensive guide to becoming a ${career.title}. Salary benchmarks: ${career.salaries.inr.entry} - ${career.salaries.inr.senior}, automation risk: ${career.automationExposure}.`}
+        title={`${career.title} Career Guide, Salary & Skills`}
+        description={career.summary || `Explore the ${career.title} career path, responsibilities, salary benchmarks (${career.salaries?.inr?.entry || "₹4 LPA"} - ${career.salaries?.inr?.senior || "₹25 LPA"}), skills, and roadmap with Try Your Career.`}
         keywords={`${career.title}, ${career.cluster}, ${career.discipline}, salary in India, career roadmap, ${career.skills.join(", ")}`}
         url={`/career-details/${encodeURIComponent(career.title || "")}`}
+        schema={careerSchema}
       />
 
       <div className="mx-auto max-w-6xl space-y-8">

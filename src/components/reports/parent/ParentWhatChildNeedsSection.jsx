@@ -1,5 +1,5 @@
 import React from "react";
-import { MessageSquare, HeartHandshake, Sparkles, CheckCircle2 } from "lucide-react";
+import { MessageSquare, HeartHandshake, Sparkles } from "lucide-react";
 
 export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
   if (!whatChildNeeds) {
@@ -27,9 +27,9 @@ export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
     : [];
 
   return (
-    <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 space-y-6 shadow-xs">
+    <section className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-7 md:p-8 space-y-5 shadow-xs">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-slate-100 pb-5">
+      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-slate-100 pb-4">
         <div className="flex items-center gap-2">
           <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
             08
@@ -44,41 +44,44 @@ export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
           </div>
         </div>
 
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
-          <HeartHandshake size={14} />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/70 text-amber-800 text-xs font-bold">
+          <HeartHandshake size={14} className="text-amber-600" />
           <span>Parent Action Guide</span>
         </div>
       </div>
 
-      {/* Discussion Prompts Inner Box */}
+      {/* Discussion Prompts: 3 Structured Blocks */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1E88E5]">
-          <MessageSquare size={14} />
-          <span>Recommended Discussion Prompts</span>
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600">
+          <MessageSquare size={14} className="text-[#1E88E5]" />
+          <span>Recommended Discussion Topics</span>
         </div>
 
         {prompts.length > 0 ? (
-          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             {prompts.map((p, idx) => {
-              const categoryLabel = p.category ? p.category.replace(/_/g, " ") : "Discussion Topic";
+              const defaultCategories = ["Growth Area", "Trial Reflection", "Pathway"];
+              const categoryLabel = p.category
+                ? p.category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+                : (defaultCategories[idx] || "Discussion Topic");
               const question = p.question;
               const context = p.context;
 
               return (
                 <div
                   key={p.prompt_id || idx}
-                  className="p-4 bg-white border border-slate-200/80 rounded-xl space-y-2"
+                  className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 flex flex-col justify-between space-y-3"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-[#1E88E5] border border-blue-200/70 uppercase tracking-wider">
+                  <div className="space-y-2">
+                    <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-[#1E88E5] border border-blue-200/70 uppercase tracking-wider">
                       {categoryLabel}
                     </span>
+                    <p className="text-xs sm:text-sm font-bold text-[#0b1a36] leading-snug">
+                      "{question}"
+                    </p>
                   </div>
-                  <p className="text-sm font-bold text-[#0b1a36] leading-snug">
-                    "{question}"
-                  </p>
                   {context && (
-                    <p className="text-xs text-slate-500 leading-relaxed italic">
+                    <p className="text-[11px] text-slate-500 leading-relaxed border-t border-slate-200/60 pt-2.5 italic">
                       Context: {context}
                     </p>
                   )}
@@ -93,7 +96,7 @@ export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
         )}
       </div>
 
-      {/* Support Recommendations */}
+      {/* Supportive Next Steps: Compact Numbered List */}
       {recommendations.length > 0 && (
         <div className="pt-2 space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700">
@@ -101,13 +104,15 @@ export default function ParentWhatChildNeedsSection({ whatChildNeeds }) {
             <span>Supportive Next Steps</span>
           </div>
 
-          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-2">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-3 sm:p-4 space-y-2">
             {recommendations.map((rec, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-3 p-3.5 bg-white rounded-xl border border-slate-200/80"
+                className="flex items-start gap-3 p-3 bg-white rounded-xl border border-slate-200/80 transition-colors"
               >
-                <CheckCircle2 size={16} className="text-[#1E88E5] shrink-0 mt-0.5" />
+                <div className="w-5 h-5 rounded-md bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                  {idx + 1}
+                </div>
                 <span className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
                   {rec}
                 </span>

@@ -20,6 +20,7 @@ import ParentIfItDoesntWorkOutSection from "../components/reports/parent/ParentI
 import ParentFAQSection from "../components/reports/parent/ParentFAQSection";
 import ParentWhatChildNeedsSection from "../components/reports/parent/ParentWhatChildNeedsSection";
 import ParentBottomLineSection from "../components/reports/parent/ParentBottomLineSection";
+import SEO from "../components/SEO";
 
 export default function SharedParentReport() {
   const { token } = useParams();
@@ -98,58 +99,61 @@ export default function SharedParentReport() {
   const expiresAt = reportData.expires_at ? new Date(reportData.expires_at).toLocaleDateString() : null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 font-sans selection:bg-indigo-500 selection:text-white" data-testid="shared-parent-report-container">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 py-6 sm:py-10 px-4 sm:px-6 lg:px-8 font-sans selection:bg-[#1E88E5] selection:text-white" data-testid="shared-parent-report-container">
+      <SEO
+        title={`Career Brief: ${careerName}`}
+        description="Private student career report shared securely."
+        noindex={true}
+      />
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
         
         {/* Security & Access Banner */}
-        <div className="bg-gradient-to-r from-emerald-950/60 to-slate-900/80 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 backdrop-blur flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
-              <Lock className="w-5 h-5" />
+            <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl border border-emerald-200 shrink-0">
+              <Lock className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Secure Parent View</span>
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Read-Only</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">Secure Parent View</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-emerald-700 border border-emerald-200 shadow-2xs">Read-Only</span>
               </div>
-              <p className="text-xs text-slate-300 mt-0.5">
-                Shared privately with you. Direct assessment evidence and student notes are isolated.
+              <p className="text-xs text-slate-600 mt-0.5">
+                Shared privately with you. Direct assessment answers and student notes are isolated.
               </p>
             </div>
           </div>
           {expiresAt && (
-            <div className="flex items-center space-x-1.5 text-xs text-slate-400 bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-800">
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <div className="flex items-center space-x-1.5 text-xs font-medium text-slate-600 bg-white px-3 py-1.5 rounded-xl border border-emerald-200/70 shadow-2xs shrink-0">
+              <Clock className="w-3.5 h-3.5 text-amber-600" />
               <span>Valid through {expiresAt}</span>
             </div>
           )}
         </div>
 
         {/* Report Header */}
-        <header className="bg-slate-900/70 border border-slate-800/80 rounded-3xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-xl">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <header className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs relative overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
             <div>
-              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-3">
+              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/70 text-[#1E88E5] text-xs font-bold mb-2.5">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Executive Parent Briefing</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0b1a36] tracking-tight">
                 {careerName}
               </h1>
-              <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-2xl">
+              <p className="text-slate-600 text-xs sm:text-sm mt-1.5 max-w-2xl leading-relaxed">
                 A verified breakdown of career viability, return on investment, AI durability, and backup pathways.
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row md:flex-col items-start md:items-end gap-2 text-xs text-slate-400">
-              <div className="flex items-center space-x-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 text-xs font-medium text-slate-500 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70 font-semibold text-[11px]">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Verified Evidence Complete</span>
               </div>
-              <div className="flex items-center space-x-1.5">
-                <Calendar className="w-4 h-4 text-slate-500" />
+              <div className="flex items-center space-x-1.5 text-[11px] text-slate-400">
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
                 <span>Generated {reportData.created_at ? new Date(reportData.created_at).toLocaleDateString() : "Recently"}</span>
               </div>
             </div>
@@ -164,44 +168,44 @@ export default function SharedParentReport() {
         )}
 
         {/* Section 2: Verified Evidence */}
-        {parent.evidence && (
+        {(parent.evidence || parent.evidence_not_just_enthusiasm) && (
           <section data-testid="shared-parent-evidence">
-            <ParentEvidenceSection evidence={parent.evidence} />
+            <ParentEvidenceSection evidence={parent.evidence_not_just_enthusiasm || parent.evidence} />
           </section>
         )}
 
         {/* Section 3: Comparative Analysis */}
-        {parent.comparisons && (
+        {(parent.comparisons || parent.how_this_compares) && (
           <section data-testid="shared-parent-comparisons">
-            <ParentHowThisComparesSection comparisons={parent.comparisons} />
+            <ParentHowThisComparesSection howThisCompares={parent.how_this_compares || parent.comparisons} comparisons={parent.comparisons || parent.how_this_compares} />
           </section>
         )}
 
         {/* Section 4: AI Preparedness */}
-        {parent.ai_preparedness && (
+        {(parent.ai_preparedness || parent.will_ai_replace_job) && (
           <section data-testid="shared-parent-ai">
-            <ParentAIPreparednessSection aiPreparedness={parent.ai_preparedness} />
+            <ParentAIPreparednessSection aiPreparedness={parent.will_ai_replace_job || parent.ai_preparedness} />
           </section>
         )}
 
         {/* Section 5: Financial Realities & ROI */}
-        {parent.financial_realities && (
+        {(parent.financial_realities || parent.financial_outlook || parent.cost_and_payoff) && (
           <section data-testid="shared-parent-financial">
-            <ParentFinancialSection financial={parent.financial_realities} />
+            <ParentFinancialSection financialOutlook={parent.financial_outlook || parent.financial_realities || parent.cost_and_payoff} financial={parent.financial_realities} />
           </section>
         )}
 
         {/* Section 6: Backup Pathways */}
-        {parent.backup_pathways && (
+        {(parent.backup_pathways || parent.if_it_doesnt_work_out) && (
           <section data-testid="shared-parent-backup">
-            <ParentIfItDoesntWorkOutSection backupPathways={parent.backup_pathways} />
+            <ParentIfItDoesntWorkOutSection ifItDoesntWorkOut={parent.if_it_doesnt_work_out || parent.backup_pathways} backupPathways={parent.backup_pathways} />
           </section>
         )}
 
         {/* Section 7: Parent FAQ */}
-        {parent.faq && (
+        {(parent.faq || parent.parent_faq) && (
           <section data-testid="shared-parent-faq">
-            <ParentFAQSection faq={parent.faq} parentReport={parent} reportData={parent} />
+            <ParentFAQSection parentFaq={parent.parent_faq || parent.faq} faq={parent.faq || parent.parent_faq} parentReport={parent} reportData={parent} />
           </section>
         )}
 
@@ -213,14 +217,14 @@ export default function SharedParentReport() {
         )}
 
         {/* Section 9: Executive Bottom Line */}
-        {parent.bottom_line && (
+        {(parent.bottom_line || parent.executive_bottom_line) && (
           <section data-testid="shared-parent-bottom-line">
-            <ParentBottomLineSection bottomLine={parent.bottom_line} />
+            <ParentBottomLineSection bottomLine={parent.bottom_line || parent.executive_bottom_line} executiveBottomLine={parent.executive_bottom_line} />
           </section>
         )}
 
         {/* Read-Only Footer */}
-        <footer className="pt-8 pb-12 border-t border-slate-900 text-center text-xs text-slate-500">
+        <footer className="pt-6 pb-12 border-t border-slate-200 text-center text-xs text-slate-500">
           <p>© {new Date().getFullYear()} TryYourCareer. Shared under secure read-only token.</p>
         </footer>
       </div>
