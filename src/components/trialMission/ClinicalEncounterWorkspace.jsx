@@ -4,16 +4,11 @@ import {
   Activity,
   User,
   AlertTriangle,
-  Stethoscope,
   FileText,
   ShieldAlert,
-  Clock,
-  CheckCircle2,
   AlertCircle,
-  Eye,
   Plus,
   Bed,
-  Thermometer,
   Pill,
   ClipboardList
 } from 'lucide-react';
@@ -91,7 +86,7 @@ export default function ClinicalEncounterWorkspace({
   isCompletingInvestigation = false
 }) {
   const effectiveFindings = findingsList || findings || [];
-  const rawWorkspace = configuration?.workspace || {};
+  const rawWorkspace = useMemo(() => configuration?.workspace || {}, [configuration?.workspace]);
 
   // Extract patient metadata
   const patient = useMemo(() => {

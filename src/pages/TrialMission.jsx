@@ -22,7 +22,6 @@ import {
   LockKeyhole,
   Timer,
   LogOut,
-  Search,
   Clock,
   Zap,
   Award,

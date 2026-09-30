@@ -461,7 +461,7 @@ export default function ReportActionBar({
             </div>
 
             {/* Ready Download Link notification */}
-            {/* {downloadReadyUrl && (
+            {downloadReadyUrl && (
               <a
                 href={downloadReadyUrl}
                 target="_blank"
@@ -473,7 +473,7 @@ export default function ReportActionBar({
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Download PDF</span>
               </a>
-            )} */}
+            )}
 
             {/* Share with Parent Button */}
             <button
