@@ -35,6 +35,7 @@ const DecisionReport = lazy(() => import("./pages/DecisionReport"));
 const ParentReport = lazy(() => import("./pages/ParentReport"));
 const SharedParentReport = lazy(() => import("./pages/SharedParentReport"));
 const ReportsHub = lazy(() => import("./pages/ReportsHub"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 function AppLoadingSkeleton() {
   return (
@@ -235,7 +236,7 @@ function AppRoutes() {
           <Route path="/stride-journey/:stageId" element={<AppShell><StrideStage /></AppShell>} />
           <Route path="/company/:tabId" element={<CompanyInfo />} />
           <Route path="/support/:tabId" element={<SupportInfo />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
 

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchCurrentUser, loginWithOAuth, setAuthToken, setSupabaseAuthSession, getAuthToken } from "../services/auth";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../supabaseConfig";
+import SEO from "../components/SEO";
 
 export default function OAuthCallback() {
   const [params] = useSearchParams();
@@ -129,6 +130,10 @@ export default function OAuthCallback() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] grid place-items-center">
+      <SEO
+        title="Signing in..."
+        noindex={true}
+      />
       {error ? (
         <div className="text-center space-y-4 max-w-sm px-6">
           <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500 font-bold text-lg">!</div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
@@ -17,19 +18,7 @@ import {
   Briefcase,
 } from "lucide-react";
 
-/* ─────────────────────────── animation presets ─────────────────────────── */
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  show: {
-    opacity: 1, y: 0,
-    transition: { type: "spring", stiffness: 90, damping: 18 },
-  },
-};
 
-const stagger = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.09, delayChildren: 0.1 } },
-};
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MAIN HERO EXPORT
@@ -364,9 +353,9 @@ function AbstractCareerTestLoop({ isDark }) {
                 transition={{ delay: 0.25, duration: 0.5, type: "spring", stiffness: 120 }}
                 className="absolute z-20 text-center pointer-events-none"
               >
-                <h3 className="text-2xl sm:text-3xl font-sans font-bold text-[#0b1a36] dark:text-white drop-shadow-md leading-tight">
+                <h2 className="text-2xl sm:text-3xl font-sans font-bold text-[#0b1a36] dark:text-white drop-shadow-md leading-tight">
                   You're a<br />Visionary!
-                </h3>
+                </h2>
               </motion.div>
 
               {/* ── Surrounding Floating Career Cards matching site typography ──── */}
@@ -466,8 +455,8 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
         type: "spring",
         stiffness: 80,
         damping: 20,
-        delayChildren: 0.3,
-        staggerChildren: 0.1,
+        delayChildren: 0.05,
+        staggerChildren: 0.08,
       },
     },
   };
@@ -482,16 +471,12 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
 
       <div className="mx-auto max-w-6xl relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left Column: Heading, description & buttons */}
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            animate="show"
+          {/* Left Column: Heading, description & buttons (Rendered directly for instantaneous LCP paint) */}
+          <div
             className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6"
           >
             {/* Pill */}
-            <motion.div
-              variants={fadeUp}
+            <div
               className={`inline-flex items-center gap-2.5 rounded-full border px-4 py-1.5 text-[11px] sm:text-xs font-bold tracking-[0.14em] uppercase ${isDark
                 ? "border-blue-500/30 bg-blue-500/10 text-blue-300"
                 : "border-blue-200/80 bg-blue-50/70 text-[#2563eb]"
@@ -499,31 +484,28 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
             >
               <span className="h-2 w-2 rounded-full bg-[#3b82f6]"></span>
               THE FUTURE OF CAREER DISCOVERY
-            </motion.div>
+            </div>
 
-            {/* Title */}
-            <motion.h1
-              variants={fadeUp}
+            {/* Title - LCP Element */}
+            <h1
               className={`text-4xl sm:text-5xl lg:text-[58px] xl:text-[66px] font-black tracking-[-0.03em] leading-[1.08] text-center lg:text-left ${isDark ? "text-white" : "text-[#0e131f]"
                 }`}
             >
               Stop guessing <br className="hidden sm:inline" />
               your future. <br />
               <span className="bg-gradient-to-r from-[#1d4ed8] via-[#2563eb] to-[#4f46e5] light:from-sky-400 light:via-blue-400 light:to-indigo-400 bg-clip-text text-transparent">Experience it.</span>
-            </motion.h1>
+            </h1>
 
             {/* Description */}
-            <motion.p
-              variants={fadeUp}
+            <p
               className={`text-sm sm:text-base leading-relaxed max-w-lg mx-auto lg:mx-0 text-center lg:text-left ${isDark ? "text-slate-400" : "text-slate-600"
                 }`}
             >
               Eliminate career confusion caused by pressure and trends. Discover your true path through structured assessment, real-world trials, and evidence-based guidance.
-            </motion.p>
+            </p>
 
             {/* Button Row */}
-            <motion.div
-              variants={fadeUp}
+            <div
               className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 w-full sm:w-auto pt-1"
             >
               <button
@@ -535,18 +517,17 @@ function HeroBanner({ isDark, onStartDiscovery, onExploreCareers, careersCount, 
                 <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
               </button>
 
-              <button
-                type="button"
-                onClick={onExploreCareers}
+              <Link
+                to="/explore-careers"
                 className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 border font-bold rounded-full px-6 py-3.5 transition-all duration-200 text-xs sm:text-sm active:scale-95 cursor-pointer ${isDark
                     ? "border-slate-800 bg-slate-900/50 hover:bg-slate-800 text-slate-200"
                     : "border-[#D3E3F5] bg-white hover:bg-[#F0F6FC] text-[#0b1a36]"
                   }`}
               >
                 <span>Explore Careers</span>
-              </button>
-            </motion.div>
-          </motion.div>
+              </Link>
+            </div>
+          </div>
 
           {/* Right Column: Beautiful Abstract Career Test Visualization */}
           <motion.div

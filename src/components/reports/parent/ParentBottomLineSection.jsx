@@ -1,8 +1,9 @@
 import React from "react";
 import { Award, Info } from "lucide-react";
 
-export default function ParentBottomLineSection({ bottomLine }) {
-  if (!bottomLine) {
+export default function ParentBottomLineSection({ bottomLine, executiveBottomLine }) {
+  const data = bottomLine || executiveBottomLine;
+  if (!data) {
     return (
       <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 text-center space-y-2 shadow-xs">
         <div className="flex items-center justify-center gap-2">
@@ -20,13 +21,13 @@ export default function ParentBottomLineSection({ bottomLine }) {
     );
   }
 
-  const { evidence_summary, next_steps } = bottomLine;
+  const { evidence_summary, next_steps } = data;
   const steps = Array.isArray(next_steps) ? next_steps : [];
 
   return (
-    <section className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 md:p-10 space-y-6 shadow-xs">
+    <section className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-7 md:p-8 space-y-5 shadow-xs">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-slate-100 pb-5">
+      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-slate-100 pb-4">
         <div className="flex items-center gap-2">
           <span className="w-7 h-7 rounded-xl bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-xs">
             09
@@ -39,16 +40,19 @@ export default function ParentBottomLineSection({ bottomLine }) {
           </div>
         </div>
 
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
-          <Award size={14} />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200/70 text-emerald-800 text-xs font-bold">
+          <Award size={14} className="text-emerald-600" />
           <span>Executive Takeaway</span>
         </div>
       </div>
 
-      {/* Summary Narrative Inner Box */}
+      {/* Executive Takeaway Narrative Box */}
       {evidence_summary && (
-        <div className="p-5 sm:p-6 bg-[#F8FAFC] border border-slate-200/80 rounded-2xl">
-          <p className="text-sm sm:text-base font-semibold text-[#0b1a36] leading-relaxed">
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-blue-50/50 via-[#F8FAFC] to-[#F8FAFC] border border-blue-200/60 rounded-2xl space-y-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#1E88E5] block">
+            Executive Summary
+          </span>
+          <p className="text-xs sm:text-sm font-semibold text-[#0b1a36] leading-relaxed">
             {evidence_summary}
           </p>
         </div>
@@ -60,11 +64,11 @@ export default function ParentBottomLineSection({ bottomLine }) {
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
             Recommended Actionable Next Steps
           </h3>
-          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-2.5">
+          <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-3 sm:p-4 space-y-2">
             {steps.map((step, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-3 p-3.5 bg-white rounded-xl border border-slate-200/80"
+                className="flex items-start gap-3 p-3 bg-white rounded-xl border border-slate-200/80"
               >
                 <div className="w-5 h-5 rounded-md bg-blue-50 text-[#1E88E5] border border-blue-200/70 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
                   {idx + 1}

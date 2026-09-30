@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Info, X } from "lucide-react";
 import { loginRedirect } from "../services/auth";
+import SEO from "./SEO";
 
 export default function Login({ onBack }) {
   const [authLoading, setAuthLoading] = useState(false);
@@ -53,6 +54,12 @@ export default function Login({ onBack }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+      <SEO
+        title="Log In"
+        description="Log in to your Try Your Career account to access personalized assessments and dashboard."
+        url="/login"
+        noindex={true}
+      />
       {/* Backdrop */}
       <div className="absolute inset-0 cursor-pointer" onClick={onBack} />
 

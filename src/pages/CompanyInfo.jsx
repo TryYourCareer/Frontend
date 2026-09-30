@@ -55,8 +55,26 @@ export default function CompanyInfo() {
   return (
     <div className="min-h-screen transition-colors duration-300 flex flex-col bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] text-[#0b1a36] font-sans">
       <SEO
-        title={activeTab === "about" ? "About Us" : activeTab === "careers" ? "Careers & Open Roles" : activeTab === "privacy" ? "Privacy Policy" : "Company"}
-        description="Learn more about Try Your Careers, our mission to democratize career discovery, our team, open career opportunities, and principles."
+        title={
+          activeTab === "about"
+            ? "About Us"
+            : activeTab === "careers"
+            ? "Careers & Open Roles"
+            : activeTab === "elevate"
+            ? "Elevate Program"
+            : activeTab === "stories"
+            ? "Student Success Stories"
+            : "Company"
+        }
+        description={
+          activeTab === "about"
+            ? "Learn about Try Your Career, our mission to eliminate the experience barrier, our team, and practical learning values."
+            : activeTab === "careers"
+            ? "Explore open positions, internships, and work culture at Try Your Career."
+            : activeTab === "elevate"
+            ? "Discover the Elevate program connecting top simulator performers with sponsored capstone projects and interviews."
+            : "Read how students transitioned into tech roles and mastered simulator sandboxes on Try Your Career."
+        }
         url={`/company/${activeTab}`}
       />
       {/* Landing Navbar */}

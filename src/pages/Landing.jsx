@@ -49,14 +49,14 @@ export default function Landing({
       />
 
       {/* Main content */}
-      <div className="flex-1">
+      <main className="flex-1" id="main-content">
         <Hero
           onStartDiscovery={onStartDiscovery}
           onExploreCareers={onExploreCareers}
           careersCount={careers.length}
           isDark={isDark}
         />
-      </div>
+      </main>
 
       {/* Landing Footer */}
       <LandingFooter isDark={isDark} />

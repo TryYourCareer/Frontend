@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Download,
@@ -20,6 +20,91 @@ import reportsService, {
   getExportStatus,
   createParentShareLink
 } from "../../services/reports";
+import BACKEND_BASE_URL from "../../API/BaseURL";
+
+/**
+ * Safely resolves a share URL or token to a complete absolute URL using the runtime origin.
+ */
+export function toAbsoluteShareUrl(rawUrl, token) {
+  if (!rawUrl && !token) return "";
+  const target = rawUrl || `/shared/parent/${token}`;
+  if (/^https?:\/\//i.test(target)) {
+    return target;
+  }
+  const origin =
+    (typeof window !== "undefined" && window.location?.origin) ||
+    (typeof window !== "undefined" && window.location?.protocol && window.location?.host
+      ? `${window.location.protocol}//${window.location.host}`
+      : "");
+  const path = target.startsWith("/") ? target : `/${target}`;
+  return `${origin}${path}`;
+}
+
+/**
+ * Resolves a download URL (relative backend API path or absolute URL) to a complete backend URL.
+ * Never resolves backend download routes against window.location.origin.
+ */
+export function toBackendDownloadUrl(rawUrl) {
+  if (!rawUrl) return "";
+  if (/^https?:\/\//i.test(rawUrl)) {
+    return rawUrl;
+  }
+  const base = (BACKEND_BASE_URL || "").replace(/\/+$/, "");
+  const path = rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`;
+  return `${base}${path}`;
+}
+
+/**
+ * Generates an appropriate descriptive PDF filename based on career and export type.
+ */
+export function getExportFilename(careerName, type) {
+  const safeName = (careerName || "Career")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const typeTag =
+    type === "parent"
+      ? "parent-briefing"
+      : type === "student"
+      ? "student-report"
+      : "full-report";
+  return `${safeName || "career"}-${typeTag}.pdf`;
+}
+
+/**
+ * Triggers a browser file download safely without leaving orphan DOM elements.
+ */
+export function triggerBrowserDownload(urlOrBlob, filename = "career_report.pdf") {
+  if (!urlOrBlob) return;
+
+  if (typeof urlOrBlob === "string") {
+    const link = document.createElement("a");
+    link.href = urlOrBlob;
+    link.setAttribute("download", filename);
+    link.setAttribute("target", "_blank");
+    link.setAttribute("rel", "noopener noreferrer");
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      if (document.body && document.body.contains(link)) {
+        document.body.removeChild(link);
+      }
+    }, 250);
+  } else if (urlOrBlob instanceof Blob) {
+    const blobUrl = window.URL.createObjectURL(urlOrBlob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      if (document.body && document.body.contains(link)) {
+        document.body.removeChild(link);
+      }
+      window.URL.revokeObjectURL(blobUrl);
+    }, 250);
+  }
+}
 
 /**
  * ReportActionBar
@@ -46,52 +131,170 @@ export default function ReportActionBar({
   const [shareError, setShareError] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  const pollAttemptsRef = useRef(0);
+  const pollTimerRef = useRef(null);
+
   const currentView = activeView || reportType || "student";
 
-  // Poll export status if in QUEUED or PROCESSING state
+  // Poll export status if in QUEUED, PROCESSING, or PENDING state with timeout protection
   useEffect(() => {
-    let timer = null;
-    if (exportJob && (exportJob.status === "QUEUED" || exportJob.status === "PROCESSING")) {
-      timer = setTimeout(async () => {
+    const isPending =
+      exportJob &&
+      (exportJob.status === "QUEUED" ||
+        exportJob.status === "PROCESSING" ||
+        exportJob.status === "PENDING");
+
+    if (isPending) {
+      if (pollAttemptsRef.current >= 20) {
+        setExportError("PDF generation timed out. Please try again.");
+        setExportingType(null);
+        setExportJob(null);
+        return;
+      }
+
+      pollTimerRef.current = setTimeout(async () => {
         try {
+          pollAttemptsRef.current += 1;
           const fn = getExportStatus || reportsService?.getExportStatus;
           const statusRes = await fn(exportJob.id);
           setExportJob(statusRes);
-          if (statusRes.status === "READY" && statusRes.download_url) {
-            setDownloadReadyUrl(statusRes.download_url);
+
+          const rawDownloadUrl =
+            statusRes?.signed_url ||
+            statusRes?.download_url ||
+            statusRes?.url ||
+            statusRes?.pdf_url;
+
+          const isReady =
+            statusRes?.status === "READY" ||
+            statusRes?.status === "COMPLETED" ||
+            statusRes?.status === "SUCCESS";
+
+          if (isReady) {
+            if (rawDownloadUrl) {
+              const fullDownloadUrl = toBackendDownloadUrl(rawDownloadUrl);
+              setDownloadReadyUrl(fullDownloadUrl);
+              triggerBrowserDownload(
+                fullDownloadUrl,
+                getExportFilename(careerName, exportingType || exportJob.export_type)
+              );
+            } else {
+              setExportError("PDF generation completed, but download URL is missing.");
+            }
             setExportingType(null);
-          } else if (statusRes.status === "FAILED") {
-            setExportError(statusRes.error_message || "PDF generation failed on the server.");
+            setExportJob(null);
+          } else if (statusRes?.status === "FAILED") {
+            setExportError(
+              statusRes.error_message || statusRes.error || "PDF generation failed on the server."
+            );
             setExportingType(null);
+            setExportJob(null);
+          } else if (
+            statusRes?.status !== "QUEUED" &&
+            statusRes?.status !== "PROCESSING" &&
+            statusRes?.status !== "PENDING"
+          ) {
+            if (rawDownloadUrl) {
+              const fullDownloadUrl = toBackendDownloadUrl(rawDownloadUrl);
+              setDownloadReadyUrl(fullDownloadUrl);
+              triggerBrowserDownload(
+                fullDownloadUrl,
+                getExportFilename(careerName, exportingType || exportJob.export_type)
+              );
+            } else {
+              setExportError("Unexpected export job status.");
+            }
+            setExportingType(null);
+            setExportJob(null);
           }
         } catch (err) {
-          setExportError("Unable to retrieve export status.");
+          setExportError(
+            err.response?.data?.detail || err.message || "Unable to retrieve export status."
+          );
           setExportingType(null);
+          setExportJob(null);
         }
       }, 1500);
     }
+
     return () => {
-      if (timer) clearTimeout(timer);
+      if (pollTimerRef.current) {
+        clearTimeout(pollTimerRef.current);
+      }
     };
-  }, [exportJob]);
+  }, [exportJob, careerName, exportingType]);
 
   const handleStartExport = async (type) => {
     setDropdownOpen(false);
     setExportError(null);
     setDownloadReadyUrl(null);
     setExportingType(type);
+    pollAttemptsRef.current = 0;
 
     try {
       const fn = exportReportPdf || reportsService?.exportReportPdf;
       const res = await fn(careerId, type);
-      setExportJob(res);
-      if (res.status === "READY" && res.download_url) {
-        setDownloadReadyUrl(res.download_url);
+
+      if (res instanceof Blob) {
+        triggerBrowserDownload(res, getExportFilename(careerName, type));
         setExportingType(null);
+        setExportJob(null);
+        return;
+      }
+
+      const rawDownloadUrl =
+        res?.signed_url || res?.download_url || res?.url || res?.pdf_url;
+      const isReady =
+        res?.status === "READY" ||
+        res?.status === "COMPLETED" ||
+        res?.status === "SUCCESS";
+
+      if (isReady) {
+        if (rawDownloadUrl) {
+          const fullDownloadUrl = toBackendDownloadUrl(rawDownloadUrl);
+          setDownloadReadyUrl(fullDownloadUrl);
+          triggerBrowserDownload(fullDownloadUrl, getExportFilename(careerName, type));
+        } else {
+          setExportError("PDF generation completed, but download URL is missing.");
+        }
+        setExportingType(null);
+        setExportJob(null);
+        return;
+      }
+
+      if (res?.status === "FAILED") {
+        setExportError(
+          res.error_message || res.error || "PDF generation failed on the server."
+        );
+        setExportingType(null);
+        setExportJob(null);
+        return;
+      }
+
+      const isPending =
+        res?.status === "QUEUED" ||
+        res?.status === "PROCESSING" ||
+        res?.status === "PENDING";
+
+      if (isPending && res?.id) {
+        setExportJob(res);
+      } else if (rawDownloadUrl) {
+        const fullDownloadUrl = toBackendDownloadUrl(rawDownloadUrl);
+        setDownloadReadyUrl(fullDownloadUrl);
+        triggerBrowserDownload(fullDownloadUrl, getExportFilename(careerName, type));
+        setExportingType(null);
+        setExportJob(null);
+      } else {
+        setExportError("Unable to process PDF export request.");
+        setExportingType(null);
+        setExportJob(null);
       }
     } catch (err) {
-      setExportError(err.response?.data?.detail || err.message || "Failed to start export job.");
+      setExportError(
+        err.response?.data?.detail || err.message || "Failed to start export job."
+      );
       setExportingType(null);
+      setExportJob(null);
     }
   };
 
@@ -113,17 +316,36 @@ export default function ReportActionBar({
   };
 
   const handleCopyLink = async () => {
-    if (!shareData?.share_url) return;
+    const rawUrl = shareData?.share_url;
+    const token = shareData?.token;
+    const absoluteUrl = toAbsoluteShareUrl(rawUrl, token);
+    if (!absoluteUrl) return;
+
     try {
       if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareData.share_url);
+        await navigator.clipboard.writeText(absoluteUrl);
         setCopied(true);
         setTimeout(() => setCopied(false), 2500);
       } else if (navigator?.share) {
         await navigator.share({
           title: `${careerName} - Parent Decision Report`,
-          url: shareData.share_url,
+          url: absoluteUrl,
         });
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = absoluteUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
       }
     } catch (err) {
       setShareError("Could not copy link to clipboard.");
@@ -239,7 +461,7 @@ export default function ReportActionBar({
             </div>
 
             {/* Ready Download Link notification */}
-            {downloadReadyUrl && (
+            {/* {downloadReadyUrl && (
               <a
                 href={downloadReadyUrl}
                 target="_blank"
@@ -251,7 +473,7 @@ export default function ReportActionBar({
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Download PDF</span>
               </a>
-            )}
+            )} */}
 
             {/* Share with Parent Button */}
             <button
@@ -369,8 +591,9 @@ export default function ReportActionBar({
                     <input
                       type="text"
                       readOnly
-                      value={shareData.share_url}
+                      value={toAbsoluteShareUrl(shareData.share_url, shareData.token)}
                       className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-700 select-all focus:outline-none"
+                      data-testid="share-link-input"
                     />
                     <button
                       onClick={handleCopyLink}

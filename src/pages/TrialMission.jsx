@@ -1065,7 +1065,7 @@ export default function TrialMission() {
               </div>
 
               {/* Filter Toolbar */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
@@ -1132,7 +1132,7 @@ export default function TrialMission() {
                     </button>
                   )}
                 </div>
-              </div>
+              </div> */}
 
               {/* Missions Grid */}
               <div className="space-y-4">
@@ -1558,9 +1558,10 @@ export default function TrialMission() {
                 {/* 4. Uncertainty & Risks */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                    4. What are you uncertain about? (Optional)
+                    4. What are you uncertain about? *
                   </label>
                   <textarea
+                    required
                     rows={2}
                     value={recommendationUncertainty}
                     onChange={(e) => setRecommendationUncertainty(e.target.value)}
