@@ -51,9 +51,12 @@ export default function LandingFooter({ isDark }) {
                 </span>
               </div>
             </Link>
-            <p className="text-xs sm:text-sm leading-relaxed max-w-md text-slate-600 dark:text-slate-300">
-              Your personalized path to lasting success. We combine interactive simulator sandboxes, real market data, and validated career assessments to build your career confidence.
-            </p>
+<p
+  className="text-xs sm:text-sm leading-relaxed max-w-md dark:text-slate-200"
+  style={{ color: "#1f2937" }}
+>
+  Your personalized path to lasting success. We combine interactive simulator sandboxes, real market data, and validated career assessments to build your career confidence.
+</p>
           </div>
 
           {/* Navigation Links Columns (Right) */}
