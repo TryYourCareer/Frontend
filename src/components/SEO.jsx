@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const SITE_NAME = "Try Your Career";
-const DEFAULT_TITLE = "Try Your Career | AI-Powered Career Guidance & Exploration Platform";
+const DEFAULT_TITLE = "Try Your Career — AI Career Guidance & Roadmaps";
 const DEFAULT_DESCRIPTION =
   "Discover your ideal career path with AI-driven assessments, salary insights, interactive industry roadmaps, and real-world career reality checks.";
 const DEFAULT_IMAGE = "https://tryyourcareer.com/career_discovery.png";
@@ -49,7 +49,19 @@ export default function SEO({
     // 1. Document Title
     let fullTitle = DEFAULT_TITLE;
     if (title) {
-      fullTitle = title.includes("Try Your Career") ? title : `${title} | ${SITE_NAME}`;
+      // Strip legacy names or duplicate brand suffixes
+      const cleanTitle = title
+        .replace(/\s*\|\s*ClearCareers?/gi, "")
+        .replace(/\s*-\s*ClearCareers?/gi, "")
+        .replace(/\s*\|\s*Try Your Careers?/gi, "")
+        .replace(/\s*-\s*Try Your Careers?/gi, "")
+        .trim();
+
+      if (cleanTitle.toLowerCase().includes("try your career")) {
+        fullTitle = cleanTitle;
+      } else if (cleanTitle.length > 0) {
+        fullTitle = `${cleanTitle} | ${SITE_NAME}`;
+      }
     }
     document.title = fullTitle;
 

@@ -304,7 +304,7 @@ export default function CareerRealityV2({ onBack }) {
   return (
     <section className="min-h-screen bg-gradient-to-br from-[#f7fafd] via-[#eef4fc] to-[#e4eef9] px-4 py-8 sm:px-6 lg:px-10 text-slate-800 font-sans">
       <SEO
-        title="Career Reality Check - Explore 500+ Verified Industry Trajectories | ClearCareers"
+        title="Career Reality Check — 500+ Verified Trajectories"
         description="Explore 500+ real-world career trajectories with verified salary brackets, AI automation exposure ratings, RIASEC dimensional matching, and learning roadmaps."
       />
 

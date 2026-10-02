@@ -253,7 +253,7 @@ export default function StudentDashboard() {
   return (
     <section className="min-h-screen bg-gradient-to-br from-[#f7fafd] via-[#eef4fc] to-[#e4eef9] px-4 py-8 sm:px-6 lg:px-10 text-slate-800 font-sans text-left">
       <SEO
-        title="Student Career Command Center | ClearCareers"
+        title="Student Career Command Center"
         description="Track your personalized career discovery roadmap, RIASEC vector diagnostic scores, interactive trial mission simulations, and verified industry trajectories."
       />
 

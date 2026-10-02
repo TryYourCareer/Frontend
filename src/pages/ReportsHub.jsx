@@ -65,7 +65,7 @@ export default function ReportsHub() {
       data-testid="reports-hub-container"
     >
       <SEO
-        title="Decision Report Engine | ClearCareers"
+        title="Decision Report Engine"
         description="Access and explore your multi-dimensional career decision reports and parent evidence summaries."
       />
 
