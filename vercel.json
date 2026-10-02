@@ -1,17 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.tryyourcareer.com"
-        }
-      ],
-      "destination": "https://tryyourcareer.com/:path*",
-      "permanent": true
-    }
-  ],
   "headers": [
     {
       "source": "/static/(.*)",
