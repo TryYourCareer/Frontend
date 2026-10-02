@@ -1,4 +1,17 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.tryyourcareer.com"
+        }
+      ],
+      "destination": "https://tryyourcareer.com/:path*",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/static/(.*)",
@@ -30,7 +43,7 @@
         },
         {
           "key": "Strict-Transport-Security",
-          "value": "max-age=31536000"
+          "value": "max-age=31536000; includeSubDomains; preload"
         }
       ]
     }

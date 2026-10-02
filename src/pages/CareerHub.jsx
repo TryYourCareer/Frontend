@@ -496,7 +496,7 @@ export default function CareerHub() {
       <SEO
         title="Career Hubs & Communities"
         description="Connect with peers, explore verified roadmaps, get industry updates, and participate in active discussions across 400+ careers."
-        keywords="career hubs, career communities, peer learning, career roadmaps, job discussions, try your careers"
+        keywords="career hubs, career communities, peer learning, career roadmaps, job discussions, try your career"
         url="/career-hubs"
       />
       <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[360px_1fr] bg-transparent overflow-hidden">
