@@ -244,7 +244,7 @@ describe("SystemArchitectWorkspace Component", () => {
 
     const specButton = screen.getByText("System Topology & RTO Specification");
     fireEvent.click(specButton);
-    expect(handleAccessResource).toHaveBeenCalledWith(mockResources[0]);
+    expect(handleAccessResource).toHaveBeenCalledWith(mockResources[0].id);
   });
 
   test("component inspection displays properties drawer", () => {

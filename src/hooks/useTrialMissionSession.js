@@ -248,7 +248,7 @@ export function useTrialMissionSession(initialSessionId = null) {
 
   const handleAccessResource = useCallback(async (resourceId) => {
     if (!session?.id || !resourceId) return;
-    const targetId = typeof resourceId === "object" && resourceId !== null ? resourceId.id : resourceId;
+    const targetId = typeof resourceId === "object" && resourceId !== null ? (resourceId.id || resourceId.resource_id || resourceId.identifier || "") : resourceId;
     if (!targetId || typeof targetId !== "string") return;
 
     setActionLoading(true);

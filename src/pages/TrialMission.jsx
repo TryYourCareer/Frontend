@@ -448,7 +448,7 @@ export default function TrialMission() {
   const resources = Array.isArray(config.resources) ? config.resources : [];
   const investigationConfig = config.investigation || {};
   const completionRules = investigationConfig.completion || {};
-  const requiredFindingsCount = completionRules.required_findings || 1;
+  const requiredFindingsCount = typeof completionRules.required_findings === "number" ? completionRules.required_findings : 0;
   const requiredResourceAccess = completionRules.required_resource_access || [];
 
   // Derive configured investigation phase ID from session.mission_configuration
@@ -683,8 +683,8 @@ export default function TrialMission() {
   }, [reflectionForm, isReflectionStage, isCompletedStage, session?.state, handleSaveReflection]);
 
   const handleSaveNewFinding = async (e) => {
-    e.preventDefault();
-    if (!findingStatement.trim()) return;
+    e?.preventDefault?.();
+    if (!findingStatement?.trim()) return;
 
     const payload = {
       statement: findingStatement.trim(),

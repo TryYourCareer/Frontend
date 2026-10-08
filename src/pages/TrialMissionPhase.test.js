@@ -1602,7 +1602,9 @@ describe("Professional Memo / Output Autosave and Review Lifecycle", () => {
 
     // Click Review immediately before debounce fires
     const reviewBtn = screen.getByRole("button", { name: /Review memo/i });
-    fireEvent.click(reviewBtn);
+    await act(async () => {
+      fireEvent.click(reviewBtn);
+    });
 
     expect(callOrder).toEqual(["save", "review"]);
     expect(handleSaveOutput).toHaveBeenCalledWith(

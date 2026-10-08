@@ -6,8 +6,14 @@ import FindingComposer from "./shared/FindingComposer";
 import WorkspaceTaskChecklistPanel from "./shared/WorkspaceTaskChecklistPanel";
 
 export default function ResearchInterviewWorkspace({
+manager = {},
+  briefing = {},
+
   session,
   configuration,
+  resources = [],
+  accessedResourceIds = new Set(),
+  requiredResourceAccess = [],
   activeResource,
   notesValue,
   setNotesValue,
@@ -28,6 +34,8 @@ export default function ResearchInterviewWorkspace({
   handleSaveNewFinding,
   handleCompleteInvestigation,
   isCompletingInvestigation,
+  requiredFindingsCount = 0,
+  isInvestigationPhase = true,
   actionLoading = false,
   workspaceLoading = false,
 }) {
@@ -71,7 +79,9 @@ export default function ResearchInterviewWorkspace({
   );
   const [selectedTopicId, setSelectedTopicId] = useState("");
 
-  const effectiveFindings = findingsList !== undefined ? findingsList : (findings || []);
+  const effectiveFindings = Array.isArray(findingsList) ? findingsList : (Array.isArray(findings) ? findings : (session?.findings || []));
+  const effectiveRequiredFindingsCount = typeof requiredFindingsCount === "number" ? requiredFindingsCount : (typeof configuration?.investigation?.completion?.required_findings === "number" ? configuration?.investigation?.completion?.required_findings : (session?.mission_configuration?.investigation?.completion?.required_findings || 0));
+  const effectiveRequiredResourceAccess = Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0 ? requiredResourceAccess : (configuration?.investigation?.required_resource_ids || session?.mission_configuration?.investigation?.required_resource_ids || []);
 
   // Finding composer state (supports external controlled props from TrialMission or internal fallback)
   const [localShowFindingForm, setLocalShowFindingForm] = useState(false);
@@ -369,12 +379,18 @@ export default function ResearchInterviewWorkspace({
 
               {/* Checklist & Complete Investigation */}
               <WorkspaceTaskChecklistPanel
-                checklist={configuration?.investigation?.checklist || []}
-                requiredResourceIds={requiredResourceIds}
+                manager={manager || configuration?.role?.manager || {}}
+                briefing={briefing || configuration?.role?.briefing || {}}
+                findings={effectiveFindings}
+                requiredFindingsCount={effectiveRequiredFindingsCount}
+                requiredResourceAccess={effectiveRequiredResourceAccess}
                 accessedResourceIds={accessedResourceIdsSet}
-                allRequiredAccessed={allRequiredAccessed}
                 handleCompleteInvestigation={handleCompleteInvestigation}
-                isCompletingInvestigation={isCompletingInvestigation}
+                actionLoading={actionLoading || isCompletingInvestigation}
+                isInvestigationPhase={isInvestigationPhase}
+                defaultManagerName="Research Director"
+                defaultManagerTitle="Lead Researcher"
+                defaultTask="Synthesize interview transcripts, record qualitative findings, and complete your investigation."
               />
             </div>
           </div>
