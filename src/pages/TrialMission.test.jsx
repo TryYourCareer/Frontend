@@ -11,6 +11,12 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import TrialMission from "./TrialMission";
 import { useTrialMissionSession } from "../hooks/useTrialMissionSession";
 import { getSessionActivitySummary } from "../services/trialMission";
+import { getCareerFitReport } from "../services/discoveryTest";
+
+jest.mock("../services/discoveryTest", () => ({
+  __esModule: true,
+  getCareerFitReport: jest.fn(),
+}));
 
 jest.mock("../services/trialMission", () => ({
   __esModule: true,
@@ -475,5 +481,290 @@ describe("Trial Mission UI Refinement — Full-Screen Shell & Stopwatch Header",
     expect(await screen.findByText(/Supply Chain Bottleneck Pipeline/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Assess Inbound Freight/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText(/Process Configuration Unavailable/i)).not.toBeInTheDocument();
+  });
+});
+
+describe("Discovery Recommended Missions, Explore More & Dynamic Sector Filter", () => {
+  const mockMissions = [
+    {
+      id: "mission-ds-1",
+      title: "Data Science Investigation",
+      career_id: "career-uuid-ds",
+      career: { id: "career-uuid-ds", name: "Data Scientist", sector: "Technology" },
+      workspace_type: "data_notebook",
+      description: "Analyze machine learning drift and models.",
+    },
+    {
+      id: "mission-ux-1",
+      title: "UX Flow Redesign",
+      career_id: "career-uuid-ux",
+      career: { id: "career-uuid-ux", name: "UX Designer", sector: "Creative & Design" },
+      workspace_type: "ux_designer",
+      description: "Optimize user checkout workflow.",
+    },
+    {
+      id: "mission-ux-2",
+      title: "UX Usability Audit",
+      career_id: "career-uuid-ux",
+      career: { id: "career-uuid-ux", name: "UX Designer", sector: "Creative & Design" },
+      workspace_type: "ux_designer",
+      description: "Conduct heuristic evaluation.",
+    },
+    {
+      id: "mission-ba-1",
+      title: "Business Process Optimization",
+      career_id: "career-uuid-ba",
+      career: { id: "career-uuid-ba", name: "Business Analyst", sector: "Business & Management" },
+      workspace_type: "business_analyst",
+      description: "Evaluate operational bottlenecks.",
+    },
+    {
+      id: "mission-nurse-1",
+      title: "Clinical Workflow Triage",
+      career_id: "career-uuid-nurse",
+      career: { id: "career-uuid-nurse", name: "Registered Nurse", sector: "Healthcare & Medicine" },
+      workspace_type: "healthcare",
+      description: "Review patient priority metrics.",
+    },
+  ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+    mockSearchParams = new URLSearchParams();
+    getSessionActivitySummary.mockResolvedValue({ categories: [] });
+    getCareerFitReport.mockResolvedValue(null);
+    useTrialMissionSession.mockReturnValue({
+      ...defaultMockSessionHook,
+      missions: mockMissions,
+      startSession: mockStartSession,
+    });
+  });
+
+  test("1. Reads completed Discovery recommendations from localStorage test session ID", async () => {
+    localStorage.setItem("latest_test_session_id", "session-rec-abc");
+    getCareerFitReport.mockResolvedValue({
+      top_matches: [
+        { career_id: "career-uuid-ds", career_name: "Data Scientist", sector: "Technology" },
+      ],
+    });
+
+    render(<TrialMission />);
+
+    await waitFor(() => {
+      expect(getCareerFitReport).toHaveBeenCalledWith("session-rec-abc");
+    });
+  });
+
+  test("2. Recommended missions are identified strictly by canonical career_id, not career_name", async () => {
+    localStorage.setItem("latest_test_session_id", "session-canonical-test");
+    // Discovery returns matching career_id with different name to prove ID matching
+    getCareerFitReport.mockResolvedValue({
+      top_matches: [
+        {
+          career_id: "career-uuid-ds",
+          career_name: "Completely Different Name In Discovery",
+          sector: "Technology",
+        },
+      ],
+    });
+
+    render(<TrialMission />);
+
+    // Recommended section appears and contains Data Science Investigation because career_id matches
+    expect(await screen.findByText("Recommended Trial Missions")).toBeInTheDocument();
+    expect(screen.getByText("Data Science Investigation")).toBeInTheDocument();
+
+    // Other missions whose career_id did NOT match are not shown in recommended section
+    expect(screen.queryByText("Business Process Optimization")).not.toBeInTheDocument();
+    expect(screen.queryByText("Clinical Workflow Triage")).not.toBeInTheDocument();
+  });
+
+  test("3. Recommended missions are shown initially and non-recommended missions are hidden", async () => {
+    localStorage.setItem("latest_test_session_id", "session-initial-view");
+    getCareerFitReport.mockResolvedValue({
+      top_matches: [
+        { career_id: "career-uuid-ds", career_name: "Data Scientist" },
+      ],
+    });
+
+    render(<TrialMission />);
+
+    expect(await screen.findByText("Recommended Trial Missions")).toBeInTheDocument();
+    expect(screen.getByText("Data Science Investigation")).toBeInTheDocument();
+
+    // Non-recommended missions are hidden before clicking Explore More
+    expect(screen.queryByText("Business Process Optimization")).not.toBeInTheDocument();
+    expect(screen.queryByText("Clinical Workflow Triage")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /explore more missions/i })).toBeInTheDocument();
+  });
+
+  test("4. Explore More reveals remaining active missions without duplicating recommended missions", async () => {
+    localStorage.setItem("latest_test_session_id", "session-explore-test");
+    getCareerFitReport.mockResolvedValue({
+      top_matches: [
+        { career_id: "career-uuid-ds", career_name: "Data Scientist" },
+      ],
+    });
+
+    render(<TrialMission />);
+
+    expect(await screen.findByText("Recommended Trial Missions")).toBeInTheDocument();
+    const exploreBtn = screen.getByRole("button", { name: /explore more missions/i });
+    fireEvent.click(exploreBtn);
+
+    // Remaining missions are now visible under All Other Trial Missions
+    expect(await screen.findByText("All Other Trial Missions")).toBeInTheDocument();
+    expect(screen.getByText("Business Process Optimization")).toBeInTheDocument();
+    expect(screen.getByText("Clinical Workflow Triage")).toBeInTheDocument();
+
+    // Recommended mission remains in Recommended section and is NOT duplicated in Explore More
+    const dsCards = screen.getAllByText("Data Science Investigation");
+    expect(dsCards.length).toBe(1);
+  });
+
+  test("5. Preserves all active missions when a recommended career has multiple missions", async () => {
+    localStorage.setItem("latest_test_session_id", "session-multi-mission");
+    getCareerFitReport.mockResolvedValue({
+      top_matches: [
+        { career_id: "career-uuid-ux", career_name: "UX Designer" },
+      ],
+    });
+
+    render(<TrialMission />);
+
+    expect(await screen.findByText("Recommended Trial Missions")).toBeInTheDocument();
+    // Both active missions for UX Designer are shown in the recommended section
+    expect(screen.getByText("UX Flow Redesign")).toBeInTheDocument();
+    expect(screen.getByText("UX Usability Audit")).toBeInTheDocument();
+  });
+
+  test("6. Derives dynamic sector filter options from returned mission data and filters correctly", async () => {
+    localStorage.setItem("latest_test_session_id", "session-sector-filter");
+    getCareerFitReport.mockResolvedValue({
+      top_matches: [
+        { career_id: "career-uuid-ds", career_name: "Data Scientist" },
+      ],
+    });
+
+    render(<TrialMission />);
+
+    const exploreBtn = await screen.findByRole("button", { name: /explore more missions/i });
+    fireEvent.click(exploreBtn);
+
+    // Sector select dropdown is present
+    const sectorSelect = await screen.findByLabelText(/sector filter/i);
+    expect(sectorSelect).toBeInTheDocument();
+
+    // Check dynamically populated options
+    const options = Array.from(sectorSelect.querySelectorAll("option")).map((o) => o.value);
+    expect(options).toContain("all");
+    expect(options).toContain("Business & Management");
+    expect(options).toContain("Creative & Design");
+    expect(options).toContain("Healthcare & Medicine");
+
+    // Filter by "Healthcare & Medicine"
+    fireEvent.change(sectorSelect, { target: { value: "Healthcare & Medicine" } });
+
+    expect(screen.getByText("Clinical Workflow Triage")).toBeInTheDocument();
+    expect(screen.queryByText("Business Process Optimization")).not.toBeInTheDocument();
+
+    // Filter back to "all"
+    fireEvent.change(sectorSelect, { target: { value: "all" } });
+    expect(screen.getByText("Clinical Workflow Triage")).toBeInTheDocument();
+    expect(screen.getByText("Business Process Optimization")).toBeInTheDocument();
+  });
+
+  test("7. Shows clear empty state when no recommended careers have active missions, but Explore More is available", async () => {
+    localStorage.setItem("latest_test_session_id", "session-no-rec-missions");
+    getCareerFitReport.mockResolvedValue({
+      top_matches: [
+        { career_id: "career-uuid-uncovered", career_name: "Uncovered Specialty" },
+      ],
+    });
+
+    render(<TrialMission />);
+
+    expect(
+      await screen.findByText("No recommended Trial Missions are currently available for your top careers.")
+    ).toBeInTheDocument();
+
+    // All other trial missions are still accessible
+    expect(screen.getByText("All Other Trial Missions")).toBeInTheDocument();
+    expect(screen.getByText("Data Science Investigation")).toBeInTheDocument();
+    expect(screen.getByText("Clinical Workflow Triage")).toBeInTheDocument();
+  });
+
+  test("8. Users without completed Discovery see standard catalog of all available simulations", async () => {
+    getCareerFitReport.mockResolvedValue(null);
+
+    render(<TrialMission />);
+
+    expect(screen.getByRole("heading", { name: /Available Simulations/i })).toBeInTheDocument();
+    expect(screen.queryByText("Recommended Trial Missions")).not.toBeInTheDocument();
+    expect(screen.getByText("Data Science Investigation")).toBeInTheDocument();
+    expect(screen.getByText("UX Flow Redesign")).toBeInTheDocument();
+    expect(screen.getByText("Clinical Workflow Triage")).toBeInTheDocument();
+  });
+
+  test("9. Clicking Launch Simulation initiates the session with authoritative mission ID", async () => {
+    localStorage.setItem("latest_test_session_id", "session-launch-test");
+    getCareerFitReport.mockResolvedValue({
+      top_matches: [
+        { career_id: "career-uuid-ds", career_name: "Data Scientist" },
+      ],
+    });
+
+    render(<TrialMission />);
+
+    const launchBtn = await screen.findByRole("button", { name: /try this career/i });
+    fireEvent.click(launchBtn);
+
+    expect(mockStartSession).toHaveBeenCalledWith("mission-ds-1");
+  });
+
+  test("10. Discovery loading state is displayed and does not expose full catalog while in flight", async () => {
+    localStorage.setItem("latest_test_session_id", "session-loading-test");
+    // Return unresolved promise to simulate in-flight request
+    let resolveReport;
+    getCareerFitReport.mockImplementation(() => new Promise((resolve) => { resolveReport = resolve; }));
+
+    render(<TrialMission />);
+
+    // 1. Discovery loading indicator is shown
+    expect(screen.getByText(/Loading your personalized career recommendations.../i)).toBeInTheDocument();
+
+    // 2. Full catalog / non-recommended missions are NOT prematurely rendered
+    expect(screen.queryByText("Available Simulations")).not.toBeInTheDocument();
+    expect(screen.queryByText("Data Science Investigation")).not.toBeInTheDocument();
+    expect(screen.queryByText("Clinical Workflow Triage")).not.toBeInTheDocument();
+
+    // Resolve report
+    resolveReport({
+      top_matches: [
+        { career_id: "career-uuid-ds", career_name: "Data Scientist" },
+      ],
+    });
+
+    // 3. Recommended section appears after load
+    expect(await screen.findByText("Recommended Trial Missions")).toBeInTheDocument();
+    expect(screen.getByText("Data Science Investigation")).toBeInTheDocument();
+  });
+
+  test("11. Discovery report request failure displays non-blocking informative fallback banner", async () => {
+    localStorage.setItem("latest_test_session_id", "session-failed-test");
+    getCareerFitReport.mockRejectedValue(new Error("Network Error"));
+
+    render(<TrialMission />);
+
+    // 1. Non-blocking error banner is displayed
+    expect(
+      await screen.findByText(/Personalized recommendations could not be loaded/i)
+    ).toBeInTheDocument();
+
+    // 2. Falls back to showing all available simulations so user is not blocked
+    expect(screen.getByRole("heading", { name: /Available Simulations/i })).toBeInTheDocument();
+    expect(screen.getByText("Data Science Investigation")).toBeInTheDocument();
+    expect(screen.getByText("Clinical Workflow Triage")).toBeInTheDocument();
   });
 });
