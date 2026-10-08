@@ -768,3 +768,73 @@ describe("Discovery Recommended Missions, Explore More & Dynamic Sector Filter",
     expect(screen.getByText("Clinical Workflow Triage")).toBeInTheDocument();
   });
 });
+
+describe("Trial Mission - Resource-Access State Hydration & Checklist UI", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+    mockSearchParams = new URLSearchParams();
+    getSessionActivitySummary.mockResolvedValue({ categories: [] });
+    getCareerFitReport.mockResolvedValue(null);
+  });
+
+  test("resource checklist reflects hydrated accessed resource IDs", async () => {
+    useTrialMissionSession.mockReturnValue({
+      ...defaultMockSessionHook,
+      session: {
+        id: "session-hydrated-1",
+        state: "PHASE_ACTIVE",
+        current_phase: "investigate",
+        mission_title: "Hydration Test Mission",
+        workspace_type: "document_workbench",
+        mission_configuration: {
+          role: { title: "Tester" },
+          workspace: { type: "document_workbench", sections: ["evidence_workspace"] },
+          phases: [{ id: "investigate", type: "investigation" }],
+          resources: [
+            { id: "res_1", type: "document", title: "Resource 1 Overview" },
+            { id: "res_2", type: "document", title: "Resource 2 Report" },
+          ],
+        },
+      },
+      accessedResourceIds: new Set(["res_1"]),
+    });
+
+    render(<TrialMission />);
+
+    expect(screen.getByText("Resource 1 Overview")).toBeInTheDocument();
+    expect(screen.getByText("Resource 2 Report")).toBeInTheDocument();
+    expect(screen.getByText("Viewed")).toBeInTheDocument();
+  });
+
+  test("resource click invokes handleAccessResource with canonical resource ID", async () => {
+    const mockAccess = jest.fn();
+    useTrialMissionSession.mockReturnValue({
+      ...defaultMockSessionHook,
+      session: {
+        id: "session-hydrated-2",
+        state: "PHASE_ACTIVE",
+        current_phase: "investigate",
+        mission_title: "Access Test Mission",
+        workspace_type: "document_workbench",
+        mission_configuration: {
+          role: { title: "Tester" },
+          workspace: { type: "document_workbench", sections: ["evidence_workspace"] },
+          phases: [{ id: "investigate", type: "investigation" }],
+          resources: [
+            { id: "res_1", type: "document", title: "Resource 1 Overview" },
+          ],
+        },
+      },
+      accessedResourceIds: new Set(),
+      handleAccessResource: mockAccess,
+    });
+
+    render(<TrialMission />);
+
+    const openBtn = screen.getByRole("button", { name: /view/i });
+    fireEvent.click(openBtn);
+
+    expect(mockAccess).toHaveBeenCalledWith("res_1");
+  });
+});

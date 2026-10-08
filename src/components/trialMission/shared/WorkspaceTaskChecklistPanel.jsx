@@ -23,6 +23,16 @@ export default function WorkspaceTaskChecklistPanel({
   const managerTitle = manager.title || defaultManagerTitle;
   const managerInitial = managerName ? managerName[0] : "M";
   const findingsMet = findings.length >= requiredFindingsCount;
+  const allResourcesAccessed = Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0
+    ? requiredResourceAccess.every((id) =>
+        accessedResourceIds instanceof Set
+          ? accessedResourceIds.has(id)
+          : Array.isArray(accessedResourceIds)
+          ? accessedResourceIds.includes(id)
+          : false
+      )
+    : true;
+  const isReadyToComplete = findingsMet && allResourcesAccessed;
 
   return (
     <div className="space-y-4 lg:col-span-3">
@@ -56,8 +66,8 @@ export default function WorkspaceTaskChecklistPanel({
               Checklist
             </h3>
           </div>
-          <span className={`text-[11px] font-bold ${findingsMet ? "text-emerald-700" : "text-amber-700"}`}>
-            {findingsMet ? "Ready to Complete" : "In Progress"}
+          <span className={`text-[11px] font-bold ${isReadyToComplete ? "text-emerald-700" : "text-amber-700"}`}>
+            {isReadyToComplete ? "Ready to Complete" : "In Progress"}
           </span>
         </div>
 
@@ -100,7 +110,7 @@ export default function WorkspaceTaskChecklistPanel({
         <div className="pt-2 border-t border-slate-100">
           <button
             type="button"
-            disabled={actionLoading || !isInvestigationPhase}
+            disabled={actionLoading || !isInvestigationPhase || !isReadyToComplete}
             onClick={handleCompleteInvestigation}
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
           >

@@ -8,6 +8,9 @@ import WorkspaceTaskChecklistPanel from "./shared/WorkspaceTaskChecklistPanel";
 export default function ProcessWorkflowWorkspace({
   session,
   configuration,
+  resources = [],
+  accessedResourceIds = new Set(),
+  requiredResourceAccess = [],
   activeResource,
   notesValue,
   setNotesValue,
@@ -127,13 +130,17 @@ export default function ProcessWorkflowWorkspace({
     };
   }, [processConfig]);
 
-  const resourcesList = configuration?.resources || [];
-  const requiredResourceIds = configuration?.investigation?.required_resource_ids || [];
+  const resourcesList = resources.length > 0 ? resources : (configuration?.resources || []);
+  const requiredResourceIds = requiredResourceAccess.length > 0
+    ? requiredResourceAccess
+    : (configuration?.investigation?.completion?.required_resource_access || configuration?.investigation?.required_resource_ids || []);
 
-  const accessedResourceIdsSet = useMemo(
-    () => new Set(session?.accessed_resource_ids || []),
-    [session?.accessed_resource_ids]
-  );
+  const accessedResourceIdsSet = useMemo(() => {
+    if (accessedResourceIds instanceof Set && accessedResourceIds.size > 0) {
+      return accessedResourceIds;
+    }
+    return new Set(session?.accessed_resource_ids || []);
+  }, [accessedResourceIds, session?.accessed_resource_ids]);
 
   const allRequiredAccessed = requiredResourceIds.every((id) =>
     accessedResourceIdsSet.has(id)
