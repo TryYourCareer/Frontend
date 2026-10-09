@@ -136,7 +136,7 @@ export default function SystemArchitectWorkspace({
   const onComplete = handleCompleteInvestigation || onCompletePhase;
   const isSavingFinding = creatingFinding ?? actionLoading;
   const isCompleting = completingInvestigation ?? actionLoading;
-  // Extract workspace configuration from session
+
   const workspaceConfig = useMemo(() => {
     return (
       session?.mission_configuration?.workspace ||
@@ -152,7 +152,6 @@ export default function SystemArchitectWorkspace({
   const simulations = useMemo(() => workspaceConfig.simulations || [], [workspaceConfig.simulations]);
   const validationRules = useMemo(() => workspaceConfig.validation_rules || [], [workspaceConfig.validation_rules]);
 
-  // Local interactive topology state
   const [components, setComponents] = useState(initialComponents);
   const [connections, setConnections] = useState(initialConnections);
   const [selectedComponentId, setSelectedComponentId] = useState(null);
@@ -161,7 +160,6 @@ export default function SystemArchitectWorkspace({
   const [activeSimulationLog, setActiveSimulationLog] = useState(null);
   const [telemetryDeltas, setTelemetryDeltas] = useState({});
 
-  // Sync state if session config loads dynamically
   React.useEffect(() => {
     if (initialComponents.length > 0 && components.length === 0) {
       setComponents(initialComponents);
@@ -171,22 +169,18 @@ export default function SystemArchitectWorkspace({
     }
   }, [initialComponents, initialConnections, components.length, connections.length]);
 
-  // Selected component object
   const selectedComponent = useMemo(() => {
     return components.find((c) => c.id === selectedComponentId) || null;
   }, [components, selectedComponentId]);
 
-  // Active simulation object
   const activeSimulation = useMemo(() => {
     return simulations.find((s) => s.id === activeSimulationId) || null;
   }, [simulations, activeSimulationId]);
 
-  // Validation report
   const validationReport = useMemo(() => {
     return validateArchitectureState(components, connections, validationRules);
   }, [components, connections, validationRules]);
 
-  // Handle running a configured failure scenario
   const handleRunSimulation = (scenarioId) => {
     const scenario = simulations.find((s) => s.id === scenarioId);
     if (!scenario) return;
@@ -196,7 +190,6 @@ export default function SystemArchitectWorkspace({
     const failedIds = new Set(effects.failed_components || []);
     const degradedConnIds = new Set(effects.degraded_connections || []);
 
-    // Update component statuses deterministically
     setComponents((prev) =>
       prev.map((c) => {
         if (failedIds.has(c.id)) {
@@ -209,7 +202,6 @@ export default function SystemArchitectWorkspace({
       })
     );
 
-    // Update connection statuses
     setConnections((prev) =>
       prev.map((conn) => {
         if (degradedConnIds.has(conn.id)) {
@@ -223,7 +215,6 @@ export default function SystemArchitectWorkspace({
     setActiveSimulationLog(effects.system_log || `Simulated event [${scenario.title}] executed.`);
   };
 
-  // Reset simulation back to baseline
   const handleResetSimulation = () => {
     setActiveSimulationId(null);
     setActiveSimulationLog(null);
@@ -232,7 +223,6 @@ export default function SystemArchitectWorkspace({
     setConnections(initialConnections);
   };
 
-  // Group components by region
   const componentsByRegion = useMemo(() => {
     const grouped = {};
     if (initialRegions.length > 0) {
@@ -254,13 +244,13 @@ export default function SystemArchitectWorkspace({
   const allRequiredAccessed = requiredResourceAccess.every((id) => accessedResourceIds.has(id));
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" data-testid="system-architect-workspace">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start max-w-7xl mx-auto px-4 sm:px-6 py-6" data-testid="system-architect-workspace">
       {/* ========================================================================= */}
-      {/* LEFT PANEL: Architecture Dossier & Evidence (Cols 3)                     */}
+      {/* LEFT PANEL: Architecture Dossier & Evidence (Cols 3)                      */}
       {/* ========================================================================= */}
       <div className="lg:col-span-3 space-y-5">
         {/* Resource Dossier Card */}
-        <div className="rounded-3xl border border-[#E5DEC9] bg-white p-5 shadow-sm space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
@@ -287,7 +277,7 @@ export default function SystemArchitectWorkspace({
                   key={res.id}
                   type="button"
                   onClick={() => handleAccessResource(res)}
-                  className={`w-full text-left p-3 rounded-2xl border transition flex items-start justify-between gap-2 ${
+                  className={`w-full text-left p-3 rounded-2xl border transition flex items-start justify-between gap-2 cursor-pointer ${
                     isActive
                       ? "border-indigo-600 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-600"
                       : isAccessed
@@ -347,7 +337,7 @@ export default function SystemArchitectWorkspace({
             </div>
             <div className="space-y-1.5">
               {Object.entries(telemetryDeltas).map(([metricKey, metricVal]) => (
-                <div key={metricKey} className="flex items-center justify-between text-xs bg-white/80 p-2 rounded-xl border border-rose-100">
+                <div key={metricKey} className="flex items-center justify-between text-xs bg-white p-2 rounded-xl border border-rose-100">
                   <span className="font-semibold text-slate-700">{metricKey.replace(/_/g, " ")}:</span>
                   <span className="font-mono font-bold text-rose-700">{String(metricVal)}</span>
                 </div>
@@ -361,7 +351,7 @@ export default function SystemArchitectWorkspace({
       {/* CENTER PANEL: Interactive Topology Canvas (Cols 6)                        */}
       {/* ========================================================================= */}
       <div className="lg:col-span-6 space-y-4">
-        <div className="rounded-3xl border border-[#E5DEC9] bg-white p-5 shadow-sm space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
           {/* Header Bar */}
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
@@ -396,7 +386,7 @@ export default function SystemArchitectWorkspace({
 
           {/* Active Simulation Notification Banner */}
           {activeSimulation && (
-            <div className="flex items-center justify-between rounded-2xl bg-amber-500/10 border border-amber-300 p-3 text-xs text-amber-900">
+            <div className="flex items-center justify-between rounded-2xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900">
               <div className="flex items-center gap-2">
                 <Zap size={15} className="text-amber-600 animate-pulse shrink-0" />
                 <div>
@@ -407,7 +397,7 @@ export default function SystemArchitectWorkspace({
               <button
                 type="button"
                 onClick={handleResetSimulation}
-                className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-900 bg-white px-2 py-1 rounded-lg border border-amber-200 hover:bg-amber-50 transition"
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-900 bg-white px-2 py-1 rounded-lg border border-amber-200 hover:bg-amber-50 transition cursor-pointer"
               >
                 <RotateCcw size={12} /> Reset
               </button>
@@ -415,7 +405,7 @@ export default function SystemArchitectWorkspace({
           )}
 
           {/* Topology Canvas Graph View */}
-          <div className="rounded-2xl border border-slate-200 bg-slate-900/5 p-4 min-h-[380px] space-y-4">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 min-h-[380px] space-y-4">
             {components.length === 0 ? (
               <div className="flex flex-col items-center justify-center min-h-[340px] text-center p-6 space-y-2 text-slate-400">
                 <Layers size={36} className="opacity-40 text-slate-500" />
@@ -432,9 +422,9 @@ export default function SystemArchitectWorkspace({
               return (
                 <div
                   key={regId}
-                  className="rounded-2xl border border-slate-300/80 bg-white/80 p-4 shadow-sm space-y-3"
+                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3"
                 >
-                  <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                     <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                       <Globe size={14} className="text-blue-600" />
                       {region.name || regId}
@@ -533,12 +523,12 @@ export default function SystemArchitectWorkspace({
                           setSelectedConnectionId(conn.id);
                           setSelectedComponentId(null);
                         }}
-                        className={`text-left p-2 rounded-xl border text-xs flex items-center justify-between transition ${
+                        className={`text-left p-2 rounded-xl border text-xs flex items-center justify-between transition cursor-pointer ${
                           isSelected
                             ? "border-indigo-600 bg-indigo-50"
                             : isDegraded
                             ? "border-rose-300 bg-rose-50"
-                            : "border-slate-100 bg-slate-50/60 hover:border-slate-200"
+                            : "border-slate-200 bg-slate-50 hover:border-slate-300"
                         }`}
                       >
                         <div className="flex items-center gap-1.5 min-w-0">
@@ -570,7 +560,7 @@ export default function SystemArchitectWorkspace({
                 <button
                   type="button"
                   onClick={() => setSelectedComponentId(null)}
-                  className="text-xs text-slate-500 hover:text-slate-800 font-bold"
+                  className="text-xs text-slate-500 hover:text-slate-800 font-bold cursor-pointer"
                 >
                   ✕
                 </button>
@@ -599,7 +589,7 @@ export default function SystemArchitectWorkspace({
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">Configured Properties:</span>
                   <div className="space-y-1">
                     {Object.entries(selectedComponent.properties).map(([k, v]) => (
-                      <div key={k} className="flex items-center justify-between text-xs bg-white/80 p-1.5 rounded-lg border border-blue-100">
+                      <div key={k} className="flex items-center justify-between text-xs bg-white p-1.5 rounded-lg border border-blue-100">
                         <span className="text-slate-600 font-medium">{k.replace(/_/g, " ")}:</span>
                         <span className="font-mono font-bold text-slate-800">{String(v)}</span>
                       </div>
@@ -612,7 +602,7 @@ export default function SystemArchitectWorkspace({
 
           {/* Fault Simulation Control Tray */}
           {simulations.length > 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <Zap size={16} className="text-amber-600" />
@@ -622,7 +612,7 @@ export default function SystemArchitectWorkspace({
                   <button
                     type="button"
                     onClick={handleResetSimulation}
-                    className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1"
+                    className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer"
                   >
                     <RotateCcw size={12} /> Reset Baseline
                   </button>
@@ -638,7 +628,7 @@ export default function SystemArchitectWorkspace({
                       type="button"
                       disabled={isRunning}
                       onClick={() => handleRunSimulation(sim.id)}
-                      className={`p-3 rounded-xl border text-left transition flex items-center justify-between gap-2 ${
+                      className={`p-3 rounded-xl border text-left transition flex items-center justify-between gap-2 cursor-pointer ${
                         isRunning
                           ? "border-amber-400 bg-amber-50 shadow-sm"
                           : "border-slate-200 bg-white hover:border-amber-300 hover:bg-amber-50/30"
@@ -671,29 +661,31 @@ export default function SystemArchitectWorkspace({
       {/* ========================================================================= */}
       <div className="lg:col-span-3 space-y-5">
         {/* Manager & Mission Objectives */}
-        <div className="rounded-3xl border border-[#E5DEC9] bg-white p-5 shadow-sm space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-800 font-bold text-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-800 font-bold text-sm shrink-0">
               {manager?.name ? manager.name.charAt(0) : "M"}
             </div>
             <div className="min-w-0">
-              <h4 className="text-sm font-bold text-slate-900 truncate">{manager?.name || "Engineering Director"}</h4>
-              <p className="text-xs text-slate-500 truncate">{manager?.title || "Infrastructure Lead"}</p>
+              <h4 className="text-xs font-bold text-slate-900 truncate">{manager?.name || "Engineering Director"}</h4>
+              <p className="text-[11px] text-slate-500 truncate">{manager?.title || "Infrastructure Lead"}</p>
             </div>
           </div>
 
-          <div className="space-y-1.5 text-xs">
-            <span className="font-bold text-slate-800 uppercase tracking-wider text-[10px]">Architectural Mandate</span>
-            <p className="text-slate-600 leading-relaxed">
+          <div className="rounded-xl bg-blue-50/40 border border-blue-100 p-3">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-900 block mb-1">
+              Architectural Mandate
+            </span>
+            <p className="text-xs leading-relaxed text-slate-700">
               {briefing?.task || briefing?.context || "Evaluate the system topology, inspect failure modes, and formulate a resilient architecture recommendation."}
             </p>
           </div>
         </div>
 
         {/* Live Working Notes */}
-        <div className="rounded-3xl border border-[#E5DEC9] bg-white p-5 shadow-sm space-y-3">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 className="text-sm font-bold text-slate-900">Architecture Notes</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">Architecture Notes</h3>
             <span className="text-[11px] text-slate-400 font-medium">
               {notesStatus === "saving" ? "Saving..." : notesStatus === "saved" ? "Saved" : "Autosave"}
             </span>
@@ -702,37 +694,37 @@ export default function SystemArchitectWorkspace({
             value={notesValue || ""}
             onChange={(e) => setNotesValue(e.target.value)}
             placeholder="Record topology observations, single points of failure (SPOFs), and failover latency constraints..."
-            className="w-full h-32 rounded-2xl border border-slate-200 p-3 text-xs text-slate-800 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600 resize-none font-mono"
+            className="w-full h-32 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-800 focus:border-blue-500 focus:outline-none resize-none font-mono"
           />
         </div>
 
         {/* Pinned Architecture Findings */}
-        <div className="rounded-3xl border border-[#E5DEC9] bg-white p-5 shadow-sm space-y-3">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 className="text-sm font-bold text-slate-900">Architecture Findings</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">Architecture Findings</h3>
             <button
               type="button"
               onClick={() => setShowFindingForm(!showFindingForm)}
-              className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800"
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 cursor-pointer"
             >
               <Plus size={14} /> Add
             </button>
           </div>
 
           {showFindingForm && (
-            <div className="rounded-2xl border border-indigo-200 bg-indigo-50/50 p-3 space-y-2">
+            <div className="rounded-2xl border border-blue-100 bg-slate-50 p-3 space-y-2">
               <input
                 type="text"
                 value={findingStatement || ""}
                 onChange={(e) => setFindingStatement(e.target.value)}
                 placeholder="e.g. Asynchronous WAL stream exceeds 30s RTO..."
-                className="w-full rounded-xl border border-slate-200 bg-white p-2 text-xs text-slate-800 focus:border-indigo-600 focus:outline-none"
+                className="w-full rounded-xl border border-slate-200 bg-white p-2 text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
               />
               <button
                 type="button"
                 disabled={isSavingFinding || !findingStatement?.trim()}
                 onClick={onSaveFinding}
-                className="w-full rounded-xl bg-indigo-600 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50 transition"
+                className="w-full rounded-xl bg-blue-600 py-1.5 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50 transition cursor-pointer"
               >
                 {isSavingFinding ? "Saving Finding..." : "Pin Finding"}
               </button>
@@ -744,7 +736,7 @@ export default function SystemArchitectWorkspace({
               <p className="text-xs text-slate-400 italic">No findings pinned yet.</p>
             ) : (
               findings.map((f, idx) => (
-                <div key={f.id || idx} className="rounded-xl border border-slate-100 bg-slate-50 p-2.5 text-xs space-y-1">
+                <div key={f.id || idx} className="rounded-xl border border-slate-200 bg-white p-2.5 text-xs space-y-1 shadow-sm">
                   <p className="font-semibold text-slate-800 leading-snug">{f.statement}</p>
                 </div>
               ))
@@ -753,7 +745,7 @@ export default function SystemArchitectWorkspace({
         </div>
 
         {/* Phase Completion Action */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-3">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Investigation Readiness</span>
             <p className="text-xs text-slate-600">
@@ -767,7 +759,7 @@ export default function SystemArchitectWorkspace({
             type="button"
             disabled={!allRequiredAccessed || isCompleting}
             onClick={onComplete}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3 text-xs font-bold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition cursor-pointer"
           >
             {isCompleting ? (
               <>

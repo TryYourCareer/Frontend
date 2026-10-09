@@ -234,7 +234,7 @@ export default function CareerSearch() {
   }, [query, careers]);
 
   return (
-    <section className="min-h-screen bg-[#FAF6EC] px-4 sm:px-6 py-8">
+    <section className="min-h-screen bg-gradient-to-br from-[#f4f8fd] via-[#edf3fb] to-[#dfeaf7] px-4 sm:px-6 py-8">
       <SEO
         title={query ? `Search: "${query}" Careers` : "Search 100+ Careers & Job Roles"}
         description={query ? `Explore job paths, salaries, and roadmaps matching "${query}" on Try Your Career.` : "Search across 100+ high-growth careers, industries, and skill requirements."}
@@ -282,7 +282,7 @@ export default function CareerSearch() {
 
         {/* Empty state */}
         {!loadingCSV && query && results.length === 0 && (
-          <div className="rounded-3xl border border-[#D3E3F5] bg-white p-10 text-center shadow-xs">
+          <div className="rounded-3xl border border-[#D3E3F5] bg-white/90 backdrop-blur-md p-10 text-center shadow-xs">
             <Briefcase size={36} className="mx-auto mb-3 text-[#1E88E5]/70" />
             <p className="font-sans text-base font-bold text-[#0b1a36]">No careers matched "{query}"</p>
             <p className="text-xs text-slate-500 mt-1">Try different keywords — e.g. "data", "design", or "healthcare"</p>
@@ -291,7 +291,7 @@ export default function CareerSearch() {
 
         {/* No query yet */}
         {!loadingCSV && !query && (
-          <div className="rounded-3xl border border-[#D3E3F5] bg-white p-10 text-center shadow-xs">
+          <div className="rounded-3xl border border-[#D3E3F5] bg-white/90 backdrop-blur-md p-10 text-center shadow-xs">
             <Search size={36} className="mx-auto mb-3 text-[#1E88E5]/70" />
             <p className="font-sans text-base font-bold text-[#0b1a36]">Start typing to explore 270+ careers</p>
             <p className="text-xs text-slate-500 mt-1">Search by career name, skill, cluster, or industry</p>

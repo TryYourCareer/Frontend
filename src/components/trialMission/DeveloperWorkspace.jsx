@@ -38,7 +38,7 @@ export default function DeveloperWorkspace({
   isInvestigationPhase = true,
 }) {
   return (
-    <div className="space-y-6" data-testid="developer-workspace">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 py-6" data-testid="developer-workspace">
       <WorkspaceHeader
         session={session}
         badgeLabel="Developer Investigation Workspace"
@@ -47,7 +47,7 @@ export default function DeveloperWorkspace({
         notesStatus={notesStatus}
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
         <ResourceInspectorPanel
           resources={resources}
           accessedResourceIds={accessedResourceIds}

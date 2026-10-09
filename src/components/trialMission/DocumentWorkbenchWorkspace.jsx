@@ -147,7 +147,7 @@ export default function DocumentWorkbenchWorkspace({
   };
 
   return (
-    <div className="space-y-6" data-testid="document-workbench-workspace">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 py-6" data-testid="document-workbench-workspace">
       <WorkspaceHeader
         session={session}
         badgeLabel="Document Workbench"
@@ -156,7 +156,7 @@ export default function DocumentWorkbenchWorkspace({
         notesStatus={memoSaveStatus || notesStatus}
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
         {/* 1. Left Panel: Reference & Evidence Inspector */}
         <ResourceInspectorPanel
           resources={resources}
@@ -172,26 +172,26 @@ export default function DocumentWorkbenchWorkspace({
         {/* 2. Center Panel: Structured Document Editor */}
         <div className="space-y-6 lg:col-span-6">
           {/* Document Overview Banner */}
-          <div className="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50/70 to-slate-50 p-5 shadow-sm">
+          <div className="rounded-3xl border border-indigo-100 bg-white p-5 shadow-sm space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm shrink-0">
                   <BookOpen size={18} />
                 </div>
                 <div>
-                  <h2 className="font-sans text-lg font-bold text-slate-900">{documentTitle}</h2>
+                  <h2 className="font-sans text-base sm:text-lg font-bold text-slate-900">{documentTitle}</h2>
                   <p className="text-xs text-slate-500">
                     Drafting structured deliverable • {completedSectionsCount} of {sections.length} sections populated
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 rounded-full bg-indigo-100/80 px-3 py-1 font-mono text-xs font-bold text-indigo-900">
+              <div className="flex items-center gap-1.5 rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 font-mono text-xs font-bold text-indigo-900 shrink-0">
                 {Math.round((completedSectionsCount / sections.length) * 100)}% Complete
               </div>
             </div>
 
             {/* Horizontal Section Navigation Tabs */}
-            <div className="mt-4 flex gap-1.5 overflow-x-auto pb-1">
+            <div className="flex gap-1.5 overflow-x-auto pb-1">
               {sections.map((sec, idx) => {
                 const isSelected = sec.id === currentSection.id;
                 const isPopulated = (outputState[sec.id] || "").trim().length > 0;
@@ -200,12 +200,12 @@ export default function DocumentWorkbenchWorkspace({
                     key={sec.id}
                     type="button"
                     onClick={() => setActiveSectionId(sec.id)}
-                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                       isSelected
                         ? "bg-indigo-600 text-white shadow-sm"
                         : isPopulated
                         ? "bg-white text-indigo-900 border border-indigo-200 hover:bg-indigo-50"
-                        : "bg-white/80 text-slate-600 border border-slate-200 hover:bg-slate-100"
+                        : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"
                     }`}
                   >
                     {isPopulated ? <CheckCircle2 size={12} className={isSelected ? "text-white" : "text-emerald-600"} /> : <Circle size={12} className="text-slate-400" />}
@@ -217,7 +217,7 @@ export default function DocumentWorkbenchWorkspace({
           </div>
 
           {/* Active Section Editor Card */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700">
@@ -226,7 +226,7 @@ export default function DocumentWorkbenchWorkspace({
                 <h3 className="font-sans text-xl font-bold text-slate-900">{currentSection.title}</h3>
                 <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">{currentSection.description}</p>
               </div>
-              <div className="flex items-center gap-2 font-mono text-xs text-slate-500">
+              <div className="flex items-center gap-2 font-mono text-xs text-slate-500 shrink-0">
                 <span>{wordCount} words</span>
                 <span>•</span>
                 <span>{charCount} chars</span>
@@ -240,7 +240,7 @@ export default function DocumentWorkbenchWorkspace({
                 value={activeContent}
                 onChange={(e) => handleSectionContentChange(e.target.value)}
                 placeholder={currentSection.placeholder}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-4 font-sans text-sm leading-relaxed text-slate-900 transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full rounded-2xl border border-slate-200 bg-white p-4 font-sans text-sm leading-relaxed text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
 
@@ -250,7 +250,7 @@ export default function DocumentWorkbenchWorkspace({
                 type="button"
                 onClick={handlePrevSection}
                 disabled={currentSectionIndex === 0}
-                className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 cursor-pointer"
               >
                 <ChevronLeft size={14} /> Previous Section
               </button>
@@ -258,7 +258,7 @@ export default function DocumentWorkbenchWorkspace({
                 type="button"
                 onClick={handleNextSection}
                 disabled={currentSectionIndex === sections.length - 1}
-                className="inline-flex items-center gap-1 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-xs font-semibold text-indigo-800 hover:bg-indigo-100 disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-xs font-semibold text-indigo-800 hover:bg-indigo-100 disabled:opacity-40 cursor-pointer"
               >
                 Next Section <ChevronRight size={14} />
               </button>
@@ -267,10 +267,12 @@ export default function DocumentWorkbenchWorkspace({
         </div>
 
         {/* 3. Right Panel: Document Section Checklist & Completion Controls */}
-        <div className="space-y-6 lg:col-span-3">
+        <div className="space-y-4 lg:col-span-3">
           {/* Section Completeness Overview */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Document Outline Checklist</h4>
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
+              Document Outline Checklist
+            </h4>
             <div className="space-y-2">
               {sections.map((sec, idx) => {
                 const isPopulated = (outputState[sec.id] || "").trim().length > 0;
@@ -282,7 +284,7 @@ export default function DocumentWorkbenchWorkspace({
                     className={`flex items-center justify-between rounded-xl p-2.5 cursor-pointer text-xs transition ${
                       isSelected
                         ? "bg-indigo-50 border border-indigo-200 font-bold text-indigo-900"
-                        : "hover:bg-slate-50 text-slate-700"
+                        : "hover:bg-slate-50 text-slate-700 border border-slate-100"
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
@@ -293,7 +295,7 @@ export default function DocumentWorkbenchWorkspace({
                       )}
                       <span className="truncate">{idx + 1}. {sec.title}</span>
                     </div>
-                    <span className="font-mono text-[10px] text-slate-400">
+                    <span className="font-mono text-[10px] text-slate-400 shrink-0">
                       {isPopulated ? `${(outputState[sec.id] || "").trim().split(/\s+/).length}w` : "Empty"}
                     </span>
                   </div>

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { Activity, AlertTriangle, CheckCircle2, Lock, Rocket, Loader2 } from "lucide-react";
 import WorkspaceHeader from "./shared/WorkspaceHeader";
 import ResourceInspectorPanel from "./shared/ResourceInspectorPanel";
 import WorkingNotesPanel from "./shared/WorkingNotesPanel";
@@ -53,7 +54,6 @@ export default function ProcessWorkflowWorkspace({
 
   const effectiveFindings = findingsList !== undefined ? findingsList : (findings || []);
 
-  // Finding composer state (supports external controlled props from TrialMission or internal fallback)
   const [localShowFindingForm, setLocalShowFindingForm] = useState(false);
   const [localFindingStatement, setLocalFindingStatement] = useState("");
   const [localFindingResource, setLocalFindingResource] = useState("");
@@ -84,7 +84,6 @@ export default function ProcessWorkflowWorkspace({
     );
   }, [processConfig, selectedStageId]);
 
-  // Configuration-driven process metrics
   const processMetrics = useMemo(() => {
     if (!processConfig) return null;
 
@@ -135,116 +134,82 @@ export default function ProcessWorkflowWorkspace({
     [session?.accessed_resource_ids]
   );
 
-  const allRequiredAccessed = requiredResourceIds.every((id) =>
-    accessedResourceIdsSet.has(id)
-  );
-
   const handlePinStageFinding = (stage) => {
     if (!stage || !processMetrics) return;
     const metrics = processMetrics.stageMetrics[stage.id];
     const statementText = `[Process Finding - ${stage.name}] Configured Latency: ${metrics?.latency}m, SLA Target: ${metrics?.slaTarget}m (${metrics?.slaStatus}).`;
 
     setFindingStatement(statementText);
-    setFindingResource(""); // Explicitly leave resource unselected for learner choice
+    setFindingResource("");
     setShowFindingForm(true);
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "16px" }}>
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 py-6" data-testid="process-workflow-workspace">
       <WorkspaceHeader
-        missionTitle={session?.mission_title || configuration?.title || "Process Workflow Investigation"}
-        currentPhase={session?.current_phase || "investigate"}
-        customBadgeLabel="Process Workflow Workspace"
+        session={session}
+        badgeLabel="Process Workflow Workspace"
+        badgeColorClass="bg-blue-50 border-blue-200 text-blue-800"
+        badgeIcon={Activity}
         notesStatus={notesStatus}
       />
 
       {!processConfig ? (
-        <div
-          style={{
-            padding: "32px",
-            textAlign: "center",
-            backgroundColor: "#ffffff",
-            borderRadius: "8px",
-            border: "1px dashed #cbd5e1",
-            color: "#475569"
-          }}
-        >
-          <h3 style={{ margin: "0 0 8px 0", fontSize: "1.1rem" }}>Process Configuration Unavailable</h3>
-          <p style={{ margin: 0, fontSize: "0.875rem", color: "#64748b" }}>
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500 shadow-sm">
+          <h3 className="text-base font-bold text-slate-900 mb-2">Process Configuration Unavailable</h3>
+          <p className="text-xs text-slate-500">
             No valid process workflow pipeline was provided in the mission configuration.
           </p>
         </div>
       ) : (
-        <>
+        <div className="space-y-6">
           {/* Top Overview Bar */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              backgroundColor: "#1e293b",
-              color: "#f8fafc",
-              padding: "16px",
-              borderRadius: "8px"
-            }}
-          >
+          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 text-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 style={{ margin: 0, fontSize: "1.1rem" }}>{processConfig.process_name}</h3>
+              <h3 className="text-base font-bold text-white">{processConfig.process_name}</h3>
               {processConfig.description && (
-                <p style={{ margin: "4px 0 0 0", color: "#94a3b8", fontSize: "0.85rem" }}>
+                <p className="text-xs text-slate-400 mt-1">
                   {processConfig.description}
                 </p>
               )}
             </div>
-            <div style={{ display: "flex", gap: "16px", textAlign: "right" }}>
+            <div className="flex items-center gap-6 text-right flex-wrap">
               <div>
-                <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>ESTIMATED CYCLE TIME</div>
-                <div style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#38bdf8" }}>
+                <div className="text-[10px] uppercase font-bold text-slate-400">Estimated Cycle Time</div>
+                <div className="text-lg font-black text-cyan-400 font-mono">
                   {processMetrics.totalCycleTime} mins
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>TARGET SLA</div>
-                <div style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#cbd5e1" }}>
+                <div className="text-[10px] uppercase font-bold text-slate-400">Target SLA</div>
+                <div className="text-lg font-black text-slate-200 font-mono">
                   {processMetrics.totalTargetSla} mins
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>SYSTEM SLA STATUS</div>
-                <div
-                  style={{
-                    fontSize: "0.9rem",
-                    fontWeight: "bold",
-                    padding: "2px 8px",
-                    borderRadius: "4px",
-                    marginTop: "2px",
-                    backgroundColor:
-                      processMetrics.overallStatus === "SLA Compliant" ? "#166534" : "#991b1b",
-                    color: "#ffffff"
-                  }}
+                <div className="text-[10px] uppercase font-bold text-slate-400">System SLA Status</div>
+                <span
+                  className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold font-mono mt-1 ${
+                    processMetrics.overallStatus === "SLA Compliant"
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                  }`}
                 >
                   {processMetrics.overallStatus}
-                </div>
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Main 3-Panel Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            {/* Left Column: Process Pipeline Diagram & Stage Inspector */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "8px",
-                  padding: "16px"
-                }}
-              >
-                <h4 style={{ margin: "0 0 12px 0", fontSize: "1rem", color: "#0f172a" }}>
+          {/* Main 12-Column Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column (7 cols): Process Pipeline Diagram & Stage Inspector */}
+            <div className="lg:col-span-7 flex flex-col gap-6">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-3">
                   Process Pipeline Diagram
                 </h4>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div className="space-y-2.5">
                   {processConfig.stages.map((stage) => {
                     const metrics = processMetrics.stageMetrics[stage.id];
                     const isSelected = stage.id === activeStage?.id;
@@ -254,65 +219,42 @@ export default function ProcessWorkflowWorkspace({
                       <div
                         key={stage.id}
                         onClick={() => setSelectedStageId(stage.id)}
-                        style={{
-                          padding: "12px",
-                          borderRadius: "6px",
-                          border: isSelected ? "2px solid #2563eb" : "1px solid #cbd5e1",
-                          backgroundColor: isSelected ? "#eff6ff" : "#f8fafc",
-                          cursor: "pointer",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center"
-                        }}
+                        className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                          isSelected
+                            ? "border-blue-500 bg-blue-50/60 shadow-sm ring-1 ring-blue-400"
+                            : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/70"
+                        }`}
                       >
-                        <div>
-                          <div style={{ fontWeight: "600", fontSize: "0.95rem", color: "#1e293b" }}>
-                            {stage.name}{" "}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-bold text-slate-900">{stage.name}</span>
                             {stage.risk_flag && (
-                              <span
-                                style={{
-                                  fontSize: "0.7rem",
-                                  backgroundColor: "#fef3c7",
-                                  color: "#92400e",
-                                  padding: "2px 6px",
-                                  borderRadius: "4px",
-                                  marginLeft: "6px"
-                                }}
-                              >
+                              <span className="rounded bg-amber-100 border border-amber-200 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
                                 Risk Flag
                               </span>
                             )}
                             {isBottleneck && (
-                              <span
-                                style={{
-                                  fontSize: "0.7rem",
-                                  backgroundColor: "#fee2e2",
-                                  color: "#991b1b",
-                                  padding: "2px 6px",
-                                  borderRadius: "4px",
-                                  marginLeft: "6px"
-                                }}
-                              >
-                                BOTTLENECK
+                              <span className="rounded bg-rose-100 border border-rose-200 px-1.5 py-0.5 text-[10px] font-bold text-rose-800">
+                                Bottleneck
                               </span>
                             )}
                           </div>
                           {stage.owner && (
-                            <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px" }}>
-                              Owner: {stage.owner} | SLA Target: {metrics?.slaTarget}m
-                            </div>
+                            <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                              Owner: {stage.owner} • SLA Target: {metrics?.slaTarget}m
+                            </p>
                           )}
                         </div>
-                        <div style={{ textAlign: "right" }}>
-                          <div
-                            style={{
-                              fontWeight: "bold",
-                              fontSize: "0.9rem",
-                              color: metrics?.slaStatus === "COMPLIANT" ? "#166534" : "#dc2626"
-                            }}
+                        <div className="text-right shrink-0">
+                          <span
+                            className={`font-mono text-xs font-bold px-2.5 py-1 rounded-xl ${
+                              metrics?.slaStatus === "COMPLIANT"
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : "bg-rose-50 text-rose-700 border border-rose-200"
+                            }`}
                           >
                             {metrics?.latency}m
-                          </div>
+                          </span>
                         </div>
                       </div>
                     );
@@ -322,60 +264,34 @@ export default function ProcessWorkflowWorkspace({
 
               {/* Active Stage Inspector Panel */}
               {activeStage && (
-                <div
-                  style={{
-                    backgroundColor: "#ffffff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    padding: "16px"
-                  }}
-                >
-                  <h4 style={{ margin: "0 0 8px 0", fontSize: "1rem", color: "#0f172a" }}>
+                <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-3">
                     Stage Inspector: {activeStage.name}
                   </h4>
-                  <div style={{ fontSize: "0.85rem", color: "#334155", display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <div className="text-xs text-slate-700 space-y-2">
                     {activeStage.owner && (
-                      <div>
-                        <strong>Owner:</strong> {activeStage.owner}
-                      </div>
+                      <div><strong className="text-slate-900">Owner:</strong> {activeStage.owner}</div>
                     )}
                     {Array.isArray(activeStage.inputs) && (
-                      <div>
-                        <strong>Inputs:</strong> {activeStage.inputs.join(", ") || "None"}
-                      </div>
+                      <div><strong className="text-slate-900">Inputs:</strong> {activeStage.inputs.join(", ") || "None"}</div>
                     )}
                     {Array.isArray(activeStage.outputs) && (
-                      <div>
-                        <strong>Outputs:</strong> {activeStage.outputs.join(", ") || "None"}
-                      </div>
+                      <div><strong className="text-slate-900">Outputs:</strong> {activeStage.outputs.join(", ") || "None"}</div>
                     )}
                     {Array.isArray(activeStage.dependencies) && (
-                      <div>
-                        <strong>Dependencies:</strong> {activeStage.dependencies.join(", ") || "None (Root Stage)"}
-                      </div>
+                      <div><strong className="text-slate-900">Dependencies:</strong> {activeStage.dependencies.join(", ") || "None (Root Stage)"}</div>
                     )}
                     <div>
-                      <strong>Configured Latency:</strong> {processMetrics.stageMetrics[activeStage.id]?.latency} mins |{" "}
-                      <strong>SLA Target:</strong> {processMetrics.stageMetrics[activeStage.id]?.slaTarget} mins
+                      <strong className="text-slate-900">Configured Latency:</strong> {processMetrics.stageMetrics[activeStage.id]?.latency} mins |{" "}
+                      <strong className="text-slate-900">SLA Target:</strong> {processMetrics.stageMetrics[activeStage.id]?.slaTarget} mins
                     </div>
                   </div>
 
-                  <hr style={{ margin: "12px 0", borderColor: "#f1f5f9" }} />
-
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <div className="pt-3 border-t border-slate-100 flex justify-end">
                     <button
                       type="button"
                       onClick={() => handlePinStageFinding(activeStage)}
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: "4px",
-                        border: "1px solid #2563eb",
-                        backgroundColor: "#2563eb",
-                        color: "#ffffff",
-                        fontWeight: "600",
-                        fontSize: "0.8rem",
-                        cursor: "pointer"
-                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-all cursor-pointer"
                     >
                       Pin Finding for Stage
                     </button>
@@ -384,24 +300,23 @@ export default function ProcessWorkflowWorkspace({
               )}
             </div>
 
-            {/* Right Column: Shared Workspace Primitives */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {/* Resource Inspector Panel */}
+            {/* Right Column (5 cols): Primitives (Resources, Notes, Findings, Checklist) */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
               <ResourceInspectorPanel
                 resources={resourcesList}
                 activeResource={activeResource}
                 accessedResourceIds={accessedResourceIdsSet}
                 handleAccessResource={handleAccessResource}
+                title="Process Evidence"
+                theme="blue"
               />
 
-              {/* Working Notes Panel */}
               <WorkingNotesPanel
                 notesValue={notesValue}
                 setNotesValue={setNotesValue}
                 notesStatus={notesStatus}
               />
 
-              {/* Finding Composer */}
               <FindingComposer
                 findings={effectiveFindings}
                 resources={resourcesList}
@@ -418,20 +333,27 @@ export default function ProcessWorkflowWorkspace({
                 handleSaveNewFinding={handleSaveNewFinding}
                 actionLoading={actionLoading}
                 workspaceLoading={workspaceLoading}
+                title="Process Findings"
+                description="Recorded findings and operational bottlenecks."
               />
 
-              {/* Checklist & Complete Investigation */}
               <WorkspaceTaskChecklistPanel
-                checklist={configuration?.investigation?.checklist || []}
-                requiredResourceIds={requiredResourceIds}
+                manager={configuration?.manager || {}}
+                briefing={configuration?.briefing || {}}
+                findings={effectiveFindings}
+                requiredFindingsCount={configuration?.investigation?.required_findings || 1}
+                requiredResourceAccess={requiredResourceIds}
                 accessedResourceIds={accessedResourceIdsSet}
-                allRequiredAccessed={allRequiredAccessed}
                 handleCompleteInvestigation={handleCompleteInvestigation}
-                isCompletingInvestigation={isCompletingInvestigation}
+                actionLoading={actionLoading || isCompletingInvestigation}
+                isInvestigationPhase={true}
+                defaultManagerName="Process Operations Lead"
+                defaultManagerTitle="Operations Manager"
+                defaultTask="Analyze stage latencies, identify bottlenecks, and record required findings."
               />
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

@@ -543,7 +543,7 @@ export default function DataNotebookWorkspace({
   return (
     <div className="space-y-6" data-testid="data-notebook-workspace">
       {/* HEADER BAR */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-3 py-0.5 text-xs font-bold text-indigo-800 uppercase tracking-wider">
@@ -583,12 +583,12 @@ export default function DataNotebookWorkspace({
       </div>
 
       {/* 3-COLUMN DESKTOP WORKSPACE LAYOUT */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
         {/* ========================================================================= */}
         {/* LEFT PANEL: Datasets & Evidence Explorer                                  */}
         {/* ========================================================================= */}
         <div className="space-y-4 lg:col-span-3">
-          <div className="rounded-3xl border border-[#E5DEC9] bg-white p-5 shadow-sm space-y-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
                 Datasets & Evidence
@@ -620,18 +620,18 @@ export default function DataNotebookWorkspace({
                       className={`rounded-2xl border p-3.5 transition-all duration-200 cursor-pointer ${
                         isSelected
                           ? "border-blue-500 bg-blue-50/70 shadow-sm ring-1 ring-blue-400"
-                          : "border-slate-200 bg-slate-50/80 hover:bg-slate-100"
+                          : "border-slate-200 bg-white hover:border-slate-300"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="space-y-1">
                           <h3 className="text-xs font-bold text-slate-900">{res.title}</h3>
                           <div className="flex items-center gap-1.5">
-                            <span className="inline-block rounded bg-slate-200/80 px-1.5 py-0.5 font-mono text-[10px] text-slate-700 uppercase">
+                            <span className="inline-block rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 font-mono text-[10px] text-slate-600 uppercase">
                               {res.type || "evidence"}
                             </span>
                             {isDataset && (
-                              <span className="inline-flex items-center gap-0.5 rounded bg-indigo-100 px-1.5 py-0.5 font-mono text-[10px] text-indigo-700">
+                              <span className="inline-flex items-center gap-0.5 rounded bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 font-mono text-[10px] text-indigo-700">
                                 <FileSpreadsheet size={10} /> Tabular
                               </span>
                             )}
@@ -642,7 +642,7 @@ export default function DataNotebookWorkspace({
                         )}
                       </div>
 
-                      <div className="mt-3 pt-2 border-t border-slate-200/60 flex justify-end">
+                      <div className="mt-3 pt-2 border-t border-slate-100 flex justify-end">
                         <button
                           type="button"
                           disabled={actionLoading}
@@ -651,7 +651,7 @@ export default function DataNotebookWorkspace({
                             e.stopPropagation();
                             handleSelectResource(res);
                           }}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline disabled:opacity-50 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 disabled:opacity-50 transition-colors cursor-pointer"
                         >
                           <Eye size={12} /> {isAccessed ? "Inspect" : "Load & Inspect"}
                         </button>
@@ -686,7 +686,7 @@ export default function DataNotebookWorkspace({
                     <span>Columns ({parsedData.columns.length}):</span>
                     <span className="font-mono text-slate-600">{parsedData.rows.length} rows</span>
                   </div>
-                  <div className="flex flex-wrap gap-1 max-h-28 overflow-y-auto p-1 bg-white/70 rounded-xl border border-indigo-100">
+                  <div className="flex flex-wrap gap-1 max-h-28 overflow-y-auto p-1 bg-white rounded-xl border border-indigo-100">
                     {parsedData.columns.map((col) => (
                       <span
                         key={col}
@@ -702,7 +702,7 @@ export default function DataNotebookWorkspace({
                   <div className="flex items-center gap-1 text-[11px] text-slate-600 font-semibold">
                     <Info size={12} /> Non-tabular document evidence
                   </div>
-                  <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap max-h-48 overflow-y-auto bg-white/80 p-3 rounded-xl border border-slate-200">
+                  <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap max-h-48 overflow-y-auto bg-white p-3 rounded-xl border border-slate-200">
                     {resolvedActiveResource.content || "No raw content provided."}
                   </div>
                 </div>
@@ -716,7 +716,7 @@ export default function DataNotebookWorkspace({
         {/* ========================================================================= */}
         <div className="space-y-6 lg:col-span-6">
           {/* ANALYTICAL QUERY CELL */}
-          <div className="rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm space-y-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h2 className="text-base font-bold text-slate-900">Analytical Workspace</h2>
@@ -742,7 +742,7 @@ export default function DataNotebookWorkspace({
                       setActiveAnalysisResult(null);
                       setAnalysisError(null);
                     }}
-                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
                   >
                     <option value="filter_cohort">Filter Cohort</option>
                     <option value="aggregate_metrics">Aggregate Metrics</option>
@@ -761,7 +761,7 @@ export default function DataNotebookWorkspace({
                         disabled={!resolvedActiveResource || parsedData.columns.length === 0}
                         value={filterColumn || (parsedData.columns[0] || "")}
                         onChange={(e) => setFilterColumn(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       >
                         {!resolvedActiveResource ? (
                           <option value="">(Select dataset first)</option>
@@ -783,7 +783,7 @@ export default function DataNotebookWorkspace({
                         id="filter-operator-select"
                         value={filterOperator}
                         onChange={(e) => setFilterOperator(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
                       >
                         <option value="equals">Equals (==)</option>
                         <option value="not_equals">Not Equals (!=)</option>
@@ -806,7 +806,7 @@ export default function DataNotebookWorkspace({
                         disabled={!resolvedActiveResource || parsedData.columns.length === 0}
                         value={aggMetricCol || (parsedData.columns[0] || "")}
                         onChange={(e) => setAggMetricCol(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       >
                         {!resolvedActiveResource ? (
                           <option value="">(Select dataset first)</option>
@@ -830,7 +830,7 @@ export default function DataNotebookWorkspace({
                         disabled={!resolvedActiveResource || parsedData.columns.length === 0}
                         value={aggGroupByCol}
                         onChange={(e) => setAggGroupByCol(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       >
                         <option value="">(None - Overall)</option>
                         {parsedData.columns.map((c) => (
@@ -854,7 +854,7 @@ export default function DataNotebookWorkspace({
                         disabled={!resolvedActiveResource || parsedData.columns.length === 0}
                         value={compareSplitCol || (parsedData.columns[0] || "")}
                         onChange={(e) => setCompareSplitCol(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       >
                         {!resolvedActiveResource ? (
                           <option value="">(Select dataset first)</option>
@@ -878,7 +878,7 @@ export default function DataNotebookWorkspace({
                         disabled={!resolvedActiveResource || parsedData.columns.length === 0}
                         value={compareMetricCol || (parsedData.columns[0] || "")}
                         onChange={(e) => setCompareMetricCol(e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       >
                         {!resolvedActiveResource ? (
                           <option value="">(Select dataset first)</option>
@@ -908,7 +908,7 @@ export default function DataNotebookWorkspace({
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
                     placeholder="e.g., iOS, 500, failed, true"
-                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
               )}
@@ -924,7 +924,7 @@ export default function DataNotebookWorkspace({
                       value={compareCohortA}
                       onChange={(e) => setCompareCohortA(e.target.value)}
                       placeholder="e.g. baseline, control, US"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -936,7 +936,7 @@ export default function DataNotebookWorkspace({
                       value={compareCohortB}
                       onChange={(e) => setCompareCohortB(e.target.value)}
                       placeholder="e.g. treatment, v2.1, EU"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#7B4A28] focus:outline-none"
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -946,7 +946,7 @@ export default function DataNotebookWorkspace({
                 <button
                   type="submit"
                   disabled={actionLoading || !resolvedActiveResource || !parsedData.isTabular}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-700 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-800 disabled:opacity-40 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-40 cursor-pointer transition-all"
                 >
                   <BarChart2 size={13} /> Run Analysis
                 </button>
@@ -971,9 +971,9 @@ export default function DataNotebookWorkspace({
                   <button
                     type="button"
                     onClick={() => handlePinAsFinding(activeAnalysisResult)}
-                    className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1 rounded-xl bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition-all cursor-pointer"
                   >
-                    <BookmarkPlus size={11} /> Pin as Finding
+                    <BookmarkPlus size={13} /> Pin as Finding
                   </button>
                 </div>
 
@@ -1029,7 +1029,7 @@ export default function DataNotebookWorkspace({
                             <td className="p-2 text-slate-700">{g.mean ?? "—"}</td>
                             <td className="p-2 text-slate-700">{g.median ?? "—"}</td>
                             <td className="p-2 text-slate-700">
-                              {g.min !== null ? `${g.min} - ${g.max}` : "—"}
+                              {g.min !== null ? `${g.min} — ${g.max}` : "—"}
                             </td>
                           </tr>
                         ))}
@@ -1042,7 +1042,7 @@ export default function DataNotebookWorkspace({
           </div>
 
           {/* FINDINGS NOTEBOOK / EVIDENCE REGISTER */}
-          <div className="rounded-3xl border border-[#E5DEC9] bg-white p-6 shadow-sm space-y-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">
@@ -1060,7 +1060,7 @@ export default function DataNotebookWorkspace({
                     setShowFindingForm(true);
                     setFindingResource(resolvedActiveResource?.id || "");
                   }}
-                  className="inline-flex items-center gap-1 rounded-xl bg-blue-50 border border-blue-200 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-all cursor-pointer"
                 >
                   <Plus size={13} /> Add Finding
                 </button>
@@ -1071,7 +1071,7 @@ export default function DataNotebookWorkspace({
             {showFindingForm && (
               <form
                 onSubmit={handleSaveNewFinding}
-                className="rounded-2xl border border-blue-200 bg-blue-50/60 p-4 space-y-3"
+                className="rounded-2xl border border-blue-100 bg-slate-50/50 p-4 space-y-3"
               >
                 <div className="space-y-1">
                   <label htmlFor="finding-statement-input" className="text-xs font-bold text-slate-700">
@@ -1137,18 +1137,18 @@ export default function DataNotebookWorkspace({
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t border-blue-200/60">
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
                   <button
                     type="button"
                     onClick={() => setShowFindingForm(false)}
-                    className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                    className="rounded-xl border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={actionLoading || !findingStatement.trim()}
-                    className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-all cursor-pointer"
                   >
                     {actionLoading ? (
                       <Loader2 size={13} className="animate-spin" />
@@ -1172,11 +1172,11 @@ export default function DataNotebookWorkspace({
                 {findings.map((f, idx) => (
                   <div
                     key={f.id || idx}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1.5"
+                    className="rounded-2xl border border-slate-200 bg-white p-4 space-y-1.5 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <h4 className="text-xs font-bold text-slate-900">{f.statement}</h4>
-                      <span className="rounded bg-indigo-100 px-1.5 py-0.5 font-mono text-[10px] text-indigo-800">
+                      <span className="rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 font-mono text-[10px] font-bold text-slate-600 shrink-0">
                         Finding #{idx + 1}
                       </span>
                     </div>
@@ -1187,8 +1187,8 @@ export default function DataNotebookWorkspace({
                       </p>
                     )}
                     {f.uncertainty && (
-                      <p className="text-[11px] text-slate-500 italic">
-                        Uncertainty: {f.uncertainty}
+                      <p className="text-[11px] text-amber-700 italic flex items-center gap-1 mt-1">
+                        <AlertCircle size={12} className="shrink-0" /> Uncertainty: {f.uncertainty}
                       </p>
                     )}
                   </div>
@@ -1203,17 +1203,20 @@ export default function DataNotebookWorkspace({
         {/* ========================================================================= */}
         <div className="space-y-4 lg:col-span-3">
           {/* MANAGER CARD */}
-          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-sm backdrop-blur-sm space-y-3">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-sm font-bold text-white shadow-sm shadow-blue-500/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-sm shrink-0">
                 {manager.name ? manager.name[0] : "M"}
               </div>
-              <div>
-                <h3 className="text-xs font-bold text-slate-900">{manager.name || "Lead"}</h3>
-                <p className="text-[11px] text-slate-500 font-medium">{manager.title || "Data Science Lead"}</p>
+              <div className="min-w-0">
+                <h3 className="text-xs font-bold text-slate-900 truncate">{manager.name || "Lead"}</h3>
+                <p className="text-[11px] text-slate-500 font-medium truncate">{manager.title || "Data Science Lead"}</p>
               </div>
             </div>
-            <div className="rounded-xl bg-blue-50/50 border border-blue-100/60 p-3">
+            <div className="rounded-xl bg-blue-50/50 border border-blue-100 p-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-900 block mb-1">
+                Current Objective
+              </span>
               <p className="text-xs leading-relaxed text-slate-700">
                 {briefing.task ||
                   "Analyze the dataset slices, evaluate baseline vs production metrics, and prepare evidence-backed findings."}
@@ -1222,7 +1225,7 @@ export default function DataNotebookWorkspace({
           </div>
 
           {/* WORKING NOTES */}
-          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-sm backdrop-blur-sm space-y-3">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
               Working Notes
             </h3>
@@ -1231,18 +1234,18 @@ export default function DataNotebookWorkspace({
               value={notesValue || ""}
               onChange={(e) => setNotesValue?.(e.target.value)}
               placeholder="Record feature hypotheses, data anomalies, and calculation scratchnotes..."
-              className="w-full rounded-2xl border border-slate-300 bg-slate-50/60 p-3 text-xs text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none transition"
+              className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:outline-none transition"
             />
           </div>
 
           {/* COMPLETION CHECKLIST */}
-          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-sm backdrop-blur-sm space-y-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
               Completion Checklist
             </h3>
 
             <div className="space-y-2.5 text-xs">
-              <div className="flex items-center justify-between rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
+              <div className="flex items-center justify-between rounded-xl bg-white p-2.5 border border-slate-200">
                 <span className="flex items-center gap-2 text-slate-700 font-medium">
                   {findings.length >= requiredFindingsCount ? (
                     <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
@@ -1259,7 +1262,7 @@ export default function DataNotebookWorkspace({
               {requiredResourceAccess.map((reqId) => {
                 const hasAccessed = accessedResourceIds.has(reqId);
                 return (
-                  <div key={reqId} className="flex items-center justify-between rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
+                  <div key={reqId} className="flex items-center justify-between rounded-xl bg-white p-2.5 border border-slate-200">
                     <span className="flex items-center gap-2 text-slate-700 font-medium truncate max-w-[160px]">
                       {hasAccessed ? (
                         <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
@@ -1281,7 +1284,7 @@ export default function DataNotebookWorkspace({
                 type="button"
                 disabled={actionLoading || !isInvestigationPhase}
                 onClick={handleCompleteInvestigation}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-xs font-bold text-white shadow-sm hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 cursor-pointer transition-all"
               >
                 {actionLoading ? (
                   <>

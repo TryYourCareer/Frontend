@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { Activity, MessageSquare, CheckCircle2, Lock, Rocket, Loader2 } from "lucide-react";
 import WorkspaceHeader from "./shared/WorkspaceHeader";
 import ResourceInspectorPanel from "./shared/ResourceInspectorPanel";
 import WorkingNotesPanel from "./shared/WorkingNotesPanel";
@@ -73,7 +74,6 @@ export default function ResearchInterviewWorkspace({
 
   const effectiveFindings = findingsList !== undefined ? findingsList : (findings || []);
 
-  // Finding composer state (supports external controlled props from TrialMission or internal fallback)
   const [localShowFindingForm, setLocalShowFindingForm] = useState(false);
   const [localFindingStatement, setLocalFindingStatement] = useState("");
   const [localFindingResource, setLocalFindingResource] = useState("");
@@ -121,88 +121,62 @@ export default function ResearchInterviewWorkspace({
     [session?.accessed_resource_ids]
   );
 
-  const allRequiredAccessed = requiredResourceIds.every((id) =>
-    accessedResourceIdsSet.has(id)
-  );
-
   const handlePinInquiryFinding = (topic, stakeholder) => {
     if (!topic || !stakeholder) return;
     const statementText = `[Interview Evidence - ${stakeholder.name}] Question: "${topic.question}" | Response Excerpt: "${topic.response}"`;
 
     setFindingStatement(statementText);
-    setFindingResource(""); // Explicitly leave resource unselected for learner choice
+    setFindingResource("");
     setShowFindingForm(true);
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "16px" }}>
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 py-6" data-testid="research-interview-workspace">
       <WorkspaceHeader
-        missionTitle={session?.mission_title || configuration?.title || "Research & Interview Discovery"}
-        currentPhase={session?.current_phase || "investigate"}
-        customBadgeLabel="Research / Interview Workspace"
+        session={session}
+        badgeLabel="Research / Interview Workspace"
+        badgeColorClass="bg-blue-50 border-blue-200 text-blue-800"
+        badgeIcon={Activity}
         notesStatus={notesStatus}
       />
 
       {!interviewConfig ? (
-        <div
-          style={{
-            padding: "32px",
-            textAlign: "center",
-            backgroundColor: "#ffffff",
-            borderRadius: "8px",
-            border: "1px dashed #cbd5e1",
-            color: "#475569"
-          }}
-        >
-          <h3 style={{ margin: "0 0 8px 0", fontSize: "1.1rem" }}>Research Configuration Unavailable</h3>
-          <p style={{ margin: 0, fontSize: "0.875rem", color: "#64748b" }}>
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500 shadow-sm">
+          <h3 className="text-base font-bold text-slate-900 mb-2">Research Configuration Unavailable</h3>
+          <p className="text-xs text-slate-500">
             No valid research or interview configuration was provided in the mission configuration.
           </p>
         </div>
       ) : (
-        <>
+        <div className="space-y-6">
           {/* Top Overview Header */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              backgroundColor: "#0f172a",
-              color: "#f8fafc",
-              padding: "16px",
-              borderRadius: "8px"
-            }}
-          >
+          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 text-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 style={{ margin: 0, fontSize: "1.1rem" }}>{interviewConfig.title}</h3>
+              <h3 className="text-base font-bold text-white">{interviewConfig.title}</h3>
               {interviewConfig.description && (
-                <p style={{ margin: "4px 0 0 0", color: "#94a3b8", fontSize: "0.85rem" }}>
+                <p className="text-xs text-slate-400 mt-1">
                   {interviewConfig.description}
                 </p>
               )}
             </div>
-            <div style={{ textAlign: "right", fontSize: "0.85rem", color: "#cbd5e1" }}>
-              <div>STAKEHOLDERS: <strong>{interviewConfig.stakeholders.length}</strong></div>
+            <div className="text-right shrink-0">
+              <div className="text-[10px] uppercase font-bold text-slate-400">Stakeholders</div>
+              <div className="text-lg font-black text-white font-mono">
+                {interviewConfig.stakeholders.length}
+              </div>
             </div>
           </div>
 
-          {/* Main 3-Panel Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            {/* Left Column: Stakeholder Selector & Inquiry Inspector */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {/* Main 12-Column Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column (7 cols): Stakeholder Selector & Inquiry Topics */}
+            <div className="lg:col-span-7 flex flex-col gap-6">
               {/* Stakeholder Selector Tabs */}
-              <div
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "8px",
-                  padding: "16px"
-                }}
-              >
-                <h4 style={{ margin: "0 0 12px 0", fontSize: "1rem", color: "#0f172a" }}>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-3">
                   Select Stakeholder / Target Persona
                 </h4>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                <div className="flex flex-wrap gap-2">
                   {interviewConfig.stakeholders.map((st) => {
                     const isSelected = st.id === activeStakeholder?.id;
                     return (
@@ -213,16 +187,11 @@ export default function ResearchInterviewWorkspace({
                           setSelectedStakeholderId(st.id);
                           setSelectedTopicId("");
                         }}
-                        style={{
-                          padding: "8px 14px",
-                          borderRadius: "6px",
-                          border: isSelected ? "2px solid #0284c7" : "1px solid #cbd5e1",
-                          backgroundColor: isSelected ? "#e0f2fe" : "#f8fafc",
-                          color: isSelected ? "#0369a1" : "#334155",
-                          fontWeight: "600",
-                          fontSize: "0.85rem",
-                          cursor: "pointer"
-                        }}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100"
+                        }`}
                       >
                         {st.name} {st.role ? `(${st.role})` : ""}
                       </button>
@@ -233,89 +202,54 @@ export default function ResearchInterviewWorkspace({
 
               {/* Inquiry Topics & Responses List */}
               {activeStakeholder && (
-                <div
-                  style={{
-                    backgroundColor: "#ffffff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    padding: "16px"
-                  }}
-                >
-                  <h4 style={{ margin: "0 0 12px 0", fontSize: "1rem", color: "#0f172a" }}>
+                <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-3">
                     Inquiry Topics for {activeStakeholder.name}
                   </h4>
 
                   {activeStakeholder.topics.length === 0 ? (
-                    <p style={{ color: "#64748b", fontSize: "0.85rem" }}>
+                    <p className="text-xs text-slate-500">
                       No inquiry topics configured for this stakeholder.
                     </p>
                   ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div className="space-y-3">
                       {activeStakeholder.topics.map((t) => {
                         const isSelectedTopic = t.id === activeTopic?.id;
                         return (
                           <div
                             key={t.id}
                             onClick={() => setSelectedTopicId(t.id)}
-                            style={{
-                              padding: "12px",
-                              borderRadius: "6px",
-                              border: isSelectedTopic ? "2px solid #0284c7" : "1px solid #e2e8f0",
-                              backgroundColor: isSelectedTopic ? "#f0f9ff" : "#ffffff",
-                              cursor: "pointer"
-                            }}
+                            className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                              isSelectedTopic
+                                ? "border-blue-500 bg-blue-50/50 shadow-sm ring-1 ring-blue-400"
+                                : "border-slate-200 bg-white hover:border-slate-300"
+                            }`}
                           >
-                            <div style={{ fontWeight: "600", fontSize: "0.9rem", color: "#0f172a" }}>
-                              {t.question}
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                              <span className="text-xs font-bold text-slate-900">{t.question}</span>
                               {t.theme && (
-                                <span
-                                  style={{
-                                    fontSize: "0.7rem",
-                                    backgroundColor: "#e0e7ff",
-                                    color: "#3730a3",
-                                    padding: "2px 6px",
-                                    borderRadius: "4px",
-                                    marginLeft: "8px"
-                                  }}
-                                >
+                                <span className="rounded bg-indigo-50 border border-indigo-200 px-2 py-0.5 font-mono text-[10px] font-bold text-indigo-800">
                                   {t.theme}
                                 </span>
                               )}
                             </div>
 
                             {isSelectedTopic && t.response && (
-                              <div
-                                style={{
-                                  marginTop: "10px",
-                                  padding: "10px",
-                                  backgroundColor: "#f8fafc",
-                                  borderRadius: "6px",
-                                  borderLeft: "4px solid #0284c7",
-                                  fontSize: "0.85rem",
-                                  color: "#334155",
-                                  lineHeight: "1.4"
-                                }}
-                              >
-                                <strong>Transcript Response:</strong>
-                                <p style={{ margin: "4px 0 8px 0", fontStyle: "italic" }}>"{t.response}"</p>
-
-                                <div style={{ display: "flex", justify: "flex-end" }}>
+                              <div className="mt-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200 border-l-4 border-l-blue-600 space-y-2">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                                  Transcript Response:
+                                </span>
+                                <p className="text-xs text-slate-700 italic leading-relaxed">
+                                  "{t.response}"
+                                </p>
+                                <div className="flex justify-end pt-1">
                                   <button
                                     type="button"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handlePinInquiryFinding(t, activeStakeholder);
                                     }}
-                                    style={{
-                                      padding: "4px 10px",
-                                      borderRadius: "4px",
-                                      border: "1px solid #0284c7",
-                                      backgroundColor: "#0284c7",
-                                      color: "#ffffff",
-                                      fontWeight: "600",
-                                      fontSize: "0.75rem",
-                                      cursor: "pointer"
-                                    }}
+                                    className="inline-flex items-center gap-1 rounded-xl bg-blue-600 px-3 py-1 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-all cursor-pointer"
                                   >
                                     Pin Finding from Response
                                   </button>
@@ -331,24 +265,23 @@ export default function ResearchInterviewWorkspace({
               )}
             </div>
 
-            {/* Right Column: Shared Workspace Primitives */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {/* Resource Inspector Panel */}
+            {/* Right Column (5 cols): Primitives (Resources, Notes, Findings, Checklist) */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
               <ResourceInspectorPanel
                 resources={resourcesList}
                 activeResource={activeResource}
                 accessedResourceIds={accessedResourceIdsSet}
                 handleAccessResource={handleAccessResource}
+                title="Research Evidence"
+                theme="blue"
               />
 
-              {/* Working Notes Panel */}
               <WorkingNotesPanel
                 notesValue={notesValue}
                 setNotesValue={setNotesValue}
                 notesStatus={notesStatus}
               />
 
-              {/* Finding Composer */}
               <FindingComposer
                 findings={effectiveFindings}
                 resources={resourcesList}
@@ -365,20 +298,27 @@ export default function ResearchInterviewWorkspace({
                 handleSaveNewFinding={handleSaveNewFinding}
                 actionLoading={actionLoading}
                 workspaceLoading={workspaceLoading}
+                title="Research Findings"
+                description="Recorded stakeholder insights and interview evidence."
               />
 
-              {/* Checklist & Complete Investigation */}
               <WorkspaceTaskChecklistPanel
-                checklist={configuration?.investigation?.checklist || []}
-                requiredResourceIds={requiredResourceIds}
+                manager={configuration?.manager || {}}
+                briefing={configuration?.briefing || {}}
+                findings={effectiveFindings}
+                requiredFindingsCount={configuration?.investigation?.required_findings || 1}
+                requiredResourceAccess={requiredResourceIds}
                 accessedResourceIds={accessedResourceIdsSet}
-                allRequiredAccessed={allRequiredAccessed}
                 handleCompleteInvestigation={handleCompleteInvestigation}
-                isCompletingInvestigation={isCompletingInvestigation}
+                actionLoading={actionLoading || isCompletingInvestigation}
+                isInvestigationPhase={true}
+                defaultManagerName="Research Lead"
+                defaultManagerTitle="User Research Director"
+                defaultTask="Conduct stakeholder inquiries, analyze interview transcripts, and record required findings."
               />
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

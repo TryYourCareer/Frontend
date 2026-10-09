@@ -6,6 +6,10 @@ import WorkingNotesPanel from "./shared/WorkingNotesPanel";
 import FindingComposer from "./shared/FindingComposer";
 import WorkspaceTaskChecklistPanel from "./shared/WorkspaceTaskChecklistPanel";
 
+/**
+ * Business Analyst Workspace container component.
+ * Layout optimized to remove visual cluster confusion and provide clear hierarchy.
+ */
 export default function BusinessAnalystWorkspace({
   session,
   manager = {},
@@ -38,7 +42,7 @@ export default function BusinessAnalystWorkspace({
   isInvestigationPhase = true,
 }) {
   return (
-    <div className="space-y-6" data-testid="business-analyst-workspace">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6" data-testid="business-analyst-workspace">
       <WorkspaceHeader
         session={session}
         badgeLabel="Investigation Workspace"
@@ -47,7 +51,7 @@ export default function BusinessAnalystWorkspace({
         notesStatus={notesStatus}
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
         <ResourceInspectorPanel
           resources={resources}
           accessedResourceIds={accessedResourceIds}

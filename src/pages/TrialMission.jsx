@@ -26,6 +26,9 @@ import {
   Zap,
   Award,
   Compass,
+  Search,
+  ChevronDown,
+  Filter,
 } from "lucide-react";
 import { useTrialMissionSession } from "../hooks/useTrialMissionSession";
 import { useDebounceAutosave } from "../hooks/useDebounceAutosave";
@@ -180,7 +183,7 @@ export default function TrialMission() {
     risks_limitations: "",
     next_steps: "",
   });
-  const [memoSaveStatus, setMemoSaveStatus] = useState("ready"); // "ready" | "saving" | "saved" | "error"
+  const [memoSaveStatus, setMemoSaveStatus] = useState("ready"); 
   const [reviewLoading, setReviewLoading] = useState(false);
 
   // Reflection form state
@@ -189,16 +192,16 @@ export default function TrialMission() {
     hardest_part: "",
     investigate_next: "",
   });
-  const [reflectionSaveStatus, setReflectionSaveStatus] = useState("ready"); // "ready" | "saving" | "saved" | "error"
+  const [reflectionSaveStatus, setReflectionSaveStatus] = useState("ready"); 
 
   // Activity Summary state
   const [activitySummary, setActivitySummary] = useState(null);
   const [activitySummaryLoading, setActivitySummaryLoading] = useState(false);
   const [activitySummaryError, setActivitySummaryError] = useState(null);
 
-  // Catalog search & category filter state
+  // Catalog search & Sector filter state
   const [catalogSearch, setCatalogSearch] = useState("");
-  const [selectedTrack, setSelectedTrack] = useState("all");
+  const [selectedSector, setSelectedSector] = useState("all");
 
   const {
     missions,
@@ -295,13 +298,12 @@ export default function TrialMission() {
     delay: 800,
   });
 
-  // Sync memo draft from backend outputData - only initializes when session changes or when finalised
+  // Sync memo draft from backend outputData
   useEffect(() => {
     const isNewSession = session?.id && memoInitializedSessionIdRef.current !== session.id;
     const isFinalised = outputData?.status === "finalised" || outputData?.status === "submitted";
 
     if (outputData) {
-      // If memo is finalised, keep in sync with server. If unfinalised, only initialize once per session.
       if (isFinalised || isNewSession || !memoInitializedSessionIdRef.current) {
         if (memoDirtyRef.current && !isFinalised && !isNewSession) {
           return;
@@ -345,7 +347,7 @@ export default function TrialMission() {
     }
   }, [outputData, currentDecision, session?.id]);
 
-  // Sync reflection draft from backend reflectionData - only initializes once per session
+  // Sync reflection draft from backend reflectionData
   useEffect(() => {
     const isNewSession = session?.id && reflectionInitializedSessionIdRef.current !== session.id;
     const isCompleted = session?.state === "SESSION_COMPLETED" || session?.state === "COMPLETED";
@@ -381,7 +383,6 @@ export default function TrialMission() {
     }
   }, [reflectionData, session?.id, session?.state]);
 
-  // Derive allowed actions from server session
   const allowedActions = Array.isArray(session?.allowed_actions)
     ? session.allowed_actions
     : [];
@@ -390,12 +391,10 @@ export default function TrialMission() {
     allowedActions.includes("abandon") ||
     allowedActions.includes("transition:SESSION_ABANDONED");
 
-  // Determine transition action for "I'm ready — Start"
   const startTransitionAction =
     allowedActions.find((a) => a === "transition:PHASE_ACTIVE" || a === "PHASE_ACTIVE") ||
     "PHASE_ACTIVE";
 
-  // Extract configuration
   const config = session?.mission_configuration || {};
   const role = config.role || {};
   const manager = role.manager || {};
@@ -407,10 +406,8 @@ export default function TrialMission() {
   const requiredFindingsCount = completionRules.required_findings || 1;
   const requiredResourceAccess = completionRules.required_resource_access || [];
 
-  // Derive configured investigation phase ID from session.mission_configuration
   const investigationPhaseId = deriveInvestigationPhaseId(config);
 
-  // Check current server stage
   const isCreatedStage = session?.state === "SESSION_CREATED";
   const isInvestigationPhase =
     Boolean(session?.current_phase) &&
@@ -473,7 +470,6 @@ export default function TrialMission() {
     isCompletedStage,
   ]);
 
-  // Track stage transitions for authoritative timing
   const currentStageName = useMemo(() => {
     if (isCreatedStage) return "GET_READY";
     if (isBriefingStage) return "MEET_MANAGER";
@@ -509,27 +505,24 @@ export default function TrialMission() {
     }
   }, [session?.id, currentStageName, session?.state, handleRecordScreenTransition]);
 
-  // Decision options from backend configuration
   const decisionsConfig = Array.isArray(config.decisions) && config.decisions.length > 0
     ? config.decisions[0]
     : {};
   const decisionOptions = Array.isArray(decisionsConfig.options)
     ? decisionsConfig.options
     : [
-      "Show delivery costs earlier",
-      "Improve payment reliability",
-      "Simplify checkout experience",
-      "Investigate further",
-    ];
+        "Show delivery costs earlier",
+        "Improve payment reliability",
+        "Simplify checkout experience",
+        "Investigate further",
+      ];
 
   const realityEventsConfig = Array.isArray(config.reality_events) && config.reality_events.length > 0
     ? config.reality_events[0]
     : {};
 
-  // Resolve registered workspace component from registry based on session.workspace_type
   const WorkspaceComponent = WORKSPACE_COMPONENTS[session?.workspace_type];
 
-  // Trigger consequence generation when state is CONSEQUENCE_ACTIVE
   useEffect(() => {
     if (
       session?.state === "CONSEQUENCE_ACTIVE" &&
@@ -545,7 +538,6 @@ export default function TrialMission() {
     }
   }, [session?.state, actionLoading, handleGenerateConsequence]);
 
-  // Fetch reality event only once state is REALITY_EVENT_PENDING
   useEffect(() => {
     if (
       session?.state === "REALITY_EVENT_PENDING" &&
@@ -556,7 +548,6 @@ export default function TrialMission() {
     }
   }, [session?.state, realityEventData, actionLoading, handleFetchRealityEvent]);
 
-  // Debounced autosave for memo draft
   useEffect(() => {
     if (!isOutputStage || isMemoFinalised) return;
     if (!memoDirtyRef.current) return;
@@ -568,7 +559,6 @@ export default function TrialMission() {
     const timer = setTimeout(async () => {
       try {
         await handleSaveOutput(snapshot);
-        // Only mark clean if no new keystrokes occurred while the save request was in flight
         if (memoEditVersionRef.current === savingVersion) {
           memoDirtyRef.current = false;
           setMemoSaveStatus("saved");
@@ -589,7 +579,6 @@ export default function TrialMission() {
     };
   }, [memoForm, isOutputStage, isMemoFinalised, handleSaveOutput]);
 
-  // Debounced autosave for reflection draft
   useEffect(() => {
     if (!isReflectionStage || isCompletedStage || session?.state !== "REFLECTION_ACTIVE") return;
     if (!reflectionDirtyRef.current) return;
@@ -604,7 +593,6 @@ export default function TrialMission() {
     setReflectionSaveStatus("saving");
     const timer = setTimeout(async () => {
       try {
-        // Defensive check: session must still be REFLECTION_ACTIVE, not completed, and dirty
         if (
           session?.state !== "REFLECTION_ACTIVE" ||
           isCompletedStage ||
@@ -657,9 +645,7 @@ export default function TrialMission() {
       setFindingExplanation("");
       setFindingUncertainty("");
       setShowFindingForm(false);
-    } catch {
-      // Error handled by hook
-    }
+    } catch {}
   };
 
   const handleRecommendationSubmit = async (e) => {
@@ -684,9 +670,7 @@ export default function TrialMission() {
         consequenceGeneratedRef.current = true;
         await Promise.resolve(handleGenerateConsequence?.());
       }
-    } catch {
-      // Error handled by hook
-    }
+    } catch {}
   };
 
   const handleKeepRecommendation = async () => {
@@ -747,14 +731,12 @@ export default function TrialMission() {
     if (actionLoading || reviewLoading || isMemoFinalised) return;
     setReviewLoading(true);
 
-    // Clear any pending debounce timer to prevent duplicate save afterwards
     if (memoSaveTimerRef.current) {
       clearTimeout(memoSaveTimerRef.current);
       memoSaveTimerRef.current = null;
     }
 
     try {
-      // If form is dirty, flush the save first
       if (memoDirtyRef.current) {
         const savingVersion = memoEditVersionRef.current;
         const snapshot = memoForm;
@@ -765,16 +747,13 @@ export default function TrialMission() {
         }
         setMemoSaveStatus("saved");
 
-        // If newer edits occurred while explicit save was in flight, do not proceed with review
         if (memoEditVersionRef.current !== savingVersion) {
           return;
         }
       }
 
-      // Now proceed with review
       await handleReviewOutput();
     } catch (err) {
-      // If save or review failed, ensure dirty state is maintained and error status shown
       if (memoDirtyRef.current) {
         setMemoSaveStatus("error");
       }
@@ -812,19 +791,36 @@ export default function TrialMission() {
     Array.isArray(reflectionData?.questions) && reflectionData.questions.length > 0
       ? reflectionData.questions
       : [
-        {
-          id: "what_felt_natural",
-          prompt: "What part of this investigation felt most natural to you?",
-        },
-        {
-          id: "hardest_part",
-          prompt: "What was the most challenging or uncertain aspect?",
-        },
-        {
-          id: "investigate_next",
-          prompt: "If you had more time, what would you investigate next?",
-        },
-      ];
+          {
+            id: "what_felt_natural",
+            prompt: "What part of this investigation felt most natural to you?",
+          },
+          {
+            id: "hardest_part",
+            prompt: "What was the most challenging or uncertain aspect?",
+          },
+          {
+            id: "investigate_next",
+            prompt: "If you had more time, what would you investigate next?",
+          },
+        ];
+
+  // Extract unique sectors from available missions
+  const availableSectors = useMemo(() => {
+    if (!Array.isArray(missions)) return [];
+    const sectorsSet = new Set();
+    missions.forEach((m) => {
+      const sector = m.sector || m.industry || m.domain || m.career?.sector || m.career?.name;
+      if (sector) sectorsSet.add(sector);
+    });
+    return Array.from(sectorsSet);
+  }, [missions]);
+
+  // Recommended missions (fallback to first 5 items)
+  const recommendedMissions = useMemo(() => {
+    if (!Array.isArray(missions)) return [];
+    return missions.slice(0, 5);
+  }, [missions]);
 
   const filteredMissions = useMemo(() => {
     if (!Array.isArray(missions)) return [];
@@ -833,6 +829,7 @@ export default function TrialMission() {
       const title = (m.title || "").toLowerCase();
       const desc = (m.description || "").toLowerCase();
       const wsType = (m.workspace_type || "").toLowerCase();
+      const sector = (m.sector || m.industry || m.domain || m.career?.sector || m.career?.name || "").toLowerCase();
       const q = catalogSearch.toLowerCase().trim();
 
       const matchesSearch =
@@ -842,26 +839,12 @@ export default function TrialMission() {
         desc.includes(q) ||
         wsType.includes(q);
 
-      if (!matchesSearch) return false;
-      if (selectedTrack === "all") return true;
-      if (
-        selectedTrack === "tech" &&
-        (wsType.includes("dev") ||
-          wsType.includes("architect") ||
-          wsType.includes("data"))
-      )
-        return true;
-      if (
-        selectedTrack === "business" &&
-        (wsType.includes("analyst") ||
-          wsType.includes("process") ||
-          wsType.includes("business"))
-      )
-        return true;
-      if (selectedTrack === "design" && wsType.includes("design")) return true;
-      return true;
+      const matchesSector =
+        selectedSector === "all" || sector === selectedSector.toLowerCase();
+
+      return matchesSearch && matchesSector;
     });
-  }, [missions, catalogSearch, selectedTrack]);
+  }, [missions, catalogSearch, selectedSector]);
 
   return (
     <div
@@ -901,7 +884,6 @@ export default function TrialMission() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            {/* Stopwatch with live indicator */}
             <div className="flex items-center gap-1.5 sm:gap-2 rounded-full border border-blue-200/80 bg-blue-50/70 px-2.5 py-1 sm:px-4 sm:py-1.5 shadow-inner">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -913,7 +895,6 @@ export default function TrialMission() {
               </span>
             </div>
 
-            {/* Pause / Resume Controls */}
             {session && !isCompletedStage && (
               session.state === "SESSION_PAUSED" ? (
                 <button
@@ -938,7 +919,6 @@ export default function TrialMission() {
               )
             )}
 
-            {/* Exit Control */}
             <button
               type="button"
               onClick={resetToCatalog}
@@ -953,7 +933,6 @@ export default function TrialMission() {
 
       <div className={session ? "flex-1 overflow-y-auto px-3 py-4 sm:px-8 sm:py-6 overscroll-contain" : ""}>
         <div className="mx-auto max-w-7xl space-y-6">
-          {/* Navigation & Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <button
               type="button"
@@ -964,7 +943,7 @@ export default function TrialMission() {
                   navigate("/dashboard");
                 }
               }}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
             >
               <ArrowLeft size={14} />
               {session ? "Back to Mission Catalog" : "Back to Dashboard"}
@@ -976,13 +955,12 @@ export default function TrialMission() {
                   Phase: {session.current_phase || "initial"}
                 </span>
 
-                {/* Lifecycle Controls */}
                 {canAbandon && (
                   <button
                     type="button"
                     disabled={actionLoading}
                     onClick={handleAbandon}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50 cursor-pointer"
                   >
                     <ShieldAlert size={13} /> Abandon
                   </button>
@@ -991,7 +969,6 @@ export default function TrialMission() {
             )}
           </div>
 
-          {/* Global Error Banner */}
           {error && (
             <div className="flex items-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800 shadow-sm">
               <AlertCircle size={18} className="shrink-0 text-rose-600" />
@@ -999,14 +976,13 @@ export default function TrialMission() {
               <button
                 type="button"
                 onClick={() => setError(null)}
-                className="text-rose-600 hover:text-rose-900"
+                className="text-rose-600 hover:text-rose-900 cursor-pointer"
               >
                 <XCircle size={18} />
               </button>
             </div>
           )}
 
-          {/* Loading State */}
           {loading ? (
             <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 rounded-3xl border border-slate-200/80 bg-white/95 p-12 shadow-sm backdrop-blur-sm">
               <Loader2 className="animate-spin text-blue-600" size={36} />
@@ -1015,145 +991,136 @@ export default function TrialMission() {
               </p>
             </div>
           ) : !session ? (
-            /* ========================================================= */
-            /* 1. Modern Mission Catalog                                 */
-            /* ========================================================= */
             <div className="space-y-6">
-              {/* Hero Banner */}
-              <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-8 shadow-sm backdrop-blur-sm sm:p-10">
-                <div className="absolute top-0 right-0 -mt-8 -mr-8 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-                <div className="relative max-w-3xl space-y-4">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-blue-800">
-                    <Sparkles size={12} className="text-blue-600" /> Live Interactive Simulation Lab
-                  </span>
-                  <h1 className="text-3xl font-black tracking-tight text-[#0b1a36] sm:text-4xl">
-                    Trial Missions & Role Simulations
-                  </h1>
-                  <p className="text-base leading-relaxed text-slate-600">
-                    Step into day-in-the-life industry challenges. Investigate realistic anomalies, examine telemetry & user feedback, propose strategic recommendations under pressure, and receive detailed competency evaluation.
-                  </p>
-
-                  {/* Highlights strip */}
-                  <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4">
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3 text-left">
-                      <div className="flex items-center gap-1.5 text-blue-600 font-bold text-xs">
-                        <Zap size={13} /> Interactive Canvas
-                      </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5">Real code, data & diagrams</p>
-                    </div>
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3 text-left">
-                      <div className="flex items-center gap-1.5 text-indigo-600 font-bold text-xs">
-                        <RefreshCw size={13} /> Reality Events
-                      </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5">Dynamic production surprises</p>
-                    </div>
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3 text-left">
-                      <div className="flex items-center gap-1.5 text-purple-600 font-bold text-xs">
-                        <FileText size={13} /> Executive Memo
-                      </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5">Authentic deliverables</p>
-                    </div>
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3 text-left">
-                      <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs">
-                        <Award size={13} /> Capability Signal
-                      </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5">AI competency feedback</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Filter Toolbar */}
-              {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTrack("all")}
-                    className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                      selectedTrack === "all"
-                        ? "bg-[#0b1a36] text-white shadow-sm"
-                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    All Tracks
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTrack("tech")}
-                    className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                      selectedTrack === "tech"
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    Tech & Systems
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTrack("business")}
-                    className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                      selectedTrack === "business"
-                        ? "bg-indigo-600 text-white shadow-sm"
-                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    Business & Strategy
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTrack("design")}
-                    className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                      selectedTrack === "design"
-                        ? "bg-purple-600 text-white shadow-sm"
-                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    Design & UX
-                  </button>
-                </div>
-
-                <div className="relative min-w-[240px]">
+              {/* Left-Aligned Search Bar & Sector Filter matching the screenshot */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-start gap-3">
+                <div className="relative w-full sm:w-[320px]">
                   <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     value={catalogSearch}
                     onChange={(e) => setCatalogSearch(e.target.value)}
-                    placeholder="Search missions or roles..."
-                    className="w-full rounded-full border border-slate-200/90 bg-white py-2 pl-9 pr-4 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="Search missions, domains, or skills..."
+                    className="w-full rounded-full border border-slate-200/90 bg-white py-2.5 pl-9 pr-8 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
                   />
                   {catalogSearch && (
                     <button
                       type="button"
                       onClick={() => setCatalogSearch("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold cursor-pointer"
                     >
                       ✕
                     </button>
                   )}
                 </div>
-              </div> */}
 
-              {/* Missions Grid */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold text-[#0b1a36]">
+                <div className="relative w-full sm:w-[240px]">
+                  <select
+                    value={selectedSector}
+                    onChange={(e) => setSelectedSector(e.target.value)}
+                    className="w-full rounded-full border border-slate-200/90 bg-white py-2.5 pl-4 pr-10 text-xs font-semibold text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm appearance-none cursor-pointer"
+                  >
+                    <option value="all">All Sectors / Industries</option>
+                    {availableSectors.map((sector) => (
+                      <option key={sector} value={sector}>
+                        {formatDimensionKey(sector)}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Recommended Careers Section */}
+              {recommendedMissions.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={18} className="text-amber-500" />
+                      <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">
+                        Recommended Based on Your Discovery Test
+                      </h2>
+                    </div>
+                    <span className="rounded-full bg-indigo-50 border border-indigo-200 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-800">
+                      Top 5 Matches
+                    </span>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {recommendedMissions.map((m) => {
+                      const careerName = m.career?.name || m.career_name || "Career Mission";
+                      const workspaceLabel = formatWorkspaceType(m.workspace_type);
+                      return (
+                        <div
+                          key={`rec-${m.id}`}
+                          className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                        >
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-blue-900">
+                                {careerName}
+                              </span>
+                              <span className="rounded-full bg-amber-100 text-amber-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                                Top Match
+                              </span>
+                            </div>
+
+                            <div>
+                              <h3 className="text-sm sm:text-base font-black text-slate-900 leading-snug group-hover:text-blue-600 transition-colors">
+                                {m.title}
+                              </h3>
+                            </div>
+
+                            <div className="flex items-center gap-2 pt-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
+                                {workspaceLabel}
+                              </span>
+                              {m.estimated_duration_minutes && (
+                                <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                                  <Clock size={12} /> {m.estimated_duration_minutes} mins
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end">
+                            <button
+                              type="button"
+                              disabled={actionLoading}
+                              onClick={() => startSession(m.id)}
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 cursor-pointer transition-all"
+                            >
+                              Launch Simulation <Rocket size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Available Simulations Grid */}
+              <div className="space-y-4 pt-4">
+                <div className="flex items-center justify-between px-2">
+                  <h2 className="text-base font-bold text-slate-900">
                     Available Simulations ({filteredMissions.length})
                   </h2>
                 </div>
 
                 {filteredMissions.length === 0 ? (
-                  <div className="rounded-3xl border border-dashed border-slate-200 bg-white/80 p-12 text-center text-sm text-slate-500 space-y-3">
+                  <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm text-slate-500 space-y-3">
                     <Compass size={32} className="mx-auto text-slate-400 animate-pulse" />
-                    <p className="font-semibold text-slate-700">No trial missions found matching your search.</p>
+                    <p className="font-semibold text-slate-700">No trial missions found matching your search or filter.</p>
                     <button
                       type="button"
                       onClick={() => {
                         setCatalogSearch("");
-                        setSelectedTrack("all");
+                        setSelectedSector("all");
                       }}
-                      className="text-xs font-bold text-blue-600 hover:underline"
+                      className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
                     >
-                      Reset filters
+                      Reset search & filters
                     </button>
                   </div>
                 ) : (
@@ -1164,50 +1131,48 @@ export default function TrialMission() {
                       return (
                         <div
                           key={m.id}
-                          className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 backdrop-blur-sm overflow-hidden"
+                          className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 backdrop-blur-sm overflow-hidden"
                         >
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <div className="space-y-3.5">
+                          <div className="space-y-4">
                             <div className="flex items-center justify-between gap-2">
                               <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200/80 px-3 py-1 text-xs font-bold text-blue-900">
-                                <Briefcase size={12} className="text-blue-600" /> {careerName}
+                                {careerName}
                               </span>
                               {m.estimated_duration_minutes && (
                                 <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                                  <Clock size={12} /> ~{m.estimated_duration_minutes}m
+                                  <Clock size={12} /> {m.estimated_duration_minutes} mins
                                 </span>
                               )}
                             </div>
+
                             <div>
-                              <h3 className="text-lg font-black text-[#0b1a36] group-hover:text-blue-600 transition-colors">
+                              <h3 className="text-sm sm:text-base font-black text-slate-900 leading-snug group-hover:text-blue-600 transition-colors">
                                 {m.title}
                               </h3>
-                              <div className="mt-1.5 flex items-center gap-2">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
-                                  {workspaceLabel}
-                                </span>
-                              </div>
                             </div>
-                            <p className="text-xs leading-relaxed text-slate-600 line-clamp-3">
-                              {m.description || "Take on real-world business challenges and test your analytical intuition in this interactive scenario."}
-                            </p>
+
+                            <div className="flex items-center gap-2 pt-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
+                                {workspaceLabel}
+                              </span>
+                            </div>
                           </div>
 
-                          <div className="mt-6 pt-4 border-t border-slate-100">
+                          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end">
                             <button
                               type="button"
                               disabled={actionLoading}
                               onClick={() => startSession(m.id)}
                               aria-label="Try this career"
-                              className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 cursor-pointer transition-all"
                             >
                               {actionLoading && startingMissionId === m.id ? (
                                 <>
-                                  <Loader2 size={15} className="animate-spin" /> Launching Simulation...
+                                  <Loader2 size={13} className="animate-spin" /> Launching...
                                 </>
                               ) : (
                                 <>
-                                  Launch Simulation <Rocket size={15} />
+                                  Launch Simulation <Rocket size={13} />
                                 </>
                               )}
                             </button>
@@ -1220,9 +1185,6 @@ export default function TrialMission() {
               </div>
             </div>
           ) : isCreatedStage ? (
-            /* ========================================================= */
-            /* 2. Get Ready Screen                                      */
-            /* ========================================================= */
             <div className="space-y-6">
               <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-8 shadow-sm sm:p-10 backdrop-blur-sm space-y-6">
                 <div className="space-y-2">
@@ -1277,7 +1239,7 @@ export default function TrialMission() {
                       type="button"
                       disabled={!isReadyChecked || actionLoading}
                       onClick={() => handleTransition(startTransitionAction)}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
                     >
                       {actionLoading ? (
                         <>
@@ -1294,9 +1256,6 @@ export default function TrialMission() {
               </div>
             </div>
           ) : isBriefingStage ? (
-            /* ========================================================= */
-            /* 3. Meet Manager Screen                                   */
-            /* ========================================================= */
             <div className="space-y-6">
               <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-8 shadow-sm sm:p-10 backdrop-blur-sm space-y-8">
                 <div className="flex flex-wrap items-center gap-4 border-b border-slate-100 pb-6">
@@ -1355,7 +1314,7 @@ export default function TrialMission() {
                             type="button"
                             disabled={actionLoading}
                             onClick={() => handleAccessResource(res.id)}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 hover:text-blue-600 disabled:opacity-50 transition-colors"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 hover:text-blue-600 disabled:opacity-50 transition-colors cursor-pointer"
                           >
                             {isAccessed ? (
                               <>
@@ -1382,7 +1341,7 @@ export default function TrialMission() {
                       <button
                         type="button"
                         onClick={() => setActiveResource(null)}
-                        className="text-xs text-slate-400 hover:text-slate-600 font-bold"
+                        className="text-xs text-slate-400 hover:text-slate-600 font-bold cursor-pointer"
                       >
                         ✕ Close
                       </button>
@@ -1397,7 +1356,7 @@ export default function TrialMission() {
                   <button
                     type="button"
                     onClick={() => setBriefingDismissed(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98]"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] cursor-pointer"
                   >
                     Start investigating <Rocket size={16} />
                   </button>
@@ -1405,9 +1364,6 @@ export default function TrialMission() {
               </div>
             </div>
           ) : isInvestigationStage ? (
-            /* ========================================================= */
-            /* 4. Career-Specific Investigation Workspace Dispatch       */
-            /* ========================================================= */
             WorkspaceComponent ? (
               <WorkspaceComponent
                 session={session}
@@ -1457,9 +1413,6 @@ export default function TrialMission() {
               </div>
             )
           ) : isRecommendationStage ? (
-            /* ========================================================= */
-            /* 5. Make Recommendation Screen                             */
-            /* ========================================================= */
             <div className="space-y-6">
               <form
                 onSubmit={handleRecommendationSubmit}
@@ -1477,7 +1430,6 @@ export default function TrialMission() {
                   </p>
                 </div>
 
-                {/* 1. Decision Options */}
                 <div className="space-y-2.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                     1. Select Recommended Intervention *
@@ -1509,7 +1461,6 @@ export default function TrialMission() {
                   </div>
                 </div>
 
-                {/* 2. Supporting Evidence */}
                 <div className="space-y-2.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                     2. Supporting Evidence & Findings
@@ -1539,7 +1490,6 @@ export default function TrialMission() {
                   </div>
                 </div>
 
-                {/* 3. Strategic Rationale */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                     3. Why are you recommending this? *
@@ -1554,7 +1504,6 @@ export default function TrialMission() {
                   />
                 </div>
 
-                {/* 4. Uncertainty & Risks */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                     4. What are you uncertain about? *
@@ -1569,12 +1518,11 @@ export default function TrialMission() {
                   />
                 </div>
 
-                {/* Submit Decision Action */}
                 <div className="pt-3 sm:pt-4 border-t border-slate-100 flex justify-end">
                   <button
                     type="submit"
                     disabled={actionLoading || !selectedOption || !whyRecommendation.trim()}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-40"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-40 cursor-pointer"
                   >
                     {actionLoading ? (
                       <>
@@ -1590,9 +1538,6 @@ export default function TrialMission() {
               </form>
             </div>
           ) : isRealityEventStage ? (
-            /* ========================================================= */
-            /* 6. Consequence & Reality Event Screen                      */
-            /* ========================================================= */
             <div className="space-y-6">
               {session?.state === "CONSEQUENCE_ACTIVE" ? (
                 <div className="flex min-h-[360px] flex-col items-center justify-center gap-4 rounded-3xl border border-slate-200/80 bg-white/95 p-12 shadow-sm text-center backdrop-blur-sm">
@@ -1686,7 +1631,7 @@ export default function TrialMission() {
                         type="button"
                         disabled={actionLoading}
                         onClick={handleKeepRecommendation}
-                        className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                        className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50 transition-colors cursor-pointer"
                       >
                         Keep my recommendation
                       </button>
@@ -1705,7 +1650,7 @@ export default function TrialMission() {
                             : selectedEvidenceResources;
                           setUpdatedEvidenceResources(existingEvidenceIds);
                         }}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all"
+                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all cursor-pointer"
                       >
                         Update my recommendation <RefreshCw size={14} />
                       </button>
@@ -1722,7 +1667,7 @@ export default function TrialMission() {
                         <button
                           type="button"
                           onClick={() => setIsUpdatingRecommendation(false)}
-                          className="text-xs font-bold text-slate-500 hover:text-slate-800"
+                          className="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer"
                         >
                           Cancel
                         </button>
@@ -1824,7 +1769,7 @@ export default function TrialMission() {
                         <button
                           type="button"
                           onClick={() => setIsUpdatingRecommendation(false)}
-                          className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-700"
+                          className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 cursor-pointer"
                         >
                           Back
                         </button>
@@ -1836,7 +1781,7 @@ export default function TrialMission() {
                             !updatedWhy.trim() ||
                             updatedEvidenceResources.length === 0
                           }
-                          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
+                          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 cursor-pointer"
                         >
                           {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                           Confirm Updated Recommendation
@@ -1848,12 +1793,8 @@ export default function TrialMission() {
               )}
             </div>
           ) : isOutputStage ? (
-            /* ========================================================= */
-            /* 7. Professional Memo / Output Workflow                     */
-            /* ========================================================= */
             <div className="space-y-6">
               <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-8 md:p-10 shadow-sm backdrop-blur-sm space-y-6 sm:space-y-8">
-                {/* Header & Status Banner */}
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-6">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -1893,9 +1834,7 @@ export default function TrialMission() {
                   )}
                 </div>
 
-                {/* Six Required Memo Sections */}
                 <div className="space-y-6">
-                  {/* 1. Executive Summary */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                       1. Executive Summary *
@@ -1915,7 +1854,6 @@ export default function TrialMission() {
                     )}
                   </div>
 
-                  {/* 2. Key Findings */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                       2. Key Findings *
@@ -1935,7 +1873,6 @@ export default function TrialMission() {
                     )}
                   </div>
 
-                  {/* 3. Evidence */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                       3. Supporting Evidence *
@@ -1955,7 +1892,6 @@ export default function TrialMission() {
                     )}
                   </div>
 
-                  {/* 4. Recommendation */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                       4. Recommendation *
@@ -1975,7 +1911,6 @@ export default function TrialMission() {
                     )}
                   </div>
 
-                  {/* 5. Risks / Limitations */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                       5. Risks & Limitations *
@@ -1995,7 +1930,6 @@ export default function TrialMission() {
                     )}
                   </div>
 
-                  {/* 6. Next Steps */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                       6. Next Steps *
@@ -2016,7 +1950,6 @@ export default function TrialMission() {
                   </div>
                 </div>
 
-                {/* Output Actions Bar */}
                 <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
                   <div className="text-xs text-slate-500 font-medium">
                     {outputStatus === "draft" && "Editing draft. When ready, review the memo document."}
@@ -2031,7 +1964,7 @@ export default function TrialMission() {
                         type="button"
                         disabled={actionLoading || reviewLoading}
                         onClick={handleReviewMemoClick}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 cursor-pointer"
                       >
                         {actionLoading || reviewLoading ? <Loader2 size={15} className="animate-spin" /> : <Eye size={15} />}
                         Review memo
@@ -2043,7 +1976,7 @@ export default function TrialMission() {
                         type="button"
                         disabled={actionLoading}
                         onClick={handleFinaliseOutput}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-amber-600 px-6 py-3 text-xs font-bold text-white shadow-md hover:bg-amber-700 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-2xl bg-amber-600 px-6 py-3 text-xs font-bold text-white shadow-md hover:bg-amber-700 disabled:opacity-50 cursor-pointer"
                       >
                         {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <LockKeyhole size={15} />}
                         Finalise memo
@@ -2055,7 +1988,7 @@ export default function TrialMission() {
                         type="button"
                         disabled={actionLoading}
                         onClick={handleSubmitOutput}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 cursor-pointer"
                       >
                         {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
                         Submit memo to {manager.name || "Sarah"}
@@ -2066,9 +1999,6 @@ export default function TrialMission() {
               </div>
             </div>
           ) : isReflectionStage ? (
-            /* ========================================================= */
-            /* 8. Reflection Workflow                                    */
-            /* ========================================================= */
             <div className="space-y-6">
               <form
                 onSubmit={handleReflectionSubmit}
@@ -2139,7 +2069,7 @@ export default function TrialMission() {
                   <button
                     type="submit"
                     disabled={actionLoading}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all"
+                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all cursor-pointer"
                   >
                     {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
                     Submit reflection
@@ -2148,9 +2078,6 @@ export default function TrialMission() {
               </form>
             </div>
           ) : isCompletedStage ? (
-            /* ========================================================= */
-            /* 9. Mission Completion Screen                              */
-            /* ========================================================= */
             <div className="space-y-6">
               <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-8 md:p-10 shadow-sm backdrop-blur-sm space-y-6 sm:space-y-8">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 border-b border-slate-100 pb-4 sm:pb-6">
@@ -2197,7 +2124,6 @@ export default function TrialMission() {
                   </div>
                 </div>
 
-                {/* Timing Summary Section */}
                 {((session?.stage_durations && session.stage_durations.length > 0) ||
                   (activitySummary?.timing_summary?.stage_durations &&
                     activitySummary.timing_summary.stage_durations.length > 0)) && (
@@ -2249,7 +2175,6 @@ export default function TrialMission() {
                   </div>
                 )}
 
-                {/* Activity Summary Section */}
                 {activitySummaryLoading && (
                   <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-6 text-xs text-slate-600">
                     <Loader2 size={16} className="animate-spin text-blue-600" />
@@ -2308,7 +2233,6 @@ export default function TrialMission() {
                     </div>
                   )}
 
-                {/* Evaluation Section */}
                 {evaluationLoading && (
                   <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-6 text-xs text-slate-600">
                     <Loader2 size={16} className="animate-spin text-blue-600" />
@@ -2353,7 +2277,6 @@ export default function TrialMission() {
                         </p>
                       </div>
 
-                      {/* AI Evaluation Dimensions */}
                       {Array.isArray(evaluationData.ai_evaluation?.dimensions) &&
                         evaluationData.ai_evaluation.dimensions.length > 0 && (
                           <div className="space-y-4">
@@ -2415,7 +2338,6 @@ export default function TrialMission() {
                           </div>
                         )}
 
-                      {/* Limitations */}
                       {Array.isArray(evaluationData.ai_evaluation?.limitations) &&
                         evaluationData.ai_evaluation.limitations.length > 0 && (
                           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 space-y-2">
@@ -2430,7 +2352,6 @@ export default function TrialMission() {
                           </div>
                         )}
 
-                      {/* Deterministic Evaluation Signals */}
                       {evaluationData.deterministic_evaluation?.dimensions &&
                         typeof evaluationData.deterministic_evaluation.dimensions === "object" && (
                           <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-3">
@@ -2470,7 +2391,7 @@ export default function TrialMission() {
                     </div>
                   )}
 
-{(() => {
+                {(() => {
                   const activeMission = missions?.find((m) => m.id === session?.mission_id);
                   const completedCareerId =
                     session?.career_id ||
@@ -2487,21 +2408,21 @@ export default function TrialMission() {
                       <button
                         type="button"
                         onClick={resetToCatalog}
-                        className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+                        className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors cursor-pointer"
                       >
                         Explore More Missions
                       </button>
                       <button
                         type="button"
                         onClick={() => navigate("/dashboard")}
-                        className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+                        className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors cursor-pointer"
                       >
                         Return to Dashboard
                       </button>
                       <button
                         type="button"
                         onClick={() => navigate("/career-decision")}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors cursor-pointer"
                       >
                         View Career Decision & Fit
                       </button>
@@ -2509,7 +2430,7 @@ export default function TrialMission() {
                         <button
                           type="button"
                           onClick={() => navigate(`/careers/${completedCareerId}/decision-report`)}
-                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-[#1E88E5] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-all"
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-[#1E88E5] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-all cursor-pointer"
                           data-testid="view-decision-report-button"
                         >
                           <FileCheck2 size={16} />

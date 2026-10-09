@@ -3,7 +3,7 @@ import { Activity } from "lucide-react";
 
 /**
  * Reusable Workspace Header displaying mission title, phase, badge, and autosave status.
- * Optimized with responsive padding and clear visual hierarchy.
+ * Optimized with clean borders and reduced visual noise.
  */
 export default function WorkspaceHeader({
   session,
@@ -13,7 +13,7 @@ export default function WorkspaceHeader({
   notesStatus = "saved",
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-6 shadow-sm backdrop-blur-sm">
+    <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
       <div className="space-y-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <span
@@ -25,7 +25,7 @@ export default function WorkspaceHeader({
             Phase: {session?.current_phase}
           </span>
         </div>
-        <h1 className="text-lg sm:text-2xl font-black text-[#0b1a36] tracking-tight truncate">
+        <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">
           {session?.mission_title}
         </h1>
       </div>
