@@ -130,6 +130,14 @@ export default function ClinicalEncounterWorkspace({
   const [internalExplanation, setInternalExplanation] = useState('');
   const [internalUncertainty, setInternalUncertainty] = useState('');
 
+  React.useEffect(() => {
+    setInternalShowFindingForm(false);
+    setInternalStatement('');
+    setInternalResource('');
+    setInternalExplanation('');
+    setInternalUncertainty('');
+  }, [session?.id]);
+
   const isFormOpen =
     externalShowFindingForm !== undefined
       ? externalShowFindingForm

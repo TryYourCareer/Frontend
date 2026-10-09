@@ -74,9 +74,13 @@ export function useTrialMissionSession(initialSessionId = null) {
 
       if (notesRes.status === "fulfilled" && notesRes.value) {
         setWorkingNotes(notesRes.value.content || notesRes.value.working_notes || "");
+      } else {
+        setWorkingNotes("");
       }
       if (findingsRes.status === "fulfilled" && Array.isArray(findingsRes.value)) {
         setFindings(findingsRes.value);
+      } else {
+        setFindings([]);
       }
     } catch (err) {
       console.error("Failed loading workspace data:", err);
@@ -137,6 +141,20 @@ export function useTrialMissionSession(initialSessionId = null) {
     setLoading(true);
     setError(null);
     try {
+      if (session?.id !== sessionId) {
+        setWorkingNotes("");
+        setFindings([]);
+        setCurrentDecision(null);
+        setConsequenceData(null);
+        setRealityEventData(null);
+        setOutputData(null);
+        setReflectionData(null);
+        setEvaluationData(null);
+        setEvaluationLoading(false);
+        setEvaluationError(null);
+        setAccessedResourceIds(new Set());
+        setActiveResource(null);
+      }
       const data = await getMissionSession(sessionId);
       setSession(data);
       const accessedList = Array.isArray(data?.accessed_resource_ids)
@@ -199,6 +217,19 @@ export function useTrialMissionSession(initialSessionId = null) {
     setActionLoading(true);
     setError(null);
     try {
+      setWorkingNotes("");
+      setFindings([]);
+      setCurrentDecision(null);
+      setConsequenceData(null);
+      setRealityEventData(null);
+      setOutputData(null);
+      setReflectionData(null);
+      setEvaluationData(null);
+      setEvaluationLoading(false);
+      setEvaluationError(null);
+      setAccessedResourceIds(new Set());
+      setActiveResource(null);
+
       const data = await createMissionSession(missionId);
       setSession(data);
       const accessedList = Array.isArray(data?.accessed_resource_ids)

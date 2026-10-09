@@ -70,6 +70,14 @@ manager = {},
   const [localFindingExplanation, setLocalFindingExplanation] = useState("");
   const [localFindingUncertainty, setLocalFindingUncertainty] = useState("");
 
+  React.useEffect(() => {
+    setLocalShowFindingForm(false);
+    setLocalFindingStatement("");
+    setLocalFindingResource("");
+    setLocalFindingExplanation("");
+    setLocalFindingUncertainty("");
+  }, [session?.id]);
+
   const showFindingForm = externalShowFindingForm !== undefined ? externalShowFindingForm : localShowFindingForm;
   const setShowFindingForm = externalSetShowFindingForm || setLocalShowFindingForm;
 

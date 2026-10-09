@@ -203,7 +203,7 @@ export default function TrialMission() {
 
   // Catalog search & category filter state
   const [catalogSearch, setCatalogSearch] = useState("");
-  const [selectedTrack, setSelectedTrack] = useState("all");
+  // const [selectedTrack, setSelectedTrack] = useState("all");
 
   // Discovery recommendations & Explore More state
   const [discoveryReport, setDiscoveryReport] = useState(null);
@@ -264,7 +264,7 @@ export default function TrialMission() {
   useEffect(() => {
     if (queryMissionId && !querySessionId && !session && !autoStartedMissionRef.current && typeof startSession === "function") {
       autoStartedMissionRef.current = true;
-      startSession(queryMissionId);
+      handleStartMission(queryMissionId);
     }
   }, [queryMissionId, querySessionId, session, startSession]);
 
@@ -328,6 +328,90 @@ export default function TrialMission() {
     }
   }, [session?.state, session?.id]);
 
+  const resetMissionLocalState = useCallback(() => {
+    setIsReadyChecked(false);
+    setBriefingDismissed(false);
+
+    setShowFindingForm(false);
+    setFindingStatement("");
+    setFindingResource("");
+    setFindingExplanation("");
+    setFindingUncertainty("");
+
+    setSelectedOption("");
+    setWhyRecommendation("");
+    setSelectedEvidenceResources([]);
+    setRecommendationUncertainty("");
+
+    setIsUpdatingRecommendation(false);
+    setUpdatedOption("");
+    setUpdatedWhy("");
+    setUpdatedEvidenceResources([]);
+    setUpdatedUncertainty("");
+
+    consequenceGeneratedRef.current = false;
+
+    if (memoSaveTimerRef.current) {
+      clearTimeout(memoSaveTimerRef.current);
+      memoSaveTimerRef.current = null;
+    }
+    memoDirtyRef.current = false;
+    memoEditVersionRef.current = 0;
+    memoInitializedSessionIdRef.current = null;
+    setMemoForm({
+      executive_summary: "",
+      key_findings: "",
+      evidence: "",
+      recommendation: "",
+      risks_limitations: "",
+      next_steps: "",
+    });
+    setMemoSaveStatus("ready");
+    setReviewLoading(false);
+
+    if (reflectionSaveTimerRef.current) {
+      clearTimeout(reflectionSaveTimerRef.current);
+      reflectionSaveTimerRef.current = null;
+    }
+    reflectionDirtyRef.current = false;
+    reflectionEditVersionRef.current = 0;
+    reflectionInitializedSessionIdRef.current = null;
+    setReflectionForm({
+      what_felt_natural: "",
+      hardest_part: "",
+      investigate_next: "",
+    });
+    setReflectionSaveStatus("ready");
+
+    setActivitySummary(null);
+    setActivitySummaryLoading(false);
+    setActivitySummaryError(null);
+
+    lastRecordedStageRef.current = null;
+  }, []);
+
+  const previousSessionIdRef = useRef(null);
+
+  useEffect(() => {
+    const currentSessionId = session?.id ?? null;
+    if (
+      currentSessionId &&
+      previousSessionIdRef.current &&
+      previousSessionIdRef.current !== currentSessionId
+    ) {
+      resetMissionLocalState();
+    }
+    previousSessionIdRef.current = currentSessionId;
+  }, [session?.id, resetMissionLocalState]);
+
+  const handleStartMission = useCallback(
+    async (missionId) => {
+      resetMissionLocalState();
+      return startSession(missionId);
+    },
+    [resetMissionLocalState, startSession]
+  );
+
   // Debounced notes autosave
   const {
     value: notesValue,
@@ -337,6 +421,7 @@ export default function TrialMission() {
     initialValue: workingNotes,
     onSave: handleSaveNotes,
     delay: 800,
+    sessionId: session?.id,
   });
 
   // Sync memo draft from backend outputData - only initializes when session changes or when finalised
@@ -1040,7 +1125,7 @@ export default function TrialMission() {
             {/* Exit Control */}
             <button
               type="button"
-              onClick={resetToCatalog}
+              onClick={() => { resetMissionLocalState(); resetToCatalog(); }}
               className="inline-flex items-center gap-1 rounded-lg sm:rounded-xl border border-slate-200 bg-white px-2.5 py-1 sm:px-3.5 sm:py-1.5 text-xs font-bold text-slate-600 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all shadow-sm"
               title="Exit Trial Mission workspace"
             >
@@ -1314,7 +1399,7 @@ export default function TrialMission() {
                                   <button
                                     type="button"
                                     disabled={actionLoading}
-                                    onClick={() => startSession(m.id)}
+                                    onClick={() => handleStartMission(m.id)}
                                     aria-label="Try this career"
                                     className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
                                   >
@@ -1455,7 +1540,7 @@ export default function TrialMission() {
                                     <button
                                       type="button"
                                       disabled={actionLoading}
-                                      onClick={() => startSession(m.id)}
+                                      onClick={() => handleStartMission(m.id)}
                                       aria-label="Try this career"
                                       className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
                                     >
@@ -1572,7 +1657,7 @@ export default function TrialMission() {
                                 <button
                                   type="button"
                                   disabled={actionLoading}
-                                  onClick={() => startSession(m.id)}
+                                  onClick={() => handleStartMission(m.id)}
                                   aria-label="Try this career"
                                   className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
                                 >
@@ -2865,7 +2950,7 @@ export default function TrialMission() {
                     <div className="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3">
                       <button
                         type="button"
-                        onClick={resetToCatalog}
+                        onClick={() => { resetMissionLocalState(); resetToCatalog(); }}
                         className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
                       >
                         Explore More Missions
