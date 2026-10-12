@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Sparkles, ArrowRight, Check, ChevronDown, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Sparkles, ArrowRight, Check, ChevronDown, X, AlertCircle } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { getTestProgress, getTestQuestions, startTestSession, submitQuestionAnswer, submitTestSession, saveOnboardingProfile } from "../services/discoveryTest";
 
@@ -95,23 +95,20 @@ export default function Assessment() {
     return localStorage.getItem("latest_test_session_id") || null;
   });
 
-  // Stage 0 Onboarding Signals State
-  const [grade, setGrade] = useState("Class 12");
-  const [currentStream, setCurrentStream] = useState("Science (PCM)");
+  // Stage 0 Onboarding Signals State - initially no option selected
+  const [grade, setGrade] = useState("");
+  const [currentStream, setCurrentStream] = useState("");
+  const [interestTags, setInterestTags] = useState([]);
+  const [declaredAspiration, setDeclaredAspiration] = useState("");
+  const [learningStyle, setLearningStyle] = useState("");
+  const [onboardingSubmitted, setOnboardingSubmitted] = useState(false);
+  const [onboardingError, setOnboardingError] = useState("");
 
   const handleGradeChange = (newGrade) => {
     setGrade(newGrade);
-    const available = GRADE_STREAM_OPTIONS[newGrade] || [];
-    if (available.length > 0) {
-      const exists = available.some((s) => s.value === currentStream);
-      if (!exists) {
-        setCurrentStream(available[0].value);
-      }
-    }
+    setCurrentStream("");
+    if (onboardingError) setOnboardingError("");
   };
-  const [interestTags, setInterestTags] = useState(["Coding & AI", "Visual Design"]);
-  const [declaredAspiration, setDeclaredAspiration] = useState("");
-  const [learningStyle, setLearningStyle] = useState("Hands-on");
   const [isDomainDropdownOpen, setIsDomainDropdownOpen] = useState(false);
   const domainDropdownRef = useRef(null);
 
@@ -154,6 +151,20 @@ export default function Assessment() {
   };
 
   const handleProceedFromOnboarding = async () => {
+    setOnboardingSubmitted(true);
+    setOnboardingError("");
+
+    const missingFields = [];
+    if (!grade) missingFields.push("Current Education Grade");
+    if (!currentStream) missingFields.push("Current Academic Stream");
+    if (!interestTags || interestTags.length === 0) missingFields.push("Domain Interests");
+    if (!learningStyle) missingFields.push("Preferred Learning & Working Style");
+
+    if (missingFields.length > 0) {
+      setOnboardingError(`Please complete all required fields before continuing: ${missingFields.join(", ")}.`);
+      return;
+    }
+
     if (!profile?.id) {
       setError("Your profile is not ready yet. Please complete registration first.");
       setStatus("error");
@@ -175,8 +186,7 @@ export default function Assessment() {
       // Start Session
       const session = await startTestSession(profile.id);
       setTestSessionId(session.test_session_id);
-      localStorage.setItem("latest_test_session_id", session.test_session_id);
-      setPreviousSessionId(session.test_session_id);
+      // Keep previous completed session intact; do not overwrite until full submission
       setStatus("loading questions");
 
       const questionsPayload = await getTestQuestions(session.test_session_id);
@@ -241,6 +251,9 @@ export default function Assessment() {
         await Promise.all(savesRef.current.values());
         setStatus("analyzing");
         await submitTestSession(testSessionId);
+        // Entire test is now fully submitted! Update the latest completed test session.
+        localStorage.setItem("latest_test_session_id", testSessionId);
+        setPreviousSessionId(testSessionId);
         setTimeout(() => {
           setStatus("completed");
           if (testSessionId) {
@@ -382,15 +395,29 @@ export default function Assessment() {
           </div>
 
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#D3E3F5] shadow-xs space-y-6">
+            {onboardingSubmitted && onboardingError && (
+              <div className="p-3.5 rounded-2xl border border-red-200 bg-red-50 text-red-700 text-xs font-semibold flex items-center gap-2">
+                <AlertCircle size={16} className="shrink-0 text-red-500" />
+                <span>{onboardingError}</span>
+              </div>
+            )}
+
             {/* Grade & Stream */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Current Education Grade</label>
+                <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
+                  Current Education Grade <span className="text-red-500 font-bold">*</span>
+                </label>
                 <select
                   value={grade}
                   onChange={(e) => handleGradeChange(e.target.value)}
-                  className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400"
+                  className={`w-full rounded-2xl border ${
+                    onboardingSubmitted && !grade
+                      ? "border-red-400 bg-red-50/20 ring-1 ring-red-400"
+                      : "border-[#D3E3F5] bg-[#F0F6FC]"
+                  } p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400 transition`}
                 >
+                  <option value="" disabled>Select your education grade...</option>
                   <option value="Class 8">Class 8</option>
                   <option value="Class 9">Class 9</option>
                   <option value="Class 10">Class 10</option>
@@ -400,38 +427,60 @@ export default function Assessment() {
                   <option value="UG Year 3-4">Undergraduate (Year 3–4)</option>
                   <option value="Working Professional">Working Professional</option>
                 </select>
+                {onboardingSubmitted && !grade && (
+                  <p className="text-[11px] text-red-500 font-medium">Please select your education grade.</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Current Academic Stream</label>
+                <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
+                  Current Academic Stream <span className="text-red-500 font-bold">*</span>
+                </label>
                 <select
                   value={currentStream}
                   onChange={(e) => setCurrentStream(e.target.value)}
-                  className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400"
+                  disabled={!grade}
+                  className={`w-full rounded-2xl border ${
+                    onboardingSubmitted && !currentStream
+                      ? "border-red-400 bg-red-50/20 ring-1 ring-red-400"
+                      : "border-[#D3E3F5] bg-[#F0F6FC]"
+                  } p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400 disabled:opacity-60 disabled:cursor-not-allowed transition`}
                 >
-                  {(GRADE_STREAM_OPTIONS[grade] || GRADE_STREAM_OPTIONS["Class 12"]).map((opt) => (
+                  <option value="" disabled>
+                    {grade ? "Select your academic stream..." : "Select education grade first..."}
+                  </option>
+                  {grade && (GRADE_STREAM_OPTIONS[grade] || []).map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}
                     </option>
                   ))}
                 </select>
+                {onboardingSubmitted && !currentStream && (
+                  <p className="text-[11px] text-red-500 font-medium">
+                    {grade ? "Please select your academic stream." : "Please choose your education grade first."}
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Interest Tags Dropdown */}
             <div className="space-y-2.5 relative" ref={domainDropdownRef}>
               <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
-                Select Your Top Domain Interests (Select all that apply)
+                Select Your Top Domain Interests <span className="text-red-500 font-bold">*</span> (Select all that apply)
               </label>
 
               {/* Dropdown Trigger Button */}
               <div
                 onClick={() => setIsDomainDropdownOpen((prev) => !prev)}
-                className="w-full rounded-2xl border border-[#D3E3F5] bg-[#F0F6FC] p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400 cursor-pointer flex items-center justify-between transition-all hover:bg-white"
+                className={`w-full rounded-2xl border ${
+                  onboardingSubmitted && interestTags.length === 0
+                    ? "border-red-400 bg-red-50/20 ring-1 ring-red-400"
+                    : "border-[#D3E3F5] bg-[#F0F6FC]"
+                } p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-slate-400 cursor-pointer flex items-center justify-between transition-all hover:bg-white`}
               >
                 <div className="flex items-center gap-2 overflow-hidden flex-wrap">
                   {interestTags.length === 0 ? (
-                    <span className="text-slate-400 font-normal">Choose your domain interests...</span>
+                    <span className="text-slate-400 font-normal">Choose your domain interests (at least 1 required)...</span>
                   ) : (
                     <span className="text-slate-800 font-bold">
                       {interestTags.length} domain interest{interestTags.length > 1 ? "s" : ""} selected
@@ -445,6 +494,10 @@ export default function Assessment() {
                   }`}
                 />
               </div>
+
+              {onboardingSubmitted && interestTags.length === 0 && (
+                <p className="text-[11px] text-red-500 font-medium">Please select at least one domain interest.</p>
+              )}
 
               {/* Dropdown Menu */}
               {isDomainDropdownOpen && (
@@ -548,7 +601,9 @@ export default function Assessment() {
 
             {/* Learning Style */}
             <div className="space-y-2.5">
-              <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Preferred Learning & Working Style</label>
+              <label className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
+                Preferred Learning & Working Style <span className="text-red-500 font-bold">*</span>
+              </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {["Hands-on", "Reading & Research", "Team Projects", "Independent"].map((style) => {
                   const isSelected = learningStyle === style;
@@ -560,6 +615,8 @@ export default function Assessment() {
                       className={`p-3.5 rounded-2xl text-xs font-bold border transition text-center cursor-pointer shadow-2xs ${
                         isSelected
                           ? "border-[#1E88E5] bg-sky-50 text-[#1E88E5]"
+                          : onboardingSubmitted && !learningStyle
+                          ? "border-red-300 bg-red-50/10 text-slate-700 hover:bg-white"
                           : "border-[#D3E3F5] bg-[#F0F6FC] text-slate-700 hover:bg-white hover:border-slate-300"
                       }`}
                     >
@@ -568,6 +625,9 @@ export default function Assessment() {
                   );
                 })}
               </div>
+              {onboardingSubmitted && !learningStyle && (
+                <p className="text-[11px] text-red-500 font-medium">Please select your preferred learning & working style.</p>
+              )}
             </div>
           </div>
 

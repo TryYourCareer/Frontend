@@ -113,6 +113,7 @@ export default function DiscoveryTest() {
         // Wait for all background saves to finish
         await Promise.all(savesRef.current.values());
         await submitTestSession(testSessionId);
+        localStorage.setItem("latest_test_session_id", testSessionId);
         setStatus("completed");
         navigate(`/career-report/${testSessionId}`);
       } catch (err) {

@@ -88,7 +88,7 @@ export default function CareerRealityV2({ onBack }) {
   const [selectedDemand] = useState("all"); // "all", "growing", "stable"
   const [sortBy, setSortBy] = useState("recommended"); // "recommended", "growth", "salary", "name"
   const [viewLayout, setViewLayout] = useState("grid"); // "grid" or "list"
-  const [viewMode, setViewMode] = useState("assessment"); // "assessment" or "catalog"
+  const [viewMode, setViewMode] = useState("catalog"); // "assessment" or "catalog"
   const [visibleCount, setVisibleCount] = useState(12);
 
   // Inspector Drawer State
@@ -130,7 +130,7 @@ export default function CareerRealityV2({ onBack }) {
         }
       }
 
-      // 2. Fetch dynamic assessment report if user took the test
+      // 2. Fetch dynamic assessment report ONLY if user has submitted a completed test
       if (sessionId) {
         try {
           const report = await getCareerFitReport(sessionId);
@@ -138,13 +138,18 @@ export default function CareerRealityV2({ onBack }) {
             setReportData(report);
             setViewMode("assessment");
           } else if (isMounted) {
+            setReportData(null);
             setViewMode("catalog");
           }
         } catch (err) {
-          console.warn("Unable to fetch career fit report:", err);
-          if (isMounted) setViewMode("catalog");
+          console.info("Career Reality: No submitted test report available, showing catalog tracks.");
+          if (isMounted) {
+            setReportData(null);
+            setViewMode("catalog");
+          }
         }
       } else if (isMounted) {
+        setReportData(null);
         setViewMode("catalog");
       }
 
