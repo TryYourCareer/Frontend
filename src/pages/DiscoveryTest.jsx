@@ -84,11 +84,14 @@ export default function DiscoveryTest() {
     setError("");
 
     const questionId = currentQuestion.question_id;
-    // Launch save in background
+    const isOpenText = currentQuestion.question_type === "open_text";
+
+    // Launch save in background with correct payload for question type
     const savePromise = submitQuestionAnswer({
       testSessionId,
       questionId,
-      selectedOptionId: selectedAnswer,
+      selectedOptionId: isOpenText ? null : selectedAnswer,
+      responseText: isOpenText ? String(selectedAnswer) : null,
       responseTimeMs: null,
     }).then((res) => {
       savesRef.current.delete(questionId);
