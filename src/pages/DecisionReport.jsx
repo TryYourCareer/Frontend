@@ -95,10 +95,14 @@ export default function DecisionReport({ initialView = "student" }) {
   }, [careerId, activeView]);
 
   useEffect(() => {
-    if (careerId) {
+    setReportData(null);
+  }, [careerId]);
+
+  useEffect(() => {
+    if (careerId && !reportData) {
       fetchReport();
     }
-  }, [careerId, fetchReport]);
+  }, [careerId, fetchReport, reportData]);
 
   // Loading State
   if (loading) {

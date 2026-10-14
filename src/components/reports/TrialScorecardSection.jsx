@@ -464,6 +464,11 @@ export default function TrialScorecardSection({ trialScorecard }) {
                       {dRationale}
                     </p>
                   )}
+                  {d?.uncertainty && (
+                    <p className="text-[11px] text-amber-700 bg-amber-50/60 rounded-md px-2 py-0.5 border border-amber-200/50">
+                      Uncertainty noted: {d.uncertainty}
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -497,6 +502,53 @@ export default function TrialScorecardSection({ trialScorecard }) {
                 <span className="font-semibold">Deliverable Status:</span>
                 <span className="font-bold text-[#1E88E5]">{deliverable_output.status}</span>
               </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* 7. Decision Implications & Context                                */}
+      {/* ------------------------------------------------------------------ */}
+      {trialScorecard?.decision_implications && (
+        <div className="space-y-2.5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <TrendingUp size={15} className="text-[#1E88E5]" />
+            Decision Implications & Scenario Context
+          </h3>
+          <div className="bg-blue-50/50 border border-blue-200/70 rounded-2xl p-4 sm:p-5 space-y-1.5 text-xs text-blue-950">
+            {trialScorecard.decision_implications.title && (
+              <h4 className="font-bold text-sm text-[#0b1a36]">
+                {trialScorecard.decision_implications.title}
+              </h4>
+            )}
+            <p className="leading-relaxed text-slate-700">
+              {trialScorecard.decision_implications.narrative || trialScorecard.decision_implications.summary || "Decision executed within simulated workflow."}
+            </p>
+            <p className="text-[10px] text-slate-400 font-medium pt-1 border-t border-blue-100">
+              Factual scenario outcome within the simulation environment — not a personal assessment.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* 8. Evidence Limitations                                            */}
+      {/* ------------------------------------------------------------------ */}
+      {trialScorecard?.evidence_limitations && (
+        <div className="space-y-2">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <AlertCircle size={15} className="text-slate-500" />
+            Evidence Limitations
+          </h3>
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-600 space-y-1">
+            <p className="font-medium text-slate-700">
+              This outcome is derived from the actions and records of a single simulation session.
+            </p>
+            {Array.isArray(trialScorecard.evidence_limitations.missing_evidence) && trialScorecard.evidence_limitations.missing_evidence.length > 0 && (
+              <p className="text-[11px] text-slate-500">
+                Data fields not completed in this session: {trialScorecard.evidence_limitations.missing_evidence.join(", ")}.
+              </p>
             )}
           </div>
         </div>

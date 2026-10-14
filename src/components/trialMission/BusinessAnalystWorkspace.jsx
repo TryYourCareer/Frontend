@@ -32,7 +32,7 @@ export default function BusinessAnalystWorkspace({
   setFindingUncertainty = () => {},
   handleSaveNewFinding = () => {},
   handleCompleteInvestigation = () => {},
-  requiredFindingsCount = 1,
+  requiredFindingsCount = 0,
   requiredResourceAccess = [],
   actionLoading = false,
   isInvestigationPhase = true,

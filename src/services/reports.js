@@ -103,6 +103,17 @@ export const getPublicSharedParentReport = (token) => {
   return api.get(`/api/reports/shared/${encodeURIComponent(token)}`);
 };
 
+/**
+ * Constructs the backend download URL for a shared Parent Report PDF.
+ *
+ * @param {string} token - Cryptographically random share token.
+ * @returns {string} Relative URL to download the shared parent PDF.
+ */
+export const getSharedParentPdfUrl = (token) => {
+  if (!token) return "";
+  return `/api/reports/shared/${encodeURIComponent(token)}/pdf`;
+};
+
 const reportService = {
   getReport,
   getCanonicalReport,
@@ -112,6 +123,8 @@ const reportService = {
   getExportStatus,
   createParentShareLink,
   getPublicSharedParentReport,
+  getSharedParentPdfUrl,
 };
 
 export default reportService;
+

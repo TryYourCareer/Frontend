@@ -74,9 +74,13 @@ export function useTrialMissionSession(initialSessionId = null) {
 
       if (notesRes.status === "fulfilled" && notesRes.value) {
         setWorkingNotes(notesRes.value.content || notesRes.value.working_notes || "");
+      } else {
+        setWorkingNotes("");
       }
       if (findingsRes.status === "fulfilled" && Array.isArray(findingsRes.value)) {
         setFindings(findingsRes.value);
+      } else {
+        setFindings([]);
       }
     } catch (err) {
       console.error("Failed loading workspace data:", err);
@@ -137,8 +141,26 @@ export function useTrialMissionSession(initialSessionId = null) {
     setLoading(true);
     setError(null);
     try {
+      if (session?.id !== sessionId) {
+        setWorkingNotes("");
+        setFindings([]);
+        setCurrentDecision(null);
+        setConsequenceData(null);
+        setRealityEventData(null);
+        setOutputData(null);
+        setReflectionData(null);
+        setEvaluationData(null);
+        setEvaluationLoading(false);
+        setEvaluationError(null);
+        setAccessedResourceIds(new Set());
+        setActiveResource(null);
+      }
       const data = await getMissionSession(sessionId);
       setSession(data);
+      const accessedList = Array.isArray(data?.accessed_resource_ids)
+        ? data.accessed_resource_ids
+        : [];
+      setAccessedResourceIds(new Set(accessedList));
       const config = data?.mission_configuration || {};
       const phases = config.phases;
       let invPhaseId = "investigate";
@@ -195,8 +217,25 @@ export function useTrialMissionSession(initialSessionId = null) {
     setActionLoading(true);
     setError(null);
     try {
+      setWorkingNotes("");
+      setFindings([]);
+      setCurrentDecision(null);
+      setConsequenceData(null);
+      setRealityEventData(null);
+      setOutputData(null);
+      setReflectionData(null);
+      setEvaluationData(null);
+      setEvaluationLoading(false);
+      setEvaluationError(null);
+      setAccessedResourceIds(new Set());
+      setActiveResource(null);
+
       const data = await createMissionSession(missionId);
       setSession(data);
+      const accessedList = Array.isArray(data?.accessed_resource_ids)
+        ? data.accessed_resource_ids
+        : [];
+      setAccessedResourceIds(new Set(accessedList));
       return data;
     } catch (err) {
       setError(err?.message || "Failed to create mission session.");
@@ -223,6 +262,9 @@ export function useTrialMissionSession(initialSessionId = null) {
       const payload = typeof target === "string" ? { target_state: target } : target;
       const updated = await transitionSession(session.id, payload);
       setSession(updated);
+      if (Array.isArray(updated?.accessed_resource_ids)) {
+        setAccessedResourceIds(new Set(updated.accessed_resource_ids));
+      }
       if (updated?.current_phase === "investigate" || updated?.current_phase === "investigation") {
         await loadWorkspaceData(session.id);
       }
@@ -237,11 +279,20 @@ export function useTrialMissionSession(initialSessionId = null) {
 
   const handleAccessResource = useCallback(async (resourceId) => {
     if (!session?.id || !resourceId) return;
+    const targetId = typeof resourceId === "object" && resourceId !== null ? (resourceId.id || resourceId.resource_id || resourceId.identifier || "") : resourceId;
+    if (!targetId || typeof targetId !== "string") return;
+
     setActionLoading(true);
     setError(null);
     try {
-      const res = await accessMissionResource(session.id, resourceId);
-      setAccessedResourceIds((prev) => new Set([...prev, resourceId]));
+      const res = await accessMissionResource(session.id, targetId);
+      setAccessedResourceIds((prev) => new Set([...prev, targetId]));
+      setSession((prev) => {
+        if (!prev) return prev;
+        const current = Array.isArray(prev.accessed_resource_ids) ? prev.accessed_resource_ids : [];
+        if (current.includes(targetId)) return prev;
+        return { ...prev, accessed_resource_ids: [...current, targetId] };
+      });
       setActiveResource(res);
       return res;
     } catch (err) {
@@ -276,6 +327,8 @@ export function useTrialMissionSession(initialSessionId = null) {
 
   const handleCompleteInvestigation = useCallback(async () => {
     if (!session?.id) return;
+    if (actionLoading) return;
+
     const config = session?.mission_configuration || {};
     const phases = config.phases;
     let invPhaseId = "investigate";
@@ -315,6 +368,23 @@ export function useTrialMissionSession(initialSessionId = null) {
       return;
     }
 
+    const completion = config.investigation?.completion || {};
+    const reqFindings = typeof completion.required_findings === "number" ? completion.required_findings : 0;
+    const reqAccess = Array.isArray(completion.required_resource_access) ? completion.required_resource_access : [];
+
+    if (reqFindings > 0 && findings.length < reqFindings) {
+      setError(`Investigation requires at least ${reqFindings} finding(s).`);
+      return;
+    }
+
+    if (reqAccess.length > 0) {
+      const missing = reqAccess.filter((rId) => !accessedResourceIds.has(rId));
+      if (missing.length > 0) {
+        setError("Investigation requires access to all configured resources before completion.");
+        return;
+      }
+    }
+
     setActionLoading(true);
     setError(null);
     try {
@@ -329,6 +399,7 @@ export function useTrialMissionSession(initialSessionId = null) {
         if (
           rawMsg.includes("requires at least") ||
           rawMsg.includes("requires inspecting") ||
+          rawMsg.includes("requires access to all") ||
           rawMsg.includes("investigation phase") ||
           rawMsg.includes("requirements are")
         ) {
@@ -340,11 +411,12 @@ export function useTrialMissionSession(initialSessionId = null) {
         }
       }
       setError(message);
-      throw err;
+      // Explicitly return null instead of rethrowing to prevent uncaught runtime error overlays
+      return null;
     } finally {
       setActionLoading(false);
     }
-  }, [session]);
+  }, [session, actionLoading, findings.length, accessedResourceIds]);
 
   const handleSubmitDecision = useCallback(async (payload) => {
     if (!session?.id) return;

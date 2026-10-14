@@ -405,7 +405,7 @@ export default function DataNotebookWorkspace({
   setFindingUncertainty,
   handleSaveNewFinding,
   handleCompleteInvestigation,
-  requiredFindingsCount = 1,
+  requiredFindingsCount = 0,
   requiredResourceAccess = [],
   actionLoading,
   isInvestigationPhase,
@@ -484,6 +484,19 @@ export default function DataNotebookWorkspace({
   };
 
   // Handle running bounded analytical operation
+  const allResourcesAccessed = Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0
+    ? requiredResourceAccess.every((id) =>
+        accessedResourceIds instanceof Set
+          ? accessedResourceIds.has(id)
+          : Array.isArray(accessedResourceIds)
+          ? accessedResourceIds.includes(id)
+          : false
+      )
+    : true;
+  const effectiveReqFindings = typeof requiredFindingsCount === "number" ? requiredFindingsCount : (session?.mission_configuration?.investigation?.completion?.required_findings ?? session?.configuration?.investigation?.completion?.required_findings ?? 0);
+  const findingsMet = effectiveReqFindings > 0 ? (findings?.length || 0) >= effectiveReqFindings : true;
+  const isReadyToComplete = allResourcesAccessed && findingsMet;
+
   const handleRunAnalysis = (e) => {
     if (e) e.preventDefault();
     setAnalysisError(null);
@@ -1279,7 +1292,7 @@ export default function DataNotebookWorkspace({
             <div className="pt-3 border-t border-slate-100">
               <button
                 type="button"
-                disabled={actionLoading || !isInvestigationPhase}
+                disabled={actionLoading || !isInvestigationPhase || !isReadyToComplete}
                 onClick={handleCompleteInvestigation}
                 className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
               >

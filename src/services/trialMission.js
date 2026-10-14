@@ -67,8 +67,13 @@ export const abandonSession = (sessionId, payload = {}) =>
   api.post(`/trial-missions/sessions/${sessionId}/abandon`, payload);
 
 // Resources
-export const accessMissionResource = (sessionId, resourceId) =>
-  api.post(`/trial-missions/sessions/${sessionId}/resources/${resourceId}/access`);
+export const accessMissionResource = (sessionId, resourceId) => {
+  const targetId =
+    typeof resourceId === "object" && resourceId !== null
+      ? (resourceId.id || resourceId.resource_id || resourceId.identifier || "")
+      : resourceId;
+  return api.post(`/trial-missions/sessions/${sessionId}/resources/${targetId}/access`);
+};
 
 // Working Notes
 export const getWorkingNotes = (sessionId) =>
