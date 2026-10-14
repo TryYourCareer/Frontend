@@ -1390,9 +1390,6 @@ export default function TrialMission() {
                                       </span>
                                     </div>
                                   </div>
-                                  <p className="text-xs leading-relaxed text-slate-600 line-clamp-3">
-                                    {m.description || "Take on real-world business challenges and test your analytical intuition in this interactive scenario."}
-                                  </p>
                                 </div>
 
                                 <div className="mt-6 pt-4 border-t border-slate-100">
@@ -1531,9 +1528,6 @@ export default function TrialMission() {
                                         </span>
                                       </div>
                                     </div>
-                                    <p className="text-xs leading-relaxed text-slate-600 line-clamp-3">
-                                      {m.description || "Take on real-world business challenges and test your analytical intuition in this interactive scenario."}
-                                    </p>
                                   </div>
 
                                   <div className="mt-6 pt-4 border-t border-slate-100">
@@ -1648,9 +1642,6 @@ export default function TrialMission() {
                                     </span>
                                   </div>
                                 </div>
-                                <p className="text-xs leading-relaxed text-slate-600 line-clamp-3">
-                                  {m.description || "Take on real-world business challenges and test your analytical intuition in this interactive scenario."}
-                                </p>
                               </div>
 
                               <div className="mt-6 pt-4 border-t border-slate-100">
