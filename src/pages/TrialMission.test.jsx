@@ -838,3 +838,58 @@ describe("Trial Mission - Resource-Access State Hydration & Checklist UI", () =>
     expect(mockAccess).toHaveBeenCalledWith("res_1");
   });
 });
+
+describe("Trial Mission - Canonical 513 Career Coverage", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+    mockSearchParams = new URLSearchParams();
+    getSessionActivitySummary.mockResolvedValue({ categories: [] });
+    getCareerFitReport.mockResolvedValue(null);
+  });
+
+  test("renders all 513 canonical careers in catalog including careers without published missions", async () => {
+    // Generate 513 mock canonical career missions: 509 published + 4 archived
+    const mock513 = Array.from({ length: 513 }, (_, i) => {
+      const isArchivedFitness = i < 4;
+      const isClinical = i >= 4 && i < 26;
+      const careerName = isArchivedFitness
+        ? ["CrossFit Coach", "Group Fitness Instructor", "Personal Trainer", "Youth Sports Coach"][i]
+        : `Canonical Career ${i + 1}`;
+      return {
+        id: `mission-${i + 1}`,
+        career_id: `career-${i + 1}`,
+        title: `${careerName} Trial Mission`,
+        slug: `career-${i + 1}-trial-mission`,
+        description: `Hands-on simulation for ${careerName}`,
+        workspace_type: "interactive",
+        status: isArchivedFitness ? "archived" : "published",
+        is_active: !isArchivedFitness,
+        career: {
+          id: `career-${i + 1}`,
+          name: careerName,
+          slug: `career-${i + 1}`,
+          sector: isClinical ? "Healthcare & Life Sciences" : "Technology",
+        },
+      };
+    });
+
+    useTrialMissionSession.mockReturnValue({
+      ...defaultMockSessionHook,
+      missions: mock513,
+      session: null,
+    });
+
+    render(<TrialMission />);
+
+    // Proves all 513 canonical careers are represented in the UI counter and catalog
+    expect(
+      screen.getByRole("heading", { name: /Available Simulations \(513\)/i })
+    ).toBeInTheDocument();
+
+    // Proves careers without a published active mission are displayed
+    expect(screen.getByText("CrossFit Coach Trial Mission")).toBeInTheDocument();
+    expect(screen.getByText("Group Fitness Instructor Trial Mission")).toBeInTheDocument();
+  });
+});
+

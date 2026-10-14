@@ -2772,6 +2772,223 @@ export default function TrialMission() {
                     </div>
                   )}
 
+                {/* Evidence-Grounded Decision Intelligence Outcome (Phase 2R) */}
+                {activitySummary?.decision_intelligence && (
+                  <div
+                    className="rounded-3xl border border-blue-200/80 bg-white p-6 sm:p-8 space-y-6 shadow-sm"
+                    data-testid="decision-intelligence-outcome"
+                  >
+                    <div className="border-b border-slate-100 pb-4 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center font-bold text-xs">
+                          DI
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">
+                          Decision Intelligence Outcome
+                        </span>
+                      </div>
+                      <h2 className="text-lg font-black text-[#0b1a36]">
+                        Evidence-Grounded Mission Analysis
+                      </h2>
+                      <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
+                        Synthesized directly from your recorded findings, selected recommendation, evidence resources, and self-reflection.
+                      </p>
+                    </div>
+
+                    {/* 1. Evidence & Observations */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                          <Search size={14} className="text-blue-600" />
+                          Evidence & Observations ({activitySummary.decision_intelligence.evidence_and_observations.length})
+                        </h3>
+                        <span className="text-[10px] text-slate-400">Recorded Investigation Telemetry</span>
+                      </div>
+                      {activitySummary.decision_intelligence.evidence_and_observations.length > 0 ? (
+                        <div className="grid gap-2.5 sm:grid-cols-2">
+                          {activitySummary.decision_intelligence.evidence_and_observations.map((fo, fIdx) => (
+                            <div
+                              key={fo.finding_id || fIdx}
+                              className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 space-y-2 hover:bg-white transition"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">
+                                  Finding {fIdx + 1}
+                                </span>
+                                {fo.uncertainty && (
+                                  <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-md">
+                                    {fo.uncertainty}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-800 leading-relaxed font-medium">
+                                {fo.statement}
+                              </p>
+                              {Array.isArray(fo.evidence_resources) && fo.evidence_resources.length > 0 && (
+                                <div className="pt-1.5 border-t border-slate-200/50 flex flex-wrap items-center gap-1.5">
+                                  <span className="text-[10px] text-slate-400">Source:</span>
+                                  {fo.evidence_resources.map((res, rIdx) => (
+                                    <span
+                                      key={rIdx}
+                                      className="rounded bg-white border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-700"
+                                    >
+                                      {res}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500 italic">
+                          No investigation findings were recorded during this session.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 2. Decision Rationale & 3. Decision Implications */}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {/* Decision Rationale */}
+                      <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-3">
+                        <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <Compass size={14} className="text-blue-600" />
+                            Decision Rationale
+                          </h3>
+                          {activitySummary.decision_intelligence.decision_rationale?.revision_count > 0 && (
+                            <span className="text-[10px] text-blue-700 font-bold bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                              Adapted ({activitySummary.decision_intelligence.decision_rationale.revision_count} rev)
+                            </span>
+                          )}
+                        </div>
+                        {activitySummary.decision_intelligence.decision_rationale ? (
+                          <div className="space-y-2 text-xs">
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Selected Option</span>
+                              <p className="font-bold text-[#0b1a36] text-xs">
+                                {activitySummary.decision_intelligence.decision_rationale.selected_option}
+                              </p>
+                            </div>
+                            {activitySummary.decision_intelligence.decision_rationale.why && (
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-slate-400 block">Stated Reasoning</span>
+                                <p className="text-slate-700 leading-relaxed">
+                                  {activitySummary.decision_intelligence.decision_rationale.why}
+                                </p>
+                              </div>
+                            )}
+                            {activitySummary.decision_intelligence.decision_rationale.uncertainty && (
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-slate-400 block">Declared Uncertainty</span>
+                                <p className="text-amber-800 bg-amber-50/60 rounded-md p-1.5 border border-amber-200/50 text-[11px]">
+                                  {activitySummary.decision_intelligence.decision_rationale.uncertainty}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-slate-500 italic">No recommendation decision was submitted.</p>
+                        )}
+                      </div>
+
+                      {/* Decision Implications */}
+                      <div className="rounded-2xl border border-blue-200/70 bg-blue-50/40 p-5 space-y-3">
+                        <div className="flex items-center justify-between border-b border-blue-200/60 pb-2">
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
+                            <Sparkles size={14} className="text-blue-600" />
+                            Scenario Implications
+                          </h3>
+                          <span className="text-[10px] text-blue-700 font-medium">Simulation Dynamic</span>
+                        </div>
+                        {activitySummary.decision_intelligence.decision_implications ? (
+                          <div className="space-y-2 text-xs">
+                            <h4 className="font-bold text-blue-950">
+                              {activitySummary.decision_intelligence.decision_implications.title || "Selected Path Consequence"}
+                            </h4>
+                            <p className="text-blue-900 leading-relaxed">
+                              {activitySummary.decision_intelligence.decision_implications.narrative}
+                            </p>
+                            <p className="text-[10px] text-blue-600/80 font-medium pt-1 border-t border-blue-100">
+                              Factual scenario outcome within the simulation — not a personality judgment.
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-blue-800 italic">Scenario implications unavailable for this selection.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 4. Evidence Limitations & 5. Next Steps */}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {/* Evidence Limitations */}
+                      <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-2.5">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
+                          <AlertCircle size={14} className="text-slate-500" />
+                          Evidence Limitations
+                        </h3>
+                        <div className="space-y-1.5 text-xs text-slate-600">
+                          {activitySummary.decision_intelligence.evidence_limitations.unconsulted_resources.length > 0 && (
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase">Unconsulted Resources:</span>
+                              <div className="flex flex-wrap gap-1">
+                                {activitySummary.decision_intelligence.evidence_limitations.unconsulted_resources.map((res, rIdx) => (
+                                  <span key={rIdx} className="bg-white border border-slate-200 rounded px-2 py-0.5 text-[10px] text-slate-700">
+                                    {res}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {activitySummary.decision_intelligence.evidence_limitations.unresolved_uncertainties.length > 0 && (
+                            <div className="space-y-0.5 pt-1">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase">Noted Uncertainties:</span>
+                              <ul className="list-disc pl-4 text-[11px] text-slate-600 space-y-0.5">
+                                {activitySummary.decision_intelligence.evidence_limitations.unresolved_uncertainties.map((unc, uIdx) => (
+                                  <li key={uIdx}>{unc}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {activitySummary.decision_intelligence.evidence_limitations.data_gaps.length > 0 && (
+                            <ul className="list-disc pl-4 text-[11px] text-slate-500 space-y-0.5 pt-1">
+                              {activitySummary.decision_intelligence.evidence_limitations.data_gaps.map((gap, gIdx) => (
+                                <li key={gIdx}>{gap}</li>
+                              ))}
+                            </ul>
+                          )}
+                          {activitySummary.decision_intelligence.evidence_limitations.unconsulted_resources.length === 0 &&
+                           activitySummary.decision_intelligence.evidence_limitations.unresolved_uncertainties.length === 0 &&
+                           activitySummary.decision_intelligence.evidence_limitations.data_gaps.length === 0 && (
+                            <p className="text-xs text-slate-500 italic">All provided mission resources were consulted; no outstanding uncertainties were flagged.</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Next Steps */}
+                      <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-2.5">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
+                          <CheckCircle2 size={14} className="text-emerald-600" />
+                          Grounded Next Steps
+                        </h3>
+                        {activitySummary.decision_intelligence.next_steps.length > 0 ? (
+                          <ul className="space-y-2 text-xs text-slate-700">
+                            {activitySummary.decision_intelligence.next_steps.map((step, sIdx) => (
+                              <li key={sIdx} className="flex items-start gap-2">
+                                <span className="text-blue-500 font-bold select-none mt-0.5">{sIdx + 1}.</span>
+                                <span className="leading-relaxed">{step}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-xs text-slate-500 italic">Explore your comprehensive Decision Report to continue career evaluation.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+
                 {/* Evaluation Section */}
                 {evaluationLoading && (
                   <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-6 text-xs text-slate-600">
