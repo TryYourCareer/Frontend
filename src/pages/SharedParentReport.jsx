@@ -6,9 +6,19 @@ import {
   Lock,
   Clock,
   CheckCircle2,
-  Calendar
+  Calendar,
+  Download,
+  Loader2,
+  X,
 } from "lucide-react";
-import reportsService, { getPublicSharedParentReport } from "../services/reports";
+import reportsService, {
+  getPublicSharedParentReport,
+  getSharedParentPdfUrl,
+} from "../services/reports";
+import {
+  toBackendDownloadUrl,
+  triggerBrowserDownload,
+} from "../components/reports/ReportActionBar";
 
 // Parent Report Sections
 import ParentSnapshotSection from "../components/reports/parent/ParentSnapshotSection";
@@ -27,6 +37,68 @@ export default function SharedParentReport() {
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState(null);
   const [error, setError] = useState(null);
+
+  // PDF Download State
+  const [downloading, setDownloading] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
+  const [downloadError, setDownloadError] = useState(null);
+
+  const handleDownloadPdf = async () => {
+    if (!token || downloading) return;
+    setDownloading(true);
+    setDownloadError(null);
+    setDownloaded(false);
+
+    try {
+      const getPdfUrlFn = getSharedParentPdfUrl || reportsService?.getSharedParentPdfUrl;
+      const relativeUrl = getPdfUrlFn ? getPdfUrlFn(token) : `/api/reports/shared/${encodeURIComponent(token)}/pdf`;
+      const fullUrl = toBackendDownloadUrl ? toBackendDownloadUrl(relativeUrl) : relativeUrl;
+
+      const res = await fetch(fullUrl);
+      if (!res.ok) {
+        let detail = `Download failed with HTTP ${res.status}`;
+        try {
+          const errData = await res.json();
+          detail = errData.detail || detail;
+        } catch {
+          // ignore JSON parse failures
+        }
+        throw new Error(detail);
+      }
+
+      const blob = await res.blob();
+      const parentSnapshot = reportData?.parent_report?.snapshot;
+      const currentCareerName = reportData?.career_title || parentSnapshot?.career_name || reportData?.career_id || "Career Option";
+      const safeCareerName = (currentCareerName || "Career")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      const filename = `${safeCareerName || "career"}-parent-briefing.pdf`;
+
+      if (typeof triggerBrowserDownload === "function") {
+        triggerBrowserDownload(blob, filename);
+      } else {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          if (document.body && document.body.contains(link)) {
+            document.body.removeChild(link);
+          }
+          window.URL.revokeObjectURL(blobUrl);
+        }, 250);
+      }
+      setDownloaded(true);
+      setTimeout(() => setDownloaded(false), 3000);
+    } catch (err) {
+      setDownloadError(err.message || "Unable to download Parent Report PDF. Please try again later.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchSharedReport = async () => {
@@ -147,18 +219,67 @@ export default function SharedParentReport() {
               </p>
             </div>
             
-            <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 text-xs font-medium text-slate-500 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70 font-semibold text-[11px]">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Verified Evidence Complete</span>
-              </div>
-              <div className="flex items-center space-x-1.5 text-[11px] text-slate-400">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                <span>Generated {reportData.created_at ? new Date(reportData.created_at).toLocaleDateString() : "Recently"}</span>
+            <div className="flex flex-col items-start md:items-end justify-between md:justify-center gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={downloading}
+                data-testid="shared-parent-download-btn"
+                className="inline-flex items-center px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:shadow-md"
+              >
+                {downloading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin text-slate-300" />
+                    <span>Preparing PDF...</span>
+                  </>
+                ) : downloaded ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-400" />
+                    <span>Downloaded!</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2 text-slate-300" />
+                    <span>Download PDF Report</span>
+                  </>
+                )}
+              </button>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
+                <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70 font-semibold text-[11px]">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Verified Evidence Complete</span>
+                </div>
+                <div className="flex items-center space-x-1.5 text-[11px] text-slate-400">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Generated {reportData.created_at ? new Date(reportData.created_at).toLocaleDateString() : "Recently"}</span>
+                </div>
               </div>
             </div>
           </div>
         </header>
+
+        {/* Download Error Banner */}
+        {downloadError && (
+          <div
+            className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-xs sm:text-sm flex items-center justify-between shadow-2xs"
+            data-testid="shared-parent-download-error"
+          >
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
+              <span>{downloadError}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setDownloadError(null)}
+              className="text-red-500 hover:text-red-700 text-base font-bold ml-3 px-1 cursor-pointer"
+              aria-label="Dismiss error"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
 
         {/* Section 1: Executive Snapshot */}
         {parent.snapshot && (

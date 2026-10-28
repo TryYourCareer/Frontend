@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Rocket,
@@ -26,7 +26,12 @@ import {
   Zap,
   Award,
   Compass,
+  Search,
+  Filter,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
+import { getCareerFitReport } from "../services/discoveryTest";
 import { useTrialMissionSession } from "../hooks/useTrialMissionSession";
 import { useDebounceAutosave } from "../hooks/useDebounceAutosave";
 import { WORKSPACE_COMPONENTS } from "../components/trialMission/WorkspaceRegistry";
@@ -198,7 +203,16 @@ export default function TrialMission() {
 
   // Catalog search & category filter state
   const [catalogSearch, setCatalogSearch] = useState("");
-  const [selectedTrack, setSelectedTrack] = useState("all");
+  // const [selectedTrack, setSelectedTrack] = useState("all");
+
+  // Discovery recommendations & Explore More state
+  const [discoveryReport, setDiscoveryReport] = useState(null);
+  const [discoveryLoading, setDiscoveryLoading] = useState(() => {
+    return Boolean(localStorage.getItem("latest_test_session_id"));
+  });
+  const [discoveryError, setDiscoveryError] = useState(null);
+  const [isExploreMoreOpen, setIsExploreMoreOpen] = useState(false);
+  const [selectedSector, setSelectedSector] = useState("all");
 
   const {
     missions,
@@ -250,9 +264,39 @@ export default function TrialMission() {
   useEffect(() => {
     if (queryMissionId && !querySessionId && !session && !autoStartedMissionRef.current && typeof startSession === "function") {
       autoStartedMissionRef.current = true;
-      startSession(queryMissionId);
+      handleStartMission(queryMissionId);
     }
   }, [queryMissionId, querySessionId, session, startSession]);
+
+  // Fetch completed Discovery Test recommendations for canonical career matching
+  useEffect(() => {
+    const sessionId = localStorage.getItem("latest_test_session_id");
+    if (!sessionId) {
+      setDiscoveryLoading(false);
+      return;
+    }
+    let isMounted = true;
+    setDiscoveryLoading(true);
+    setDiscoveryError(null);
+    getCareerFitReport(sessionId)
+      .then((report) => {
+        if (isMounted && report && Array.isArray(report.top_matches)) {
+          setDiscoveryReport(report);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.warn("Could not load Discovery recommendations:", err);
+          setDiscoveryError(err?.message || "Discovery recommendations unavailable");
+        }
+      })
+      .finally(() => {
+        if (isMounted) setDiscoveryLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (session?.state === "SESSION_COMPLETED" && session?.id) {
@@ -284,6 +328,90 @@ export default function TrialMission() {
     }
   }, [session?.state, session?.id]);
 
+  const resetMissionLocalState = useCallback(() => {
+    setIsReadyChecked(false);
+    setBriefingDismissed(false);
+
+    setShowFindingForm(false);
+    setFindingStatement("");
+    setFindingResource("");
+    setFindingExplanation("");
+    setFindingUncertainty("");
+
+    setSelectedOption("");
+    setWhyRecommendation("");
+    setSelectedEvidenceResources([]);
+    setRecommendationUncertainty("");
+
+    setIsUpdatingRecommendation(false);
+    setUpdatedOption("");
+    setUpdatedWhy("");
+    setUpdatedEvidenceResources([]);
+    setUpdatedUncertainty("");
+
+    consequenceGeneratedRef.current = false;
+
+    if (memoSaveTimerRef.current) {
+      clearTimeout(memoSaveTimerRef.current);
+      memoSaveTimerRef.current = null;
+    }
+    memoDirtyRef.current = false;
+    memoEditVersionRef.current = 0;
+    memoInitializedSessionIdRef.current = null;
+    setMemoForm({
+      executive_summary: "",
+      key_findings: "",
+      evidence: "",
+      recommendation: "",
+      risks_limitations: "",
+      next_steps: "",
+    });
+    setMemoSaveStatus("ready");
+    setReviewLoading(false);
+
+    if (reflectionSaveTimerRef.current) {
+      clearTimeout(reflectionSaveTimerRef.current);
+      reflectionSaveTimerRef.current = null;
+    }
+    reflectionDirtyRef.current = false;
+    reflectionEditVersionRef.current = 0;
+    reflectionInitializedSessionIdRef.current = null;
+    setReflectionForm({
+      what_felt_natural: "",
+      hardest_part: "",
+      investigate_next: "",
+    });
+    setReflectionSaveStatus("ready");
+
+    setActivitySummary(null);
+    setActivitySummaryLoading(false);
+    setActivitySummaryError(null);
+
+    lastRecordedStageRef.current = null;
+  }, []);
+
+  const previousSessionIdRef = useRef(null);
+
+  useEffect(() => {
+    const currentSessionId = session?.id ?? null;
+    if (
+      currentSessionId &&
+      previousSessionIdRef.current &&
+      previousSessionIdRef.current !== currentSessionId
+    ) {
+      resetMissionLocalState();
+    }
+    previousSessionIdRef.current = currentSessionId;
+  }, [session?.id, resetMissionLocalState]);
+
+  const handleStartMission = useCallback(
+    async (missionId) => {
+      resetMissionLocalState();
+      return startSession(missionId);
+    },
+    [resetMissionLocalState, startSession]
+  );
+
   // Debounced notes autosave
   const {
     value: notesValue,
@@ -293,6 +421,7 @@ export default function TrialMission() {
     initialValue: workingNotes,
     onSave: handleSaveNotes,
     delay: 800,
+    sessionId: session?.id,
   });
 
   // Sync memo draft from backend outputData - only initializes when session changes or when finalised
@@ -404,7 +533,7 @@ export default function TrialMission() {
   const resources = Array.isArray(config.resources) ? config.resources : [];
   const investigationConfig = config.investigation || {};
   const completionRules = investigationConfig.completion || {};
-  const requiredFindingsCount = completionRules.required_findings || 1;
+  const requiredFindingsCount = typeof completionRules.required_findings === "number" ? completionRules.required_findings : 0;
   const requiredResourceAccess = completionRules.required_resource_access || [];
 
   // Derive configured investigation phase ID from session.mission_configuration
@@ -639,8 +768,8 @@ export default function TrialMission() {
   }, [reflectionForm, isReflectionStage, isCompletedStage, session?.state, handleSaveReflection]);
 
   const handleSaveNewFinding = async (e) => {
-    e.preventDefault();
-    if (!findingStatement.trim()) return;
+    e?.preventDefault?.();
+    if (!findingStatement?.trim()) return;
 
     const payload = {
       statement: findingStatement.trim(),
@@ -826,42 +955,97 @@ export default function TrialMission() {
         },
       ];
 
-  const filteredMissions = useMemo(() => {
-    if (!Array.isArray(missions)) return [];
-    return missions.filter((m) => {
-      const careerName = (m.career?.name || m.career_name || "").toLowerCase();
-      const title = (m.title || "").toLowerCase();
-      const desc = (m.description || "").toLowerCase();
-      const wsType = (m.workspace_type || "").toLowerCase();
-      const q = catalogSearch.toLowerCase().trim();
+  // Canonical matching against completed Discovery recommendations
+  const hasDiscovery = Boolean(
+    discoveryReport &&
+      Array.isArray(discoveryReport.top_matches) &&
+      discoveryReport.top_matches.length > 0
+  );
 
-      const matchesSearch =
-        !q ||
-        careerName.includes(q) ||
-        title.includes(q) ||
-        desc.includes(q) ||
-        wsType.includes(q);
+  const recommendedCareerIds = useMemo(() => {
+    if (!hasDiscovery) return new Set();
+    return new Set(
+      discoveryReport.top_matches
+        .map((m) => m.career_id)
+        .filter(Boolean)
+    );
+  }, [hasDiscovery, discoveryReport]);
 
-      if (!matchesSearch) return false;
-      if (selectedTrack === "all") return true;
-      if (
-        selectedTrack === "tech" &&
-        (wsType.includes("dev") ||
-          wsType.includes("architect") ||
-          wsType.includes("data"))
-      )
-        return true;
-      if (
-        selectedTrack === "business" &&
-        (wsType.includes("analyst") ||
-          wsType.includes("process") ||
-          wsType.includes("business"))
-      )
-        return true;
-      if (selectedTrack === "design" && wsType.includes("design")) return true;
+  const { recommendedMissions, remainingMissions } = useMemo(() => {
+    if (!Array.isArray(missions)) {
+      return { recommendedMissions: [], remainingMissions: [] };
+    }
+    if (!hasDiscovery || recommendedCareerIds.size === 0) {
+      return { recommendedMissions: [], remainingMissions: missions };
+    }
+    const rec = [];
+    const rem = [];
+    missions.forEach((m) => {
+      const cId = m.career_id || m.career?.id;
+      if (cId && recommendedCareerIds.has(cId)) {
+        rec.push(m);
+      } else {
+        rem.push(m);
+      }
+    });
+    return { recommendedMissions: rec, remainingMissions: rem };
+  }, [missions, hasDiscovery, recommendedCareerIds]);
+
+  const availableSectors = useMemo(() => {
+    const sourceList = hasDiscovery ? remainingMissions : (Array.isArray(missions) ? missions : []);
+    const sectors = new Set();
+    sourceList.forEach((m) => {
+      const sec = m.career?.sector || m.sector || m.career_sector;
+      if (sec && typeof sec === "string" && sec.trim()) {
+        sectors.add(sec.trim());
+      }
+    });
+    return Array.from(sectors).sort();
+  }, [hasDiscovery, remainingMissions, missions]);
+
+  const matchesSearch = useCallback((m, query) => {
+    if (!query) return true;
+    const q = query.toLowerCase().trim();
+    const careerName = (m.career?.name || m.career_name || "").toLowerCase();
+    const title = (m.title || "").toLowerCase();
+    const desc = (m.description || "").toLowerCase();
+    const wsType = (m.workspace_type || "").toLowerCase();
+    const sec = (m.career?.sector || m.sector || m.career_sector || "").toLowerCase();
+    return (
+      careerName.includes(q) ||
+      title.includes(q) ||
+      desc.includes(q) ||
+      wsType.includes(q) ||
+      sec.includes(q)
+    );
+  }, []);
+
+  const filteredRecommendedMissions = useMemo(() => {
+    return recommendedMissions.filter((m) => matchesSearch(m, catalogSearch));
+  }, [recommendedMissions, catalogSearch, matchesSearch]);
+
+  const filteredRemainingMissions = useMemo(() => {
+    return remainingMissions.filter((m) => {
+      if (!matchesSearch(m, catalogSearch)) return false;
+      if (selectedSector !== "all") {
+        const sec = m.career?.sector || m.sector || m.career_sector;
+        if (sec !== selectedSector) return false;
+      }
       return true;
     });
-  }, [missions, catalogSearch, selectedTrack]);
+  }, [remainingMissions, selectedSector, catalogSearch, matchesSearch]);
+
+  const filteredAllMissions = useMemo(() => {
+    if (!Array.isArray(missions)) return [];
+    return missions.filter((m) => {
+      if (!matchesSearch(m, catalogSearch)) return false;
+      if (selectedSector !== "all") {
+        const sec = m.career?.sector || m.sector || m.career_sector;
+        if (sec !== selectedSector) return false;
+      }
+      return true;
+    });
+  }, [missions, selectedSector, catalogSearch, matchesSearch]);
 
   return (
     <div
@@ -941,7 +1125,7 @@ export default function TrialMission() {
             {/* Exit Control */}
             <button
               type="button"
-              onClick={resetToCatalog}
+              onClick={() => { resetMissionLocalState(); resetToCatalog(); }}
               className="inline-flex items-center gap-1 rounded-lg sm:rounded-xl border border-slate-200 bg-white px-2.5 py-1 sm:px-3.5 sm:py-1.5 text-xs font-bold text-slate-600 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all shadow-sm"
               title="Exit Trial Mission workspace"
             >
@@ -1063,159 +1247,430 @@ export default function TrialMission() {
                 </div>
               </div>
 
-              {/* Filter Toolbar */}
-              {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTrack("all")}
-                    className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                      selectedTrack === "all"
-                        ? "bg-[#0b1a36] text-white shadow-sm"
-                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    All Tracks
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTrack("tech")}
-                    className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                      selectedTrack === "tech"
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    Tech & Systems
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTrack("business")}
-                    className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                      selectedTrack === "business"
-                        ? "bg-indigo-600 text-white shadow-sm"
-                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    Business & Strategy
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTrack("design")}
-                    className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                      selectedTrack === "design"
-                        ? "bg-purple-600 text-white shadow-sm"
-                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    Design & UX
-                  </button>
+{/* Catalog Search & Content Area */}
+              <div className="space-y-6">
+                {/* Search Bar Toolbar */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="relative w-full sm:max-w-md">
+                    <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={catalogSearch}
+                      onChange={(e) => setCatalogSearch(e.target.value)}
+                      placeholder="Search trial missions or careers..."
+                      className="w-full rounded-full border border-slate-200/90 bg-white py-2 pl-9 pr-8 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                    />
+                    {catalogSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setCatalogSearch("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <div className="relative min-w-[240px]">
-                  <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={catalogSearch}
-                    onChange={(e) => setCatalogSearch(e.target.value)}
-                    placeholder="Search missions or roles..."
-                    className="w-full rounded-full border border-slate-200/90 bg-white py-2 pl-9 pr-4 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                  {catalogSearch && (
-                    <button
-                      type="button"
-                      onClick={() => setCatalogSearch("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </div> */}
-
-              {/* Missions Grid */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold text-[#0b1a36]">
-                    Available Simulations ({filteredMissions.length})
-                  </h2>
-                </div>
-
-                {filteredMissions.length === 0 ? (
-                  <div className="rounded-3xl border border-dashed border-slate-200 bg-white/80 p-12 text-center text-sm text-slate-500 space-y-3">
-                    <Compass size={32} className="mx-auto text-slate-400 animate-pulse" />
-                    <p className="font-semibold text-slate-700">No trial missions found matching your search.</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCatalogSearch("");
-                        setSelectedTrack("all");
-                      }}
-                      className="text-xs font-bold text-blue-600 hover:underline"
-                    >
-                      Reset filters
-                    </button>
+{discoveryLoading ? (
+                  /* ========================================================= */
+                  /* Loading State (Discovery in flight)                        */
+                  /* ========================================================= */
+                  <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-slate-200/80 bg-white/95 p-12 text-center shadow-sm backdrop-blur-sm">
+                    <Loader2 className="animate-spin text-blue-600" size={32} />
+                    <p className="text-sm font-bold text-slate-700">
+                      Loading your personalized career recommendations...
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Matching your Discovery Test results to active industry simulations
+                    </p>
                   </div>
                 ) : (
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredMissions.map((m) => {
-                      const careerName = m.career?.name || m.career_name || "Career Mission";
-                      const workspaceLabel = formatWorkspaceType(m.workspace_type);
-                      return (
-                        <div
-                          key={m.id}
-                          className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 backdrop-blur-sm overflow-hidden"
+                  <>
+                    {discoveryError && (
+                      <div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs font-medium text-amber-900 shadow-sm">
+                        <AlertCircle size={16} className="shrink-0 text-amber-600" />
+                        <span className="flex-1">
+                          Personalized recommendations could not be loaded ({discoveryError}). Showing all available simulations.
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setDiscoveryError(null)}
+                          className="text-amber-700 hover:text-amber-950 font-bold text-xs"
                         >
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <div className="space-y-3.5">
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200/80 px-3 py-1 text-xs font-bold text-blue-900">
-                                <Briefcase size={12} className="text-blue-600" /> {careerName}
-                              </span>
-                              {m.estimated_duration_minutes && (
-                                <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                                  <Clock size={12} /> ~{m.estimated_duration_minutes}m
-                                </span>
-                              )}
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-black text-[#0b1a36] group-hover:text-blue-600 transition-colors">
-                                {m.title}
-                              </h3>
-                              <div className="mt-1.5 flex items-center gap-2">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
-                                  {workspaceLabel}
-                                </span>
-                              </div>
-                            </div>
-                            <p className="text-xs leading-relaxed text-slate-600 line-clamp-3">
-                              {m.description || "Take on real-world business challenges and test your analytical intuition in this interactive scenario."}
+                          ✕
+                        </button>
+                      </div>
+                    )}
+
+                                    {hasDiscovery ? (
+                  /* ========================================================= */
+                  /* Recommended Missions + Explore More (Discovery Complete)  */
+                  /* ========================================================= */
+                  <div className="space-y-8">
+                    {/* Recommended Section */}
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-100 text-blue-600 shadow-sm">
+                            <Sparkles size={16} />
+                          </div>
+                          <div>
+                            <h2 className="text-lg font-black text-[#0b1a36]">
+                              Recommended Trial Missions
+                            </h2>
+                            <p className="text-xs text-slate-500">
+                              Personalized matches from your Discovery Test results
                             </p>
                           </div>
+                        </div>
+                        <span className="rounded-full bg-blue-50 border border-blue-200/80 px-3 py-1 text-xs font-bold text-blue-800">
+                          {recommendedMissions.length} {recommendedMissions.length === 1 ? "Mission" : "Missions"} Matched
+                        </span>
+                      </div>
 
-                          <div className="mt-6 pt-4 border-t border-slate-100">
-                            <button
-                              type="button"
-                              disabled={actionLoading}
-                              onClick={() => startSession(m.id)}
-                              aria-label="Try this career"
-                              className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
+                      {recommendedMissions.length === 0 ? (
+                        <div className="rounded-3xl border border-dashed border-amber-200 bg-amber-50/60 p-8 text-center space-y-2">
+                          <Compass size={28} className="mx-auto text-amber-500" />
+                          <p className="text-sm font-bold text-amber-900">
+                            No recommended Trial Missions are currently available for your top careers.
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            Use Explore More below to access all active industry simulations.
+                          </p>
+                        </div>
+                      ) : filteredRecommendedMissions.length === 0 ? (
+                        <div className="rounded-3xl border border-dashed border-slate-200 bg-white/80 p-8 text-center text-sm text-slate-500 space-y-2">
+                          <p className="font-semibold text-slate-700">No recommended trial missions match your search.</p>
+                          <button
+                            type="button"
+                            onClick={() => setCatalogSearch("")}
+                            className="text-xs font-bold text-blue-600 hover:underline"
+                          >
+                            Clear search
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                          {filteredRecommendedMissions.map((m) => {
+                            const careerName = m.career?.name || m.career_name || "Career Mission";
+                            const sectorName = m.career?.sector || m.sector || m.career_sector;
+                            const workspaceLabel = formatWorkspaceType(m.workspace_type);
+                            return (
+                              <div
+                                key={m.id}
+                                className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 backdrop-blur-sm overflow-hidden"
+                              >
+                                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="space-y-3.5">
+                                  <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200/80 px-3 py-1 text-xs font-bold text-blue-900">
+                                        <Briefcase size={12} className="text-blue-600" /> {careerName}
+                                      </span>
+                                      {sectorName && (
+                                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                                          {sectorName}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {m.estimated_duration_minutes && (
+                                      <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                                        <Clock size={12} /> ~{m.estimated_duration_minutes}m
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <h3 className="text-lg font-black text-[#0b1a36] group-hover:text-blue-600 transition-colors">
+                                      {m.title}
+                                    </h3>
+                                    <div className="mt-1.5 flex items-center gap-2">
+                                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                                        {workspaceLabel}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="mt-6 pt-4 border-t border-slate-100">
+                                  <button
+                                    type="button"
+                                    disabled={actionLoading}
+                                    onClick={() => handleStartMission(m.id)}
+                                    aria-label="Try this career"
+                                    className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
+                                  >
+                                    {actionLoading && startingMissionId === m.id ? (
+                                      <>
+                                        <Loader2 size={15} className="animate-spin" /> Launching Simulation...
+                                      </>
+                                    ) : (
+                                      <>
+                                        Launch Simulation <Rocket size={15} />
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Explore More Toggle Button */}
+                    {remainingMissions.length > 0 && (
+                      <div className="flex justify-center pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsExploreMoreOpen((prev) => !prev)}
+                          aria-expanded={isExploreMoreOpen}
+                          className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-[0.98]"
+                        >
+                          {isExploreMoreOpen ? (
+                            <>
+                              Hide Remaining Missions <ChevronUp size={15} />
+                            </>
+                          ) : (
+                            <>
+                              Explore More Missions ({remainingMissions.length}) <ChevronDown size={15} />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Explore More Expanded View with Dynamic Sector Filter */}
+                    {(isExploreMoreOpen || recommendedMissions.length === 0) && remainingMissions.length > 0 && (
+                      <div className="space-y-4 pt-6 border-t border-slate-200/80">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div>
+                            <h2 className="text-base font-bold text-[#0b1a36]">
+                              All Other Trial Missions
+                            </h2>
+                            <p className="text-xs text-slate-500">
+                              Browse simulations across all career tracks and industry sectors
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
+                              <Filter size={13} className="text-blue-600" /> Sector:
+                            </span>
+                            <select
+                              id="sector-filter"
+                              aria-label="Sector Filter"
+                              value={selectedSector}
+                              onChange={(e) => setSelectedSector(e.target.value)}
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                             >
-                              {actionLoading && startingMissionId === m.id ? (
-                                <>
-                                  <Loader2 size={15} className="animate-spin" /> Launching Simulation...
-                                </>
-                              ) : (
-                                <>
-                                  Launch Simulation <Rocket size={15} />
-                                </>
-                              )}
-                            </button>
+                              <option value="all">All Sectors</option>
+                              {availableSectors.map((sec) => (
+                                <option key={sec} value={sec}>
+                                  {sec}
+                                </option>
+                              ))}
+                            </select>
                           </div>
                         </div>
-                      );
-                    })}
+
+                        {filteredRemainingMissions.length === 0 ? (
+                          <div className="rounded-3xl border border-dashed border-slate-200 bg-white/80 p-12 text-center text-sm text-slate-500 space-y-3">
+                            <Compass size={32} className="mx-auto text-slate-400 animate-pulse" />
+                            <p className="font-semibold text-slate-700">No trial missions found matching the selected sector or search.</p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCatalogSearch("");
+                                setSelectedSector("all");
+                              }}
+                              className="text-xs font-bold text-blue-600 hover:underline"
+                            >
+                              Reset filters
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            {filteredRemainingMissions.map((m) => {
+                              const careerName = m.career?.name || m.career_name || "Career Mission";
+                              const sectorName = m.career?.sector || m.sector || m.career_sector;
+                              const workspaceLabel = formatWorkspaceType(m.workspace_type);
+                              return (
+                                <div
+                                  key={m.id}
+                                  className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 backdrop-blur-sm overflow-hidden"
+                                >
+                                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                  <div className="space-y-3.5">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                      <div className="flex flex-wrap items-center gap-1.5">
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200/80 px-3 py-1 text-xs font-bold text-blue-900">
+                                          <Briefcase size={12} className="text-blue-600" /> {careerName}
+                                        </span>
+                                        {sectorName && (
+                                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                                            {sectorName}
+                                          </span>
+                                        )}
+                                      </div>
+                                      {m.estimated_duration_minutes && (
+                                        <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                                          <Clock size={12} /> ~{m.estimated_duration_minutes}m
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <h3 className="text-lg font-black text-[#0b1a36] group-hover:text-blue-600 transition-colors">
+                                        {m.title}
+                                      </h3>
+                                      <div className="mt-1.5 flex items-center gap-2">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                                          {workspaceLabel}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="mt-6 pt-4 border-t border-slate-100">
+                                    <button
+                                      type="button"
+                                      disabled={actionLoading}
+                                      onClick={() => handleStartMission(m.id)}
+                                      aria-label="Try this career"
+                                      className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
+                                    >
+                                      {actionLoading && startingMissionId === m.id ? (
+                                        <>
+                                          <Loader2 size={15} className="animate-spin" /> Launching Simulation...
+                                        </>
+                                      ) : (
+                                        <>
+                                          Launch Simulation <Rocket size={15} />
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  /* ========================================================= */
+                  /* Default Catalog View (No Discovery Results)                */
+                  /* ========================================================= */
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <h2 className="text-base font-bold text-[#0b1a36]">
+                        Available Simulations ({filteredAllMissions.length})
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
+                          <Filter size={13} className="text-blue-600" /> Sector:
+                        </span>
+                        <select
+                          id="sector-filter"
+                          aria-label="Sector Filter"
+                          value={selectedSector}
+                          onChange={(e) => setSelectedSector(e.target.value)}
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        >
+                          <option value="all">All Sectors</option>
+                          {availableSectors.map((sec) => (
+                            <option key={sec} value={sec}>
+                              {sec}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {filteredAllMissions.length === 0 ? (
+                      <div className="rounded-3xl border border-dashed border-slate-200 bg-white/80 p-12 text-center text-sm text-slate-500 space-y-3">
+                        <Compass size={32} className="mx-auto text-slate-400 animate-pulse" />
+                        <p className="font-semibold text-slate-700">No trial missions found matching your search or filter.</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCatalogSearch("");
+                            setSelectedSector("all");
+                          }}
+                          className="text-xs font-bold text-blue-600 hover:underline"
+                        >
+                          Reset filters
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {filteredAllMissions.map((m) => {
+                          const careerName = m.career?.name || m.career_name || "Career Mission";
+                          const sectorName = m.career?.sector || m.sector || m.career_sector;
+                          const workspaceLabel = formatWorkspaceType(m.workspace_type);
+                          return (
+                            <div
+                              key={m.id}
+                              className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 backdrop-blur-sm overflow-hidden"
+                            >
+                              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              <div className="space-y-3.5">
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200/80 px-3 py-1 text-xs font-bold text-blue-900">
+                                      <Briefcase size={12} className="text-blue-600" /> {careerName}
+                                    </span>
+                                    {sectorName && (
+                                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                                        {sectorName}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {m.estimated_duration_minutes && (
+                                    <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                                      <Clock size={12} /> ~{m.estimated_duration_minutes}m
+                                    </span>
+                                  )}
+                                </div>
+                                <div>
+                                  <h3 className="text-lg font-black text-[#0b1a36] group-hover:text-blue-600 transition-colors">
+                                    {m.title}
+                                  </h3>
+                                  <div className="mt-1.5 flex items-center gap-2">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                                      {workspaceLabel}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="mt-6 pt-4 border-t border-slate-100">
+                                <button
+                                  type="button"
+                                  disabled={actionLoading}
+                                  onClick={() => handleStartMission(m.id)}
+                                  aria-label="Try this career"
+                                  className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
+                                >
+                                  {actionLoading && startingMissionId === m.id ? (
+                                    <>
+                                      <Loader2 size={15} className="animate-spin" /> Launching Simulation...
+                                    </>
+                                  ) : (
+                                    <>
+                                      Launch Simulation <Rocket size={15} />
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+                  </>
                 )}
               </div>
             </div>
@@ -2308,6 +2763,223 @@ export default function TrialMission() {
                     </div>
                   )}
 
+                {/* Evidence-Grounded Decision Intelligence Outcome (Phase 2R) */}
+                {activitySummary?.decision_intelligence && (
+                  <div
+                    className="rounded-3xl border border-blue-200/80 bg-white p-6 sm:p-8 space-y-6 shadow-sm"
+                    data-testid="decision-intelligence-outcome"
+                  >
+                    <div className="border-b border-slate-100 pb-4 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center font-bold text-xs">
+                          DI
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">
+                          Decision Intelligence Outcome
+                        </span>
+                      </div>
+                      <h2 className="text-lg font-black text-[#0b1a36]">
+                        Evidence-Grounded Mission Analysis
+                      </h2>
+                      <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
+                        Synthesized directly from your recorded findings, selected recommendation, evidence resources, and self-reflection.
+                      </p>
+                    </div>
+
+                    {/* 1. Evidence & Observations */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                          <Search size={14} className="text-blue-600" />
+                          Evidence & Observations ({activitySummary.decision_intelligence.evidence_and_observations.length})
+                        </h3>
+                        <span className="text-[10px] text-slate-400">Recorded Investigation Telemetry</span>
+                      </div>
+                      {activitySummary.decision_intelligence.evidence_and_observations.length > 0 ? (
+                        <div className="grid gap-2.5 sm:grid-cols-2">
+                          {activitySummary.decision_intelligence.evidence_and_observations.map((fo, fIdx) => (
+                            <div
+                              key={fo.finding_id || fIdx}
+                              className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 space-y-2 hover:bg-white transition"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">
+                                  Finding {fIdx + 1}
+                                </span>
+                                {fo.uncertainty && (
+                                  <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-md">
+                                    {fo.uncertainty}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-800 leading-relaxed font-medium">
+                                {fo.statement}
+                              </p>
+                              {Array.isArray(fo.evidence_resources) && fo.evidence_resources.length > 0 && (
+                                <div className="pt-1.5 border-t border-slate-200/50 flex flex-wrap items-center gap-1.5">
+                                  <span className="text-[10px] text-slate-400">Source:</span>
+                                  {fo.evidence_resources.map((res, rIdx) => (
+                                    <span
+                                      key={rIdx}
+                                      className="rounded bg-white border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-700"
+                                    >
+                                      {res}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500 italic">
+                          No investigation findings were recorded during this session.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 2. Decision Rationale & 3. Decision Implications */}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {/* Decision Rationale */}
+                      <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-3">
+                        <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <Compass size={14} className="text-blue-600" />
+                            Decision Rationale
+                          </h3>
+                          {activitySummary.decision_intelligence.decision_rationale?.revision_count > 0 && (
+                            <span className="text-[10px] text-blue-700 font-bold bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                              Adapted ({activitySummary.decision_intelligence.decision_rationale.revision_count} rev)
+                            </span>
+                          )}
+                        </div>
+                        {activitySummary.decision_intelligence.decision_rationale ? (
+                          <div className="space-y-2 text-xs">
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Selected Option</span>
+                              <p className="font-bold text-[#0b1a36] text-xs">
+                                {activitySummary.decision_intelligence.decision_rationale.selected_option}
+                              </p>
+                            </div>
+                            {activitySummary.decision_intelligence.decision_rationale.why && (
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-slate-400 block">Stated Reasoning</span>
+                                <p className="text-slate-700 leading-relaxed">
+                                  {activitySummary.decision_intelligence.decision_rationale.why}
+                                </p>
+                              </div>
+                            )}
+                            {activitySummary.decision_intelligence.decision_rationale.uncertainty && (
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-slate-400 block">Declared Uncertainty</span>
+                                <p className="text-amber-800 bg-amber-50/60 rounded-md p-1.5 border border-amber-200/50 text-[11px]">
+                                  {activitySummary.decision_intelligence.decision_rationale.uncertainty}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-slate-500 italic">No recommendation decision was submitted.</p>
+                        )}
+                      </div>
+
+                      {/* Decision Implications */}
+                      <div className="rounded-2xl border border-blue-200/70 bg-blue-50/40 p-5 space-y-3">
+                        <div className="flex items-center justify-between border-b border-blue-200/60 pb-2">
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
+                            <Sparkles size={14} className="text-blue-600" />
+                            Scenario Implications
+                          </h3>
+                          <span className="text-[10px] text-blue-700 font-medium">Simulation Dynamic</span>
+                        </div>
+                        {activitySummary.decision_intelligence.decision_implications ? (
+                          <div className="space-y-2 text-xs">
+                            <h4 className="font-bold text-blue-950">
+                              {activitySummary.decision_intelligence.decision_implications.title || "Selected Path Consequence"}
+                            </h4>
+                            <p className="text-blue-900 leading-relaxed">
+                              {activitySummary.decision_intelligence.decision_implications.narrative}
+                            </p>
+                            <p className="text-[10px] text-blue-600/80 font-medium pt-1 border-t border-blue-100">
+                              Factual scenario outcome within the simulation — not a personality judgment.
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-blue-800 italic">Scenario implications unavailable for this selection.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 4. Evidence Limitations & 5. Next Steps */}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {/* Evidence Limitations */}
+                      <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-2.5">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
+                          <AlertCircle size={14} className="text-slate-500" />
+                          Evidence Limitations
+                        </h3>
+                        <div className="space-y-1.5 text-xs text-slate-600">
+                          {activitySummary.decision_intelligence.evidence_limitations.unconsulted_resources.length > 0 && (
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase">Unconsulted Resources:</span>
+                              <div className="flex flex-wrap gap-1">
+                                {activitySummary.decision_intelligence.evidence_limitations.unconsulted_resources.map((res, rIdx) => (
+                                  <span key={rIdx} className="bg-white border border-slate-200 rounded px-2 py-0.5 text-[10px] text-slate-700">
+                                    {res}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {activitySummary.decision_intelligence.evidence_limitations.unresolved_uncertainties.length > 0 && (
+                            <div className="space-y-0.5 pt-1">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase">Noted Uncertainties:</span>
+                              <ul className="list-disc pl-4 text-[11px] text-slate-600 space-y-0.5">
+                                {activitySummary.decision_intelligence.evidence_limitations.unresolved_uncertainties.map((unc, uIdx) => (
+                                  <li key={uIdx}>{unc}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {activitySummary.decision_intelligence.evidence_limitations.data_gaps.length > 0 && (
+                            <ul className="list-disc pl-4 text-[11px] text-slate-500 space-y-0.5 pt-1">
+                              {activitySummary.decision_intelligence.evidence_limitations.data_gaps.map((gap, gIdx) => (
+                                <li key={gIdx}>{gap}</li>
+                              ))}
+                            </ul>
+                          )}
+                          {activitySummary.decision_intelligence.evidence_limitations.unconsulted_resources.length === 0 &&
+                           activitySummary.decision_intelligence.evidence_limitations.unresolved_uncertainties.length === 0 &&
+                           activitySummary.decision_intelligence.evidence_limitations.data_gaps.length === 0 && (
+                            <p className="text-xs text-slate-500 italic">All provided mission resources were consulted; no outstanding uncertainties were flagged.</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Next Steps */}
+                      <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-2.5">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
+                          <CheckCircle2 size={14} className="text-emerald-600" />
+                          Grounded Next Steps
+                        </h3>
+                        {activitySummary.decision_intelligence.next_steps.length > 0 ? (
+                          <ul className="space-y-2 text-xs text-slate-700">
+                            {activitySummary.decision_intelligence.next_steps.map((step, sIdx) => (
+                              <li key={sIdx} className="flex items-start gap-2">
+                                <span className="text-blue-500 font-bold select-none mt-0.5">{sIdx + 1}.</span>
+                                <span className="leading-relaxed">{step}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-xs text-slate-500 italic">Explore your comprehensive Decision Report to continue career evaluation.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+
                 {/* Evaluation Section */}
                 {evaluationLoading && (
                   <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-6 text-xs text-slate-600">
@@ -2486,7 +3158,7 @@ export default function TrialMission() {
                     <div className="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3">
                       <button
                         type="button"
-                        onClick={resetToCatalog}
+                        onClick={() => { resetMissionLocalState(); resetToCatalog(); }}
                         className="w-full sm:w-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
                       >
                         Explore More Missions

@@ -496,7 +496,7 @@ export default function DecisionReportSnapshot({
 
             {/* 2. Recommendation Category */}
             <SnapshotIndicator
-              label="Recommendation"
+              label="Recommendation Category"
               icon={TrendingUp}
             >
               {recommendation_category ? (
