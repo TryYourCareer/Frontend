@@ -293,9 +293,10 @@ export function AuthProvider({ children }) {
         }
       } catch (err) {
         if (!mounted) return;
-        // Only logout on failure if there is no valid cached profile
+        // Only logout on failure if it is an explicit auth revocation (e.g. 401), not network errors
+        const isAuthRevoked = err?.message && (err.message.includes("401") || err.message.toLowerCase().includes("invalid token"));
         const cached = getStoredJson(PROFILE_KEY);
-        if (!cached) {
+        if (!cached && isAuthRevoked) {
           logout(false);
         }
       } finally {

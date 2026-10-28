@@ -81,8 +81,15 @@ export default function OAuthCallback() {
           activeToken = result.token || "";
           refreshToken = result.refreshToken || refreshToken;
           authUser = result.user || null;
-        } else if (activeToken && refreshToken) {
-          await setSupabaseAuthSession(activeToken, refreshToken);
+        } else if (activeToken && refreshToken && supabase) {
+          try {
+            const { data } = await supabase.auth.getSession();
+            if (data?.session?.access_token !== activeToken) {
+              await setSupabaseAuthSession(activeToken, refreshToken);
+            }
+          } catch {
+            // ignore
+          }
         }
 
         if (!activeToken) {
@@ -113,8 +120,8 @@ export default function OAuthCallback() {
           isRegistered: isRegistered,
         });
 
-        // If not registered yet, navigate to register, otherwise dashboard
-        navigate(isRegistered ? "/dashboard" : "/registration", { replace: true });
+        // If not registered yet, navigate to root where Registration modal opens, otherwise dashboard
+        navigate(isRegistered ? "/dashboard" : "/", { replace: true });
       } catch (err) {
         if (!active) return;
         setError(err.message || "OAuth login failed.");

@@ -22,7 +22,14 @@ export default function WorkspaceTaskChecklistPanel({
   const managerName = manager.name || defaultManagerName;
   const managerTitle = manager.title || defaultManagerTitle;
   const managerInitial = managerName ? managerName[0] : "M";
-  const findingsMet = findings.length >= requiredFindingsCount;
+  const findingsMet = (findings?.length || 0) >= requiredFindingsCount;
+
+  const safeAccessedSet = accessedResourceIds instanceof Set
+    ? accessedResourceIds
+    : new Set(Array.isArray(accessedResourceIds) ? accessedResourceIds : []);
+  const safeRequiredAccess = Array.isArray(requiredResourceAccess) ? requiredResourceAccess : [];
+  const resourcesMet = safeRequiredAccess.length === 0 || safeRequiredAccess.every((reqId) => safeAccessedSet.has(reqId));
+  const canComplete = findingsMet && resourcesMet;
 
   return (
     <div className="space-y-4 lg:col-span-3">
@@ -56,8 +63,8 @@ export default function WorkspaceTaskChecklistPanel({
               Checklist
             </h3>
           </div>
-          <span className={`text-[11px] font-bold ${findingsMet ? "text-emerald-700" : "text-amber-700"}`}>
-            {findingsMet ? "Ready to Complete" : "In Progress"}
+          <span className={`text-[11px] font-bold ${canComplete ? "text-emerald-700" : "text-amber-700"}`}>
+            {canComplete ? "Ready to Complete" : "In Progress"}
           </span>
         </div>
 
@@ -72,23 +79,23 @@ export default function WorkspaceTaskChecklistPanel({
               Record {requiredFindingsCount}+ finding
             </span>
             <span className="font-mono text-xs font-bold text-slate-600">
-              {findings.length}/{requiredFindingsCount}
+              {findings?.length || 0}/{requiredFindingsCount}
             </span>
           </div>
 
-          {requiredResourceAccess.map((reqId) => {
-            const hasAccessed = accessedResourceIds.has(reqId);
+          {safeRequiredAccess.map((reqId) => {
+            const hasAccessed = safeAccessedSet.has(reqId);
             return (
               <div key={reqId} className="flex items-center justify-between rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
-                <span className="flex items-center gap-2 text-slate-700 font-medium truncate max-w-[170px]">
+                <span className="flex items-center gap-2 text-slate-700 font-medium truncate max-w-[170px]" title={reqId}>
                   {hasAccessed ? (
                     <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
                   ) : (
                     <Lock size={14} className="text-slate-400 shrink-0" />
                   )}
-                  Inspect {reqId}
+                  Inspect {reqId.replace(/[_-]+/g, " ")}
                 </span>
-                <span className="font-mono text-xs font-semibold text-slate-500 shrink-0">
+                <span className={`font-mono text-xs font-semibold shrink-0 ${hasAccessed ? "text-emerald-600 font-bold" : "text-slate-500"}`}>
                   {hasAccessed ? "Done" : "Pending"}
                 </span>
               </div>
@@ -100,9 +107,10 @@ export default function WorkspaceTaskChecklistPanel({
         <div className="pt-2 border-t border-slate-100">
           <button
             type="button"
-            disabled={actionLoading || !isInvestigationPhase}
+            disabled={actionLoading || !isInvestigationPhase || !canComplete}
             onClick={handleCompleteInvestigation}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50"
+            title={!canComplete ? "Complete all required checklist items before completing investigation" : ""}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {actionLoading ? (
               <>
@@ -114,6 +122,15 @@ export default function WorkspaceTaskChecklistPanel({
               </>
             )}
           </button>
+          {!canComplete && isInvestigationPhase && (
+            <p className="mt-2 text-center text-[11px] text-slate-500 font-medium">
+              {!findingsMet && !resourcesMet
+                ? `Inspect all required resources and record ${requiredFindingsCount}+ finding to continue.`
+                : !resourcesMet
+                ? "Inspect all required resources in the Resources list to continue."
+                : `Record at least ${requiredFindingsCount} finding to continue.`}
+            </p>
+          )}
         </div>
       </div>
     </div>

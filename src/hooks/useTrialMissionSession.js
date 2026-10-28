@@ -328,6 +328,7 @@ export function useTrialMissionSession(initialSessionId = null) {
       if (typeof rawMsg === "string" && rawMsg.trim()) {
         if (
           rawMsg.includes("requires at least") ||
+          rawMsg.includes("requires access to all configured resources") ||
           rawMsg.includes("requires inspecting") ||
           rawMsg.includes("investigation phase") ||
           rawMsg.includes("requirements are")
@@ -340,7 +341,7 @@ export function useTrialMissionSession(initialSessionId = null) {
         }
       }
       setError(message);
-      throw err;
+      return null;
     } finally {
       setActionLoading(false);
     }

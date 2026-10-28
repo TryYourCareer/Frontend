@@ -8,6 +8,9 @@ import WorkspaceTaskChecklistPanel from "./shared/WorkspaceTaskChecklistPanel";
 export default function ProcessWorkflowWorkspace({
   session,
   configuration,
+  manager,
+  briefing,
+  resources,
   activeResource,
   notesValue,
   setNotesValue,
@@ -15,6 +18,9 @@ export default function ProcessWorkflowWorkspace({
   findings = [],
   findingsList,
   handleAccessResource,
+  accessedResourceIds,
+  requiredResourceAccess,
+  requiredFindingsCount,
   showFindingForm: externalShowFindingForm,
   setShowFindingForm: externalSetShowFindingForm,
   findingStatement: externalFindingStatement,
@@ -30,6 +36,7 @@ export default function ProcessWorkflowWorkspace({
   isCompletingInvestigation,
   actionLoading = false,
   workspaceLoading = false,
+  isInvestigationPhase = true,
 }) {
   const rawProcess = configuration?.workspace?.process || configuration?.process;
 
@@ -127,17 +134,30 @@ export default function ProcessWorkflowWorkspace({
     };
   }, [processConfig]);
 
-  const resourcesList = configuration?.resources || [];
-  const requiredResourceIds = configuration?.investigation?.required_resource_ids || [];
+  const resourcesList = resources || configuration?.resources || [];
+  const effectiveRequiredResourceAccess = useMemo(() => {
+    if (Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0) {
+      return requiredResourceAccess;
+    }
+    const fromConfig =
+      configuration?.requirements?.required_resource_access ||
+      configuration?.investigation?.required_resource_access ||
+      configuration?.investigation?.required_resource_ids ||
+      [];
+    return Array.isArray(fromConfig) ? fromConfig : [];
+  }, [requiredResourceAccess, configuration]);
 
-  const accessedResourceIdsSet = useMemo(
-    () => new Set(session?.accessed_resource_ids || []),
-    [session?.accessed_resource_ids]
-  );
+  const safeAccessedResourceIdsSet = useMemo(() => {
+    if (accessedResourceIds instanceof Set) return accessedResourceIds;
+    if (Array.isArray(accessedResourceIds)) return new Set(accessedResourceIds);
+    if (Array.isArray(session?.accessed_resource_ids)) return new Set(session.accessed_resource_ids);
+    return new Set();
+  }, [accessedResourceIds, session?.accessed_resource_ids]);
 
-  const allRequiredAccessed = requiredResourceIds.every((id) =>
-    accessedResourceIdsSet.has(id)
-  );
+  const effectiveRequiredFindingsCount =
+    typeof requiredFindingsCount === "number"
+      ? requiredFindingsCount
+      : (configuration?.requirements?.required_findings ?? configuration?.investigation?.required_findings ?? 1);
 
   const handlePinStageFinding = (stage) => {
     if (!stage || !processMetrics) return;
@@ -390,7 +410,7 @@ export default function ProcessWorkflowWorkspace({
               <ResourceInspectorPanel
                 resources={resourcesList}
                 activeResource={activeResource}
-                accessedResourceIds={accessedResourceIdsSet}
+                accessedResourceIds={safeAccessedResourceIdsSet}
                 handleAccessResource={handleAccessResource}
               />
 
@@ -422,12 +442,18 @@ export default function ProcessWorkflowWorkspace({
 
               {/* Checklist & Complete Investigation */}
               <WorkspaceTaskChecklistPanel
-                checklist={configuration?.investigation?.checklist || []}
-                requiredResourceIds={requiredResourceIds}
-                accessedResourceIds={accessedResourceIdsSet}
-                allRequiredAccessed={allRequiredAccessed}
+                manager={manager}
+                briefing={briefing}
+                findings={effectiveFindings}
+                requiredFindingsCount={effectiveRequiredFindingsCount}
+                requiredResourceAccess={effectiveRequiredResourceAccess}
+                accessedResourceIds={safeAccessedResourceIdsSet}
                 handleCompleteInvestigation={handleCompleteInvestigation}
-                isCompletingInvestigation={isCompletingInvestigation}
+                actionLoading={actionLoading || isCompletingInvestigation}
+                isInvestigationPhase={isInvestigationPhase}
+                defaultManagerName="Senior Commercial Valuer"
+                defaultManagerTitle="Lead Valuer"
+                defaultTask="Review the site inspection notes and building survey report, identify key issues and record your findings."
               />
             </div>
           </div>

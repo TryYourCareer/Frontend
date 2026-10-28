@@ -207,8 +207,9 @@ function AppRoutes() {
           <Route path="/" element={<Landing onStartDiscovery={() => setIsLoginOpen(true)} onExploreCareers={() => navigate("/explore-careers")} onOpenAuth={() => setIsLoginOpen(true)} theme="light" />} />
           <Route path="/login" element={<Login onBack={() => window.history.back()} />} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
-          {/* /register now redirects to / — the Registration modal is rendered globally below */}
+          {/* /register and /registration redirect to / — the Registration modal is rendered globally below */}
           <Route path="/register" element={<Navigate to="/" replace />} />
+          <Route path="/registration" element={<Navigate to="/" replace />} />
           <Route path="/profile" element={<ProtectedRoute><AppShell><Profile profile={profile} /></AppShell></ProtectedRoute>} />
           <Route path="/assessment" element={<ProtectedRoute requireRegistration><AppShell><Assessment user={profile} /></AppShell></ProtectedRoute>} />
           <Route path="/discovery-test" element={<ProtectedRoute requireRegistration><AppShell><DiscoveryTest /></AppShell></ProtectedRoute>} />
