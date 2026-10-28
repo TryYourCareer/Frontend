@@ -8,9 +8,12 @@ import WorkspaceTaskChecklistPanel from "./shared/WorkspaceTaskChecklistPanel";
 export default function ResearchInterviewWorkspace({
   session,
   configuration,
-  manager,
-  briefing,
-  resources,
+  manager = {},
+  briefing = {},
+  resources = [],
+  accessedResourceIds = new Set(),
+  requiredResourceAccess = [],
+  requiredFindingsCount = 0,
   activeResource,
   notesValue,
   setNotesValue,
@@ -18,9 +21,6 @@ export default function ResearchInterviewWorkspace({
   findings = [],
   findingsList,
   handleAccessResource,
-  accessedResourceIds,
-  requiredResourceAccess,
-  requiredFindingsCount,
   showFindingForm: externalShowFindingForm,
   setShowFindingForm: externalSetShowFindingForm,
   findingStatement: externalFindingStatement,
@@ -78,7 +78,9 @@ export default function ResearchInterviewWorkspace({
   );
   const [selectedTopicId, setSelectedTopicId] = useState("");
 
-  const effectiveFindings = findingsList !== undefined ? findingsList : (findings || []);
+  const effectiveFindings = Array.isArray(findingsList) ? findingsList : (Array.isArray(findings) ? findings : (session?.findings || []));
+  const effectiveRequiredFindingsCount = typeof requiredFindingsCount === "number" ? requiredFindingsCount : (typeof configuration?.investigation?.completion?.required_findings === "number" ? configuration?.investigation?.completion?.required_findings : (session?.mission_configuration?.investigation?.completion?.required_findings || 0));
+  const effectiveRequiredResourceAccess = Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0 ? requiredResourceAccess : (configuration?.investigation?.required_resource_ids || session?.mission_configuration?.investigation?.required_resource_ids || []);
 
   // Finding composer state (supports external controlled props from TrialMission or internal fallback)
   const [localShowFindingForm, setLocalShowFindingForm] = useState(false);
@@ -86,6 +88,14 @@ export default function ResearchInterviewWorkspace({
   const [localFindingResource, setLocalFindingResource] = useState("");
   const [localFindingExplanation, setLocalFindingExplanation] = useState("");
   const [localFindingUncertainty, setLocalFindingUncertainty] = useState("");
+
+  React.useEffect(() => {
+    setLocalShowFindingForm(false);
+    setLocalFindingStatement("");
+    setLocalFindingResource("");
+    setLocalFindingExplanation("");
+    setLocalFindingUncertainty("");
+  }, [session?.id]);
 
   const showFindingForm = externalShowFindingForm !== undefined ? externalShowFindingForm : localShowFindingForm;
   const setShowFindingForm = externalSetShowFindingForm || setLocalShowFindingForm;
@@ -389,8 +399,8 @@ export default function ResearchInterviewWorkspace({
 
               {/* Checklist & Complete Investigation */}
               <WorkspaceTaskChecklistPanel
-                manager={manager}
-                briefing={briefing}
+                manager={manager || configuration?.role?.manager || {}}
+                briefing={briefing || configuration?.role?.briefing || {}}
                 findings={effectiveFindings}
                 requiredFindingsCount={effectiveRequiredFindingsCount}
                 requiredResourceAccess={effectiveRequiredResourceAccess}
@@ -400,7 +410,7 @@ export default function ResearchInterviewWorkspace({
                 isInvestigationPhase={isInvestigationPhase}
                 defaultManagerName="Research Director"
                 defaultManagerTitle="Lead Researcher"
-                defaultTask="Interview stakeholders and review interview transcripts to capture key findings."
+                defaultTask="Synthesize interview transcripts, record qualitative findings, and complete your investigation."
               />
             </div>
           </div>

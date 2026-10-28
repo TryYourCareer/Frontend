@@ -8,9 +8,12 @@ import WorkspaceTaskChecklistPanel from "./shared/WorkspaceTaskChecklistPanel";
 export default function ProcessWorkflowWorkspace({
   session,
   configuration,
-  manager,
-  briefing,
-  resources,
+  manager = {},
+  briefing = {},
+  resources = [],
+  accessedResourceIds = new Set(),
+  requiredResourceAccess = [],
+  requiredFindingsCount = 0,
   activeResource,
   notesValue,
   setNotesValue,
@@ -18,9 +21,6 @@ export default function ProcessWorkflowWorkspace({
   findings = [],
   findingsList,
   handleAccessResource,
-  accessedResourceIds,
-  requiredResourceAccess,
-  requiredFindingsCount,
   showFindingForm: externalShowFindingForm,
   setShowFindingForm: externalSetShowFindingForm,
   findingStatement: externalFindingStatement,
@@ -58,7 +58,9 @@ export default function ProcessWorkflowWorkspace({
     processConfig?.stages[0]?.id || ""
   );
 
-  const effectiveFindings = findingsList !== undefined ? findingsList : (findings || []);
+  const effectiveFindings = Array.isArray(findingsList) ? findingsList : (Array.isArray(findings) ? findings : (session?.findings || []));
+  const effectiveRequiredFindingsCount = typeof requiredFindingsCount === "number" ? requiredFindingsCount : (typeof configuration?.investigation?.completion?.required_findings === "number" ? configuration?.investigation?.completion?.required_findings : (session?.mission_configuration?.investigation?.completion?.required_findings || 0));
+  const effectiveRequiredResourceAccess = Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0 ? requiredResourceAccess : (configuration?.investigation?.required_resource_ids || session?.mission_configuration?.investigation?.required_resource_ids || []);
 
   // Finding composer state (supports external controlled props from TrialMission or internal fallback)
   const [localShowFindingForm, setLocalShowFindingForm] = useState(false);
@@ -66,6 +68,14 @@ export default function ProcessWorkflowWorkspace({
   const [localFindingResource, setLocalFindingResource] = useState("");
   const [localFindingExplanation, setLocalFindingExplanation] = useState("");
   const [localFindingUncertainty, setLocalFindingUncertainty] = useState("");
+
+  React.useEffect(() => {
+    setLocalShowFindingForm(false);
+    setLocalFindingStatement("");
+    setLocalFindingResource("");
+    setLocalFindingExplanation("");
+    setLocalFindingUncertainty("");
+  }, [session?.id]);
 
   const showFindingForm = externalShowFindingForm !== undefined ? externalShowFindingForm : localShowFindingForm;
   const setShowFindingForm = externalSetShowFindingForm || setLocalShowFindingForm;
@@ -134,13 +144,14 @@ export default function ProcessWorkflowWorkspace({
     };
   }, [processConfig]);
 
-  const resourcesList = resources || configuration?.resources || [];
+  const resourcesList = resources?.length > 0 ? resources : (configuration?.resources || []);
   const effectiveRequiredResourceAccess = useMemo(() => {
     if (Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0) {
       return requiredResourceAccess;
     }
     const fromConfig =
       configuration?.requirements?.required_resource_access ||
+      configuration?.investigation?.completion?.required_resource_access ||
       configuration?.investigation?.required_resource_access ||
       configuration?.investigation?.required_resource_ids ||
       [];
@@ -148,10 +159,10 @@ export default function ProcessWorkflowWorkspace({
   }, [requiredResourceAccess, configuration]);
 
   const safeAccessedResourceIdsSet = useMemo(() => {
+    if (accessedResourceIds instanceof Set && accessedResourceIds.size > 0) return accessedResourceIds;
     if (accessedResourceIds instanceof Set) return accessedResourceIds;
     if (Array.isArray(accessedResourceIds)) return new Set(accessedResourceIds);
-    if (Array.isArray(session?.accessed_resource_ids)) return new Set(session.accessed_resource_ids);
-    return new Set();
+    return new Set(session?.accessed_resource_ids || []);
   }, [accessedResourceIds, session?.accessed_resource_ids]);
 
   const effectiveRequiredFindingsCount =
@@ -442,8 +453,8 @@ export default function ProcessWorkflowWorkspace({
 
               {/* Checklist & Complete Investigation */}
               <WorkspaceTaskChecklistPanel
-                manager={manager}
-                briefing={briefing}
+                manager={manager || configuration?.role?.manager || {}}
+                briefing={briefing || configuration?.role?.briefing || {}}
                 findings={effectiveFindings}
                 requiredFindingsCount={effectiveRequiredFindingsCount}
                 requiredResourceAccess={effectiveRequiredResourceAccess}
@@ -451,8 +462,8 @@ export default function ProcessWorkflowWorkspace({
                 handleCompleteInvestigation={handleCompleteInvestigation}
                 actionLoading={actionLoading || isCompletingInvestigation}
                 isInvestigationPhase={isInvestigationPhase}
-                defaultManagerName="Senior Commercial Valuer"
-                defaultManagerTitle="Lead Valuer"
+                defaultManagerName="Operations Lead"
+                defaultManagerTitle="Process Director"
                 defaultTask="Review the site inspection notes and building survey report, identify key issues and record your findings."
               />
             </div>

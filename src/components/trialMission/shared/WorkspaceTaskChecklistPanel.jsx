@@ -9,7 +9,7 @@ export default function WorkspaceTaskChecklistPanel({
   manager = {},
   briefing = {},
   findings = [],
-  requiredFindingsCount = 1,
+  requiredFindingsCount = 0,
   requiredResourceAccess = [],
   accessedResourceIds = new Set(),
   handleCompleteInvestigation = () => {},
@@ -22,8 +22,8 @@ export default function WorkspaceTaskChecklistPanel({
   const managerName = manager.name || defaultManagerName;
   const managerTitle = manager.title || defaultManagerTitle;
   const managerInitial = managerName ? managerName[0] : "M";
-  const findingsMet = (findings?.length || 0) >= requiredFindingsCount;
 
+  const findingsMet = requiredFindingsCount > 0 ? (findings?.length || 0) >= requiredFindingsCount : true;
   const safeAccessedSet = accessedResourceIds instanceof Set
     ? accessedResourceIds
     : new Set(Array.isArray(accessedResourceIds) ? accessedResourceIds : []);
@@ -69,19 +69,21 @@ export default function WorkspaceTaskChecklistPanel({
         </div>
 
         <div className="space-y-2 text-xs">
-          <div className="flex items-center justify-between rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
-            <span className="flex items-center gap-2 text-slate-700 font-medium">
-              {findingsMet ? (
-                <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
-              ) : (
-                <Lock size={14} className="text-slate-400 shrink-0" />
-              )}
-              Record {requiredFindingsCount}+ finding
-            </span>
-            <span className="font-mono text-xs font-bold text-slate-600">
-              {findings?.length || 0}/{requiredFindingsCount}
-            </span>
-          </div>
+          {requiredFindingsCount > 0 && (
+            <div className="flex items-center justify-between rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
+              <span className="flex items-center gap-2 text-slate-700 font-medium">
+                {findingsMet ? (
+                  <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                ) : (
+                  <Lock size={14} className="text-slate-400 shrink-0" />
+                )}
+                Record {requiredFindingsCount}+ finding
+              </span>
+              <span className="font-mono text-xs font-bold text-slate-600">
+                {(findings?.length || 0)}/{requiredFindingsCount}
+              </span>
+            </div>
+          )}
 
           {safeRequiredAccess.map((reqId) => {
             const hasAccessed = safeAccessedSet.has(reqId);
