@@ -251,7 +251,18 @@ export default function SystemArchitectWorkspace({
   }, [initialRegions, components]);
 
   const requiredResourceAccess = session?.mission_configuration?.investigation?.completion?.required_resource_access || [];
-  const allRequiredAccessed = requiredResourceAccess.every((id) => accessedResourceIds.has(id));
+  const allRequiredAccessed = Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0
+    ? requiredResourceAccess.every((id) =>
+        accessedResourceIds instanceof Set
+          ? accessedResourceIds.has(id)
+          : Array.isArray(accessedResourceIds)
+          ? accessedResourceIds.includes(id)
+          : false
+      )
+    : true;
+  const effectiveRequiredFindings = session?.mission_configuration?.investigation?.completion?.required_findings ?? 0;
+  const findingsMet = effectiveRequiredFindings > 0 ? (findings?.length || 0) >= effectiveRequiredFindings : true;
+  const isReadyToComplete = allRequiredAccessed && findingsMet;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" data-testid="system-architect-workspace">
@@ -286,7 +297,7 @@ export default function SystemArchitectWorkspace({
                 <button
                   key={res.id}
                   type="button"
-                  onClick={() => handleAccessResource(res)}
+                  onClick={() => { if (typeof setActiveResource === "function") setActiveResource(res); handleAccessResource(res.id); }}
                   className={`w-full text-left p-3 rounded-2xl border transition flex items-start justify-between gap-2 ${
                     isActive
                       ? "border-indigo-600 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-600"
@@ -702,7 +713,7 @@ export default function SystemArchitectWorkspace({
             value={notesValue || ""}
             onChange={(e) => setNotesValue(e.target.value)}
             placeholder="Record topology observations, single points of failure (SPOFs), and failover latency constraints..."
-            className="w-full h-32 rounded-2xl border border-slate-200 p-3 text-xs text-slate-800 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600 resize-none font-mono"
+            className="w-full h-32 rounded-2xl border bg-white border-slate-200 p-3 text-xs text-slate-800 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600 resize-none font-mono"
           />
         </div>
 
@@ -757,15 +768,17 @@ export default function SystemArchitectWorkspace({
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Investigation Readiness</span>
             <p className="text-xs text-slate-600">
-              {allRequiredAccessed
-                ? "All required architectural specifications inspected. Ready to formulate recommendation."
-                : "Inspect all required resources before proceeding."}
+              {!allRequiredAccessed
+                ? "Inspect all required resources before proceeding."
+                : !findingsMet
+                ? `Record at least ${effectiveRequiredFindings} finding(s) before proceeding.`
+                : "All required architectural specifications inspected and findings recorded. Ready to formulate recommendation."}
             </p>
           </div>
 
           <button
             type="button"
-            disabled={!allRequiredAccessed || isCompleting}
+            disabled={!isReadyToComplete || isCompleting}
             onClick={onComplete}
             className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
           >
