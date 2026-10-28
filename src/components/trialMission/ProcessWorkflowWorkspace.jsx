@@ -59,8 +59,8 @@ export default function ProcessWorkflowWorkspace({
   );
 
   const effectiveFindings = Array.isArray(findingsList) ? findingsList : (Array.isArray(findings) ? findings : (session?.findings || []));
-  const effectiveRequiredFindingsCount = typeof requiredFindingsCount === "number" ? requiredFindingsCount : (typeof configuration?.investigation?.completion?.required_findings === "number" ? configuration?.investigation?.completion?.required_findings : (session?.mission_configuration?.investigation?.completion?.required_findings || 0));
-  const effectiveRequiredResourceAccess = Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0 ? requiredResourceAccess : (configuration?.investigation?.required_resource_ids || session?.mission_configuration?.investigation?.required_resource_ids || []);
+  const effectiveRequiredFindingsCount = typeof requiredFindingsCount === "number" && requiredFindingsCount > 0 ? requiredFindingsCount : (typeof configuration?.investigation?.completion?.required_findings === "number" ? configuration?.investigation?.completion?.required_findings : (configuration?.requirements?.required_findings || 1));
+  const effectiveRequiredResourceAccess = Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0 ? requiredResourceAccess : (configuration?.requirements?.required_resource_access || configuration?.investigation?.completion?.required_resource_access || configuration?.investigation?.required_resource_access || configuration?.investigation?.required_resource_ids || []);
 
   // Finding composer state (supports external controlled props from TrialMission or internal fallback)
   const [localShowFindingForm, setLocalShowFindingForm] = useState(false);
@@ -145,18 +145,6 @@ export default function ProcessWorkflowWorkspace({
   }, [processConfig]);
 
   const resourcesList = resources?.length > 0 ? resources : (configuration?.resources || []);
-  const effectiveRequiredResourceAccess = useMemo(() => {
-    if (Array.isArray(requiredResourceAccess) && requiredResourceAccess.length > 0) {
-      return requiredResourceAccess;
-    }
-    const fromConfig =
-      configuration?.requirements?.required_resource_access ||
-      configuration?.investigation?.completion?.required_resource_access ||
-      configuration?.investigation?.required_resource_access ||
-      configuration?.investigation?.required_resource_ids ||
-      [];
-    return Array.isArray(fromConfig) ? fromConfig : [];
-  }, [requiredResourceAccess, configuration]);
 
   const safeAccessedResourceIdsSet = useMemo(() => {
     if (accessedResourceIds instanceof Set && accessedResourceIds.size > 0) return accessedResourceIds;
@@ -164,11 +152,6 @@ export default function ProcessWorkflowWorkspace({
     if (Array.isArray(accessedResourceIds)) return new Set(accessedResourceIds);
     return new Set(session?.accessed_resource_ids || []);
   }, [accessedResourceIds, session?.accessed_resource_ids]);
-
-  const effectiveRequiredFindingsCount =
-    typeof requiredFindingsCount === "number"
-      ? requiredFindingsCount
-      : (configuration?.requirements?.required_findings ?? configuration?.investigation?.required_findings ?? 1);
 
   const handlePinStageFinding = (stage) => {
     if (!stage || !processMetrics) return;
